@@ -1,0 +1,98 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+html,
+body {
+    padding: 0;
+    margin: 0;
+    scroll-behavior: smooth;
+    font-family: "DM Sans", sans-serif;
+}
+
+
+@layer utilities {
+    .base-border {
+        border: 0.0625rem solid var(--mantine-color-gray-3);
+    }
+}
+
+
+.grid-bg {
+    --width: 5%;
+    --color: theme("colors.gray.100");
+    --scale: 20px;
+    background-image: linear-gradient(var(--color) 0%, var(--color) var(--width), transparent var(--width), transparent 100%),
+        linear-gradient(90deg, var(--color) 0%, var(--color) var(--width), transparent var(--width), transparent 100%);
+    background-size: var(--scale) var(--scale);
+    background-position: calc(var(--scale) / 2) calc(var(--scale) / 2);
+}
+
+.grid-bg-anim {
+    animation: sliding-grid-anim 2s linear infinite;
+}
+
+@keyframes sliding-grid-anim {
+    0% {
+        background-position-x: 0px;
+        background-position-y: 0px;
+    }
+
+    100% {
+        background-position-x: calc(var(--scale));
+        background-position-y: calc(var(--scale));
+    }
+}
+
+.dots-bg {
+    --color: var(--mantine-color-gray-1);
+    --size: 10%;
+    --scale: 30px;
+    /* background-image: radial-gradient(white, var(--color)); */
+    background-image: radial-gradient(var(--color) 0%, var(--color) var(--size), transparent var(--size), transparent 100%);
+    background-size: var(--scale) var(--scale);
+}
+
+.sliding-color-bg {
+    --width: 120px;
+    --main-color: white;
+    --color-1: var(--mantine-color-pink-6);
+    --color-2: var(--mantine-color-yellow-5);
+    background-image: linear-gradient(45deg,
+            transparent 0%,
+            transparent 40%,
+            var(--color-1) 40%,
+            var(--color-1) 50%,
+            var(--color-2) 50%,
+            var(--color-2) 60%,
+            transparent 60%,
+            transparent 100%);
+    background-color: var(--main-color);
+    background-repeat: no-repeat;
+    background-position-x: calc(-1 * var(--width));
+    /* transition: background-position 1s linear; */
+    animation: sliding-bg-anim 2.6s linear infinite;
+}
+
+@keyframes sliding-bg-anim {
+    0% {
+        background-position-x: calc(-1 * var(--width));
+    }
+
+    50% {
+        background-position-x: var(--width);
+    }
+
+    100% {
+        background-position-x: var(--width);
+    }
+}
+
+.cta-bg {
+    background-image:
+        radial-gradient(circle at 70% 0%, var(--mantine-color-dark-9) 0%, transparent 30%),
+        radial-gradient(circle at 80% 120%, var(--mantine-color-primary-3) 0%, transparent 50%),
+        radial-gradient(circle at 100% 0%, var(--mantine-color-pink-2) 0%, transparent 30%),
+        radial-gradient(ellipse at 60% 130%, var(--mantine-color-primary-3) 0%, transparent 50%),
+        radial-gradient(ellipse at 40% 130%, var(--mantine-color-primary-3) 0%, transparent 50%);
+}

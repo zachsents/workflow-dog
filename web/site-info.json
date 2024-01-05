@@ -1,0 +1,5 @@
+{
+    "name": "WorkflowDog",
+    "description": "Build a business without coding",
+    "sendLoggedInUsersTo": "/workflows"
+}

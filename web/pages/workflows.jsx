@@ -1,28 +1,23 @@
 import { Button, Card, CardBody, Chip, Input, Skeleton, Tooltip } from "@nextui-org/react"
+import { useMutation } from "@tanstack/react-query"
 import HighlightText from "@web/components/HighlightText"
 import CreateWorkflowButton from "@web/components/dashboard/CreateWorkflowButton"
 import DashboardLayout from "@web/components/dashboard/DashboardLayout"
 import Group from "@web/components/layout/Group"
 import { resolveTailwindColor } from "@web/modules/colors"
-import { fire } from "@web/modules/firebase"
 import { plural } from "@web/modules/grammar"
-import { useQueryParam } from "@web/modules/router"
 import { useSearch } from "@web/modules/search"
+import { supabase } from "@web/modules/supabase"
 import { TRIGGER_INFO } from "@web/modules/triggers"
-import { useCollectionQuery, useDocument } from "@zachsents/fire-query"
-import { doc, where } from "firebase/firestore"
+import { useWorkflow, useWorkflowsForTeam } from "@web/modules/workflows"
 import TimeAgo from "javascript-time-ago"
 import Link from "next/link"
 import { TbPencil } from "react-icons/tb"
-import { TEAMS_COLLECTION, WORKFLOWS_COLLECTION } from "shared/firebase"
 
 
 export default function WorkflowsPage() {
 
-    const [teamId] = useQueryParam("team")
-    const workflowsQuery = useCollectionQuery([WORKFLOWS_COLLECTION], [
-        teamId && where("team", "==", doc(fire.db, TEAMS_COLLECTION, teamId)),
-    ])
+    const workflowsQuery = useWorkflowsForTeam(undefined, ["id", "name"])
 
     const [filteredWorkflows, query, setQuery, filteredWorkflowNames] = useSearch(workflowsQuery?.data ?? [], {
         selector: workflow => workflow.name,
@@ -62,10 +57,21 @@ export default function WorkflowsPage() {
 
 function WorkflowCard({ id, highlightParts }) {
 
-    const { data: workflow, update } = useDocument([WORKFLOWS_COLLECTION, id])
-    const { name, trigger, lastEditedAt, isEnabled } = workflow || {}
+    const workflowQuery = useWorkflow(id)
+    const { name, trigger, lastEditedAt, isEnabled } = workflowQuery.data || {}
 
     const triggerInfo = TRIGGER_INFO[trigger?.type]
+
+    const toggleEnabled = useMutation({
+        mutationFn: async () => {
+            await supabase
+                .from("workflows")
+                .update({ is_enabled: !isEnabled })
+                .eq("id", id)
+                .throwOnError()
+            await workflowQuery.refetch()
+        },
+    })
 
     return (
         <div className="flex flex-col gap-unit-sm">
@@ -111,9 +117,10 @@ function WorkflowCard({ id, highlightParts }) {
             <Group className="gap-unit-sm">
                 <Tooltip placement="bottom" content={isEnabled ? "Disable?" : "Enable?"} closeDelay={0}>
                     <Chip
-                        color={isEnabled ? "success" : "danger"} variant="dot"
+                        color={toggleEnabled.isPending ? "default" : isEnabled ? "success" : "danger"}
+                        variant="dot"
                         as="button"
-                        onClick={() => update.mutate({ isEnabled: !isEnabled })}
+                        onClick={() => toggleEnabled.mutate()}
                     >
                         {isEnabled ? "Enabled" : "Disabled"}
                     </Chip>

@@ -1,8 +1,8 @@
 import { useLocalStorage } from "@mantine/hooks"
 import { Button, Select, SelectItem, Tooltip } from "@nextui-org/react"
+import { useUser } from "@web/modules/auth"
 import { useQueryParam } from "@web/modules/router"
 import { useTeamsForUser } from "@web/modules/teams"
-import { useUser } from "@zachsents/fire-query"
 import Link from "next/link"
 import { useEffect } from "react"
 import { TbSettings, TbUsers } from "react-icons/tb"
@@ -26,7 +26,7 @@ export default function TeamSelector({ includeSettingsLink = true }) {
         setStoredSelectedTeam(teamId)
     }
 
-    const teams = useTeamsForUser()
+    const { data: teams } = useTeamsForUser()
 
     useEffect(() => {
         if (selectedTeam || storedSelectedTeam || !teams || !user)

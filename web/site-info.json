@@ -1,5 +1,6 @@
 {
     "name": "WorkflowDog",
     "description": "Build a business without coding",
-    "sendLoggedInUsersTo": "/workflows"
+    "sendLoggedInUsersTo": "/workflows",
+    "domain": "workflow.dog"
 }

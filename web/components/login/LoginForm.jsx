@@ -1,14 +1,18 @@
 import { Button, Divider, Input, Link } from "@nextui-org/react"
-import { createUserWithEmail, signInWithEmail, signInWithGoogle, useMustNotBeSignedIn } from "@web/modules/firebase"
+import { useMutation } from "@tanstack/react-query"
+import { useMustNotBeSignedIn } from "@web/modules/auth"
 import { useForm } from "@web/modules/form"
 import { useNotifications } from "@web/modules/notifications"
+import { supabase } from "@web/modules/supabase"
 import siteInfo from "@web/site-info.json"
+import { useRouter } from "next/router"
 import { FcGoogle } from "react-icons/fc"
 import { TbAlertTriangle, TbArrowRight } from "react-icons/tb"
-import { useMutation } from "react-query"
 
 
 export default function LoginForm({ register = false }) {
+
+    const router = useRouter()
 
     const { notify } = useNotifications()
 
@@ -23,10 +27,14 @@ export default function LoginForm({ register = false }) {
         },
     })
 
+    const onSuccess = () => {
+        router.push(siteInfo.sendLoggedInUsersTo)
+    }
+
     const onError = err => {
         notify({
             title: "There was a problem signing in.",
-            message: err.message?.replace("Firebase: ", ""),
+            message: err.message,
             classNames: {
                 icon: "bg-danger-500",
             },
@@ -34,28 +42,36 @@ export default function LoginForm({ register = false }) {
         })
     }
 
-    const onSuccess = () => {
-        // router.push(siteInfo.sendLoggedInUsersTo)
-
-        // there is a bug in @zachsents/fire-query that causes cross-origin objects to be cached because of the hash-it package. Can't use client router here.
-        window.location.href = siteInfo.sendLoggedInUsersTo
-    }
-
     const emailSignInMutation = useMutation({
-        mutationFn: async values => register ?
-            createUserWithEmail(values.email, values.password) :
-            signInWithEmail(values.email, values.password),
-        onError,
-        onSuccess,
+        mutationFn: async ({ email, password }) => {
+            const { error } = register ?
+                await supabase.auth.signUp({ email, password }) :
+                await supabase.auth.signInWithPassword({ email, password })
+
+            if (error) onError(error)
+            else onSuccess()
+        },
     })
 
     const googleSignInMutation = useMutation({
-        mutationFn: signInWithGoogle,
-        onError,
-        onSuccess,
+        mutationFn: async () => {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: "google",
+                options: { redirectTo },
+            })
+
+            if (error) onError(error)
+            else onSuccess()
+        },
     })
 
-    useMustNotBeSignedIn(!googleSignInMutation.isLoading && !googleSignInMutation.isSuccess && siteInfo.sendLoggedInUsersTo)
+    const isLoggingInWithGoogle = googleSignInMutation.isLoading || googleSignInMutation.isSuccess
+    const isLoggingInWithEmail = emailSignInMutation.isLoading || emailSignInMutation.isSuccess
+    useMustNotBeSignedIn(
+        siteInfo.sendLoggedInUsersTo &&
+        !isLoggingInWithGoogle &&
+        !isLoggingInWithEmail,
+    )
 
     return (
         <>
@@ -124,3 +140,8 @@ export default function LoginForm({ register = false }) {
         </>
     )
 }
+
+
+const redirectTo = process.env.NODE_ENV === "production" ?
+    `${siteInfo.domain}${siteInfo.sendLoggedInUsersTo}` :
+    `http://localhost:3000${siteInfo.sendLoggedInUsersTo}`

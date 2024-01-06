@@ -1,24 +1,28 @@
-import { useCollectionQuery, useUser } from "@zachsents/fire-query"
-import { where } from "firebase/firestore"
-import { useMemo } from "react"
-import { TEAMS_COLLECTION } from "shared/firebase"
+import { useQuery } from "@tanstack/react-query"
+import { useUser } from "./auth"
+import { supabase } from "./supabase"
+import { deepCamelCase } from "./util"
 
 
-export function useTeamsForUser(userId) {
+export function useTeamsForUser(userId, selectKeys = ["*"]) {
 
     const { data: user } = useUser()
-    userId ??= user?.uid
+    userId ??= user?.id
 
-    const { data: editingTeams } = useCollectionQuery([TEAMS_COLLECTION], [
-        userId && where("editors", "array-contains", userId)
-    ])
-
-    const { data: viewingTeams } = useCollectionQuery([TEAMS_COLLECTION], [
-        userId && where("viewers", "array-contains", userId)
-    ])
-
-    return useMemo(() => editingTeams && viewingTeams && [
-        ...editingTeams?.map(team => ({ ...team, role: "editor" })),
-        ...viewingTeams?.map(team => ({ ...team, role: "viewer" }))
-    ], [editingTeams, viewingTeams])
+    return useQuery({
+        queryFn: async () => {
+            const { data: { teams } } = await supabase
+                .from("users")
+                .select(`teams!users_teams (${selectKeys.join(",")})`)
+                .eq("id", userId)
+                .limit(1)
+                .single()
+                .throwOnError()
+            return deepCamelCase(teams)
+        },
+        queryKey: ["teamsForUser", userId, selectKeys],
+        enabled: !!userId,
+    })
 }
+
+

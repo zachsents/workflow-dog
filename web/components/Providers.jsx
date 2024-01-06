@@ -1,9 +1,10 @@
-import { fire } from "@web/modules/firebase"
-import { FirebaseProvider } from "@zachsents/fire-query"
-import { QueryClient, QueryClientProvider } from "react-query"
 import { NextUIProvider } from "@nextui-org/react"
-import { useRouter } from "next/router"
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query"
+import { fire } from "@web/modules/firebase"
 import { NotificationsProvider } from "@web/modules/notifications"
+import { SupabaseController } from "@web/modules/supabase"
+import { FirebaseProvider } from "@zachsents/fire-query"
+import { useRouter } from "next/router"
 
 
 const queryClient = new QueryClient()
@@ -26,6 +27,7 @@ export default function Providers({ children }) {
                     </NotificationsProvider>
                 </NextUIProvider>
             </FirebaseProvider>
+            <SupabaseController />
         </QueryClientProvider>
     )
 }

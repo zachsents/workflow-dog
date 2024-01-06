@@ -37,3 +37,4 @@ export const INTEGRATION_INFO = {
         shade: 400,
     },
 }
+

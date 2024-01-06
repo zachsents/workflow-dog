@@ -1,5 +1,6 @@
 import { Button } from "@nextui-org/react"
-import { signOut, useMustBeSignedIn } from "@web/modules/firebase"
+import { useMustBeSignedIn } from "@web/modules/auth"
+import { supabase } from "@web/modules/supabase"
 
 
 export default function IndexPage() {
@@ -8,7 +9,7 @@ export default function IndexPage() {
 
     return (
         <>
-            <Button onClick={signOut}>
+            <Button onClick={() => supabase.auth.signOut()}>
                 Sign Out
             </Button>
         </>

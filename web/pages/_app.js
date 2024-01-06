@@ -2,9 +2,9 @@ import Providers from "@web/components/Providers"
 import "@web/modules/firebase"
 import siteInfo from "@web/site-info.json"
 import "@web/styles/globals.css"
-import Head from "next/head"
-import en from "javascript-time-ago/locale/en"
 import TimeAgo from "javascript-time-ago"
+import en from "javascript-time-ago/locale/en"
+import Head from "next/head"
 
 
 TimeAgo.addDefaultLocale(en)

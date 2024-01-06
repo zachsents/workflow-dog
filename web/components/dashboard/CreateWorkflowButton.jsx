@@ -1,14 +1,12 @@
 import { Autocomplete, AutocompleteItem, Button, Input, Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react"
+import { useUser } from "@web/modules/auth"
 import { resolveTailwindColor } from "@web/modules/colors"
-import { fire } from "@web/modules/firebase"
 import { useForm } from "@web/modules/form"
 import { useQueryParam } from "@web/modules/router"
 import { TRIGGER_INFO } from "@web/modules/triggers"
-import { useAddDocument, useUser } from "@zachsents/fire-query"
-import { doc, serverTimestamp } from "firebase/firestore"
+import { useCreateWorkflow } from "@web/modules/workflows"
 import { useRouter } from "next/router"
 import { TbArrowRight, TbPlus } from "react-icons/tb"
-import { TEAMS_COLLECTION, WORKFLOWS_COLLECTION } from "shared/firebase"
 
 
 const triggers = Object.entries(TRIGGER_INFO).map(([id, info]) => ({ ...info, id }))
@@ -31,18 +29,11 @@ export default function CreateWorkflowButton() {
     const [teamId] = useQueryParam("team")
     const { data: user } = useUser()
 
-    const addWorkflow = useAddDocument([WORKFLOWS_COLLECTION])
+    const createWorkflow = useCreateWorkflow()
 
-    const onSubmit = form.submit(async ({ name, trigger }) => {
-        const docRef = await addWorkflow.mutateAsync({
-            name,
-            trigger: { type: trigger },
-            team: doc(fire.db, TEAMS_COLLECTION, teamId),
-            isEnabled: false,
-            creator: user?.uid,
-            createdAt: serverTimestamp(),
-        })
-        await router.push(`/workflow/${docRef.id}`)
+    const onSubmit = form.submit(async values => {
+        const { id } = await createWorkflow.mutateAsync(values)
+        await router.push(`/workflow/${id}`)
     })
 
     const isReadyToCreate = user && teamId
@@ -108,7 +99,7 @@ export default function CreateWorkflowButton() {
                             endContent={<TbArrowRight />}
                             type="submit"
                             isDisabled={!form.isValid}
-                            isLoading={addWorkflow.isLoading}
+                            isLoading={createWorkflow.isPending}
                         >
                             Create Workflow
                         </Button>

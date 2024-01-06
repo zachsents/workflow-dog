@@ -7,7 +7,7 @@ import Logo from "../Logo"
 import Group from "../layout/Group"
 import TeamSelector from "./TeamSelector"
 import UserMenu from "./UserMenu"
-import { useMustBeSignedIn } from "@web/modules/firebase"
+import { useMustBeSignedIn } from "@web/modules/auth"
 
 
 export default function DashboardLayout({ children, title, rightContent }) {

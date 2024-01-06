@@ -1,6 +1,6 @@
 import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Skeleton } from "@nextui-org/react"
-import { signOut } from "@web/modules/firebase"
-import { useUser } from "@zachsents/fire-query"
+import { useUser } from "@web/modules/auth"
+import { supabase } from "@web/modules/supabase"
 import { TbLogout } from "react-icons/tb"
 
 
@@ -8,13 +8,13 @@ export default function UserMenu() {
 
     const { data: user } = useUser()
 
-    const initial = (user?.displayName || user?.emai)?.[0] ?? "?"
+    const initial = (user?.userMetadata?.name || user?.email)?.[0] ?? "?"
 
     return user ?
         <Dropdown placement="bottom-end">
             <DropdownTrigger>
                 <Avatar
-                    src={user?.photoURL}
+                    src={user?.userMetadata.avatarUrl}
                     name={initial}
                     as="button"
                 />
@@ -24,7 +24,7 @@ export default function UserMenu() {
                     <DropdownItem
                         startContent={<TbLogout />}
                         key="new"
-                        onClick={() => signOut()}
+                        onClick={() => supabase.auth.signOut()}
                     >
                         Sign Out
                     </DropdownItem>

@@ -1,26 +1,20 @@
 import { Button, Card, CardBody, Code, Divider, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ScrollShadow, Skeleton, useDisclosure } from "@nextui-org/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import AddIntegrationButton from "@web/components/dashboard/AddIntegrationButton"
 import DashboardLayout from "@web/components/dashboard/DashboardLayout"
 import Group from "@web/components/layout/Group"
 import { resolveTailwindColor } from "@web/modules/colors"
-import { fire } from "@web/modules/firebase"
 import { plural } from "@web/modules/grammar"
-import { INTEGRATION_INFO } from "@web/modules/integrations"
+import { INTEGRATION_INFO, useIntegrationAccount, useIntegrationAccountsForTeam } from "@web/modules/integrations"
 import { useQueryParam } from "@web/modules/router"
 import { useSearch } from "@web/modules/search"
-import { useCollectionQuery, useDocument } from "@zachsents/fire-query"
-import { arrayRemove, doc, where } from "firebase/firestore"
+import { supabase } from "@web/modules/supabase"
 import { TbDots } from "react-icons/tb"
-import { INTEGRATION_ACCOUNTS_COLLECTION, TEAMS_COLLECTION } from "shared/firebase"
 
 
 export default function IntegrationsPage() {
 
-    const [teamId] = useQueryParam("team")
-
-    const integrationsQuery = useCollectionQuery([INTEGRATION_ACCOUNTS_COLLECTION], [
-        teamId && where("teams", "array-contains", doc(fire.db, TEAMS_COLLECTION, teamId)),
-    ])
+    const integrationsQuery = useIntegrationAccountsForTeam(undefined, ["id", "display_id", "type"])
 
     const [filteredAccounts, query, setQuery] = useSearch(integrationsQuery?.data ?? [], {
         selector: account => `${account.displayId} ${INTEGRATION_INFO[account.type].name}`,
@@ -61,15 +55,33 @@ export default function IntegrationsPage() {
 function IntegrationCard({ id }) {
 
     const [teamId] = useQueryParam("team")
-    const { data: account, update } = useDocument([INTEGRATION_ACCOUNTS_COLLECTION, id])
+    const { data: account } = useIntegrationAccount(id)
     const { displayId, type } = account || {}
 
     const info = INTEGRATION_INFO[type]
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
-    const disconnectIntegration = () => update.mutate({
-        teams: arrayRemove(doc(fire.db, TEAMS_COLLECTION, teamId))
+    const queryClient = useQueryClient()
+
+    const disconnectIntegration = useMutation({
+        mutationFn: async () => {
+            const { data } = await supabase
+                .from("integration_accounts_teams")
+                .delete()
+                .eq("integration_account_id", id)
+                .eq("team_id", teamId)
+                .select("*")
+                .throwOnError()
+
+            if (data.length === 0)
+                throw new Error("Failed to disconnect integration account")
+
+            await queryClient.invalidateQueries({
+                queryKey: ["integrationAccountsForTeam", teamId]
+            })
+        },
+        onError: err => console.error(err),
     })
 
     return info ? <>
@@ -128,7 +140,8 @@ function IntegrationCard({ id }) {
                                 <Group>
                                     <Button
                                         variant="bordered" color="danger" size="sm"
-                                        onClick={disconnectIntegration}
+                                        onClick={() => disconnectIntegration.mutate()}
+                                        isLoading={disconnectIntegration.isPending || disconnectIntegration.isSuccess}
                                     >
                                         Disconnect Account
                                     </Button>

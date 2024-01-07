@@ -1,6 +1,10 @@
 import { FcGoogle } from "react-icons/fc"
 import { TbBrandAirtable, TbBrandDiscordFilled, TbBrandLinkedin, TbBrandStripe, TbBrandXFilled } from "react-icons/tb"
 import { INTEGRATION_SERVICE, INTEGRATION_INFO as SHARED_INTEGRATION_INFO } from "shared/integrations"
+import { useQueryParam } from "./router"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "./supabase"
+import { deepCamelCase } from "./util"
 
 
 export const INTEGRATION_INFO = {
@@ -38,3 +42,42 @@ export const INTEGRATION_INFO = {
     },
 }
 
+
+export function useIntegrationAccountsForTeam(teamId, selectKeys = ["*"]) {
+
+    const [teamIdParam] = useQueryParam("team")
+    teamId ??= teamIdParam
+
+    return useQuery({
+        queryFn: async () => {
+            const { data } = await supabase
+                .from("teams")
+                .select(`integration_accounts (${selectKeys.join(",")})`)
+                .eq("id", teamId)
+                .limit(1)
+                .single()
+                .throwOnError()
+            return deepCamelCase(data.integration_accounts)
+        },
+        queryKey: ["integrationAccountsForTeam", teamId, selectKeys],
+        enabled: !!teamId,
+    })
+}
+
+
+export function useIntegrationAccount(integrationAccountId) {
+    return useQuery({
+        queryFn: async () => {
+            const { data } = await supabase
+                .from("integration_accounts")
+                .select("*")
+                .eq("id", integrationAccountId)
+                .limit(1)
+                .single()
+                .throwOnError()
+            return deepCamelCase(data)
+        },
+        queryKey: ["integrationAccount", integrationAccountId],
+        enabled: !!integrationAccountId,
+    })
+}

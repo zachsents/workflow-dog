@@ -9,6 +9,7 @@ import { INTEGRATION_INFO, useIntegrationAccount, useIntegrationAccountsForTeam 
 import { useQueryParam } from "@web/modules/router"
 import { useSearch } from "@web/modules/search"
 import { supabase } from "@web/modules/supabase"
+import { useTeamRoles } from "@web/modules/teams"
 import { TbDots } from "react-icons/tb"
 
 
@@ -84,6 +85,9 @@ function IntegrationCard({ id }) {
         onError: err => console.error(err),
     })
 
+    const { data: roles } = useTeamRoles()
+    const isEditor = roles?.includes("editor")
+
     return info ? <>
         <Card>
             <CardBody className="px-8 flex flex-row justify-between gap-10 items-center">
@@ -142,6 +146,7 @@ function IntegrationCard({ id }) {
                                         variant="bordered" color="danger" size="sm"
                                         onClick={() => disconnectIntegration.mutate()}
                                         isLoading={disconnectIntegration.isPending || disconnectIntegration.isSuccess}
+                                        isDisabled={!isEditor}
                                     >
                                         Disconnect Account
                                     </Button>

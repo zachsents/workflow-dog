@@ -1,18 +1,19 @@
-import { Button, Card, CardBody, Chip, Input, Skeleton, Tooltip } from "@nextui-org/react"
-import { useMutation } from "@tanstack/react-query"
+import { Button, Card, CardBody, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Skeleton, Tooltip } from "@nextui-org/react"
 import HighlightText from "@web/components/HighlightText"
 import CreateWorkflowButton from "@web/components/dashboard/CreateWorkflowButton"
 import DashboardLayout from "@web/components/dashboard/DashboardLayout"
 import Group from "@web/components/layout/Group"
 import { resolveTailwindColor } from "@web/modules/colors"
+import { useDatabaseMutation } from "@web/modules/db"
 import { plural } from "@web/modules/grammar"
+import { useQueryParam } from "@web/modules/router"
 import { useSearch } from "@web/modules/search"
-import { supabase } from "@web/modules/supabase"
+import { useTeamRoles } from "@web/modules/teams"
 import { TRIGGER_INFO } from "@web/modules/triggers"
 import { useWorkflow, useWorkflowsForTeam } from "@web/modules/workflows"
 import TimeAgo from "javascript-time-ago"
 import Link from "next/link"
-import { TbPencil } from "react-icons/tb"
+import { TbDots, TbPencil, TbTrash } from "react-icons/tb"
 
 
 export default function WorkflowsPage() {
@@ -31,7 +32,7 @@ export default function WorkflowsPage() {
         >
             <div className="flex flex-col gap-unit-xl">
                 <Input
-                    type="text"
+                    type="text" size="sm"
                     label={`Search ${workflowsQuery.data?.length || 0} ${plural("workflow", workflowsQuery.data?.length || 0)}`}
                     value={query} onValueChange={setQuery}
                 />
@@ -57,21 +58,48 @@ export default function WorkflowsPage() {
 
 function WorkflowCard({ id, highlightParts }) {
 
+    const [teamId] = useQueryParam("team")
+
     const workflowQuery = useWorkflow(id)
     const { name, trigger, lastEditedAt, isEnabled } = workflowQuery.data || {}
 
     const triggerInfo = TRIGGER_INFO[trigger?.type]
 
-    const toggleEnabled = useMutation({
-        mutationFn: async () => {
-            await supabase
-                .from("workflows")
-                .update({ is_enabled: !isEnabled })
-                .eq("id", id)
-                .throwOnError()
-            await workflowQuery.refetch()
-        },
-    })
+    const toggleEnabled = useDatabaseMutation(
+        supa => supa
+            .from("workflows")
+            .update({ is_enabled: !isEnabled })
+            .eq("id", id),
+        {
+            invalidateKey: ["workflow", id],
+            notification: {
+                title: null,
+                message: `Workflow ${isEnabled ? "disabled" : "enabled"}`,
+                classNames: {
+                    icon: isEnabled ? "!bg-danger" : "!bg-success",
+                }
+            },
+        }
+    )
+
+    const deleteWorkflow = useDatabaseMutation(
+        supa => supa
+            .from("workflows")
+            .delete()
+            .eq("id", id),
+        {
+            invalidateKey: ["workflowsForTeam", teamId],
+            notification: {
+                title: null,
+                message: "Workflow deleted",
+                classNames: {
+                    icon: "!bg-danger",
+                }
+            }
+        }
+    )
+
+    const { data: roleData } = useTeamRoles()
 
     return (
         <div className="flex flex-col gap-unit-sm">
@@ -114,19 +142,51 @@ function WorkflowCard({ id, highlightParts }) {
                 </CardBody>
             </Card>
 
-            <Group className="gap-unit-sm">
-                <Tooltip placement="bottom" content={isEnabled ? "Disable?" : "Enable?"} closeDelay={0}>
-                    <Chip
-                        color={toggleEnabled.isPending ? "default" : isEnabled ? "success" : "danger"}
-                        variant="dot"
-                        as="button"
-                        onClick={() => toggleEnabled.mutate()}
+            <Group className="gap-unit-sm justify-between">
+                <Group className="gap-unit-sm">
+                    <Tooltip
+                        placement="bottom" content={isEnabled ? "Disable?" : "Enable?"} closeDelay={0}
+                        isDisabled={!roleData?.isEditor}
                     >
-                        {isEnabled ? "Enabled" : "Disabled"}
-                    </Chip>
-                </Tooltip>
-                <Chip color="warning">2 config problems</Chip>
-                <Chip color="danger">4 run errors</Chip>
+                        <Chip
+                            color={toggleEnabled.isPending ? "default" : isEnabled ? "success" : "danger"}
+                            variant="dot"
+                            {...roleData?.isEditor && {
+                                onClick: () => toggleEnabled.mutate(),
+                                as: "button",
+                            }}
+                        >
+                            {isEnabled ? "Enabled" : "Disabled"}
+                        </Chip>
+                    </Tooltip>
+                    <Chip color="warning">2 config problems</Chip>
+                    <Chip color="danger">4 run errors</Chip>
+                </Group>
+
+                <Dropdown placement="bottom-end">
+                    <DropdownTrigger>
+                        <Button
+                            isIconOnly size="sm" variant="light"
+                        >
+                            <TbDots />
+                        </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                        aria-label="Workflow actions"
+                        disabledKeys={[
+                            ...(roleData?.isEditor ? [] : ["delete"])
+                        ]}
+                    >
+                        <DropdownItem
+                            startContent={<TbTrash />} color="danger"
+                            key="delete"
+                            onClick={() => deleteWorkflow.mutate()}
+                            isLoading={deleteWorkflow.isPending || deleteWorkflow.isSuccess}
+                        >
+                            Delete
+                        </DropdownItem>
+                    </DropdownMenu>
+                </Dropdown>
             </Group>
         </div>
     )

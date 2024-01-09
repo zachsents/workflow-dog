@@ -2,10 +2,10 @@ import { useLocalStorage } from "@mantine/hooks"
 import { Button, Select, SelectItem, Tooltip } from "@nextui-org/react"
 import { useUser } from "@web/modules/auth"
 import { useQueryParam } from "@web/modules/router"
-import { useTeamsForUser } from "@web/modules/teams"
+import { useTeamRoles, useTeamsForUser } from "@web/modules/teams"
 import Link from "next/link"
 import { useEffect } from "react"
-import { TbSettings, TbUsers } from "react-icons/tb"
+import { TbEye, TbPencil, TbSettings, TbUsers } from "react-icons/tb"
 import Group from "../layout/Group"
 
 
@@ -50,7 +50,10 @@ export default function TeamSelector({ includeSettingsLink = true }) {
                 className="w-[20rem] shrink-0"
             >
                 {teams?.map(team => (
-                    <SelectItem key={team.id} value={team.id}>
+                    <SelectItem
+                        key={team.id} value={team.id}
+                        description={<TeamDescription teamId={team.id} />}
+                    >
                         {team.name}
                     </SelectItem>
                 ))}
@@ -66,6 +69,29 @@ export default function TeamSelector({ includeSettingsLink = true }) {
                         <TbSettings />
                     </Button>
                 </Tooltip>}
+        </Group>
+    )
+}
+
+
+function TeamDescription({ teamId }) {
+
+    const { data: roleData } = useTeamRoles(undefined, teamId)
+
+    let Icon, label
+    if (roleData?.isEditor) {
+        Icon = TbPencil
+        label = "Editor"
+    }
+    else if (roleData?.isViewer) {
+        Icon = TbEye
+        label = "Viewer"
+    }
+
+    return (
+        <Group className="gap-unit-xs">
+            <Icon />
+            <span>{label}</span>
         </Group>
     )
 }

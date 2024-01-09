@@ -89,12 +89,14 @@ function Notification({ options: { title, message, icon, classNames: _classNames
                             _classNames?.icon
                         )} />}
                     <div>
-                        <p className={classNames("font-medium mb-1", _classNames?.title)}>
-                            {title}
-                        </p>
-                        <p className={classNames("text-small text-default-500", _classNames?.message)}>
-                            {message}
-                        </p>
+                        {title &&
+                            <p className={classNames("font-medium", { "mb-1": !!message }, _classNames?.title)}>
+                                {title}
+                            </p>}
+                        {message &&
+                            <p className={classNames("text-small text-default-500", _classNames?.message)}>
+                                {message}
+                            </p>}
                     </div>
                 </CardBody>
 

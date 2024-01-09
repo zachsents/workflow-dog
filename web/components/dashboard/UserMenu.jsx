@@ -23,7 +23,7 @@ export default function UserMenu() {
                 <DropdownSection title="Account">
                     <DropdownItem
                         startContent={<TbLogout />}
-                        key="new"
+                        key="sign-out"
                         onClick={() => supabase.auth.signOut()}
                     >
                         Sign Out

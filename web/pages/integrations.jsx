@@ -1,14 +1,13 @@
 import { Button, Card, CardBody, Code, Divider, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ScrollShadow, Skeleton, useDisclosure } from "@nextui-org/react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
 import AddIntegrationButton from "@web/components/dashboard/AddIntegrationButton"
 import DashboardLayout from "@web/components/dashboard/DashboardLayout"
 import Group from "@web/components/layout/Group"
 import { resolveTailwindColor } from "@web/modules/colors"
+import { useDatabaseMutation } from "@web/modules/db"
 import { plural } from "@web/modules/grammar"
 import { INTEGRATION_INFO, useIntegrationAccount, useIntegrationAccountsForTeam } from "@web/modules/integrations"
 import { useQueryParam } from "@web/modules/router"
 import { useSearch } from "@web/modules/search"
-import { supabase } from "@web/modules/supabase"
 import { useTeamRoles } from "@web/modules/teams"
 import { TbDots } from "react-icons/tb"
 
@@ -29,7 +28,7 @@ export default function IntegrationsPage() {
         >
             <div className="flex flex-col gap-unit-xl">
                 <Input
-                    type="text"
+                    type="text" size="sm"
                     label={`Search ${integrationsQuery.data?.length || 0} ${plural("integration account", integrationsQuery.data?.length || 0)}`}
                     value={query} onValueChange={setQuery}
                 />
@@ -63,30 +62,16 @@ function IntegrationCard({ id }) {
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
-    const queryClient = useQueryClient()
+    const disconnectIntegration = useDatabaseMutation(
+        supa => supa
+            .from("integration_accounts_teams")
+            .delete()
+            .eq("integration_account_id", id)
+            .eq("team_id", teamId),
+        { invalidateKey: ["integrationAccountsForTeam", teamId] }
+    )
 
-    const disconnectIntegration = useMutation({
-        mutationFn: async () => {
-            const { data } = await supabase
-                .from("integration_accounts_teams")
-                .delete()
-                .eq("integration_account_id", id)
-                .eq("team_id", teamId)
-                .select("*")
-                .throwOnError()
-
-            if (data.length === 0)
-                throw new Error("Failed to disconnect integration account")
-
-            await queryClient.invalidateQueries({
-                queryKey: ["integrationAccountsForTeam", teamId]
-            })
-        },
-        onError: err => console.error(err),
-    })
-
-    const { data: roles } = useTeamRoles()
-    const isEditor = roles?.includes("editor")
+    const { data: roleData } = useTeamRoles()
 
     return info ? <>
         <Card>
@@ -146,7 +131,7 @@ function IntegrationCard({ id }) {
                                         variant="bordered" color="danger" size="sm"
                                         onClick={() => disconnectIntegration.mutate()}
                                         isLoading={disconnectIntegration.isPending || disconnectIntegration.isSuccess}
-                                        isDisabled={!isEditor}
+                                        isDisabled={!roleData?.isEditor}
                                     >
                                         Disconnect Account
                                     </Button>

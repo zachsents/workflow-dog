@@ -2,6 +2,7 @@ import { Autocomplete, AutocompleteItem, Button, Input, Popover, PopoverContent,
 import { resolveTailwindColor } from "@web/modules/colors"
 import { useForm } from "@web/modules/form"
 import { INTEGRATION_INFO } from "@web/modules/integrations"
+import { useTeamRoles } from "@web/modules/teams"
 import { useEffect } from "react"
 import { TbArrowRight, TbPlus } from "react-icons/tb"
 import { INTEGRATION_AUTH_TYPE } from "shared/integrations"
@@ -36,13 +37,15 @@ export default function AddIntegrationButton() {
         console.log(values)
     })
 
+    const { data: roleData } = useTeamRoles()
+
     return (
         <Popover placement="bottom-end" onClose={form.reset}>
             <PopoverTrigger>
                 <Button
                     startContent={<TbPlus />}
                     color="primary"
-                // isDisabled={!isReadyToCreate}
+                    isDisabled={!roleData?.isEditor}
                 >
                     Connect an Integration
                 </Button>

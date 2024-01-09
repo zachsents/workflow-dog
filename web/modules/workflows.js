@@ -66,7 +66,7 @@ export function useCreateWorkflow() {
                 .from("workflows")
                 .insert({
                     name,
-                    team: teamId,
+                    team_id: teamId,
                     trigger: { type: trigger },
                     creator: user.id,
                 })

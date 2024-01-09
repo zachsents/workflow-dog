@@ -45,7 +45,11 @@ export function useTeamRoles(userId, teamId) {
                 .limit(1)
                 .single()
                 .throwOnError()
-            return roles
+            return {
+                roles,
+                isEditor: roles.includes("editor"),
+                isViewer: roles.includes("viewer"),
+            }
         },
         queryKey: ["teamRole", userId, teamId],
         enabled: !!teamId && !!userId,

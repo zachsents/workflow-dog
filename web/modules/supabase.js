@@ -30,3 +30,12 @@ export function useSupabase() {
 export function SupabaseController() {
     useSupabase()
 }
+
+
+export async function throwOnPolicyViolation(queryPromise, select = "id") {
+    const response = await queryPromise.select(select)
+    if (!response.data || response.data.length === 0) {
+        throw new Error("Didn't pass policy check")
+    }
+    return response
+}

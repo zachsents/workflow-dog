@@ -3,6 +3,7 @@ import { useUser } from "@web/modules/auth"
 import { resolveTailwindColor } from "@web/modules/colors"
 import { useForm } from "@web/modules/form"
 import { useQueryParam } from "@web/modules/router"
+import { useTeamRoles } from "@web/modules/teams"
 import { TRIGGER_INFO } from "@web/modules/triggers"
 import { useCreateWorkflow } from "@web/modules/workflows"
 import { useRouter } from "next/router"
@@ -36,7 +37,9 @@ export default function CreateWorkflowButton() {
         await router.push(`/workflow/${id}`)
     })
 
-    const isReadyToCreate = user && teamId
+    const { data: roleData } = useTeamRoles()
+
+    const canCreate = user && teamId && roleData?.isEditor
 
     return (
         <Popover placement="bottom-end" onClose={form.reset}>
@@ -44,7 +47,7 @@ export default function CreateWorkflowButton() {
                 <Button
                     startContent={<TbPlus />}
                     color="primary"
-                    isDisabled={!isReadyToCreate}
+                    isDisabled={!canCreate}
                 >
                     New Workflow
                 </Button>

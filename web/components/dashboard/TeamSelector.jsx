@@ -13,29 +13,33 @@ export default function TeamSelector({ includeSettingsLink = true }) {
 
     const { data: user } = useUser()
 
-    const [storedSelectedTeam, setStoredSelectedTeam] = useLocalStorage({
+    const [storedSelectedTeamId, setStoredSelectedTeamId] = useLocalStorage({
         key: "selectedTeam",
     })
 
-    const [selectedTeam, setSelectedTeam] = useQueryParam("team", {
-        defaultValue: storedSelectedTeam || undefined,
+    const [selectedTeamId, setSelectedTeamId] = useQueryParam("team", {
         method: "push",
     })
     const selectTeam = teamId => {
-        setSelectedTeam(teamId)
-        setStoredSelectedTeam(teamId)
+        setSelectedTeamId(teamId)
+        setStoredSelectedTeamId(teamId)
     }
 
     const { data: teams } = useTeamsForUser()
+    const currentTeam = teams?.find(team => team.id === selectedTeamId)
 
     useEffect(() => {
-        if (selectedTeam || storedSelectedTeam || !teams || !user)
+        if (currentTeam || !teams || !user)
             return
 
-        const personalTeam = teams.find(team => team.isPersonal && team.creator === user?.uid)
+        if (storedSelectedTeamId && teams.some(team => team.id === storedSelectedTeamId))
+            selectTeam(storedSelectedTeamId)
+
+        const personalTeam = teams.find(team => team.isPersonal && team.creator === user.id)
         if (personalTeam)
             selectTeam(personalTeam.id)
-    }, [selectedTeam, storedSelectedTeam, teams, user?.uid])
+    }, [currentTeam, storedSelectedTeamId, teams, user?.id])
+
 
     return (
         <Group className="gap-unit-md">
@@ -45,7 +49,7 @@ export default function TeamSelector({ includeSettingsLink = true }) {
                 startContent={<TbUsers />}
                 isDisabled={!teams}
                 size="sm"
-                selectedKeys={(selectedTeam && teams) ? [selectedTeam] : []}
+                selectedKeys={(selectedTeamId && teams) ? [selectedTeamId] : []}
                 onChange={ev => ev.target.value && selectTeam(ev.target.value)}
                 className="w-[20rem] shrink-0"
             >
@@ -60,11 +64,15 @@ export default function TeamSelector({ includeSettingsLink = true }) {
             </Select>
 
             {includeSettingsLink &&
-                <Tooltip placement="bottom" content="Manage Team" closeDelay={0}>
+                <Tooltip
+                    placement="bottom"
+                    content={`Manage ${currentTeam?.name ? `"${currentTeam.name}"` : "Team"}`}
+                    closeDelay={0}
+                >
                     <Button
                         isIconOnly variant="light"
-                        as={Link} href={`/team/${selectedTeam}`}
-                        isDisabled={!selectedTeam}
+                        as={Link} href={`/team/${selectedTeamId}`}
+                        isDisabled={!currentTeam}
                     >
                         <TbSettings />
                     </Button>
@@ -90,7 +98,8 @@ function TeamDescription({ teamId }) {
 
     return (
         <Group className="gap-unit-xs">
-            <Icon />
+            {Icon &&
+                <Icon />}
             <span>{label}</span>
         </Group>
     )

@@ -6,6 +6,7 @@ import { useNotifications } from "@web/modules/notifications"
 import { supabase } from "@web/modules/supabase"
 import siteInfo from "@web/site-info.json"
 import { useRouter } from "next/router"
+import { useEffect } from "react"
 import { FcGoogle } from "react-icons/fc"
 import { TbAlertTriangle, TbArrowRight } from "react-icons/tb"
 
@@ -27,16 +28,12 @@ export default function LoginForm({ register = false }) {
         },
     })
 
-    const onSuccess = () => {
-        router.push(siteInfo.sendLoggedInUsersTo)
-    }
-
     const onError = err => {
         notify({
             title: "There was a problem signing in.",
             message: err.message,
             classNames: {
-                icon: "bg-danger-500",
+                icon: "!bg-danger-500",
             },
             icon: <TbAlertTriangle />,
         })
@@ -48,30 +45,39 @@ export default function LoginForm({ register = false }) {
                 await supabase.auth.signUp({ email, password }) :
                 await supabase.auth.signInWithPassword({ email, password })
 
-            if (error) onError(error)
-            else onSuccess()
+            if (error)
+                throw new Error(error.message)
         },
+        onSuccess: () => router.push(siteInfo.sendLoggedInUsersTo),
+        onError,
     })
 
     const googleSignInMutation = useMutation({
         mutationFn: async () => {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: "google",
-                options: { redirectTo },
+                options: {
+                    redirectTo: location.protocol + '//' + location.host + location.pathname,
+                },
             })
 
-            if (error) onError(error)
-            else onSuccess()
+            if (error)
+                throw new Error(error.message)
         },
     })
 
     const isLoggingInWithGoogle = googleSignInMutation.isLoading || googleSignInMutation.isSuccess
     const isLoggingInWithEmail = emailSignInMutation.isLoading || emailSignInMutation.isSuccess
     useMustNotBeSignedIn(
-        siteInfo.sendLoggedInUsersTo &&
         !isLoggingInWithGoogle &&
-        !isLoggingInWithEmail,
+        !isLoggingInWithEmail &&
+        siteInfo.sendLoggedInUsersTo
     )
+
+    useEffect(() => {
+        if (router.query?.error)
+            onError({ message: router.query.error_description || router.query.error })
+    }, [router.query])
 
     return (
         <>
@@ -140,8 +146,3 @@ export default function LoginForm({ register = false }) {
         </>
     )
 }
-
-
-const redirectTo = process.env.NODE_ENV === "production" ?
-    `${siteInfo.domain}${siteInfo.sendLoggedInUsersTo}` :
-    `http://localhost:3000${siteInfo.sendLoggedInUsersTo}`

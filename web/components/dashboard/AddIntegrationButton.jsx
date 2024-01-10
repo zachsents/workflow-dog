@@ -101,7 +101,7 @@ export default function AddIntegrationButton() {
                             isDisabled={!form.isValid}
                         // isLoading={addWorkflow.isLoading}
                         >
-                            Create Workflow
+                            Connect
                         </Button>
                     </form>}
             </PopoverContent>

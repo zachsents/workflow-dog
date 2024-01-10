@@ -40,6 +40,6 @@ export const INTEGRATION_INFO = {
     },
     [INTEGRATION_SERVICE.AIRTABLE]: {
         name: "Airtable",
-        authType: INTEGRATION_AUTH_TYPE.USER_PASS,
+        authType: INTEGRATION_AUTH_TYPE.OAUTH2,
     },
 }

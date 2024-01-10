@@ -6,6 +6,7 @@ import Group from "@web/components/layout/Group"
 import { resolveTailwindColor } from "@web/modules/colors"
 import { useDatabaseMutation } from "@web/modules/db"
 import { plural } from "@web/modules/grammar"
+import { useModals } from "@web/modules/modals"
 import { useQueryParam } from "@web/modules/router"
 import { useSearch } from "@web/modules/search"
 import { useTeamRoles } from "@web/modules/teams"
@@ -58,6 +59,7 @@ export default function WorkflowsPage() {
 
 function WorkflowCard({ id, highlightParts }) {
 
+    const modals = useModals()
     const [teamId] = useQueryParam("team")
 
     const workflowQuery = useWorkflow(id)
@@ -98,6 +100,18 @@ function WorkflowCard({ id, highlightParts }) {
             }
         }
     )
+
+    const confirmDelete = () => modals.confirm({
+        header: "Delete workflow?",
+        body: <p className="text-default-500">
+            Are you sure you want to delete the workflow "{name}"? This is irreversible.
+        </p>,
+        onConfirm: () => deleteWorkflow.mutateAsync(),
+        confirmButtonContent: "Delete",
+        confirmButtonProps: {
+            color: "danger",
+        }
+    })
 
     const { data: roleData } = useTeamRoles()
 
@@ -180,7 +194,7 @@ function WorkflowCard({ id, highlightParts }) {
                         <DropdownItem
                             startContent={<TbTrash />} color="danger"
                             key="delete"
-                            onClick={() => deleteWorkflow.mutate()}
+                            onClick={confirmDelete}
                             isLoading={deleteWorkflow.isPending || deleteWorkflow.isSuccess}
                         >
                             Delete

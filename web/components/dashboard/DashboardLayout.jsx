@@ -1,4 +1,5 @@
 import { Chip, Tab, Tabs, Tooltip } from "@nextui-org/react"
+import { useMustBeSignedIn } from "@web/modules/auth"
 import { useQueryParam } from "@web/modules/router"
 import Link from "next/link"
 import { useRouter } from "next/router"
@@ -7,7 +8,6 @@ import Logo from "../Logo"
 import Group from "../layout/Group"
 import TeamSelector from "./TeamSelector"
 import UserMenu from "./UserMenu"
-import { useMustBeSignedIn } from "@web/modules/auth"
 
 
 export default function DashboardLayout({ children, title, rightContent }) {

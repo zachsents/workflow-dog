@@ -1,4 +1,5 @@
 import _ from "lodash"
+import { useRef } from "react"
 
 
 export function deepCamelCase(obj) {
@@ -11,4 +12,11 @@ export function deepCamelCase(obj) {
     }
 
     return obj
+}
+
+
+export function useSyncedRef(value) {
+    const ref = useRef(value)
+    ref.current = value
+    return ref
 }

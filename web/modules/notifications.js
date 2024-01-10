@@ -39,7 +39,7 @@ export function NotificationsProvider({ children, maxNotifications = 8, duration
     }
 
     return (
-        <NotificationsContext.Provider value={{ notify, closeNotification }}>
+        <NotificationsContext.Provider value={{ notify, close: closeNotification }}>
             {children}
 
             <motion.div layout className={classNames(
@@ -62,7 +62,7 @@ export function NotificationsProvider({ children, maxNotifications = 8, duration
 
 
 /**
- * @param {{ id: string, createdAt: Date, options: NotificationOptions }} props
+ * @param {NotificationObject & { close: () => void }} props
  */
 function Notification({ options: { title, message, icon, classNames: _classNames = {} }, close }) {
 
@@ -114,7 +114,7 @@ function Notification({ options: { title, message, icon, classNames: _classNames
 
 
 /**
- * @return {{ notify: (options: NotificationOptions) => void, closeNotification: (notificationId: string) => void }} 
+ * @return {{ notify: (options: NotificationOptions) => void, close: (notificationId: string) => void }} 
  */
 export function useNotifications() {
     return useContext(NotificationsContext)
@@ -122,10 +122,10 @@ export function useNotifications() {
 
 
 /**
- * @typedef {object} Notification
+ * @typedef {object} NotificationObject
  * @property {string} id
  * @property {Date} createdAt
- * @property {options} NotificationOptions 
+ * @property {NotificationOptions} options
  */
 
 

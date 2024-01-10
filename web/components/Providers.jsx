@@ -1,6 +1,7 @@
 import { NextUIProvider } from "@nextui-org/react"
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query"
 import { fire } from "@web/modules/firebase"
+import { ModalsProvider } from "@web/modules/modals"
 import { NotificationsProvider } from "@web/modules/notifications"
 import { SupabaseController } from "@web/modules/supabase"
 import { FirebaseProvider } from "@zachsents/fire-query"
@@ -23,7 +24,9 @@ export default function Providers({ children }) {
             >
                 <NextUIProvider navigate={router.push}>
                     <NotificationsProvider>
-                        {children}
+                        <ModalsProvider>
+                            {children}
+                        </ModalsProvider>
                     </NotificationsProvider>
                 </NextUIProvider>
             </FirebaseProvider>

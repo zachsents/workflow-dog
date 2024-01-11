@@ -1,18 +1,14 @@
 {
-  "private": true,
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
-  },
-  "devDependencies": {
-    "@turbo/gen": "^1.11.3",
-    "eslint": "^7.32.0",
-    "eslint-config-custom": "workspace:*",
-    "prettier": "^2.8.8",
-    "turbo": "latest"
-  },
-  "packageManager": "pnpm@7.15.0",
-  "name": "minus"
+    "private": true,
+    "scripts": {},
+    "devDependencies": {
+        "@eslint/js": "^8.56.0",
+        "@next/eslint-plugin-next": "^14.0.4",
+        "eslint": "^8.56.0",
+        "eslint-plugin-jsdoc": "^48.0.2",
+        "eslint-plugin-react": "^7.33.2"
+    },
+    "packageManager": "pnpm@7.15.0",
+    "name": "workflow-dog",
+    "type": "module"
 }

@@ -36,6 +36,7 @@
         "react-icons": "^4.10.1",
         "react-query": "^3.39.3",
         "reactflow": "^11.10.1",
+        "rxjs": "^7.8.1",
         "shared": "workspace:*",
         "zustand": "^4.3.9"
     },
@@ -45,8 +46,8 @@
         "@types/react-dom": "^18.0.7",
         "@zachsents/next-firebase-rewrites": "*",
         "autoprefixer": "^10.4.14",
-        "eslint-config-custom": "workspace:*",
         "postcss": "^8.4.25",
         "tailwindcss": "^3.4.0"
-    }
+    },
+    "type": "module"
 }

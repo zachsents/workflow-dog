@@ -2,4 +2,4 @@ packages:
   - "*"
   - "!.*"
   - "!node_modules"
-  - "!edge-functions"
+  - "!supabase"

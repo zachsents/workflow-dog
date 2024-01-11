@@ -1,9 +1,7 @@
-/**
- * @type {import('next').NextConfig}
- */
-export default {
+/** @type {import("next").NextConfig} */
+module.exports = {
     reactStrictMode: true,
     transpilePackages: [],
-    output: "export",
+    // output: "export",
     productionBrowserSourceMaps: true,
 }

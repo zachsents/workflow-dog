@@ -2,6 +2,7 @@ import js from "@eslint/js"
 import nextPlugin from "@next/eslint-plugin-next"
 import jsdoc from "eslint-plugin-jsdoc"
 import reactPlugin from "eslint-plugin-react"
+import globals from "globals"
 
 
 /** @type {import("eslint").Linter.FlatConfig[]} */
@@ -19,6 +20,10 @@ export default [
             parserOptions: {
                 sourceType: "module",
             },
+            globals: {
+                ...globals.builtin,
+                ...globals.node,
+            },
         },
     },
     {
@@ -34,7 +39,12 @@ export default [
             next: {
                 rootDir: "web",
             }
-        }
+        },
+        languageOptions: {
+            globals: {
+                ...globals.browser,
+            },
+        },
     },
     {
         files: ["**/*.jsx", "web/**/*.js"],

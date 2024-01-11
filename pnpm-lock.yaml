@@ -9,12 +9,14 @@ importers:
       eslint: ^8.56.0
       eslint-plugin-jsdoc: ^48.0.2
       eslint-plugin-react: ^7.33.2
+      globals: ^13.24.0
     devDependencies:
       '@eslint/js': 8.56.0
       '@next/eslint-plugin-next': 14.0.4
       eslint: 8.56.0
       eslint-plugin-jsdoc: 48.0.2_eslint@8.56.0
       eslint-plugin-react: 7.33.2_eslint@8.56.0
+      globals: 13.24.0
 
   shared:
     specifiers: {}
@@ -48,7 +50,7 @@ importers:
       lodash: ^4.17.21
       lunr: ^2.3.9
       next: ^13.4.1
-      postcss: ^8.4.25
+      postcss: ^8.4.33
       react: ^18.2.0
       react-dom: ^18.2.0
       react-icons: ^4.10.1
@@ -56,7 +58,7 @@ importers:
       reactflow: ^11.10.1
       rxjs: ^7.8.1
       shared: workspace:*
-      tailwindcss: ^3.4.0
+      tailwindcss: ^3.4.1
       zustand: ^4.3.9
     dependencies:
       '@emotion/react': 11.11.3_fmir3ej6t2wp2ucb2nexek7zda

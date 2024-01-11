@@ -6,7 +6,8 @@
         "@next/eslint-plugin-next": "^14.0.4",
         "eslint": "^8.56.0",
         "eslint-plugin-jsdoc": "^48.0.2",
-        "eslint-plugin-react": "^7.33.2"
+        "eslint-plugin-react": "^7.33.2",
+        "globals": "^13.24.0"
     },
     "packageManager": "pnpm@7.15.0",
     "name": "workflow-dog",

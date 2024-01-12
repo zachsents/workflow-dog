@@ -33,5 +33,5 @@ Deno.serve(async (req) => {
 
     await supabase.from("team_invitations").delete().eq("token", token)
 
-    return Response.redirect(`https://workflow.dog/workflows?team=${invitation.team_id}`, 302)
+    return Response.redirect(`https://app.workflow.dog/workflows?team=${invitation.team_id}`, 302)
 })

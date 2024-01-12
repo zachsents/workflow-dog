@@ -1,6 +1,6 @@
 
 export const BASE_URL = process.env.NODE_ENV === "production" ?
-    "https://workflow.dog" :
+    "https://app.workflow.dog" :
     "http://localhost:3000"
 
 export const FUNCTIONS_URL = process.env.NODE_ENV === "production" ?

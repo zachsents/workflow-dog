@@ -7,9 +7,6 @@ import en from "javascript-time-ago/locale/en"
 import Head from "next/head"
 
 
-TimeAgo.addDefaultLocale(en)
-
-
 export default function MyApp({ Component, pageProps }) {
     return (<>
         <Head>
@@ -22,4 +19,11 @@ export default function MyApp({ Component, pageProps }) {
             </main>
         </Providers>
     </>)
+}
+
+
+let initTimeAgo = false
+if (!initTimeAgo) {
+    initTimeAgo = true
+    TimeAgo.addDefaultLocale(en)
 }

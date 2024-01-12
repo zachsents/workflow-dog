@@ -115,13 +115,14 @@ function Modal({ options: { header, body, footer, modalProps, withCloseButton = 
                         <ModalBody className="flex flex-col gap-unit-md">
                             {body}
                         </ModalBody>
-                        <ModalFooter>
-                            {footer}
-                            {withCloseButton &&
-                                <Button variant="light" onPress={onClose}>
-                                    Close
-                                </Button>}
-                        </ModalFooter>
+                        {(footer || withCloseButton) &&
+                            <ModalFooter>
+                                {footer}
+                                {withCloseButton &&
+                                    <Button variant="light" onPress={onClose}>
+                                        Close
+                                    </Button>}
+                            </ModalFooter>}
                     </>
                 )}
             </ModalContent>

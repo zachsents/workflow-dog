@@ -43,7 +43,7 @@ export function NotificationsProvider({ children, maxNotifications = 8, duration
             {children}
 
             <motion.div layout className={classNames(
-                "fixed z-50 bottom-0 right-0 p-8 w-[28rem] flex flex-col-reverse gap-unit-sm items-stretch pointer-events-none",
+                "fixed z-[60] bottom-0 right-0 p-8 w-[28rem] flex flex-col-reverse gap-unit-sm items-stretch pointer-events-none",
                 className
             )}>
                 <AnimatePresence>

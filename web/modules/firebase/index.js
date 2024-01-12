@@ -19,7 +19,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)
-const analytics = global.window && getAnalytics(app)
+const analytics = typeof window !== "undefined" && getAnalytics(app)
 const db = getFirestore(app)
 const storage = getStorage(app)
 const auth = getAuth(app)

@@ -3,7 +3,7 @@ import { useMustBeSignedIn } from "@web/modules/auth"
 import { useQueryParam } from "@web/modules/router"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { TbBorderOuter, TbBrandStackshare, TbDatabase, TbPuzzle } from "react-icons/tb"
+import { TbBorderOuter, TbBrandStackshare, TbDatabase } from "react-icons/tb"
 import Logo from "../Logo"
 import Group from "../layout/Group"
 import TeamSelector from "./TeamSelector"
@@ -59,11 +59,6 @@ export default function DashboardLayout({ children, title, rightContent }) {
                             >
                                 Snippets
                             </TabLabel>}
-                        />
-                        <Tab
-                            key="/integrations"
-                            title={<TabLabel icon={<TbPuzzle />}>Integrations</TabLabel>}
-                            as={Link} href={`/integrations?team=${selectedTeam}`} shallow
                         />
                     </Tabs>
                 </Group>

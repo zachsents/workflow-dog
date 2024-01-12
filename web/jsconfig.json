@@ -5,6 +5,7 @@
             "@web/*": [
                 "./*"
             ]
-        }
+        },
+        "moduleResolution": "node"
     }
 }

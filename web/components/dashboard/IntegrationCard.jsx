@@ -1,58 +1,14 @@
-import { Button, Card, CardBody, Code, Divider, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ScrollShadow, Skeleton, useDisclosure } from "@nextui-org/react"
-import AddIntegrationButton from "@web/components/dashboard/AddIntegrationButton"
-import DashboardLayout from "@web/components/dashboard/DashboardLayout"
+import { Button, Card, CardBody, Code, Divider, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ScrollShadow, Skeleton, useDisclosure } from "@nextui-org/react"
 import Group from "@web/components/layout/Group"
 import { resolveTailwindColor } from "@web/modules/colors"
 import { useDatabaseMutation } from "@web/modules/db"
-import { plural } from "@web/modules/grammar"
-import { INTEGRATION_INFO, useIntegrationAccount, useIntegrationAccountsForTeam } from "@web/modules/integrations"
+import { INTEGRATION_INFO, useIntegrationAccount } from "@web/modules/integrations"
 import { useQueryParam } from "@web/modules/router"
-import { useSearch } from "@web/modules/search"
 import { useTeamRoles } from "@web/modules/teams"
 import { TbDots } from "react-icons/tb"
 
 
-export default function IntegrationsPage() {
-
-    const integrationsQuery = useIntegrationAccountsForTeam(undefined, ["id", "display_id", "type"])
-
-    const [filteredAccounts, query, setQuery] = useSearch(integrationsQuery?.data ?? [], {
-        selector: account => `${account.displayId} ${INTEGRATION_INFO[account.type].name}`,
-        highlight: false,
-    })
-
-    return (
-        <DashboardLayout
-            title="Integrations"
-            rightContent={<AddIntegrationButton />}
-        >
-            <div className="flex flex-col gap-unit-xl">
-                <Input
-                    type="text" size="sm"
-                    label={`Search ${integrationsQuery.data?.length || 0} ${plural("integration account", integrationsQuery.data?.length || 0)}`}
-                    value={query} onValueChange={setQuery}
-                />
-                {integrationsQuery.isLoading ?
-                    <IntegrationsSkeleton /> :
-                    filteredAccounts?.length > 0 ?
-                        <div className="grid grid-cols-2 gap-unit-xl">
-                            {filteredAccounts.map(account =>
-                                <IntegrationCard
-                                    id={account.id}
-                                    key={account.id}
-                                />
-                            )}
-                        </div> :
-                        <p className="text-default-500 text-center">
-                            No workflows found
-                        </p>}
-            </div>
-        </DashboardLayout>
-    )
-}
-
-
-function IntegrationCard({ id }) {
+export default function IntegrationCard({ id }) {
 
     const [teamId] = useQueryParam("team")
     const { data: account } = useIntegrationAccount(id)
@@ -87,6 +43,14 @@ function IntegrationCard({ id }) {
                         <p className="font-medium">
                             {displayId}
                         </p>
+
+                        {/* <p className="text-xs text-default-500">
+                            {{
+                                [INTEGRATION_AUTH_TYPE.OAUTH2]: "OAuth2",
+                                [INTEGRATION_AUTH_TYPE.API_KEY]: "API Key",
+                                [INTEGRATION_AUTH_TYPE.USER_PASS]: "Username/Password"
+                            }[info.authType]}
+                        </p> */}
                     </div>
                 </Group>
 
@@ -162,15 +126,4 @@ function IntegrationCard({ id }) {
         </Modal>
     </> :
         <Skeleton className="h-20 rounded-xl" />
-}
-
-
-function IntegrationsSkeleton() {
-    return (
-        <div className="flex flex-col gap-unit-md">
-            <Skeleton className="w-full h-20 rounded-xl" />
-            <Skeleton className="w-full h-20 rounded-xl" />
-            <Skeleton className="w-full h-20 rounded-xl" />
-        </div>
-    )
 }

@@ -209,18 +209,20 @@ function MembersSection() {
                                 {isMe &&
                                     <span className="text-default-500"> (you)</span>}
                             </TableCell>
-                            <TableCell className="flex items-center gap-unit-xs w-32">
-                                {member.isInvited ? <>
-                                    <TbMailFast />
-                                    <span>Invited</span>
-                                </> :
-                                    isEditor(member.roles) ? <>
-                                        <TbPencil />
-                                        <span>Editor</span>
-                                    </> : <>
-                                        <TbEye />
-                                        <span>Viewer</span>
-                                    </>}
+                            <TableCell>
+                                <Group className="gap-unit-xs w-32 flex-nowrap">
+                                    {member.isInvited ? <>
+                                        <TbMailFast />
+                                        <span>Invited</span>
+                                    </> :
+                                        isEditor(member.roles) ? <>
+                                            <TbPencil />
+                                            <span>Editor</span>
+                                        </> : <>
+                                            <TbEye />
+                                            <span>Viewer</span>
+                                        </>}
+                                </Group>
                             </TableCell>
                             <TableCell>
                                 {!isMe &&

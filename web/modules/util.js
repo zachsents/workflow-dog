@@ -6,11 +6,6 @@ import { useRef } from "react"
 import { Subject, debounceTime, tap } from "rxjs"
 
 
-/**
- * @template T
- * @param {T} obj
- * @return {T} 
- */
 export function deepCamelCase(obj) {
     if (obj instanceof Array)
         return obj.map(deepCamelCase)

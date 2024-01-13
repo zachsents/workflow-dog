@@ -1,7 +1,8 @@
-import { Button, Divider, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Skeleton, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from "@nextui-org/react"
-import { useQuery } from "@tanstack/react-query"
+import { Button, Divider, Input, Skeleton, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from "@nextui-org/react"
 import DashboardLayout from "@web/components/dashboard/DashboardLayout"
 import IntegrationCard from "@web/components/dashboard/IntegrationCard"
+import InviteModal from "@web/components/dashboard/InviteModal"
+import TeamUserActions from "@web/components/dashboard/TeamUserActions"
 import Group from "@web/components/layout/Group"
 import { useUser } from "@web/modules/auth"
 import { useDatabaseMutation } from "@web/modules/db"
@@ -9,11 +10,10 @@ import { plural } from "@web/modules/grammar"
 import { INTEGRATION_INFO, useIntegrationAccountsForTeam } from "@web/modules/integrations"
 import { useQueryParam } from "@web/modules/router"
 import { useSearch } from "@web/modules/search"
-import { supabase } from "@web/modules/supabase"
-import { isEditor, useTeam, useTeamMembers, useTeamRoles } from "@web/modules/teams"
-import { useDebouncedState, useSyncToState } from "@web/modules/util"
+import { isEditor, useTeam, useTeamInvitees, useTeamMembers } from "@web/modules/teams"
+import { useSyncToState } from "@web/modules/util"
 import { useState } from "react"
-import { TbCheck, TbDots, TbEye, TbPencil, TbPencilOff, TbPuzzle, TbSettings, TbUserMinus, TbUserPlus, TbUsersGroup, TbX } from "react-icons/tb"
+import { TbEye, TbMailFast, TbPencil, TbPuzzle, TbSettings, TbUserPlus, TbUsersGroup } from "react-icons/tb"
 
 
 export default function TeamPage() {
@@ -181,36 +181,50 @@ function MembersSection() {
     const { data: user } = useUser()
     const { data: members } = useTeamMembers()
 
+    const { data: invitees } = useTeamInvitees()
+    const inviteesAsMembers = invitees?.map(invitee => ({
+        id: invitee.userId,
+        email: invitee.email,
+        roles: [],
+        isInvited: true,
+    }))
+
+    const allMembers = [...(members || []), ...(inviteesAsMembers || [])]
+
     return (
-        <Table aria-label="Example static collection table">
+        <Table aria-label="Member table">
             <TableHeader>
                 <TableColumn>Email</TableColumn>
                 <TableColumn>Role</TableColumn>
                 <TableColumn>Actions</TableColumn>
             </TableHeader>
-            <TableBody items={members || []}>
+            <TableBody items={allMembers}>
                 {member => {
                     const isMe = member.id === user?.id
 
                     return (
-                        <TableRow key={member.id}>
+                        <TableRow key={member.id + member.roles.toString()}>
                             <TableCell>
                                 {member.email}
                                 {isMe &&
                                     <span className="text-default-500"> (you)</span>}
                             </TableCell>
                             <TableCell className="flex items-center gap-unit-xs w-32">
-                                {isEditor(member.roles) ? <>
-                                    <TbPencil />
-                                    <span>Editor</span>
-                                </> : <>
-                                    <TbEye />
-                                    <span>Viewer</span>
-                                </>}
+                                {member.isInvited ? <>
+                                    <TbMailFast />
+                                    <span>Invited</span>
+                                </> :
+                                    isEditor(member.roles) ? <>
+                                        <TbPencil />
+                                        <span>Editor</span>
+                                    </> : <>
+                                        <TbEye />
+                                        <span>Viewer</span>
+                                    </>}
                             </TableCell>
                             <TableCell>
                                 {!isMe &&
-                                    <MemberActions {...member} />}
+                                    <TeamUserActions {...member} />}
                             </TableCell>
                         </TableRow>
                     )
@@ -221,93 +235,6 @@ function MembersSection() {
 }
 
 
-function MemberActions({ id: memberId, roles }) {
-
-    const [teamId] = useQueryParam("team")
-    const { data: roleData } = useTeamRoles()
-
-    const thisMemberIsEditor = isEditor(roles)
-
-    const updateRoles = useDatabaseMutation(
-        (supa, toEditor) => supa
-            .from("users_teams")
-            .update({
-                roles: toEditor ? ["viewer", "editor"] : ["viewer"],
-            })
-            .eq("user_id", memberId)
-            .eq("team_id", teamId),
-        {
-            invalidateKey: ["teamMembers", teamId],
-            notification: {
-                title: null,
-                message: "Member updated",
-            },
-            throwSelectKey: "*",
-        }
-    )
-
-    const removeFromTeam = useDatabaseMutation(
-        supa => supa
-            .from("users_teams")
-            .delete()
-            .eq("user_id", memberId)
-            .eq("team_id", teamId),
-        {
-            invalidateKey: ["teamMembers", teamId],
-            notification: {
-                title: null,
-                message: "Member removed",
-                classNames: { icon: "!bg-danger" },
-            },
-            throwSelectKey: "*",
-        }
-    )
-
-    const isLoading = updateRoles.isPending || removeFromTeam.isPending
-
-    return (
-        <Dropdown placement="bottom-end">
-            <DropdownTrigger>
-                <Button
-                    isIconOnly size="sm" variant="light"
-                    isLoading={isLoading}
-                >
-                    <TbDots />
-                </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-                aria-label="Member actions"
-                disabledKeys={[
-                    ...(roleData?.isEditor ? [] : ["remove", "make-viewer", "make-editor"])
-                ]}
-            >
-                {thisMemberIsEditor ?
-                    <DropdownItem
-                        onPress={() => updateRoles.mutate(false)}
-                        startContent={<TbPencilOff />}
-                        key="make-viewer"
-                    >
-                        Make Viewer
-                    </DropdownItem> :
-                    <DropdownItem
-                        onPress={() => updateRoles.mutate(true)}
-                        startContent={<TbPencil />}
-                        key="make-editor"
-                    >
-                        Make Editor
-                    </DropdownItem>}
-
-                <DropdownItem
-                    onPress={() => removeFromTeam.mutate()}
-                    startContent={<TbUserMinus />} color="danger"
-                    key="remove"
-                >
-                    Remove from team
-                </DropdownItem>
-            </DropdownMenu>
-        </Dropdown>
-    )
-}
 
 
 
@@ -327,84 +254,3 @@ function SectionHeader({ icon: Icon, children, rightContent }) {
     )
 }
 
-
-function InviteModal(props) {
-
-    const [teamId] = useQueryParam("team")
-
-    const [inviteeEmail, debouncedEmail, setInviteeEmail, isChanging] = useDebouncedState("", {
-        debounce: 500,
-    })
-
-    const isValid = inviteeEmail && inviteeEmail.includes("@") && inviteeEmail.includes(".")
-
-    const { data: doesUserExist, isPending } = useQuery({
-        queryFn: async () => {
-            if (!debouncedEmail)
-                return false
-
-            const { data } = await supabase.rpc("does_user_exist", { _email: debouncedEmail })
-            return data
-        },
-        queryKey: ["userExists", debouncedEmail],
-    })
-
-    const isLoading = isPending || isChanging
-
-    const invite = useDatabaseMutation(supa => supa.rpc("invite_user_to_team", {
-        _email: inviteeEmail,
-        _team_id: teamId,
-    }), {
-        enabled: isValid && !!teamId,
-        notification: {
-            title: null,
-            message: "Invitation sent!"
-        },
-        showErrorNotification: true,
-        throwSelectKey: null,
-    })
-
-    return (
-        <Modal {...props} onClose={() => setInviteeEmail("", true)}>
-            <ModalContent>
-                <ModalHeader>
-                    Invite member to team
-                </ModalHeader>
-                <ModalBody className="flex flex-col gap-unit-sm">
-                    <Input
-                        name="inviteeEmail"
-                        label="Email" type="email"
-                        value={inviteeEmail}
-                        onValueChange={value => setInviteeEmail(value)}
-                        autoFocus
-                    />
-                    {isValid &&
-                        <Group className="gap-unit-sm text-small text-default-500">
-                            {isLoading ?
-                                <Spinner size="sm" /> :
-                                doesUserExist ?
-                                    <TbCheck className="text-success text-xl" /> :
-                                    <TbX className="text-danger text-xl" />}
-                            <p>
-                                {isLoading ?
-                                    "Looking up user..." :
-                                    doesUserExist ?
-                                        "User will be invited to your team." :
-                                        "User doesn't have an account. Ask them to sign up first."}
-                            </p>
-                        </Group>}
-                </ModalBody>
-                <ModalFooter>
-                    <Button
-                        color="primary"
-                        isDisabled={isLoading || !isValid || !doesUserExist}
-                        onPress={() => invite.mutate()}
-                        isLoading={invite.isPending}
-                    >
-                        Invite
-                    </Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
-    )
-}

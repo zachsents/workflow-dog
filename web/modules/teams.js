@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
+import _ from "lodash"
 import { useUser } from "./auth"
+import { useQueryParam } from "./router"
 import { supabase } from "./supabase"
 import { deepCamelCase } from "./util"
-import { useQueryParam } from "./router"
-import _ from "lodash"
+import { useDatabaseMutation } from "./db"
 
 
 export function useTeamsForUser(userId, selectKeys = ["*"]) {
@@ -69,7 +70,6 @@ export function useTeam(teamId) {
                 .from("teams")
                 .select("*")
                 .eq("id", teamId)
-                .limit(1)
                 .single()
                 .throwOnError()
             return deepCamelCase(data)
@@ -99,6 +99,47 @@ export function useTeamMembers(teamId) {
         },
         queryKey: ["teamMembers", teamId],
         enabled: !!teamId,
+    })
+}
+
+
+export function useTeamInvitees(teamId) {
+
+    const [teamIdParam] = useQueryParam("team")
+    teamId ??= teamIdParam
+
+    return useQuery({
+        queryFn: async () => {
+            const { data } = await supabase
+                .from("team_invitations")
+                .select("user_id,email")
+                .eq("team_id", teamId)
+                .throwOnError()
+            return deepCamelCase(data)
+        },
+        queryKey: ["teamInvitees", teamId],
+        enabled: !!teamId,
+    })
+}
+
+
+export function useInviteToTeam(teamId, inviteeEmail, isValid) {
+
+    const [teamIdParam] = useQueryParam("team")
+    teamId ??= teamIdParam
+
+    return useDatabaseMutation(supa => supa.rpc("invite_user_to_team", {
+        _email: inviteeEmail,
+        _team_id: teamId,
+    }), {
+        enabled: isValid && !!teamId,
+        notification: {
+            title: null,
+            message: "Invitation sent!"
+        },
+        showErrorNotification: true,
+        throwSelectKey: null,
+        invalidateKey: ["teamInvitees", teamId],
     })
 }
 

@@ -1,5 +1,6 @@
-import { Button, Card, CardBody, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Skeleton, Tooltip } from "@nextui-org/react"
+import { Button, Card, CardBody, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Skeleton } from "@nextui-org/react"
 import HighlightText from "@web/components/HighlightText"
+import WorkflowStatusChip from "@web/components/WorkflowStatusChip"
 import CreateWorkflowButton from "@web/components/dashboard/CreateWorkflowButton"
 import DashboardLayout from "@web/components/dashboard/DashboardLayout"
 import Group from "@web/components/layout/Group"
@@ -63,26 +64,9 @@ function WorkflowCard({ id, highlightParts }) {
     const [teamId] = useQueryParam("team")
 
     const workflowQuery = useWorkflow(id)
-    const { name, trigger, lastEditedAt, isEnabled } = workflowQuery.data || {}
+    const { name, trigger, lastEditedAt } = workflowQuery.data || {}
 
     const triggerInfo = TRIGGER_INFO[trigger?.type]
-
-    const toggleEnabled = useDatabaseMutation(
-        supa => supa
-            .from("workflows")
-            .update({ is_enabled: !isEnabled })
-            .eq("id", id),
-        {
-            invalidateKey: ["workflow", id],
-            notification: {
-                title: null,
-                message: `Workflow ${isEnabled ? "disabled" : "enabled"}`,
-                classNames: {
-                    icon: isEnabled ? "!bg-danger" : "!bg-success",
-                }
-            },
-        }
-    )
 
     const deleteWorkflow = useDatabaseMutation(
         supa => supa
@@ -158,21 +142,7 @@ function WorkflowCard({ id, highlightParts }) {
 
             <Group className="gap-unit-sm justify-between">
                 <Group className="gap-unit-sm">
-                    <Tooltip
-                        placement="bottom" content={isEnabled ? "Disable?" : "Enable?"} closeDelay={0}
-                        isDisabled={!roleData?.isEditor}
-                    >
-                        <Chip
-                            color={toggleEnabled.isPending ? "default" : isEnabled ? "success" : "danger"}
-                            variant="dot"
-                            {...roleData?.isEditor && {
-                                onClick: () => toggleEnabled.mutate(),
-                                as: "button",
-                            }}
-                        >
-                            {isEnabled ? "Enabled" : "Disabled"}
-                        </Chip>
-                    </Tooltip>
+                    <WorkflowStatusChip workflowId={id} />
                     <Chip color="warning">2 config problems</Chip>
                     <Chip color="danger">4 run errors</Chip>
                 </Group>

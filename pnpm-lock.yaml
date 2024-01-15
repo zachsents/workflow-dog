@@ -32,6 +32,7 @@ importers:
       '@mantine/notifications': ^6.0.16
       '@mantine/prism': ^6.0.16
       '@nextui-org/react': ^2.2.9
+      '@react-hookz/web': ^24.0.2
       '@supabase/supabase-js': ^2.39.2
       '@tanstack/react-query': ^5.17.5
       '@types/node': ^17.0.12
@@ -70,6 +71,7 @@ importers:
       '@mantine/notifications': 6.0.21_hpnsvztc57wsdtanyivhwcmsrq
       '@mantine/prism': 6.0.21_hpnsvztc57wsdtanyivhwcmsrq
       '@nextui-org/react': 2.2.9_rw2jnhly5hc3ql4p4xapty4qxm
+      '@react-hookz/web': 24.0.2_biqbaboplfbrettd7655fr4n2y
       '@supabase/supabase-js': 2.39.2
       '@tanstack/react-query': 5.17.9_react@18.2.0
       '@zachsents/fire-query': 1.2.5_react-dom@18.2.0
@@ -3076,6 +3078,26 @@ packages:
       '@react-types/shared': 3.22.0_react@18.2.0
       '@swc/helpers': 0.5.3
       react: 18.2.0
+    dev: false
+
+  /@react-hookz/deep-equal/1.0.4:
+    resolution: {integrity: sha512-N56fTrAPUDz/R423pag+n6TXWbvlBZDtTehaGFjK0InmN+V2OFWLE/WmORhmn6Ce7dlwH5+tQN1LJFw3ngTJVg==}
+    dev: false
+
+  /@react-hookz/web/24.0.2_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-LhWw/LzhxKYRZDRIKd42mCMqRa9pTMSpwpwnfpa0hYoUNcrHw//3NlpoPlynkmKT3G88mumTTuV0HeWnNkarog==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      js-cookie: ^3.0.5
+      react: ^16.8 || ^17 || ^18
+      react-dom: ^16.8 || ^17 || ^18
+    peerDependenciesMeta:
+      js-cookie:
+        optional: true
+    dependencies:
+      '@react-hookz/deep-equal': 1.0.4
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
     dev: false
 
   /@react-stately/checkbox/3.6.1_react@18.2.0:

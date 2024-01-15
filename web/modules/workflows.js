@@ -1,8 +1,14 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
+import { useUser } from "./auth"
 import { useQueryParam } from "./router"
 import { supabase } from "./supabase"
 import { deepCamelCase } from "./util"
-import { useUser } from "./auth"
+
+
+export function useWorkflowIdFromUrl(skip) {
+    const [workflowId] = useQueryParam("workflowId")
+    return skip || workflowId
+}
 
 
 export function useWorkflowsForTeam(teamId, selectKeys = ["*"]) {
@@ -28,6 +34,9 @@ export function useWorkflowsForTeam(teamId, selectKeys = ["*"]) {
 
 
 export function useWorkflow(workflowId) {
+
+    workflowId = useWorkflowIdFromUrl(workflowId)
+
     return useQuery({
         queryFn: async () => {
             const { data } = await supabase

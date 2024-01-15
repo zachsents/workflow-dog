@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/router"
 import { useEffect } from "react"
-import { supabase } from "./supabase"
-import { deepCamelCase } from "./util"
 
 
 export function useUser() {
@@ -17,27 +15,6 @@ export function useSession() {
     return useQuery({
         queryKey: ["currentSession"],
         enabled: false,
-    })
-}
-
-
-export function useUserMetadata() {
-
-    const { data: user } = useUser()
-
-    return useQuery({
-        queryFn: async () => {
-            const { data } = await supabase
-                .from("users")
-                .select("*")
-                .eq("id", user.id)
-                .limit(1)
-                .single()
-                .throwOnError()
-            return deepCamelCase(data)
-        },
-        queryKey: ["userMetadata", user?.id],
-        enabled: !!user?.id,
     })
 }
 

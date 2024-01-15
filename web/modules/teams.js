@@ -21,6 +21,7 @@ export function useTeamsForUser(userId, selectKeys = ["*"]) {
                 .limit(1)
                 .single()
                 .throwOnError()
+
             return deepCamelCase(teams)
         },
         queryKey: ["teamsForUser", userId, selectKeys],

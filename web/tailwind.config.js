@@ -1,4 +1,5 @@
 import { nextui } from "@nextui-org/react"
+import _ from "lodash"
 import colors from "tailwindcss/colors"
 
 
@@ -36,6 +37,31 @@ export default {
                         ...colors.red,
                         DEFAULT: colors.red[DEFAULT_SHADE.light],
                     },
+                    default: {
+                        ...colors.gray,
+                        DEFAULT: colors.gray[DEFAULT_SHADE.dark],
+                    },
+                },
+            },
+            dark: {
+                extend: "dark",
+                colors: {
+                    primary: {
+                        ...swapColors(colors.violet),
+                        DEFAULT: colors.violet[DEFAULT_SHADE.light],
+                    },
+                    secondary: {
+                        ...swapColors(colors.amber),
+                        DEFAULT: colors.amber[DEFAULT_SHADE.light],
+                    },
+                    danger: {
+                        ...swapColors(colors.red),
+                        DEFAULT: colors.red[DEFAULT_SHADE.light],
+                    },
+                    default: {
+                        ...swapColors(colors.gray),
+                        DEFAULT: colors.gray[DEFAULT_SHADE.dark],
+                    },
                 },
             },
         }
@@ -44,4 +70,17 @@ export default {
         // preflight: false,
     },
     darkMode: "class",
+}
+
+
+/**
+ * Swaps the order of shades in Tailwind color objects order for dark mode
+ * @param {Record<string, any>} colors
+ * @returns {Record<string, any>}
+ */
+function swapColors(colors) {
+    return _.zipObject(
+        Object.keys(colors).reverse(),
+        Object.values(colors)
+    )
 }

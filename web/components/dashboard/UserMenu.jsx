@@ -1,21 +1,21 @@
-import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Skeleton } from "@nextui-org/react"
+import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Skeleton } from "@nextui-org/react"
 import { useUser } from "@web/modules/auth"
 import { supabase } from "@web/modules/supabase"
 import { TbLogout } from "react-icons/tb"
+import UserAvatar from "../UserAvatar"
 
 
 export default function UserMenu() {
 
     const { data: user } = useUser()
 
-    const initial = (user?.userMetadata?.name || user?.email)?.[0] ?? "?"
-
     return user ?
         <Dropdown placement="bottom-end">
             <DropdownTrigger>
-                <Avatar
-                    src={user?.userMetadata.avatarUrl}
-                    name={initial}
+                <UserAvatar
+                    name={user?.userMetadata.name}
+                    email={user?.email}
+                    photoUrl={user?.userMetadata.avatarUrl}
                     as="button"
                 />
             </DropdownTrigger>

@@ -41,16 +41,6 @@ export default function DashboardLayout({ children, title, rightContent }) {
                             as={Link} href={`/workflows?team=${selectedTeam}`} shallow
                         />
                         <Tab
-                            key="/stores"
-                            title={<TabLabel
-                                comingSoon
-                                icon={<TbDatabase />}
-                                description="Stores are simple ways to store data between Workflow runs with key-value pairs."
-                            >
-                                Stores
-                            </TabLabel>}
-                        />
-                        <Tab
                             key="/snippets"
                             title={<TabLabel
                                 comingSoon
@@ -58,6 +48,16 @@ export default function DashboardLayout({ children, title, rightContent }) {
                                 description="Snippets are reusable pieces of logic that can be used in multiple Workflows."
                             >
                                 Snippets
+                            </TabLabel>}
+                        />
+                        <Tab
+                            key="/stores"
+                            title={<TabLabel
+                                comingSoon
+                                icon={<TbDatabase />}
+                                description="Stores are simple ways to store data between Workflow runs with key-value pairs."
+                            >
+                                Stores
                             </TabLabel>}
                         />
                     </Tabs>

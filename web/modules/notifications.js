@@ -32,6 +32,8 @@ export function NotificationsProvider({ children, maxNotifications = 8, duration
 
         if (typeof duration === "number")
             setTimeout(() => closeNotification(id), duration)
+
+        return id
     }
 
     const closeNotification = id => {
@@ -64,7 +66,7 @@ export function NotificationsProvider({ children, maxNotifications = 8, duration
 /**
  * @param {NotificationObject & { close: () => void }} props
  */
-function Notification({ options: { title, message, icon, classNames: _classNames = {} }, close }) {
+function Notification({ options: { title, message, icon, classNames: _classNames = {}, content }, close }) {
 
     return (
         <motion.div
@@ -97,6 +99,8 @@ function Notification({ options: { title, message, icon, classNames: _classNames
                             <p className={classNames("text-small text-default-500", _classNames?.message)}>
                                 {message}
                             </p>}
+
+                        {content}
                     </div>
                 </CardBody>
 
@@ -136,4 +140,5 @@ export function useNotifications() {
  * @property {JSX.Element} icon
  * @property {number} duration
  * @property {{ icon: string, title: string, message: string }} classNames
+ * @property {JSX.Element} content
  */

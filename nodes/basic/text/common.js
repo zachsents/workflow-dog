@@ -1,11 +1,12 @@
+import { Type } from "shared/types.js"
+
 export default {
-    id: "text",
     name: "Text",
     inputs: {},
     outputs: {
         text: {
-            group: false,
-            type: "string",
+            name: "Text",
+            type: Type.String(),
         },
     }
 }

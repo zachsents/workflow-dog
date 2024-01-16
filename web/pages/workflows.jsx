@@ -4,14 +4,13 @@ import WorkflowStatusChip from "@web/components/WorkflowStatusChip"
 import CreateWorkflowButton from "@web/components/dashboard/CreateWorkflowButton"
 import DashboardLayout from "@web/components/dashboard/DashboardLayout"
 import Group from "@web/components/layout/Group"
-import { resolveTailwindColor } from "@web/modules/colors"
+import TriggerText from "@web/components/workflow-editor/TriggerText"
 import { useDatabaseMutation } from "@web/modules/db"
 import { plural } from "@web/modules/grammar"
 import { useModals } from "@web/modules/modals"
 import { useQueryParam } from "@web/modules/router"
 import { useSearch } from "@web/modules/search"
 import { useTeamRoles } from "@web/modules/teams"
-import { TRIGGER_INFO } from "@web/modules/triggers"
 import { useWorkflow, useWorkflowsForTeam } from "@web/modules/workflows"
 import TimeAgo from "javascript-time-ago"
 import Link from "next/link"
@@ -66,8 +65,6 @@ function WorkflowCard({ id, highlightParts }) {
     const workflowQuery = useWorkflow(id)
     const { name, trigger, lastEditedAt } = workflowQuery.data || {}
 
-    const triggerInfo = TRIGGER_INFO[trigger?.type]
-
     const deleteWorkflow = useDatabaseMutation(
         supa => supa
             .from("workflows")
@@ -104,18 +101,14 @@ function WorkflowCard({ id, highlightParts }) {
             <Card>
                 <CardBody className="px-8 flex flex-row justify-between gap-10 items-center">
                     <div>
-                        {triggerInfo ?
-                            <Group className="gap-unit-xs text-small">
-                                <triggerInfo.icon style={{
-                                    color: resolveTailwindColor(triggerInfo.color, triggerInfo.shade)
-                                }} />
-                                <p className="text-default-500">
-                                    {triggerInfo.whenName || triggerInfo.name}
-                                </p>
-                            </Group> :
-                            <p className="text-small text-default-500">
-                                No trigger set
-                            </p>}
+                        <TriggerText
+                            trigger={trigger}
+                            classNames={{
+                                text: "text-default-500",
+                                fallback: "text-small text-default-500",
+                                wrapper: "text-small",
+                            }}
+                        />
                         <HighlightText
                             className="font-medium" highlightClassName="bg-yellow-200"
                             highlightParts={highlightParts}

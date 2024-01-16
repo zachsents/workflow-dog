@@ -1,16 +1,12 @@
 import { Autocomplete, AutocompleteItem, Button, Input, Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react"
 import { useUser } from "@web/modules/auth"
-import { resolveTailwindColor } from "@web/modules/colors"
 import { useForm } from "@web/modules/form"
 import { useQueryParam } from "@web/modules/router"
 import { useTeamRoles } from "@web/modules/teams"
-import { TRIGGER_INFO } from "@web/modules/triggers"
 import { useCreateWorkflow } from "@web/modules/workflows"
 import { useRouter } from "next/router"
 import { TbArrowRight, TbPlus } from "react-icons/tb"
-
-
-const triggers = Object.entries(TRIGGER_INFO).map(([id, info]) => ({ ...info, id }))
+import { list as triggers } from "triggers/web"
 
 
 export default function CreateWorkflowButton() {
@@ -90,7 +86,7 @@ export default function CreateWorkflowButton() {
                                     key={trigger.id}
                                     description={trigger.whenName}
                                     startContent={<trigger.icon className="text-large" style={{
-                                        color: resolveTailwindColor(trigger.color, trigger.shade),
+                                        color: trigger.color,
                                     }} />}
                                 >
                                     {trigger.name}

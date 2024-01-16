@@ -16,6 +16,7 @@ export default {
         "./components/**/*.{js,ts,jsx,tsx,mdx}",
         "./modules/**/*.{js,ts,jsx,tsx,mdx}",
         "../node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
+        "../nodes/**/*.{js,ts,jsx,tsx,mdx}"
     ],
     theme: {
         extend: {},

@@ -1,7 +1,7 @@
 /** @type {import("next").NextConfig} */
 module.exports = {
     reactStrictMode: true,
-    transpilePackages: [],
+    transpilePackages: ["triggers"],
     // output: "export",
     productionBrowserSourceMaps: true,
 }

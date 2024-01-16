@@ -1,12 +1,20 @@
 {
-  "name": "nodes",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+    "name": "nodes",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "barrelboy build && barrelboy build-accessors"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "dependencies": {
+        "@zachsents/barrelboy": "^1.0.27",
+        "shared": "workspace:*"
+    },
+    "devDependencies": {
+        "joi": "^17.11.1"
+    }
 }

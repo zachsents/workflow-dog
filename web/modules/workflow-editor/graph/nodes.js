@@ -6,7 +6,6 @@ import { useNodeId, useReactFlow, useStore, useUpdateNodeInternals } from "react
 import { PREFIX } from "shared/prefixes"
 import { _get, _set, uniqueId } from "../util"
 import { useNodeInputs } from "./interfaces"
-import { projectViewportCenterToRF } from "./projection"
 
 
 /**
@@ -130,62 +129,68 @@ export function useNodeHasValidationErrors(nodeId) {
 }
 
 
-/**
- * @param {import("reactflow").ReactFlowInstance} rf
- * @param {string} definitionId
- * @param {object} position
- * @param {number} position.x
- * @param {number} position.y
- * @param {object} data
- */
-export function createActionNode(rf, definitionId, { x, y } = {}, data = {}) {
+export function useCreateActionNode() {
 
-    if (x == null || y == null) {
-        const center = projectViewportCenterToRF(rf)
-        x ??= center.x
-        y ??= center.y
-    }
+    const rf = useReactFlow()
+    const domNode = useStore(s => s.domNode)
 
-    const definition = nodeDefs[definitionId]
+    return useCallback(({
+        definition: definitionId,
+        position,
+        data = {},
+        addToGraph = true,
+    } = {}) => {
 
-    const createInput = (defId, def, extra = {}) => ({
-        id: uniqueId(PREFIX.INPUT),
-        definition: defId,
-        mode: def.defaultMode,
-        ...extra,
-    })
+        if (!position) {
+            const domNodeBounds = domNode?.getBoundingClientRect()
+            position = rf.screenToFlowPosition({
+                x: domNodeBounds.x + domNodeBounds.width / 2,
+                y: domNodeBounds.y + domNodeBounds.height / 2,
+            })
+        }
 
-    const createOutput = (defId) => ({
-        id: uniqueId(PREFIX.OUTPUT),
-        definition: defId,
-    })
+        const definition = nodeDefs[definitionId]
 
-    const newNode = {
-        id: uniqueId(PREFIX.NODE),
-        type: "action",
-        position: { x, y },
-        data: _.merge({
-            definition: definitionId,
-            inputs: Object.entries(definition.inputs).flatMap(([id, input]) => {
-                if (input.group)
-                    return Array(input.groupMin).fill().map(() => createInput(id, input, {
-                        name: `New ${input.name}`
-                    }))
+        const createInput = (defId, def, extra = {}) => ({
+            id: uniqueId(PREFIX.INPUT),
+            definition: defId,
+            mode: def.defaultMode,
+            ...extra,
+        })
 
-                return createInput(id, input)
-            }),
-            outputs: Object.entries(definition.outputs).flatMap(([id, output]) => {
-                if (output.group)
-                    return Array(output.groupMin).fill().map(() => createOutput(id))
+        const createOutput = (defId) => ({
+            id: uniqueId(PREFIX.OUTPUT),
+            definition: defId,
+        })
 
-                return createOutput(id)
-            }),
-        }, data),
-    }
+        const newNode = {
+            id: uniqueId(PREFIX.NODE),
+            type: "action",
+            position,
+            data: _.merge({
+                definition: definitionId,
+                inputs: Object.entries(definition.inputs).flatMap(([id, input]) => {
+                    if (input.group)
+                        return Array(input.groupMin).fill().map(() => createInput(id, input, {
+                            name: `New ${input.name}`
+                        }))
 
-    rf?.setNodes(nodes => [...nodes, newNode])
+                    return createInput(id, input)
+                }),
+                outputs: Object.entries(definition.outputs).flatMap(([id, output]) => {
+                    if (output.group)
+                        return Array(output.groupMin).fill().map(() => createOutput(id))
 
-    return newNode
+                    return createOutput(id)
+                }),
+            }, data),
+        }
+
+        if (addToGraph)
+            rf.addNodes(newNode)
+
+        return newNode
+    }, [rf, domNode])
 }
 
 

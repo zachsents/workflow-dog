@@ -1,5 +1,6 @@
 import _ from "lodash"
 import { useEffect } from "react"
+import { useCallback } from "react"
 import { useMemo } from "react"
 import { useState } from "react"
 import { useRef } from "react"
@@ -86,4 +87,57 @@ export function useSyncToState(value, setOtherValue) {
     }, [value])
 
     return () => setOtherValue(value)
+}
+
+
+/**
+ * @param {string} hotkey - e.g. "ctrl+b"
+ * @param {(event: KeyboardEvent) => void} callback
+ * @param {object} options
+ * @param {HTMLElement} options.target
+ * @param {string} options.event
+ * @param {object} options.eventOptions
+ * @param {boolean} options.preventDefault
+ * @param {any[]} options.callbackDependencies
+ */
+export function useHotkey(hotkey, callback, {
+    target = window,
+    event = "keydown",
+    eventOptions = {},
+    preventDefault = false,
+    callbackDependencies = [],
+} = {}) {
+
+    const wrappedCallback = useCallback(callback, callbackDependencies)
+
+    const [modifierKeys, key] = useMemo(() => {
+        const keys = hotkey.split(/[+\s]+/g)
+        return [keys, keys.pop()]
+    }, [hotkey])
+
+    useEffect(() => {
+        if (!target || !callback)
+            return
+
+        const handler = ev => {
+            if (modifierKeys.every(modKey => modifiers[modKey]?.(ev)) && ev.key === key) {
+                if (preventDefault)
+                    ev.preventDefault()
+
+                wrappedCallback(ev)
+            }
+        }
+
+        target.addEventListener(event, handler, eventOptions)
+        return () => target.removeEventListener(event, handler)
+    }, [modifiers, key, wrappedCallback, target, event, JSON.stringify(eventOptions), preventDefault])
+}
+
+
+const modifiers = {
+    ctrl: ev => ev.ctrlKey,
+    shift: ev => ev.shiftKey,
+    alt: ev => ev.altKey,
+    meta: ev => ev.metaKey,
+    mod: ev => ev.ctrlKey || ev.metaKey,
 }

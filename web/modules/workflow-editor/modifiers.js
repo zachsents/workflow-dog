@@ -10,7 +10,7 @@ const modifiers = [
         icon: TbArrowsSplit2,
         inputs: {
             condition: {
-                label: "Condition",
+                name: "Condition",
                 type: Type.Boolean(),
             }
         }
@@ -21,7 +21,13 @@ const modifiers = [
         icon: TbActivity,
         inputs: {
             promise: {
-                label: "Value",
+                name: "Value",
+                type: Type.Any(),
+            }
+        },
+        outputs: {
+            done: {
+                name: "Done",
                 type: Type.Any(),
             }
         }

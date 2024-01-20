@@ -4,32 +4,53 @@ import { object as modDefs } from "@web/modules/workflow-editor/modifiers"
 import { TbX } from "react-icons/tb"
 import Group from "../layout/Group"
 import ActionNodeHandle from "./ActionNodeHandle"
+import { PREFIX } from "shared/prefixes"
 
 
 export default function NodeModifierWrapper({ children }) {
 
     const [modifier, , clearModifier] = useModifier()
+    const modDef = modDefs[modifier?.type]
 
     return modifier ?
         <div className="px-3 pb-3 pt-1 rounded-xl bg-gray-200 bg-opacity-50 border-dashed border-1">
-            <Group className="justify-between -mr-2 mb-unit-xs">
-                <div className="flex flex-col items-start">
+            <Group className="justify-between mb-unit-xs !items-stretch">
+                <div className="flex flex-col items-start justify-between">
                     <p className="text-default-500 text-xs py-1">
-                        {modDefs[modifier.type].name}
+                        {modDef.name}
                     </p>
-                    <div className="-mx-5">
-                        <ActionNodeHandle
-                            id={modifier.id}
-                            type="target"
-                            definition={Object.values(modDefs[modifier.type].inputs)[0]}
-                        />
+                    <div className="-mx-5 flex flex-col gap-1">
+                        {Object.entries(modDef.inputs ?? {}).map(([id, input]) =>
+                            <ActionNodeHandle
+                                id={`${PREFIX.MODIFIER_INPUT}:${id}`}
+                                type="target"
+                                definition={input}
+                                key={id}
+                            />
+                        )}
                     </div>
                 </div>
-                <Tooltip content="Remove Modifier" closeDelay={0}>
-                    <Button isIconOnly size="sm" variant="light" onPress={clearModifier}>
-                        <TbX />
-                    </Button>
-                </Tooltip>
+                <div className="flex flex-col items-end justify-between">
+                    <Tooltip content="Remove Modifier" closeDelay={0}>
+                        <Button
+                            isIconOnly size="sm" variant="light" onPress={clearModifier}
+                            className="-mr-2"
+                        >
+                            <TbX />
+                        </Button>
+                    </Tooltip>
+
+                    <div className="-mx-5 flex flex-col gap-1">
+                        {Object.entries(modDef.outputs ?? {}).map(([id, output]) =>
+                            <ActionNodeHandle
+                                id={`${PREFIX.MODIFIER_OUTPUT}:${id}`}
+                                type="source"
+                                definition={output}
+                                key={id}
+                            />
+                        )}
+                    </div>
+                </div>
             </Group>
 
             {children}

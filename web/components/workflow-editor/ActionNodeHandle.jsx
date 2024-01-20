@@ -1,16 +1,13 @@
 import { Button, Tooltip } from "@nextui-org/react"
 import { useDefinition, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
 import classNames from "classnames"
-import Color from "color"
-import { useMemo } from "react"
 import { TbActivity } from "react-icons/tb"
 import { Position, Handle as RFHandle, useStore } from "reactflow"
 import util from "util"
 import Group from "../layout/Group"
-import colors from "tailwindcss/colors"
 
 
-export default function ActionNodeHandle({ id, name, type, color, definition: passedDef }) {
+export default function ActionNodeHandle({ id, name, type, definition: passedDef }) {
 
     const nodeDefinition = useDefinition()
 
@@ -38,20 +35,16 @@ export default function ActionNodeHandle({ id, name, type, color, definition: pa
     const runValueNeedsExpansion = typeof runValue === "object" && Object.keys(runValue).length > 1 ||
         typeof runValue === "string" && runValue.length > 100
 
-    const mainColor = color || nodeDefinition?.color || colors.gray[500]
-    const lightColor = useMemo(() => Color(mainColor).lighten(0.5).hex(), [mainColor])
-
     return (
         <div>
             <RFHandle
                 id={id}
                 type={type}
                 position={type == "target" ? Position.Left : Position.Right}
-                className="!relative !transform-none !inset-0 !w-auto !h-auto flex !rounded-full !border-solid !border-1 transition-colors text-dark-400 !bg-gray-50 !border-gray-300 hover:!text-[var(--main-color)] hover:!bg-[var(--light-color)] hover:!border-[var(--main-color)]"
-                style={{
-                    "--main-color": mainColor,
-                    "--light-color": lightColor,
-                }}
+                className={classNames(
+                    "!relative !transform-none !inset-0 !w-auto !h-auto flex !rounded-full !border-solid !border-1 transition-colors !bg-gray-50 !border-gray-300 hover:!text-[var(--dark-color)] hover:!bg-[var(--light-color)] hover:!border-[var(--dark-color)]",
+
+                )}
             >
                 <Group
                     className={classNames("flex-nowrap w-full pointer-events-none gap-1 px-3", {
@@ -61,7 +54,7 @@ export default function ActionNodeHandle({ id, name, type, color, definition: pa
                     {/* {definition.showHandleIcon && definition.icon &&
                         <definition.icon size="0.7rem" color="currentColor" />} */}
 
-                    <p className="text-xs text-current line-clamp-1">
+                    <p className="text-[0.625rem] text-current line-clamp-1">
                         {displayName}
                     </p>
                 </Group>
@@ -86,7 +79,7 @@ export default function ActionNodeHandle({ id, name, type, color, definition: pa
                         }>
                             <Button
                                 isIconOnly radius="full" color="primary" size="sm"
-                                onPress={() => runValueNeedsExpansion && openDataViewerModal(`${nodeDisplayName} - ${displayName}`, runValue)}
+                            // onPress={() => runValueNeedsExpansion && openDataViewerModal(`${nodeDisplayName} - ${displayName}`, runValue)}
                             >
                                 <TbActivity />
                             </Button>
@@ -98,25 +91,25 @@ export default function ActionNodeHandle({ id, name, type, color, definition: pa
 }
 
 
-function openDataViewerModal(title, value) {
-    // modals.open({
-    //     title,
-    //     size: "lg",
-    //     children: typeof value === "string" ?
-    //         <Text className={classNames({
-    //             "font-mono": true,
-    //             "text-sm": value.length > 500,
-    //             "text-xs": value.length > 1000,
-    //         })}>
-    //             {value}
-    //         </Text> :
-    //         typeof value === "object" ?
-    //             <ObjectViewer object={value} /> :
-    //             <pre>
-    //                 {util.inspect(value)}
-    //             </pre>
-    // })
-}
+// function openDataViewerModal(title, value) {
+//     // modals.open({
+//     //     title,
+//     //     size: "lg",
+//     //     children: typeof value === "string" ?
+//     //         <Text className={classNames({
+//     //             "font-mono": true,
+//     //             "text-sm": value.length > 500,
+//     //             "text-xs": value.length > 1000,
+//     //         })}>
+//     //             {value}
+//     //         </Text> :
+//     //         typeof value === "object" ?
+//     //             <ObjectViewer object={value} /> :
+//     //             <pre>
+//     //                 {util.inspect(value)}
+//     //             </pre>
+//     // })
+// }
 
 
 function ObjectViewer({ object }) {

@@ -1,22 +1,22 @@
-import { useKeyboardEvent } from "@react-hookz/web"
+import { useHotkey } from "@web/modules/util"
 import _ from "lodash"
-import { useCallback, useEffect, useMemo } from "react"
-import { useStoreApi } from "reactflow"
+import { useEffect } from "react"
+import { useEdges, useNodes, useReactFlow, useStoreApi } from "reactflow"
 import { useUndoRedo } from "./use-undo-redo"
 
 
-export function useGraphUndoRedo(nodes, edges) {
+export function useGraphUndoRedo() {
 
-    const { getState, setState } = useStoreApi()
+    const rf = useReactFlow()
+    const { setState } = useStoreApi()
 
-    const graphState = useMemo(() => ({ nodes, edges }), [nodes, edges])
+    const nodes = useNodes()
+    const edges = useEdges()
 
-    const setGraphState = useCallback(({ nodes, edges }) => {
-        getState().setNodes(nodes)
-        getState().setEdges(edges)
-    }, [])
-
-    const [, undo, redo] = useUndoRedo(graphState, setGraphState, {
+    const [, undo, redo] = useUndoRedo({ nodes, edges }, ({ nodes, edges }) => {
+        rf.setNodes(nodes)
+        rf.setEdges(edges)
+    }, {
         debounce: 200,
         equality: _.isEqual,
     })
@@ -25,8 +25,15 @@ export function useGraphUndoRedo(nodes, edges) {
         setState({ undo, redo })
     }, [undo, redo])
 
-    useKeyboardEvent(ev => ev.metaKey && ev.key === "z", undo, [undo])
-    useKeyboardEvent(ev => ev.metaKey && ev.key === "y", redo, [redo])
+    useHotkey("mod+z", undo, {
+        preventDefault: true,
+        callbackDependencies: [undo],
+    })
+
+    useHotkey("mod+y", redo, {
+        preventDefault: true,
+        callbackDependencies: [redo],
+    })
 
     return [undo, redo]
 }

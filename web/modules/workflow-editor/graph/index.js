@@ -3,6 +3,7 @@ import _ from "lodash"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useReactFlow, useStore, useStoreApi } from "reactflow"
 import { useUpdateWorkflow, useUpdateWorkflowGraph, useWorkflowGraph } from "../../workflows"
+import { produce } from "immer"
 
 
 export const RF_ELEMENT_ID = "react-flow"
@@ -65,13 +66,23 @@ export function useDeleteElements(nodes, edges) {
 
 
 /**
- * Hook to assign a node ID to a property in ReactFlow's store. 
+ * Hook to control a property of the RF store
  * @param {string} property
  */
-export function useRFStoreProperty(property) {
+export function useRFStoreProperty(path, defaultValue) {
     const storeApi = useStoreApi()
-    const value = useStore(s => s[property])
-    const setValue = useCallback(value => storeApi.setState({ [property]: value }), [property, storeApi])
+
+    const value = useStore(s => _.get(s, path))
+    const setValue = useCallback(newValue => {
+        storeApi.setState(produce(draft => {
+            _.set(draft, path, newValue)
+        }))
+    }, [storeApi, path])
+
+    useEffect(() => {
+        if (defaultValue !== undefined && value === undefined)
+            setValue(defaultValue)
+    }, [defaultValue, value, setValue])
 
     return [value, setValue]
 }

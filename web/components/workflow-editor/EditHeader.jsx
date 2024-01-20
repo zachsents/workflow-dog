@@ -72,7 +72,7 @@ export default function EditHeader() {
 
             <div className="flex-1 flex justify-end">
                 <Group className="gap-unit-xl">
-                    <WorkflowStatusChip />
+                    <WorkflowStatusChip withKeyboardShortcut />
 
                     <UsersOnline />
 

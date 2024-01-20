@@ -1,16 +1,18 @@
 import { useNodeInputs, useNodeOutputs } from "@web/modules/workflow-editor/graph/interfaces"
-import { useDefinition, useDisabled, useModifier, useNodeHasValidationErrors, useUpdateInternals } from "@web/modules/workflow-editor/graph/nodes"
+import { useDefinition, useDisabled, useModifier, useUpdateInternals } from "@web/modules/workflow-editor/graph/nodes"
 import classNames from "classnames"
 import { forwardRef, useEffect, useMemo } from "react"
-import { TbCheck, TbDots, TbPlayerPlay, TbX } from "react-icons/tb"
+import { TbCheck, TbDots, TbX } from "react-icons/tb"
 import { useStore } from "reactflow"
 import ActionNodeHandle from "./ActionNodeHandle"
 // import CheckableMenuItem from "./CheckableMenuItem"
 import NodeModifierWrapper from "./NodeModifierWrapper"
 // import ConfigureNodeModal from "./config-modal/ConfigureNodeModal"
-import { Button, Card, CardHeader, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Tooltip } from "@nextui-org/react"
+import { Button, Card, CardHeader, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Tooltip } from "@nextui-org/react"
 import { plural } from "@web/modules/grammar"
 import { list as modifiersList } from "@web/modules/workflow-editor/modifiers"
+import Color from "color"
+import colors from "tailwindcss/colors"
 import Group from "../layout/Group"
 
 
@@ -22,7 +24,7 @@ export default function ActionNode({ id, data, selected }) {
     // const [, setConfiguringNodeId] = useEditorStoreProperty("nodeBeingConfigured")
     // const openNodeConfiguration = () => setConfiguringNodeId(id)
 
-    const hasValidationErrors = useNodeHasValidationErrors(id)
+    // const hasValidationErrors = useNodeHasValidationErrors(id)
 
     const shownInputs = useMemo(() => data.inputs?.filter(
         input => input.mode == "handle" &&
@@ -42,8 +44,18 @@ export default function ActionNode({ id, data, selected }) {
     const runErrors = selectedRun?.errors?.filter(error => error.node == id)
     const hasRunErrors = runErrors?.length > 0
 
+    const baseColor = definition?.color || colors.gray[500]
+    const darkColor = useMemo(() => Color(baseColor).lightness(20).hex(), [baseColor])
+    const lightColor = useMemo(() => Color(baseColor).lightness(80).hex(), [baseColor])
+
     return (
-        <div className="relative">
+        <div
+            className="relative"
+            style={{
+                "--dark-color": darkColor,
+                "--light-color": lightColor,
+            }}
+        >
             {definition ?
                 <Tooltip
                     content={disabledMessage} isDisabled={!disabledMessage} placement="bottom"
@@ -60,9 +72,7 @@ export default function ActionNode({ id, data, selected }) {
                             <Card className={classNames("!transition rounded-xl border border-gray-800 overflow-visible min-w-[12rem] max-w-[20rem]",
                                 selected ? "shadow-xl" : "shadow-md",
                             )}>
-                                <CardHeader className="p-0 rounded-t-xl" style={{
-                                    backgroundColor: definition.color,
-                                }}>
+                                <CardHeader className="p-0 rounded-t-xl bg-[var(--dark-color)]">
                                     <Group className="w-full justify-between gap-unit-lg text-white p-1">
                                         <Tooltip
                                             content={definition?.name}
@@ -82,14 +92,16 @@ export default function ActionNode({ id, data, selected }) {
                                                 <DropdownTrigger>
                                                     <ToolbarIcon icon={TbDots} />
                                                 </DropdownTrigger>
-                                                <DropdownMenu disabledKeys={["run-node"]}>
-                                                    <DropdownItem
+                                                <DropdownMenu
+                                                // disabledKeys={["run-node"]}
+                                                >
+                                                    {/* <DropdownItem
                                                         startContent={<TbPlayerPlay />}
                                                         endContent={<Chip size="sm" variant="flat" color="primary">Coming Soon</Chip>}
                                                         key="run-node"
                                                     >
                                                         Run this node
-                                                    </DropdownItem>
+                                                    </DropdownItem> */}
                                                     {disabled ?
                                                         <DropdownItem
                                                             startContent={<TbCheck />}

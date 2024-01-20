@@ -1,15 +1,13 @@
-import { useMemo } from "react"
-import { useStore, getRectOfNodes, useReactFlow } from "reactflow"
-import { useProjectRFToScreen } from "./projection"
-import { shallow } from "zustand/shallow"
 import { produce } from "immer"
-import { useCallback } from "react"
+import _ from "lodash"
+import { useCallback, useMemo } from "react"
+import { useReactFlow, useStore } from "reactflow"
 
 
 export function useSelection() {
 
-    const selectedNodes = useStore(state => [...state.nodeInternals.values()].filter(n => n.selected), shallow)
-    const selectedEdges = useStore(state => state.edges.filter(e => e.selected), shallow)
+    const selectedNodes = useStore(s => s.getNodes().filter(n => n.selected), _.isEqual)
+    const selectedEdges = useStore(s => s.edges.filter(e => e.selected), _.isEqual)
 
     const selected = useMemo(() => [...selectedNodes, ...selectedEdges], [selectedNodes, selectedEdges])
 
@@ -17,20 +15,6 @@ export function useSelection() {
         selectedNodes,
         selectedEdges,
         selected,
-    }
-}
-
-
-export function useSelectionRect() {
-
-    const selectedNodes = useStore(state => [...state.nodeInternals.values()].filter(n => n.selected), shallow)
-    const rect = useMemo(() => getRectOfNodes(selectedNodes), [selectedNodes])
-
-    const screenRect = useProjectRFToScreen(rect)
-
-    return {
-        viewport: rect,
-        screen: screenRect,
     }
 }
 

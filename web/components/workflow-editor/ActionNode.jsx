@@ -1,17 +1,18 @@
-import { useNodeInputs, useNodeOutputs } from "@web/modules/workflow-editor/graph/interfaces"
 import { useDefinition, useDisabled, useModifier, useUpdateInternals } from "@web/modules/workflow-editor/graph/nodes"
 import classNames from "classnames"
 import { forwardRef, useEffect, useMemo } from "react"
 import { TbCheck, TbDots, TbX } from "react-icons/tb"
-import { useStore } from "reactflow"
+import { useNodeId, useStore } from "reactflow"
 import ActionNodeHandle from "./ActionNodeHandle"
 // import CheckableMenuItem from "./CheckableMenuItem"
 import NodeModifierWrapper from "./NodeModifierWrapper"
 // import ConfigureNodeModal from "./config-modal/ConfigureNodeModal"
 import { Button, Card, CardHeader, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Tooltip } from "@nextui-org/react"
 import { plural } from "@web/modules/grammar"
+import { stringHash } from "@web/modules/util"
 import { list as modifiersList } from "@web/modules/workflow-editor/modifiers"
 import Color from "color"
+import _ from "lodash"
 import colors from "tailwindcss/colors"
 import Group from "../layout/Group"
 
@@ -47,6 +48,8 @@ export default function ActionNode({ id, data, selected }) {
     const baseColor = definition?.color || colors.gray[500]
     const darkColor = useMemo(() => Color(baseColor).lightness(20).hex(), [baseColor])
     const lightColor = useMemo(() => Color(baseColor).lightness(80).hex(), [baseColor])
+
+    useUpdateInternalsWhenNecessary()
 
     return (
         <div
@@ -187,8 +190,6 @@ export default function ActionNode({ id, data, selected }) {
                     </div >
                 </Tooltip> :
                 <Fallback />}
-
-            <UpdateInternals />
         </div>
     )
 }
@@ -203,24 +204,31 @@ function Fallback() {
 }
 
 
-function UpdateInternals() {
+function useUpdateInternalsWhenNecessary() {
+    const nodeId = useNodeId()
 
     const updateInternals = useUpdateInternals()
 
-    const inputs = useNodeInputs()
-    const outputs = useNodeOutputs()
-    const [modifier] = useModifier()
-
-    const checksum = useMemo(
-        () => `${inputs?.map(input => `${input.hidden}${input.mode}`).join()}` +
-            `${outputs?.map(output => `${output.hidden}`).join()}` +
-            modifier?.id,
-        [inputs, outputs, modifier]
-    )
+    const handlesHash = useStore(s => {
+        const node = s.nodeInternals.get(nodeId)
+        return stringHash([
+            node.data.inputs?.map(input => _.pick(input, ["id", "hidden", "mode"])),
+            node.data.outputs?.map(output => _.pick(output, ["id", "hidden"])),
+            node.data.modifier?.id,
+        ])
+    })
 
     useEffect(() => {
         updateInternals()
-    }, [checksum])
+    }, [handlesHash])
+
+    const selected = useStore(s => s.nodeInternals.get(nodeId)?.selected)
+
+    useEffect(() => {
+        setTimeout(() => {
+            updateInternals()
+        }, 500)
+    }, [selected])
 }
 
 

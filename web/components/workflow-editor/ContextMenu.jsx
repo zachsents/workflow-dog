@@ -1,11 +1,11 @@
 import { useLocalStorage } from "@mantine/hooks"
-import { Button, Card, Input, Listbox, ListboxItem, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@nextui-org/react"
+import { Button, Card, Input, Kbd, Listbox, ListboxItem, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@nextui-org/react"
 import { useLocalStorageValue } from "@react-hookz/web"
 import { useCreateActionNode } from "@web/modules/workflow-editor/graph/nodes"
 import classNames from "classnames"
 import { object as nodeDefs } from "nodes/web"
 import { useMemo, useState } from "react"
-import { TbArrowBack, TbArrowForward, TbPinnedOff } from "react-icons/tb"
+import { TbArrowBack, TbArrowForward, TbClipboardText, TbCopy, TbPinnedOff } from "react-icons/tb"
 import { useReactFlow, useStore, useStoreApi } from "reactflow"
 import Group from "../layout/Group"
 import NodeSearch from "./NodeSearch"
@@ -20,9 +20,6 @@ export default function ContextMenu() {
     const position = useStore(s => s.contextMenu)
     const isOpen = !!position
     const close = () => setState({ contextMenu: null })
-
-    const undo = useStore(s => s.undo)
-    const redo = useStore(s => s.redo)
 
     const [query, setQuery] = useState("")
 
@@ -84,30 +81,7 @@ export default function ContextMenu() {
                                 <div className="flex flex-col items-stretch gap-1 p-1">
                                     <NodeSearch query={query} onAdd={addNode} maxResults={8} />
                                 </div> :
-                                <Listbox>
-                                    <ListboxItem
-                                        onPress={() => {
-                                            undo?.()
-                                            close()
-                                        }}
-                                        startContent={<TbArrowBack />}
-                                        shortcut="Ctrl+Z"
-                                        key="undo"
-                                    >
-                                        Undo
-                                    </ListboxItem>
-                                    <ListboxItem
-                                        onPress={() => {
-                                            redo?.()
-                                            close()
-                                        }}
-                                        startContent={<TbArrowForward />}
-                                        shortcut="Ctrl+Y"
-                                        key="redo"
-                                    >
-                                        Redo
-                                    </ListboxItem>
-                                </Listbox>}
+                                <ControlList onClose={close} />}
                         </Card>
                     </div>
                 </PopoverContent>
@@ -148,5 +122,54 @@ function PinnedNode({ id, onAdd }) {
                     <definition.icon />}
             </Button>
         </Tooltip>
+    )
+}
+
+
+function ControlList({ onClose }) {
+
+    const actions = {
+        undo: useStore(s => s.undo),
+        redo: useStore(s => s.redo),
+        copy: useStore(s => s.copy),
+        paste: useStore(s => s.paste),
+    }
+
+    const onAction = action => {
+        actions[action]?.()
+        onClose?.()
+    }
+
+    return (
+        <Listbox onAction={onAction}>
+            <ListboxItem
+                startContent={<TbArrowBack />}
+                endContent={<Kbd keys={["command"]}>Z</Kbd>}
+                key="undo"
+            >
+                Undo
+            </ListboxItem>
+            <ListboxItem
+                startContent={<TbArrowForward />}
+                endContent={<Kbd keys={["command"]}>Y</Kbd>}
+                key="redo"
+            >
+                Redo
+            </ListboxItem>
+            <ListboxItem
+                startContent={<TbCopy />}
+                endContent={<Kbd keys={["command"]}>C</Kbd>}
+                key="copy"
+            >
+                Copy
+            </ListboxItem>
+            <ListboxItem
+                startContent={<TbClipboardText />}
+                endContent={<Kbd keys={["command"]}>V</Kbd>}
+                key="paste"
+            >
+                Paste
+            </ListboxItem>
+        </Listbox>
     )
 }

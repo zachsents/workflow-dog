@@ -1,10 +1,11 @@
-import { useReactFlow, useStore } from "reactflow"
+import { useReactFlow, useStore, useNodeId } from "reactflow"
 import _ from "lodash"
 import { produce } from "immer"
 
 
 export function useNodeProperty(id, path) {
     const rf = useReactFlow()
+    id ??= useNodeId()
 
     const value = useStore(s => _.get(s.nodeInternals.get(id), path))
 

@@ -7,6 +7,7 @@ import { TbAlertTriangle } from "react-icons/tb"
 import { useReactFlow } from "reactflow"
 import { PREFIX } from "shared/prefixes"
 import { doTypesMatch, typeLabel } from "shared/types"
+import { uniqueId } from "../util"
 
 
 export function useOnConnect() {
@@ -43,9 +44,17 @@ export function useOnConnect() {
         const sourceType = getType(params.source, params.sourceHandle)
         const targetType = getType(params.target, params.targetHandle)
 
+        const connect = (forced = false) => {
+            rf.addEdges({
+                ...params,
+                data: { forced },
+                id: uniqueId(PREFIX.EDGE),
+            })
+        }
+
         if (doTypesMatch(sourceType, targetType)) {
             console.debug("Connected", sourceType, "to", targetType)
-            rf.addEdges([params])
+            connect()
             return
         }
 
@@ -59,10 +68,7 @@ export function useOnConnect() {
             content: <Tooltip content="This could prevent your workflow from functioning normally.">
                 <Button
                     onPress={() => {
-                        rf.addEdges([{
-                            ...params,
-                            data: { forced: true }
-                        }])
+                        connect(true)
                         closeNotification(notifId)
                     }}
                     variant="light" size="sm" color="danger" startContent={<TbAlertTriangle />}

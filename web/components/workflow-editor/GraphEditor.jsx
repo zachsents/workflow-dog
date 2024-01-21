@@ -5,7 +5,7 @@ import { useGraphUndoRedo } from "@web/modules/workflow-editor/graph/use-graph-u
 import { useOnConnect } from "@web/modules/workflow-editor/graph/use-on-connect"
 import { useSelectAll } from "@web/modules/workflow-editor/graph/use-select-all"
 import { useEditorSettings } from "@web/modules/workflow-editor/settings"
-import { TbArrowBack, TbArrowForward, TbClipboardText, TbCopy } from "react-icons/tb"
+import { TbArrowBack, TbArrowForward } from "react-icons/tb"
 import { Background, ControlButton, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState, useStore } from "reactflow"
 import "reactflow/dist/style.css"
 import colors from "tailwindcss/colors"
@@ -107,22 +107,8 @@ function AdditionalControls() {
 
     const undo = useStore(s => s.undo)
     const redo = useStore(s => s.redo)
-    const copy = useStore(s => s.copy)
-    const paste = useStore(s => s.paste)
 
     return (<>
-        <AdditionalControlButton
-            label="Copy"
-            shortcutKey="C"
-            onClick={copy}
-            icon={TbCopy}
-        />
-        <AdditionalControlButton
-            label="Paste"
-            shortcutKey="V"
-            onClick={paste}
-            icon={TbClipboardText}
-        />
         <AdditionalControlButton
             label="Undo"
             shortcutKey="Z"

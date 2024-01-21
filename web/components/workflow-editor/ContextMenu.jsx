@@ -71,7 +71,7 @@ export default function ContextMenu() {
                     </Group>
                     <Input
                         value={query} onValueChange={setQuery}
-                        placeholder="Start typing to search nodes..."
+                        placeholder="Search nodes..."
                         size="sm"
                         autoFocus
                         classNames={{

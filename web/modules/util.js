@@ -99,6 +99,7 @@ export function useSyncToState(value, setOtherValue) {
  * @param {object} options.eventOptions
  * @param {boolean} options.preventDefault
  * @param {any[]} options.callbackDependencies
+ * @param {(event: KeyboardEvent) => boolean} options.qualifier
  */
 export function useHotkey(hotkey, callback, {
     target = window,
@@ -106,6 +107,7 @@ export function useHotkey(hotkey, callback, {
     eventOptions = {},
     preventDefault = false,
     callbackDependencies = [],
+    qualifier,
 } = {}) {
 
     const wrappedCallback = useCallback(callback, callbackDependencies)
@@ -121,6 +123,9 @@ export function useHotkey(hotkey, callback, {
 
         const handler = ev => {
             if (modifierKeys.every(modKey => modifiers[modKey]?.(ev)) && ev.key === key) {
+                if (typeof qualifier === "function" && !qualifier(ev))
+                    return
+
                 if (preventDefault)
                     ev.preventDefault()
 

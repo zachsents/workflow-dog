@@ -21,7 +21,6 @@ export function useGraphUndoRedo() {
     })
 
     useEffect(() => {
-        console.log("setting undo/redo")
         setState({ undo, redo })
     }, [undo, redo])
 

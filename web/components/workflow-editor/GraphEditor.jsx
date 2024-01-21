@@ -1,5 +1,4 @@
 import { Kbd, Tooltip } from "@nextui-org/react"
-import { RF_ELEMENT_ID } from "@web/modules/workflow-editor/graph"
 import { useGraphCopyPaste } from "@web/modules/workflow-editor/graph/use-copy-paste"
 import { useGraphContextMenu } from "@web/modules/workflow-editor/graph/use-graph-context-menu"
 import { useGraphUndoRedo } from "@web/modules/workflow-editor/graph/use-graph-undo-redo"
@@ -63,7 +62,6 @@ export default function GraphEditor() {
                 zoomActivationKeyCode={null}
                 deleteKeyCode={graphDeleteKeys}
 
-                id={RF_ELEMENT_ID}
                 className="flex-1"
 
                 onCopy={onCopy}

@@ -6,12 +6,6 @@ import { useUpdateWorkflow, useUpdateWorkflowGraph, useWorkflowGraph } from "../
 import { produce } from "immer"
 
 
-export const RF_ELEMENT_ID = "react-flow"
-
-
-
-
-
 export function useGraphSaving(nodes, edges, setNodes, setEdges) {
 
     const [updateWorkflow] = useUpdateWorkflow()

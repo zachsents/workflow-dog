@@ -9,7 +9,6 @@ export function useGraphUndoRedo() {
 
     const rf = useReactFlow()
     const { setState } = useStoreApi()
-
     const nodes = useNodes()
     const edges = useEdges()
 
@@ -22,6 +21,7 @@ export function useGraphUndoRedo() {
     })
 
     useEffect(() => {
+        console.log("setting undo/redo")
         setState({ undo, redo })
     }, [undo, redo])
 

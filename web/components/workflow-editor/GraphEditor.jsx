@@ -12,6 +12,8 @@ import colors from "tailwindcss/colors"
 import Group from "../layout/Group"
 import ActionNode from "./ActionNode"
 import ContextMenu from "./ContextMenu"
+import NodeToolbar from "./NodeToolbar"
+import GhostBuster from "./GhostBuster"
 
 
 const initialNodes = []
@@ -28,9 +30,6 @@ export default function GraphEditor() {
     const [onContextMenu] = useGraphContextMenu()
 
     const [onCopy, onPaste] = useGraphCopyPaste()
-
-    useGraphUndoRedo()
-    useSelectAll()
 
     // useGraphSaving(nodes, edges, setNodes, setEdges)
 
@@ -65,7 +64,7 @@ export default function GraphEditor() {
                 className="flex-1"
 
                 onCopy={onCopy}
-                onPaste={onPaste}
+                onPaste={() => onPaste()}
                 onPaneContextMenu={onContextMenu}
             >
                 {settings.showMinimap &&
@@ -78,10 +77,11 @@ export default function GraphEditor() {
                     <AdditionalControls />
                 </Controls>
 
-                {/* <NodeToolbar /> */}
+                <NodeToolbar />
                 <ContextMenu />
             </ReactFlow>
-            {/* <GhostBuster /> */}
+            <GhostBuster />
+            <GraphHooks />
         </>
     )
 }
@@ -101,6 +101,12 @@ const graphDeleteKeys = ["Delete", "Backspace"]
 // const defaultEdgeOptions = {
 //     type: EDGE_TYPE.DATA,
 // }
+
+
+function GraphHooks() {
+    useGraphUndoRedo()
+    useSelectAll()
+}
 
 
 function AdditionalControls() {

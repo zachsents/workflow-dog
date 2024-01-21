@@ -7,8 +7,8 @@ import { useCreateActionNode } from "@web/modules/workflow-editor/graph/nodes"
 import classNames from "classnames"
 import { object as nodeDefs } from "nodes/web"
 import { useMemo, useState } from "react"
-import { TbArrowBack, TbArrowForward, TbClipboardText, TbCopy, TbPinnedOff } from "react-icons/tb"
-import { useReactFlow, useStore } from "reactflow"
+import { TbArrowBack, TbArrowForward, TbClipboardText, TbPinnedOff } from "react-icons/tb"
+import { useReactFlow, useStore, useStoreApi } from "reactflow"
 import Group from "../layout/Group"
 import NodeSearch from "./NodeSearch"
 
@@ -129,11 +129,17 @@ function PinnedNode({ id, onAdd }) {
 
 function ControlList({ onClose }) {
 
+    const rf = useReactFlow()
+    const paste = useStore(s => s.paste)
+    const storeApi = useStoreApi()
+
     const actions = {
         undo: useStore(s => s.undo),
         redo: useStore(s => s.redo),
-        copy: useStore(s => s.copy),
-        paste: useStore(s => s.paste),
+        // copy: useStore(s => s.copy),
+        paste: () => {
+            paste(rf.screenToFlowPosition(storeApi.getState().contextMenu?.position))
+        },
     }
 
     const onAction = action => {
@@ -157,13 +163,13 @@ function ControlList({ onClose }) {
             >
                 Redo
             </ListboxItem>
-            <ListboxItem
+            {/* <ListboxItem
                 startContent={<TbCopy />}
                 endContent={<Kbd keys={["command"]}>C</Kbd>}
                 key="copy"
             >
                 Copy
-            </ListboxItem>
+            </ListboxItem> */}
             <ListboxItem
                 startContent={<TbClipboardText />}
                 endContent={<Kbd keys={["command"]}>V</Kbd>}

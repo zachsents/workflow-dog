@@ -1,6 +1,5 @@
 import { produce } from "immer"
-import { useCallback } from "react"
-import { getRectOfNodes, useReactFlow } from "reactflow"
+import { getRectOfNodes } from "reactflow"
 import { PREFIX } from "shared/prefixes"
 import { uniqueId } from "../util"
 
@@ -73,15 +72,3 @@ export function duplicateElements(rf, nodes, edges, {
         ...newEdges,
     ])
 }
-
-
-/**
- * @param {import("reactflow").Node[]} nodes
- * @param {import("reactflow").Edge[]} edges
- * @param {DuplicateElementsOptions} options
- */
-export function useDuplicateElements(nodes, edges, options) {
-    const rf = useReactFlow()
-    return useCallback(() => duplicateElements(rf, nodes, edges, options), [rf, nodes, edges])
-}
-

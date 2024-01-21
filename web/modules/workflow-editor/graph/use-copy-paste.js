@@ -47,7 +47,7 @@ export function usePasteElementsFromClipboard() {
     const rf = useReactFlow()
     const domNode = useStore(s => s.domNode)
 
-    return useCallback(() => {
+    return useCallback((position) => {
         const textContent = localStorage.getItem(CLIPBOARD_KEY) || ""
 
         if (!textContent.startsWith(GRAPH_MIME_TYPE))
@@ -55,10 +55,10 @@ export function usePasteElementsFromClipboard() {
 
         const { nodes, edges } = JSON.parse(textContent.replace(GRAPH_MIME_TYPE, ""))
 
-        const domNodeBounds = domNode?.getBoundingClientRect()
         const rect = getRectOfNodes(nodes)
+        const domNodeBounds = domNode?.getBoundingClientRect()
 
-        const center = rf.screenToFlowPosition({
+        const center = position || rf.screenToFlowPosition({
             x: domNodeBounds.x + domNodeBounds.width / 2,
             y: domNodeBounds.y + domNodeBounds.height / 2,
         })

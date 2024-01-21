@@ -113,7 +113,7 @@ export function useHotkey(hotkey, callback, {
     const wrappedCallback = useCallback(callback, callbackDependencies)
 
     const [modifierKeys, key] = useMemo(() => {
-        const keys = hotkey.split(/[+\s]+/g)
+        const keys = hotkey.toLowerCase().split(/[+\s]+/g)
         return [keys, keys.pop()]
     }, [hotkey])
 
@@ -121,16 +121,26 @@ export function useHotkey(hotkey, callback, {
         if (!target || !callback)
             return
 
+        /**
+         * @param {KeyboardEvent} ev
+         */
         const handler = ev => {
-            if (modifierKeys.every(modKey => modifiers[modKey]?.(ev)) && ev.key === key) {
-                if (typeof qualifier === "function" && !qualifier(ev))
-                    return
+            const modifiersSatisfied = Object.entries(modifiers)
+                .every(([modKey, modFn]) => modifierKeys.includes(modKey) === modFn(ev))
 
-                if (preventDefault)
-                    ev.preventDefault()
+            if (!modifiersSatisfied)
+                return
 
-                wrappedCallback(ev)
-            }
+            if (ev.key.toLowerCase() !== key)
+                return
+
+            if (typeof qualifier === "function" && !qualifier(ev))
+                return
+
+            if (preventDefault)
+                ev.preventDefault()
+
+            wrappedCallback(ev)
         }
 
         target.addEventListener(event, handler, eventOptions)
@@ -140,11 +150,9 @@ export function useHotkey(hotkey, callback, {
 
 
 const modifiers = {
-    ctrl: ev => ev.ctrlKey,
+    mod: ev => ev.ctrlKey || ev.metaKey,
     shift: ev => ev.shiftKey,
     alt: ev => ev.altKey,
-    meta: ev => ev.metaKey,
-    mod: ev => ev.ctrlKey || ev.metaKey,
 }
 
 

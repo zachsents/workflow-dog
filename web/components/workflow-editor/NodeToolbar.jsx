@@ -1,15 +1,16 @@
 // import { useCopyElementsToClipboard, useDuplicateElements } from "@web/modules/graph/duplicate"
 // import { useSelectConnectedEdges, useSelectIncomers, useSelectOutgoers, useSelection } from "@web/modules/graph/selection"
-import { Button, Card, Kbd, Tooltip } from "@nextui-org/react"
+import { Button, Card, Divider, Kbd, Tooltip } from "@nextui-org/react"
 import { useHotkey } from "@web/modules/util"
 import { duplicateElements } from "@web/modules/workflow-editor/graph/duplicate"
 import { getSelectedEdges, getSelectedNodes, selectConnectedEdges, selectIncomers, selectOutgoers, useSelectedEdges, useSelectedNodes } from "@web/modules/workflow-editor/graph/selection"
 import classNames from "classnames"
 import _ from "lodash"
 import { useMemo } from "react"
-import { TbArrowLeftSquare, TbArrowRightSquare, TbChartDots3, TbClipboard, TbCopy, TbTrash } from "react-icons/tb"
+import { TbArrowLeftSquare, TbArrowRightSquare, TbChartDots3, TbClipboard, TbConfetti, TbConfettiOff, TbCopy, TbTrash } from "react-icons/tb"
 import { getRectOfNodes, useReactFlow, useStore, useViewport } from "reactflow"
 import Group from "../layout/Group"
+import { produce } from "immer"
 // import KeyboardShortcut from "./KeyboardShortcut"
 // import ToolbarIcon from "./ToolbarIcon"
 
@@ -58,6 +59,12 @@ export default function NodeToolbar() {
                     <SelectOutgoersControl />
                     {multipleNodes &&
                         <SelectConnectionsControl />}
+
+                    <Divider orientation="vertical" className="h-[30px] mx-2" />
+
+                    <EnableControl />
+
+                    <Divider orientation="vertical" className="h-[30px] mx-2" />
 
                     <CopyControl />
                     <DuplicateControl />
@@ -123,6 +130,32 @@ function SelectConnectionsControl() {
             label="Select Connections"
             shortcutModifiers={["command", "shift", "enter"]}
             icon={TbChartDots3}
+            onPress={action}
+        />
+    )
+}
+
+
+function EnableControl() {
+
+    const areSomeDisabled = useStore(s => s.getNodes().some(n => n.selected && n.data.disabled))
+
+    const rf = useReactFlow()
+    const action = () => rf.setNodes(produce(draft => {
+        draft.filter(n => n.selected).forEach(n => n.data.disabled = !areSomeDisabled)
+    }))
+
+    useHotkey("mod+shift+e", action, {
+        preventDefault: true,
+        callbackDependencies: [rf, areSomeDisabled],
+    })
+
+    return (
+        <ToolbarButton
+            label={areSomeDisabled ? "Enable" : "Disable"}
+            shortcutModifiers={["command", "shift"]}
+            shortcutKey="E"
+            icon={areSomeDisabled ? TbConfetti : TbConfettiOff}
             onPress={action}
         />
     )

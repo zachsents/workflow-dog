@@ -9,8 +9,11 @@ export function useGraphContextMenu() {
         ev.preventDefault()
         setState({
             contextMenu: {
-                x: ev.clientX,
-                y: ev.clientY,
+                isOpen: true,
+                position: {
+                    x: ev.clientX,
+                    y: ev.clientY,
+                },
             }
         })
     }, [setState])

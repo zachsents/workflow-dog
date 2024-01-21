@@ -141,3 +141,25 @@ const modifiers = {
     meta: ev => ev.metaKey,
     mod: ev => ev.ctrlKey || ev.metaKey,
 }
+
+
+/**
+ * Returns a hash code from a string
+ * @param  {string | object} value A string or object to hash. If an object is passed, it will be JSON-stringified first.
+ * @return {string} The hash code
+ * @see http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+ */
+export function stringHash(value) {
+    const str = {
+        string: value,
+        undefined: "undefined",
+    }[typeof value] ?? JSON.stringify(value)
+
+    let hash = 0
+    for (let i = 0, len = str.length; i < len; i++) {
+        let chr = str.charCodeAt(i)
+        hash = (hash << 5) - hash + chr
+        hash |= 0 // Convert to 32bit integer
+    }
+    return hash.toString(16)
+}

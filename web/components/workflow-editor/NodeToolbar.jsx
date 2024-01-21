@@ -39,7 +39,28 @@ export default function NodeToolbar() {
 
     const anyNodes = selectedNodes.length > 0
     const multiple = (selectedNodes.length + selectedEdges.length) > 1
-    const multipleNodes = selectedNodes.length > 1
+
+    const hasIncomersToSelect = useStore(
+        s => s.edges.some(
+            e => !s.nodeInternals.get(e.source).selected &&
+                s.nodeInternals.get(e.target).selected
+        )
+    )
+
+    const hasOutgoersToSelect = useStore(
+        s => s.edges.some(
+            e => s.nodeInternals.get(e.source).selected &&
+                !s.nodeInternals.get(e.target).selected
+        )
+    )
+
+    const hasConnectionsToSelect = useStore(
+        s => s.edges.some(
+            e => s.nodeInternals.get(e.source).selected &&
+                s.nodeInternals.get(e.target).selected &&
+                !e.selected
+        )
+    )
 
     return anyNodes && (
         <div
@@ -55,16 +76,18 @@ export default function NodeToolbar() {
         >
             <Card className="pointer-events-auto flex-nowrap p-1 mb-unit-lg absolute bottom-full left-1/2 -translate-x-1/2">
                 <Group>
-                    <SelectIncomersControl />
-                    <SelectOutgoersControl />
-                    {multipleNodes &&
+                    {hasIncomersToSelect &&
+                        <SelectIncomersControl />}
+                    {hasOutgoersToSelect &&
+                        <SelectOutgoersControl />}
+                    {hasConnectionsToSelect &&
                         <SelectConnectionsControl />}
 
-                    <Divider orientation="vertical" className="h-[30px] mx-2" />
+                    <Divider orientation="vertical" className="h-[30px] mx-2 first:hidden last:hidden" />
 
                     <EnableControl />
 
-                    <Divider orientation="vertical" className="h-[30px] mx-2" />
+                    <Divider orientation="vertical" className="h-[30px] mx-2 first:hidden last:hidden" />
 
                     <CopyControl />
                     <DuplicateControl />

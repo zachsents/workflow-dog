@@ -110,7 +110,7 @@ function SelectIncomersControl() {
 
     return (
         <ToolbarButton
-            label="Select Incomers"
+            label="Select Incoming Nodes"
             shortcutModifiers={["command", "shift", "left"]}
             icon={TbArrowLeftSquare}
             onPress={action}
@@ -130,7 +130,7 @@ function SelectOutgoersControl() {
 
     return (
         <ToolbarButton
-            label="Select Outgoers"
+            label="Select Outgoing Nodes"
             shortcutModifiers={["command", "shift", "right"]}
             icon={TbArrowRightSquare}
             onPress={action}

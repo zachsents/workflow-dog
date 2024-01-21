@@ -1,7 +1,8 @@
-import { useCallback } from "react"
-import { getConnectedEdges, useReactFlow, useStore, getRectOfNodes, useStoreApi } from "reactflow"
+import { useNotifications } from "@web/modules/notifications"
+import { useCallback, useEffect } from "react"
+import { TbClipboardCheck } from "react-icons/tb"
+import { getConnectedEdges, getRectOfNodes, useReactFlow, useStore, useStoreApi } from "reactflow"
 import { duplicateElements } from "./duplicate"
-import { useEffect } from "react"
 
 
 const GRAPH_MIME_TYPE = "application/vnd.wfd.graph+json"
@@ -11,9 +12,19 @@ const CLIPBOARD_KEY = "clipboard"
 export function useGraphCopyPaste() {
 
     const { setState } = useStoreApi()
+    const { notify } = useNotifications()
 
-    const onCopy = useCopySelectionToClipboard()
+    const _onCopy = useCopySelectionToClipboard()
     const onPaste = usePasteElementsFromClipboard()
+
+    const onCopy = useCallback(() => {
+        _onCopy()
+        notify({
+            title: null,
+            message: "Copied!",
+            icon: <TbClipboardCheck />,
+        })
+    }, [_onCopy])
 
     useEffect(() => {
         setState({ copy: onCopy, paste: onPaste })

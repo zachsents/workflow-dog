@@ -182,7 +182,7 @@ function DeleteControl() {
 function ToolbarButton({ label, shortcutKey, shortcutModifiers = ["command"], icon: Icon, onPress }) {
 
     return (
-        <Tooltip content={<Group className="gap-unit-sm">
+        <Tooltip closeDelay={0} content={<Group className="gap-unit-sm">
             <span>{label}</span>
             <Kbd keys={shortcutModifiers}>{shortcutKey}</Kbd>
         </Group>}>

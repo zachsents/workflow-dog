@@ -14,6 +14,7 @@ import ActionNode from "./ActionNode"
 import ContextMenu from "./ContextMenu"
 import NodeToolbar from "./NodeToolbar"
 import GhostBuster from "./GhostBuster"
+import DataEdge from "./DataEdge"
 
 
 const initialNodes = []
@@ -43,9 +44,9 @@ export default function GraphEditor() {
                 onConnect={onConnect}
 
                 nodeTypes={nodeTypes}
-                // edgeTypes={edgeTypes}
+                edgeTypes={edgeTypes}
+                defaultEdgeOptions={defaultEdgeOptions}
 
-                // defaultEdgeOptions={defaultEdgeOptions}
                 connectOnClick={false}
                 snapGrid={snapGrid}
                 snapToGrid={settings.showGrid || false}
@@ -87,20 +88,20 @@ export default function GraphEditor() {
 }
 
 const nodeTypes = {
-    "action": ActionNode,
+    action: ActionNode,
 }
 
-// const edgeTypes = {
-//     "data": DataEdge,
-// }
+const edgeTypes = {
+    data: DataEdge,
+}
+
+const defaultEdgeOptions = {
+    type: "data",
+}
 
 const snapGrid = [25, 25]
 
 const graphDeleteKeys = ["Delete", "Backspace"]
-
-// const defaultEdgeOptions = {
-//     type: EDGE_TYPE.DATA,
-// }
 
 
 function GraphHooks() {

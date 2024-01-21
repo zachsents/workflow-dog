@@ -1,5 +1,5 @@
+import { useDebouncedEffect } from "@react-hookz/web"
 import _ from "lodash"
-import { useEffect } from "react"
 import { useReactFlow, useStore } from "reactflow"
 
 
@@ -18,7 +18,7 @@ export default function GhostBuster() {
         })
     ), _.isEqual)
 
-    useEffect(() => {
+    useDebouncedEffect(() => {
         const edgesToRemove = rf.getEdges().filter(edge => {
             const sourceExists = handleMap[edge.source]?.includes(edge.sourceHandle)
             const targetExists = handleMap[edge.target]?.includes(edge.targetHandle)
@@ -28,5 +28,5 @@ export default function GhostBuster() {
             console.debug(`[GhostBuster] Removing ${edgesToRemove.length} edges:`, edgesToRemove.map(e => e.id).join(", "))
             rf.deleteElements({ edges: edgesToRemove })
         }
-    }, [rf, handleMap])
+    }, [rf, handleMap], 100)
 }

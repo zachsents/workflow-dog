@@ -163,3 +163,15 @@ export function stringHash(value) {
     }
     return hash.toString(16)
 }
+
+
+export function useHover() {
+    const [hovered, setHovered] = useState(false)
+
+    const handlers = {
+        onPointerEnter: () => setHovered(true),
+        onPointerLeave: () => setHovered(false),
+    }
+
+    return [hovered, handlers]
+}

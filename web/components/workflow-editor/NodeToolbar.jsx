@@ -58,6 +58,7 @@ export default function NodeToolbar() {
                     <SelectOutgoersControl />
                     {multipleNodes &&
                         <SelectConnectionsControl />}
+
                     <CopyControl />
                     <DuplicateControl />
                     <DeleteControl />

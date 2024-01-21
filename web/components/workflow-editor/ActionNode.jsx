@@ -225,9 +225,13 @@ function useUpdateInternalsWhenNecessary() {
     const selected = useStore(s => s.nodeInternals.get(nodeId)?.selected)
 
     useEffect(() => {
-        setTimeout(() => {
+        const intervalId = setInterval(() => {
             updateInternals()
-        }, 500)
+        }, 75)
+
+        const cleanup = () => clearInterval(intervalId)
+        setTimeout(cleanup, 400)
+        return cleanup
     }, [selected])
 }
 

@@ -266,7 +266,7 @@ function ModifierSelector() {
             classNames={{
                 base: "min-w-[12rem] self-stretch",
                 mainWrapper: "h-full",
-                trigger: "min-h-0 h-full py-0.5",
+                trigger: "min-h-0 h-full py-0.5 bg-transparent shadow-none",
             }}
         >
             {modType =>

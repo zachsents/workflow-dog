@@ -10,12 +10,11 @@ export default {
     tags: ["Text"],
     renderBody: () => {
         const nodeId = useNodeId()
-        const template = useStore(s => s.nodeInternals.get(nodeId).data.inputs.find(i => i.definition === "template").value, _.isEqual)
-        return (
+        const template = useStore(s => s.nodeInternals.get(nodeId).data.inputs.find(i => i.definition === "template"), _.isEqual)
+        return template.mode === "config" &&
             <p className="text-default-500 text-xs line-clamp-3">
-                {template}
+                {template.value}
             </p>
-        )
     },
     inputs: {
         template: {

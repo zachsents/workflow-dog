@@ -1,4 +1,4 @@
-import { Button, Divider, Input, Modal, ModalBody, ModalContent, ModalHeader, Select, SelectItem, Textarea } from "@nextui-org/react"
+import { Button, Divider, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Tab, Tabs, Textarea } from "@nextui-org/react"
 import { useDebouncedCallback, useDebouncedEffect } from "@react-hookz/web"
 import Group from "@web/components/layout/Group"
 import { useRFStoreProperty } from "@web/modules/workflow-editor/graph"
@@ -7,13 +7,13 @@ import { useDefinition, useNodeColors } from "@web/modules/workflow-editor/graph
 import { uniqueId } from "@web/modules/workflow-editor/util"
 import { produce } from "immer"
 import _ from "lodash"
-import { Fragment } from "react"
+import { Fragment, useEffect, useMemo } from "react"
 import { TbArrowLeftSquare, TbCursorText, TbPencil, TbPencilOff, TbPlus, TbX } from "react-icons/tb"
 import { useNodeId, useReactFlow, useStore } from "reactflow"
 import { PREFIX } from "shared/prefixes"
-import ActionNodeHeader from "./ActionNodeHeader"
-import { useMemo } from "react"
 import { typeLabel } from "shared/types"
+import ActionNodeHeader from "./ActionNodeHeader"
+import { singular } from "@web/modules/grammar"
 
 
 export default function ActionNodeModal() {
@@ -28,7 +28,7 @@ export default function ActionNodeModal() {
 
     return (
         <Modal
-            size="5xl" backdrop="blur"
+            size="2xl" backdrop="blur" placement="top"
             isOpen={isOpen} onClose={() => setNodeBeingConfigured(null)}
             style={nodeColors}
             className="overflow-visible"
@@ -39,27 +39,43 @@ export default function ActionNodeModal() {
                         <ActionNodeHeader />
                     </ModalHeader>
                     <ModalBody>
-                        <div className="grid grid-cols-2 gap-unit-lg">
-                            <div className="flex flex-col gap-unit-lg my-unit-lg">
-                                <p className="font-bold text-center uppercase text-sm">
-                                    Inputs
-                                </p>
-
-                                {Object.entries(definition.inputs ?? {}).map(([inputDefId, inputDef], i) =>
-                                    <Fragment key={inputDefId}>
-                                        {i !== 0 &&
-                                            <Divider />}
-                                        <InputDefinitionConfig definitionId={inputDefId} definition={inputDef} />
-                                    </Fragment>
-                                )}
-                            </div>
-                            <div className="flex flex-col gap-unit-lg my-unit-lg">
-                                <p className="font-bold text-center uppercase text-sm">
-                                    Outputs
-                                </p>
-                            </div>
-                        </div>
+                        <Tabs
+                            aria-label="Input/Output Configuration"
+                            fullWidth variant="underlined"
+                        >
+                            <Tab key="inputs" title="Inputs">
+                                <div className="flex flex-col gap-unit-lg my-unit-lg">
+                                    {Object.entries(definition.inputs ?? {}).map(([inputDefId, inputDef], i) =>
+                                        <Fragment key={inputDefId}>
+                                            {i !== 0 &&
+                                                <Divider />}
+                                            <HandleDefinitionConfig
+                                                definitionId={inputDefId} definition={inputDef}
+                                                type="input"
+                                            />
+                                        </Fragment>
+                                    )}
+                                </div>
+                            </Tab>
+                            <Tab key="outputs" title="Outputs">
+                                <div className="flex flex-col gap-unit-lg my-unit-lg">
+                                    {Object.entries(definition.outputs ?? {}).map(([outputDefId, outputDef], i) =>
+                                        <Fragment key={outputDefId}>
+                                            {i !== 0 &&
+                                                <Divider />}
+                                            <HandleDefinitionConfig
+                                                definitionId={outputDefId} definition={outputDef}
+                                                type="output"
+                                            />
+                                        </Fragment>
+                                    )}
+                                </div>
+                            </Tab>
+                        </Tabs>
                     </ModalBody>
+                    <ModalFooter>
+
+                    </ModalFooter>
                 </>}
             </ModalContent>
         </Modal>
@@ -67,22 +83,28 @@ export default function ActionNodeModal() {
 }
 
 
+/**
+ * @param {object} props
+ * @param {"input" | "output"} props.type
+ */
+function HandleDefinitionConfig({ definition, definitionId, type }) {
 
-function InputDefinitionConfig({ definition, definitionId }) {
+    const isInput = type === "input"
+    const collection = isInput ? "inputs" : "outputs"
 
     const rf = useReactFlow()
     const nodeId = useNodeId()
     const nodeDefinition = useDefinition()
-    const inputs = useStore(s => s.nodeInternals.get(nodeId).data.inputs.filter(input => input.definition === definitionId), _.isEqual)
+    const handles = useStore(s => s.nodeInternals.get(nodeId).data[collection].filter(handle => handle.definition === definitionId), _.isEqual)
 
     const isBeingDerived = useIsBeingDerived(nodeId, definition)
 
-    const addInput = () => {
+    const addHandle = () => {
         rf.setNodes(produce(draft => {
-            draft.find(node => node.id === nodeId).data.inputs.push({
-                id: uniqueId(PREFIX.INPUT),
+            draft.find(node => node.id === nodeId).data[collection].push({
+                id: uniqueId(isInput ? PREFIX.INPUT : PREFIX.OUTPUT),
                 definition: definitionId,
-                mode: definition.defaultMode,
+                ...isInput && { mode: definition.defaultMode },
                 ...definition.named && { name: "" },
             })
         }))
@@ -99,12 +121,14 @@ function InputDefinitionConfig({ definition, definitionId }) {
             </div>
 
             <div className="flex flex-col items-stretch gap-unit-md">
-                {inputs.length > 0 ?
-                    inputs.map((input, i) =>
+                {handles.length > 0 ?
+                    handles.map((input, i) =>
                         <Fragment key={input.id}>
                             {i !== 0 &&
                                 <Divider className="w-3/4 self-center" />}
-                            <InputConfig input={input} definition={definition} key={input.id} />
+                            {isInput ?
+                                <InputConfig input={input} definition={definition} key={input.id} /> :
+                                <OutputConfig output={input} definition={definition} key={input.id} />}
                         </Fragment>
                     ) :
                     <p className="text-default-500 text-sm text-center">
@@ -119,9 +143,9 @@ function InputDefinitionConfig({ definition, definitionId }) {
                         <Button
                             variant="light" color="primary"
                             startContent={<TbPlus />}
-                            onPress={addInput}
+                            onPress={addHandle}
                         >
-                            Add {definition.name.replace(/s$/, "")}
+                            Add {singular(definition.name)}
                         </Button> :
                         null}
             </div>
@@ -259,6 +283,75 @@ function InputConfig({ input, definition }) {
 }
 
 
+function OutputConfig({ output, definition }) {
+
+    const rf = useReactFlow()
+    const nodeId = useNodeId()
+
+    const removeOutput = () => rf.setNodes(produce(draft => {
+        const node = draft.find(node => node.id === nodeId)
+        node.data.outputs = node.data.outputs.filter(o => o.id !== output.id)
+    }))
+
+    const isBeingDerived = useIsBeingDerived(nodeId, definition)
+
+    const handleDisplayName = (definition.named ? output.name : definition.name).trim() || "\xa0"
+
+    const setOutputName = useDebouncedCallback(newName => {
+        rf.setNodes(produce(draft => {
+            draft.find(node => node.id === nodeId)
+                .data.outputs.find(o => o.id === output.id).name = newName
+        }))
+    }, [output.id, rf], 200)
+
+    return (
+        <div className="flex flex-col items-stretch gap-2">
+            {definition.named &&
+                <Input
+                    defaultValue={output.name}
+                    onValueChange={setOutputName}
+                    size="sm"
+                    label="Output Name" labelPlacement="outside-left"
+                    endContent={isBeingDerived ?
+                        <Group className="group-hover:opacity-100 opacity-0 transition-opacity text-default-500 flex-nowrap shrink-0 gap-unit-xs">
+                            <p className="text-xs">
+                                Auto-generated
+                            </p>
+                            <TbPencilOff />
+                        </Group> :
+                        <TbPencil className="group-hover:opacity-100 opacity-0 transition-opacity text-default-500" />}
+                    classNames={{
+                        input: "text-sm font-medium",
+                        mainWrapper: "grow",
+                    }}
+                    isReadOnly={isBeingDerived}
+                />}
+
+            <Group className="gap-unit-md flex-row-reverse relative -right-12">
+                <div className="border border-gray-300 bg-gray-50 rounded-full px-unit-md py-1 text-sm font-medium">
+                    {handleDisplayName}
+                </div>
+                <p className="text-default-500 text-xs">
+                    Output value will be sent to connected node.
+                </p>
+            </Group>
+
+            <Group className="gap-unit-md justify-between">
+                {definition.group && !isBeingDerived &&
+                    <Button
+                        color="danger" variant="light" size="sm"
+                        startContent={<TbX />}
+                        onPress={removeOutput}
+                    >
+                        Delete Output
+                    </Button>}
+            </Group>
+        </div>
+    )
+
+}
+
+
 export function ConfigComponent(_props) {
 
     const type = _props.definition.type
@@ -323,6 +416,12 @@ function SelectConfig({ input, definition, label, ...props }) {
 
     const selectItems = useEnumValues?.()
     const isLoadingSelectItems = useEnumValues && !selectItems
+
+    useEffect(() => {
+        onSelectionChange(new Set(
+            [...selectedKeys].filter(key => selectItems?.find(item => item.id === key))
+        ))
+    }, [selectItems])
 
     return (
         <Select

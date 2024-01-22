@@ -1,4 +1,4 @@
-import { Button, Input, Listbox, ListboxItem, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Spinner, Tooltip, useDisclosure } from "@nextui-org/react"
+import { Button, Input, Listbox, ListboxItem, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Spinner, useDisclosure } from "@nextui-org/react"
 import { useDatabaseMutation } from "@web/modules/db"
 import { plural } from "@web/modules/grammar"
 import { useSearch } from "@web/modules/search"
@@ -76,18 +76,17 @@ function ConfigureTrigger({ openModal }) {
                     </p>}
             </PopoverContent>
         </Popover>
-        <Tooltip content="Change Trigger" closeDelay={0} placement="bottom">
-            <Button
-                isIconOnly size="sm" color="primary" variant="faded"
-                className="pointer-events-auto"
-                onPress={() => {
-                    openModal()
-                    popoverDisclosure.onClose()
-                }}
-            >
-                <TbStatusChange />
-            </Button>
-        </Tooltip>
+        <Button
+            size="sm" variant="ghost"
+            startContent={<TbStatusChange />}
+            className="pointer-events-auto bg-white/70 backdrop-blur-sm"
+            onPress={() => {
+                openModal()
+                popoverDisclosure.onClose()
+            }}
+        >
+            Change Trigger
+        </Button>
     </>)
 }
 

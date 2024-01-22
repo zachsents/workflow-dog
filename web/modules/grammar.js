@@ -8,6 +8,16 @@ export function plural(word, q) {
     return q === 1 ? word : word + "s"
 }
 
+export function singular(word) {
+    if (word.endsWith("ies"))
+        return word.slice(0, -3) + "y"
+
+    if (word.endsWith("s"))
+        return word.slice(0, -1)
+
+    return word
+}
+
 /**
  * @param {Date | Timestamp} date
  * @param {boolean} [showDate=true]

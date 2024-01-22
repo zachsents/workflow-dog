@@ -25,7 +25,7 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
         }
     }
 
-    const displayName = definition?.bullet ? <>&bull;</> : (name || definition?.name || <>&nbsp;</>)
+    const displayName = definition?.bullet ? <>&bull;</> : (name || (definition.named ? null : definition?.name) || <>&nbsp;</>)
 
     const isConnected = useStore(s => s.edges.some(edge => edge.source == nodeId && edge.sourceHandle == id || edge.target == nodeId && edge.targetHandle == id))
 

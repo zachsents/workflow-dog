@@ -4,6 +4,7 @@ import { useWorkflow } from "@web/modules/workflows"
 import { object as triggerMap } from "triggers/web"
 
 export default {
+    name: "Use Data From Trigger",
     icon: TbPlayerSkipForward,
     color: colors.gray[800],
     tags: ["Trigger", "Basic"],

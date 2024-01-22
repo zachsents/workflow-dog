@@ -1,27 +1,17 @@
-import { Button, Divider, Input, Listbox, ListboxItem, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Spinner, useDisclosure } from "@nextui-org/react"
+import { Button, Input, Listbox, ListboxItem, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Spinner, Tooltip, useDisclosure } from "@nextui-org/react"
 import { useDatabaseMutation } from "@web/modules/db"
 import { plural } from "@web/modules/grammar"
 import { useSearch } from "@web/modules/search"
 import { useWorkflow, useWorkflowIdFromUrl } from "@web/modules/workflows"
-import { TbChevronDown, TbPlus, TbStatusChange, TbX } from "react-icons/tb"
-import { resolve as resolveTrigger, resolveId as resolveTriggerId, list as triggers } from "triggers/web"
+import { TbChevronDown, TbPlus, TbStatusChange } from "react-icons/tb"
+import { resolve as resolveTrigger, resolveId as resolveTriggerId, object as triggerMap, list as triggers } from "triggers/web"
 import Group from "../layout/Group"
 import TriggerText from "./TriggerText"
-import { object as triggerMap } from "triggers/web"
 
 
 export default function TriggerControl() {
 
     const { data: workflow } = useWorkflow()
-
-    const removeTrigger = useDatabaseMutation(
-        supa => supa.from("workflows").update({ trigger: null }).eq("id", workflow?.id),
-        {
-            enabled: !!workflow,
-            invalidateKey: ["workflow", workflow?.id],
-        }
-    )
-
     const modalDisclosure = useDisclosure()
 
     return <>
@@ -29,7 +19,6 @@ export default function TriggerControl() {
             {workflow?.trigger ?
                 <ConfigureTrigger
                     openModal={modalDisclosure.onOpen}
-                    removeTriggerMutation={removeTrigger}
                 /> :
                 <Button
                     startContent={<TbPlus />} variant="ghost" color="primary" size="sm"
@@ -47,21 +36,24 @@ export default function TriggerControl() {
 }
 
 
-function ConfigureTrigger({ openModal, removeTriggerMutation }) {
+function ConfigureTrigger({ openModal }) {
 
     const { data: workflow } = useWorkflow()
     const triggerDef = triggerMap[workflow?.trigger?.type]
 
     const popoverDisclosure = useDisclosure()
 
-    return (
+    return (<>
         <Popover
             placement="bottom-start"
             isOpen={popoverDisclosure.isOpen}
             onOpenChange={popoverDisclosure.onOpenChange}
         >
             <PopoverTrigger className="pointer-events-auto">
-                <Button size="sm" variant="ghost" endContent={<TbChevronDown />}>
+                <Button
+                    size="sm" variant="ghost" endContent={<TbChevronDown />}
+                    className="bg-white/70 backdrop-blur-sm"
+                >
                     <Group className="gap-unit-sm">
                         <p className="text-default-600">Trigger:</p>
                         <TriggerText
@@ -71,41 +63,32 @@ function ConfigureTrigger({ openModal, removeTriggerMutation }) {
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[20rem] p-unit-md flex flex-col items-stretch gap-unit-xs pointer-events-auto">
-                <div className="grid grid-cols-2 gap-unit-xs">
-                    <Button
-                        size="sm" variant="light" color="primary" fullWidth
-                        startContent={<TbStatusChange />}
-                        onPress={() => {
-                            openModal()
-                            popoverDisclosure.onClose()
-                        }}
-                    >
-                        Change Trigger
-                    </Button>
-
-                    <Button
-                        size="sm" variant="light" color="danger" fullWidth
-                        startContent={<TbX />}
-                        onPress={() => removeTriggerMutation.mutateAsync().then(popoverDisclosure.onClose)}
-                        isLoading={removeTriggerMutation.isPending}
-                    >
-                        Remove Trigger
-                    </Button>
-                </div>
-
-                <Divider />
-
                 <p className="font-bold text-large">
                     Configure Trigger
                 </p>
 
-                {triggerDef?.renderConfig &&
+                {triggerDef?.renderConfig ?
                     <triggerDef.renderConfig
 
-                    />}
+                    /> :
+                    <p className="text-sm text-default-500 text-center">
+                        No configuration needed.
+                    </p>}
             </PopoverContent>
         </Popover>
-    )
+        <Tooltip content="Change Trigger" closeDelay={0} placement="bottom">
+            <Button
+                isIconOnly size="sm" color="primary" variant="faded"
+                className="pointer-events-auto"
+                onPress={() => {
+                    openModal()
+                    popoverDisclosure.onClose()
+                }}
+            >
+                <TbStatusChange />
+            </Button>
+        </Tooltip>
+    </>)
 }
 
 

@@ -59,16 +59,16 @@ export default function ActionNode({ id, data, selected }) {
                         })}
                     >
                         <NodeModifierWrapper>
-                            <Card className={classNames("!transition rounded-xl border border-gray-800 overflow-visible min-w-[12rem] max-w-[20rem]",
+                            <Card className={classNames("!transition rounded-xl border border-gray-800 overflow-visible min-w-[12rem] max-w-[28rem]",
                                 selected ? "shadow-xl" : "shadow-md",
                             )}>
                                 <CardHeader className="p-0 rounded-t-xl bg-[var(--dark-color)]">
                                     <ActionNodeHeader withSettings />
                                 </CardHeader>
                                 <Group
-                                    className="justify-between items-stretch flex-nowrap py-unit-xs"
+                                    className="justify-between flex-nowrap py-unit-xs"
                                 >
-                                    <Group className="flex-1 flex-col justify-center !items-start gap-2 -ml-2">
+                                    <Group className="flex-col justify-center !items-start gap-2 -ml-2">
                                         {shownInputs?.map(input =>
                                             <ActionNodeHandle {...input} type="target" key={input.id} />
                                         )}
@@ -92,7 +92,7 @@ export default function ActionNode({ id, data, selected }) {
 
                                     </div>
 
-                                    <Group className="flex-1 flex-col justify-center !items-end gap-2 -mr-2">
+                                    <Group className="flex-col justify-center !items-end gap-2 -mr-2">
                                         {shownOutputs?.map(output =>
                                             <ActionNodeHandle {...output} type="source" key={output.id} />
                                         )}

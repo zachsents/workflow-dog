@@ -1,12 +1,21 @@
 import { TbReplace } from "react-icons/tb"
 import colors from "tailwindcss/colors"
+import { } from "@web/modules/workflow-editor/graph/nodes"
+import { useStore, useNodeId } from "reactflow"
+import _ from "lodash"
 
 export default {
     icon: TbReplace,
     color: colors.gray[800],
     tags: ["Text"],
     renderBody: () => {
-
+        const nodeId = useNodeId()
+        const template = useStore(s => s.nodeInternals.get(nodeId).data.inputs.find(i => i.definition === "template").value, _.isEqual)
+        return (
+            <p className="text-default-500 text-xs line-clamp-3">
+                {template}
+            </p>
+        )
     },
     inputs: {
         template: {

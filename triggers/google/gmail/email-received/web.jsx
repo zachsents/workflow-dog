@@ -4,7 +4,7 @@ import colors from "tailwindcss/colors"
 
 export default {
     icon: TbBrandGmail,
-    color: colors.red[500],
+    color: colors.red[800],
     renderConfig: () => {
 
     },

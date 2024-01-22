@@ -28,7 +28,7 @@ export default function ActionNodeModal() {
 
     return (
         <Modal
-            size="2xl" backdrop="blur"
+            size="5xl" backdrop="blur"
             isOpen={isOpen} onClose={() => setNodeBeingConfigured(null)}
             style={nodeColors}
             className="overflow-visible"
@@ -39,14 +39,25 @@ export default function ActionNodeModal() {
                         <ActionNodeHeader />
                     </ModalHeader>
                     <ModalBody>
-                        <div className="flex flex-col gap-unit-lg my-unit-lg">
-                            {Object.entries(definition.inputs ?? {}).map(([inputDefId, inputDef], i) =>
-                                <Fragment key={inputDefId}>
-                                    {i !== 0 &&
-                                        <Divider />}
-                                    <InputDefinitionConfig definitionId={inputDefId} definition={inputDef} />
-                                </Fragment>
-                            )}
+                        <div className="grid grid-cols-2 gap-unit-lg">
+                            <div className="flex flex-col gap-unit-lg my-unit-lg">
+                                <p className="font-bold text-center uppercase text-sm">
+                                    Inputs
+                                </p>
+
+                                {Object.entries(definition.inputs ?? {}).map(([inputDefId, inputDef], i) =>
+                                    <Fragment key={inputDefId}>
+                                        {i !== 0 &&
+                                            <Divider />}
+                                        <InputDefinitionConfig definitionId={inputDefId} definition={inputDef} />
+                                    </Fragment>
+                                )}
+                            </div>
+                            <div className="flex flex-col gap-unit-lg my-unit-lg">
+                                <p className="font-bold text-center uppercase text-sm">
+                                    Outputs
+                                </p>
+                            </div>
                         </div>
                     </ModalBody>
                 </>}
@@ -311,6 +322,7 @@ function SelectConfig({ input, definition, label, ...props }) {
     }
 
     const selectItems = useEnumValues?.()
+    const isLoadingSelectItems = useEnumValues && !selectItems
 
     return (
         <Select
@@ -325,6 +337,7 @@ function SelectConfig({ input, definition, label, ...props }) {
                 mainWrapper: "min-w-[12rem]"
             }}
             items={selectItems ?? []}
+            isLoading={isLoadingSelectItems}
             {...props}
         >
             {item =>

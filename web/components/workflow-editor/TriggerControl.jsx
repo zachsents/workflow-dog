@@ -7,6 +7,7 @@ import { TbChevronDown, TbPlus, TbStatusChange, TbX } from "react-icons/tb"
 import { resolve as resolveTrigger, resolveId as resolveTriggerId, list as triggers } from "triggers/web"
 import Group from "../layout/Group"
 import TriggerText from "./TriggerText"
+import { object as triggerMap } from "triggers/web"
 
 
 export default function TriggerControl() {
@@ -49,6 +50,7 @@ export default function TriggerControl() {
 function ConfigureTrigger({ openModal, removeTriggerMutation }) {
 
     const { data: workflow } = useWorkflow()
+    const triggerDef = triggerMap[workflow?.trigger?.type]
 
     const popoverDisclosure = useDisclosure()
 
@@ -96,6 +98,11 @@ function ConfigureTrigger({ openModal, removeTriggerMutation }) {
                 <p className="font-bold text-large">
                     Configure Trigger
                 </p>
+
+                {triggerDef?.renderConfig &&
+                    <triggerDef.renderConfig
+
+                    />}
             </PopoverContent>
         </Popover>
     )

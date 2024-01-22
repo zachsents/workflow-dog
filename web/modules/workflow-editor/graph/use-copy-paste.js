@@ -1,7 +1,7 @@
 import { useNotifications } from "@web/modules/notifications"
 import { useCallback, useEffect } from "react"
 import { TbClipboardCheck } from "react-icons/tb"
-import { getConnectedEdges, getRectOfNodes, useReactFlow, useStore, useStoreApi } from "reactflow"
+import { getConnectedEdges, getNodesBounds, useReactFlow, useStore, useStoreApi } from "reactflow"
 import { duplicateElements } from "./duplicate"
 
 
@@ -66,7 +66,7 @@ export function usePasteElementsFromClipboard() {
 
         const { nodes, edges } = JSON.parse(textContent.replace(GRAPH_MIME_TYPE, ""))
 
-        const rect = getRectOfNodes(nodes)
+        const rect = getNodesBounds(nodes)
         const domNodeBounds = domNode?.getBoundingClientRect()
 
         const center = position || rf.screenToFlowPosition({

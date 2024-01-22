@@ -1,6 +1,6 @@
 import { TbBrandGmail } from "react-icons/tb"
 import colors from "tailwindcss/colors"
-import { Textarea } from "@nextui-org/react"
+
 
 export default {
     icon: TbBrandGmail,
@@ -8,18 +8,18 @@ export default {
     renderConfig: () => {
 
     },
-    workflowInputs: {
+    inputs: {
         plainText: {
-            inputComponent: Textarea,
+            stringSettings: { long: true },
         },
         html: {
-            inputComponent: Textarea,
+            stringSettings: { long: true },
         },
         recipientName: {
-            inputComponent: Textarea,
+            stringSettings: { long: true },
         },
         recipientEmailAddress: {
-            inputComponent: Textarea,
+            stringSettings: { long: true },
         },
     }
 }

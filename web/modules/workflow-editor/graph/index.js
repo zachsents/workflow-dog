@@ -1,61 +1,45 @@
-import { useDebouncedValue } from "@mantine/hooks"
-import _ from "lodash"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { useReactFlow, useStore, useStoreApi } from "reactflow"
-import { useUpdateWorkflow, useUpdateWorkflowGraph, useWorkflowGraph } from "../../workflows"
+import { useDebouncedEffect, useDebouncedState } from "@react-hookz/web"
+import { useDatabaseMutation } from "@web/modules/db"
+import { useWorkflow } from "@web/modules/workflows"
 import { produce } from "immer"
+import _ from "lodash"
+import { useCallback, useEffect, useMemo } from "react"
+import { useEdges, useNodes, useStore, useStoreApi } from "reactflow"
 
 
-export function useGraphSaving(nodes, edges, setNodes, setEdges) {
+export function useGraphSaving() {
 
-    const [updateWorkflow] = useUpdateWorkflow()
-    const [remoteGraph, isGraphLoaded] = useWorkflowGraph()
-    const [updateGraph] = useUpdateWorkflowGraph()
-    const [canSave, setCanSave] = useState(false)
+    const nodes = useNodes()
+    const edges = useEdges()
 
+    const { data: workflow, isSuccess } = useWorkflow()
+
+    const [debouncedRawGraph, onGraphChange] = useDebouncedState({ nodes, edges }, 250)
     useEffect(() => {
-        if (isGraphLoaded) {
-            setCanSave(true)
+        if (!isSuccess)
+            return
 
-            const { nodes: newNodes, edges: newEdges } = merge({ nodes, edges }, remoteGraph, ["selected"])
+        onGraphChange({ nodes, edges })
+    }, [nodes, edges, isSuccess])
 
-            setNodes(newNodes)
-            setEdges(newEdges)
-            console.debug("Merged from remote", remoteGraph)
+    const convertedGraph = useMemo(() => convertGraphForRemote(debouncedRawGraph), [debouncedRawGraph])
+    const convertedGraphStr = useMemo(() => JSON.stringify(convertedGraph), [convertedGraph])
+
+    const updateGraph = useDatabaseMutation(
+        (supa) => supa.from("workflows").update({ graph: convertedGraph }).eq("id", workflow?.id),
+        {
+            enabled: !!workflow,
+            // invalidateKey: ["workflow", workflow?.id],
         }
-    }, [remoteGraph])
+    )
 
-    const convertedGraph = useMemo(() => convertGraphForRemote({ nodes, edges }), [nodes, edges])
-    const [debouncedConvertedGraph] = useDebouncedValue(convertedGraph, 500)
+    useDebouncedEffect(() => {
+        if (!isSuccess || updateGraph.isPending)
+            return
 
-    useEffect(() => {
-        if (canSave) {
-            updateGraph({ nodes, edges })
-            updateWorkflow({ lastEditedAt: new Date() })
-            console.debug("Updating remote graph")
-        }
-    }, [debouncedConvertedGraph])
-}
-
-
-/**
- * @param {import("reactflow").Node[] | string[]} nodes
- * @param {import("reactflow").Edge[] | string[]} edges
- */
-export function useDeleteElements(nodes, edges) {
-    const rf = useReactFlow()
-
-    const nodeObjects = nodes?.every(n => typeof n === "string") ?
-        nodes?.map(n => rf.getNode(n)) :
-        nodes
-    const edgeObjects = edges?.every(e => typeof e === "string") ?
-        edges?.map(e => rf.getEdge(e)) :
-        edges
-
-    return useCallback(() => rf.deleteElements({
-        nodes: nodeObjects,
-        edges: edgeObjects,
-    }), [nodes, edges, rf])
+        console.debug("Saving graph...", convertedGraph)
+        updateGraph.mutateAsync().then(() => console.log("Graph saved"))
+    }, [convertedGraphStr], 500)
 }
 
 
@@ -82,20 +66,8 @@ export function useRFStoreProperty(path, defaultValue) {
 }
 
 
-/**
- * @param {string} graphStr
- */
-export function convertGraphFromRemote(graphStr) {
-    try {
-        const graph = JSON.parse(graphStr)
-        return graph
-    }
-    catch (err) {
-        return {
-            nodes: [],
-            edges: [],
-        }
-    }
+export function convertGraphFromRemote(graph) {
+    return graph
 }
 
 
@@ -103,13 +75,14 @@ export function convertGraphFromRemote(graphStr) {
  * @param {{ nodes: import("reactflow").Node[], edges: import("reactflow").Edge[] }} graph
  */
 export function convertGraphForRemote(graph) {
-    return JSON.stringify({
-        nodes: graph.nodes.map(n => _.omit(n, ["selected"])),
-        edges: graph.edges.map(e => _.omit(e, ["selected"])),
-    })
+    return {
+        nodes: graph.nodes.map(n => _.omit(n, "selected")),
+        edges: graph.edges.map(e => _.omit(e, "selected")),
+    }
 }
 
 
+// eslint-disable-next-line no-unused-vars
 function merge(destination, source, keepDestinationProps = []) {
 
     if (Array.isArray(source)) {

@@ -42,10 +42,11 @@ function UnbrokenEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, 
             <InteractionPath d={edgePath} />
             <DeleteButton
                 x={labelX} y={labelY}
-                selected={selected}
                 onPress={() => {
                     rf.deleteElements({ edges: [{ id }] })
                 }}
+                selected={selected}
+            // forced={forced}
             />
         </g>
     )
@@ -129,13 +130,13 @@ const DeleteButton = forwardRef(function DeleteButton({ x, y, selected, onPress,
             {...props}
             ref={ref}
         >
-            <div className="w-full h-full flex justify-center items-center">
+            <div className={classNames(
+                "w-full h-full relative flex justify-center items-center transition !duration-100 group-hover:opacity-100 group-hover:scale-100",
+                selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
+            )}>
                 <Button
                     isIconOnly radius="full" size="sm"
-                    className={classNames(
-                        "pointer-events-auto transition !duration-100 group-hover:opacity-100 group-hover:scale-100 hover:bg-danger hover:text-white",
-                        selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
-                    )}
+                    className="pointer-events-auto hover:bg-danger hover:text-white"
                     onPress={onPress}
                 >
                     <TbX />
@@ -159,8 +160,8 @@ const VisiblePath = forwardRef(function VisiblePath({ d, style, markerEnd, selec
             className={classNames("fill-none stroke-gray-300 stroke-[5px] transition-colors", {
                 "stroke-primary-400": !forced && selected,
                 "group-hover:stroke-primary-300": !forced && !selected,
-                "stroke-red-500": forced && selected,
-                "stroke-red-200 group-hover:stroke-red-400": forced && !selected,
+                "stroke-amber-500": forced && selected,
+                "stroke-amber-200 group-hover:stroke-amber-400": forced && !selected,
             })}
             style={style}
             {...props}

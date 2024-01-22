@@ -1,13 +1,14 @@
 
 
 export const Type = {
-    String: (...enumValues) => ({ baseType: "string", values: enumValues }),
+    String: () => ({ baseType: "string" }),
     Boolean: () => ({ baseType: "boolean" }),
     Number: () => ({ baseType: "number" }),
     Date: () => ({ baseType: "date" }),
     Object: (schema) => ({ baseType: "object", schema }),
     Array: (itemType) => ({ baseType: "array", itemType }),
     Any: () => ({ any: true }),
+    StringEnum: (...enumValues) => ({ baseType: "string", enumValues }),
 }
 
 
@@ -22,7 +23,7 @@ export function doTypesMatch(typeA, typeB) {
     if (typeA.baseType !== typeB.baseType)
         return false
 
-    if (typeA.values && typeB.value && !typeA.values.some(v => typeB.values.includes(v)))
+    if (typeA.enumValues && typeB.enumValues && !typeA.enumValues.some(v => typeB.enumValues.includes(v)))
         return false
 
     if (typeA.baseType === "array" && typeB.baseType === "array" && !doTypesMatch(typeA.itemType, typeB.itemType))
@@ -37,7 +38,7 @@ export function typeLabel(type) {
         return "Any"
 
     if (type.baseType === "string")
-        return "String"
+        return "Text"
 
     if (type.baseType === "boolean")
         return "Boolean"
@@ -61,7 +62,7 @@ export function typeLabel(type) {
 /**
  * @typedef {object} Type
  * @property {string} baseType
- * @property {any[]} values
+ * @property {any[]} enumValues
  * @property {Type} itemType
  * @property {Record<string, Type>} schema
  * @property {boolean} any

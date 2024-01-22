@@ -1,6 +1,6 @@
 import { TbAbc } from "react-icons/tb"
 import colors from "tailwindcss/colors"
-import { useNodeProperty } from "../../_private/util"
+import { useNodeProperty, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
 import { Textarea } from "@nextui-org/react"
 import { useRef, useEffect } from "react"
 
@@ -15,20 +15,21 @@ export default {
         }
     },
     renderBody: () => {
-
         const ref = useRef()
-        const [selected] = useNodeProperty(undefined, "selected")
+        const selected = useNodePropertyValue(undefined, "selected")
         useEffect(() => {
             if (selected)
                 ref.current?.focus()
         }, [selected])
 
-        const [value, setValue] = useNodeProperty(undefined, "data.state.value")
+        const [value, setValue] = useNodeProperty(undefined, "data.state.value", {
+            debounce: 200,
+        })
 
         return (
             <div className="flex justify-center items-stretch pr-unit-xs py-unit-xs">
                 <Textarea
-                    value={value ?? ""}
+                    defaultValue={value ?? ""}
                     onValueChange={setValue}
                     minRows={1}
                     maxRows={12}

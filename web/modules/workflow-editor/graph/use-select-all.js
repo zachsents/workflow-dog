@@ -2,9 +2,6 @@ import { useHotkey } from "@web/modules/util"
 import { applyEdgeChanges, applyNodeChanges, useReactFlow } from "reactflow"
 
 
-const blacklistedTags = ["INPUT", "TEXTAREA", "SELECT"]
-
-
 export function useSelectAll() {
     const rf = useReactFlow()
 
@@ -23,6 +20,6 @@ export function useSelectAll() {
         })), edges))
     }, {
         preventDefault: true,
-        qualifier: () => !blacklistedTags.includes(document.activeElement.tagName),
+        preventInInputs: true,
     })
 }

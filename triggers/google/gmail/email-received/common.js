@@ -5,41 +5,41 @@ export default {
     whenName: "When an email is received",
     description: "Triggered when an email is received in a Gmail inbox.",
 
-    workflowInputs: {
+    inputs: {
         messageId: {
-            label: "Message ID",
+            name: "Message ID",
             type: Type.String(),
         },
         senderName: {
-            label: "Sender Name",
+            name: "Sender Name",
             type: Type.String(),
         },
         senderEmailAddress: {
-            label: "Sender Email Address",
+            name: "Sender Email Address",
             type: Type.String(),
         },
         subject: {
-            label: "Subject",
+            name: "Subject",
             type: Type.String(),
         },
         date: {
-            label: "Date",
+            name: "Date",
             type: Type.Date(),
         },
         plainText: {
-            label: "Plain Text",
+            name: "Plain Text",
             type: Type.String(),
         },
         html: {
-            label: "HTML",
+            name: "HTML",
             type: Type.String(),
         },
         recipientName: {
-            label: "Recipient Name",
+            name: "Recipient Name",
             type: Type.String(),
         },
         recipientEmailAddress: {
-            label: "Recipient Email Address",
+            name: "Recipient Email Address",
             type: Type.String(),
         },
     }

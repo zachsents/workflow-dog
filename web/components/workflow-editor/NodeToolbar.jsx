@@ -1,18 +1,18 @@
 // import { useCopyElementsToClipboard, useDuplicateElements } from "@web/modules/graph/duplicate"
 // import { useSelectConnectedEdges, useSelectIncomers, useSelectOutgoers, useSelection } from "@web/modules/graph/selection"
-import { Button, Card, Divider, Kbd, Tooltip } from "@nextui-org/react"
+import { Button, Card, Divider, Kbd, Select, SelectItem, Tooltip } from "@nextui-org/react"
 import { useHotkey } from "@web/modules/util"
 import { duplicateElements } from "@web/modules/workflow-editor/graph/duplicate"
+import { useModifier } from "@web/modules/workflow-editor/graph/nodes"
 import { getSelectedEdges, getSelectedNodes, selectConnectedEdges, selectIncomers, selectOutgoers, useSelectedEdges, useSelectedNodes } from "@web/modules/workflow-editor/graph/selection"
+import { list as modifiersList } from "@web/modules/workflow-editor/modifiers"
 import classNames from "classnames"
+import { produce } from "immer"
 import _ from "lodash"
 import { useMemo } from "react"
 import { TbArrowLeftSquare, TbArrowRightSquare, TbChartDots3, TbClipboard, TbConfetti, TbConfettiOff, TbCopy, TbTrash } from "react-icons/tb"
-import { getRectOfNodes, useReactFlow, useStore, useViewport } from "reactflow"
+import { getNodesBounds, useReactFlow, useStore, useViewport } from "reactflow"
 import Group from "../layout/Group"
-import { produce } from "immer"
-// import KeyboardShortcut from "./KeyboardShortcut"
-// import ToolbarIcon from "./ToolbarIcon"
 
 
 export default function NodeToolbar() {
@@ -26,7 +26,7 @@ export default function NodeToolbar() {
     const selectedEdges = useSelectedEdges()
 
     const selectionRect = useMemo(() => {
-        const rect = getRectOfNodes(selectedNodes)
+        const rect = getNodesBounds(selectedNodes)
         const screen = rf.flowToScreenPosition({ x: rect.x, y: rect.y })
 
         return {
@@ -39,6 +39,7 @@ export default function NodeToolbar() {
 
     const anyNodes = selectedNodes.length > 0
     const multiple = (selectedNodes.length + selectedEdges.length) > 1
+    const isSingleNode = selectedNodes.length == 1
 
     const hasIncomersToSelect = useStore(
         s => s.edges.some(
@@ -92,6 +93,11 @@ export default function NodeToolbar() {
                     <CopyControl />
                     <DuplicateControl />
                     <DeleteControl />
+
+                    <Divider orientation="vertical" className="h-[30px] mx-2 first:hidden last:hidden" />
+
+                    {isSingleNode &&
+                        <ModifierSelector />}
                 </Group>
             </Card>
         </div>
@@ -232,6 +238,45 @@ function DeleteControl() {
             icon={TbTrash}
             onPress={action}
         />
+    )
+}
+
+
+function ModifierSelector() {
+
+    const selectedNodeId = useStore(s => s.getNodes().find(n => n.selected)?.id)
+    const [modifier, setModifier, clearModifier] = useModifier(selectedNodeId)
+
+    const selectedKeys = useMemo(() => new Set(modifier?.type ? [modifier.type] : []), [modifier?.type])
+
+    const onSelect = selected => {
+        if (selected.size === 0)
+            clearModifier()
+        else
+            setModifier(selected.values().next().value)
+    }
+
+    return (
+        <Select
+            size="sm"
+            label={modifier ? "Modifier" : "No modifier"}
+            selectedKeys={selectedKeys}
+            onSelectionChange={onSelect}
+            items={modifiersList}
+            classNames={{
+                base: "min-w-[12rem] self-stretch",
+                mainWrapper: "h-full",
+                trigger: "min-h-0 h-full py-0.5",
+            }}
+        >
+            {modType =>
+                <SelectItem
+                    startContent={<modType.icon />}
+                    key={modType.id}
+                >
+                    {modType.name}
+                </SelectItem>}
+        </Select>
     )
 }
 

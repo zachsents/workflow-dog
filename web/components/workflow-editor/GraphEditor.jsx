@@ -1,4 +1,5 @@
 import { Kbd, Tooltip } from "@nextui-org/react"
+import { useGraphSaving } from "@web/modules/workflow-editor/graph"
 import { useGraphCopyPaste } from "@web/modules/workflow-editor/graph/use-copy-paste"
 import { useGraphContextMenu } from "@web/modules/workflow-editor/graph/use-graph-context-menu"
 import { useGraphUndoRedo } from "@web/modules/workflow-editor/graph/use-graph-undo-redo"
@@ -10,25 +11,21 @@ import { Background, ControlButton, Controls, MiniMap, ReactFlow, useEdgesState,
 import "reactflow/dist/style.css"
 import colors from "tailwindcss/colors"
 import Group from "../layout/Group"
-import ActionNode from "./ActionNode"
 import ContextMenu from "./ContextMenu"
-import NodeToolbar from "./NodeToolbar"
-import GhostBuster from "./GhostBuster"
 import DataEdge from "./DataEdge"
+import GhostBuster from "./GhostBuster"
+import NodeToolbar from "./NodeToolbar"
+import ActionNode from "./action-node/ActionNode"
 
 
-const initialNodes = []
-const initialEdges = []
-
-
-export default function GraphEditor() {
+export default function GraphEditor({ initialGraph: { nodes: initialNodes = [], edges: initialEdges = [] } = {} }) {
 
     const [nodes, , onNodesChange] = useNodesState(initialNodes)
     const [edges, , onEdgesChange] = useEdgesState(initialEdges)
     const onConnect = useOnConnect()
 
     const [settings] = useEditorSettings()
-    const [onContextMenu] = useGraphContextMenu()
+    const onContextMenu = useGraphContextMenu()
 
     const [onCopy, onPaste] = useGraphCopyPaste()
 
@@ -67,6 +64,7 @@ export default function GraphEditor() {
                 onCopy={onCopy}
                 onPaste={() => onPaste()}
                 onPaneContextMenu={onContextMenu}
+                fitView
             >
                 {settings.showMinimap &&
                     <MiniMap pannable zoomable />}
@@ -107,6 +105,7 @@ const graphDeleteKeys = ["Delete", "Backspace"]
 function GraphHooks() {
     useGraphUndoRedo()
     useSelectAll()
+    useGraphSaving()
 }
 
 
@@ -150,3 +149,4 @@ function AdditionalControlButton({ label, shortcutKey, onClick, icon: Icon }) {
         </Tooltip>
     )
 }
+

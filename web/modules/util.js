@@ -100,6 +100,7 @@ export function useSyncToState(value, setOtherValue) {
  * @param {boolean} options.preventDefault
  * @param {any[]} options.callbackDependencies
  * @param {(event: KeyboardEvent) => boolean} options.qualifier
+ * @param {boolean} options.preventInInputs
  */
 export function useHotkey(hotkey, callback, {
     target = window,
@@ -108,6 +109,7 @@ export function useHotkey(hotkey, callback, {
     preventDefault = false,
     callbackDependencies = [],
     qualifier,
+    preventInInputs = false,
 } = {}) {
 
     const wrappedCallback = useCallback(callback, callbackDependencies)
@@ -137,6 +139,9 @@ export function useHotkey(hotkey, callback, {
             if (typeof qualifier === "function" && !qualifier(ev))
                 return
 
+            if (preventInInputs && blacklistedTags.includes(document.activeElement.tagName))
+                return
+
             if (preventDefault)
                 ev.preventDefault()
 
@@ -154,6 +159,9 @@ const modifiers = {
     shift: ev => ev.shiftKey,
     alt: ev => ev.altKey,
 }
+
+const blacklistedTags = ["INPUT", "TEXTAREA", "SELECT"]
+
 
 
 /**

@@ -1,17 +1,16 @@
 import { Button, Tooltip } from "@nextui-org/react"
-import { useDefinition, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
+import { useDefinition } from "@web/modules/workflow-editor/graph/nodes"
 import classNames from "classnames"
 import { TbActivity } from "react-icons/tb"
-import { Position, Handle as RFHandle, useStore } from "reactflow"
+import { Position, Handle as RFHandle, useStore, useNodeId } from "reactflow"
 import util from "util"
 import Group from "../layout/Group"
 
 
 export default function ActionNodeHandle({ id, name, type, definition: passedDef }) {
 
+    const nodeId = useNodeId()
     const nodeDefinition = useDefinition()
-
-    const nodeDisplayName = useNodePropertyValue(null, "data.name") || nodeDefinition?.name
 
     const passedString = typeof passedDef === "string"
     let definition = passedString ? undefined : passedDef
@@ -28,6 +27,8 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
 
     const displayName = definition?.bullet ? <>&bull;</> : (name || definition?.name || <>&nbsp;</>)
 
+    const isConnected = useStore(s => s.edges.some(edge => edge.source == nodeId && edge.sourceHandle == id || edge.target == nodeId && edge.targetHandle == id))
+
     const selectedRun = useStore(s => s.selectedRun)
     const hasRunValue = id in (selectedRun?.outputs ?? {})
     const runValue = selectedRun?.outputs?.[id]
@@ -42,8 +43,10 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
                 type={type}
                 position={type == "target" ? Position.Left : Position.Right}
                 className={classNames(
-                    "!relative !transform-none !inset-0 !w-auto !h-auto flex !rounded-full !border-solid !border-1 transition-colors !bg-gray-50 !border-gray-300 hover:!text-[var(--dark-color)] hover:!bg-[var(--light-color)] hover:!border-[var(--dark-color)]",
-
+                    "!relative !transform-none !inset-0 !w-auto !h-auto flex !rounded-full !border-solid !border-1 transition-colors hover:!text-[var(--dark-color)] hover:!bg-[var(--light-color)] hover:!border-[var(--dark-color)]",
+                    isConnected ?
+                        "!bg-[var(--light-color)] !border-[var(--dark-color)] !text-[var(--dark-color)]" :
+                        "!bg-gray-50 !border-gray-300",
                 )}
             >
                 <Group

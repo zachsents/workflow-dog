@@ -1,5 +1,5 @@
 import { produce } from "immer"
-import { getRectOfNodes } from "reactflow"
+import { getNodesBounds } from "reactflow"
 import { PREFIX } from "shared/prefixes"
 import { uniqueId } from "../util"
 
@@ -28,7 +28,7 @@ export function duplicateElements(rf, nodes, edges, {
     position,
 } = {}) {
 
-    const rect = getRectOfNodes(nodes)
+    const rect = getNodesBounds(nodes)
     const positionOffsetX = position ? position.x - rect.x : 0
     const positionOffsetY = position ? position.y - rect.y : 0
 

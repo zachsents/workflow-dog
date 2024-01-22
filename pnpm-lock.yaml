@@ -23,9 +23,11 @@ importers:
       '@zachsents/barrelboy': ^1.0.27
       joi: ^17.11.1
       shared: workspace:*
+      triggers: workspace:*
     dependencies:
       '@zachsents/barrelboy': 1.0.27
       shared: link:../shared
+      triggers: link:../triggers
     devDependencies:
       joi: 17.11.1
 

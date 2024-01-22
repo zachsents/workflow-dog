@@ -3,11 +3,11 @@ import { useStoreApi } from "reactflow"
 
 
 export function useGraphContextMenu() {
-    const { setState } = useStoreApi()
+    const storeApi = useStoreApi()
 
     const handler = useCallback(ev => {
         ev.preventDefault()
-        setState({
+        storeApi.setState({
             contextMenu: {
                 isOpen: true,
                 position: {
@@ -16,7 +16,7 @@ export function useGraphContextMenu() {
                 },
             }
         })
-    }, [setState])
+    }, [storeApi])
 
-    return [handler]
+    return handler
 }

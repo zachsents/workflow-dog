@@ -1,7 +1,7 @@
 import { Button, Input } from "@nextui-org/react"
 import { TbMinus, TbNumbers, TbPlus } from "react-icons/tb"
 import colors from "tailwindcss/colors"
-import { useNodeProperty } from "../../_private/util"
+import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
 
 
 export default {

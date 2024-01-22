@@ -8,7 +8,7 @@ import { useUndoRedo } from "./use-undo-redo"
 export function useGraphUndoRedo() {
 
     const rf = useReactFlow()
-    const { setState } = useStoreApi()
+    const storeApi = useStoreApi()
     const nodes = useNodes()
     const edges = useEdges()
 
@@ -21,16 +21,18 @@ export function useGraphUndoRedo() {
     })
 
     useEffect(() => {
-        setState({ undo, redo })
-    }, [undo, redo])
+        storeApi.setState({ undo, redo })
+    }, [undo, redo, storeApi])
 
     useHotkey("mod+z", undo, {
         preventDefault: true,
+        preventInInputs: true,
         callbackDependencies: [undo],
     })
 
     useHotkey("mod+y", redo, {
         preventDefault: true,
+        preventInInputs: true,
         callbackDependencies: [redo],
     })
 

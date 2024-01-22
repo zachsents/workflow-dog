@@ -1,10 +1,13 @@
+import { useDebouncedCallback } from "@react-hookz/web"
+import Color from "color"
 import { produce } from "immer"
 import _ from "lodash"
 import { object as nodeDefs } from "nodes/web"
 import { useCallback, useEffect, useMemo } from "react"
 import { useNodeId, useReactFlow, useStore, useUpdateNodeInternals } from "reactflow"
 import { PREFIX } from "shared/prefixes"
-import { _get, _set, uniqueId } from "../util"
+import colors from "tailwindcss/colors"
+import { uniqueId } from "../util"
 import { useNodeInputs } from "./interfaces"
 
 
@@ -47,7 +50,7 @@ export function setNodeProperty(rf, nodeId, path, value) {
         if (node === undefined)
             throw new Error(`Node ${nodeId} not found`)
 
-        _set(node, path, value)
+        _.set(node, path, value)
     }))
 }
 
@@ -58,10 +61,8 @@ export function setNodeProperty(rf, nodeId, path, value) {
  * @param {string} path
  */
 export function useNodePropertyValue(nodeId, path) {
-    if (nodeId === undefined)
-        nodeId = useNodeId()
-
-    return useStore(state => _get(state.nodeInternals.get(nodeId), path))
+    nodeId ??= useNodeId()
+    return useStore(s => _.get(s.nodeInternals.get(nodeId), path))
 }
 
 
@@ -69,15 +70,16 @@ export function useNodePropertyValue(nodeId, path) {
  * Hook that provides a setter for a node property.
  * @param {string} nodeId
  * @param {string} path
+ * @param {object} [options]
+ * @param {number} [options.debounce=0]
  * @return {(value: any) => void} 
  */
-export function useSetNodeProperty(nodeId, path) {
-    if (nodeId === undefined)
-        nodeId = useNodeId()
-
+export function useSetNodeProperty(nodeId, path, {
+    debounce = 0,
+} = {}) {
+    nodeId ??= useNodeId()
     const rf = useReactFlow()
-
-    return useCallback(value => setNodeProperty(rf, nodeId, path, value), [nodeId, path, rf])
+    return useDebouncedCallback(value => setNodeProperty(rf, nodeId, path, value), [nodeId, path, rf], debounce)
 }
 
 
@@ -85,20 +87,22 @@ export function useSetNodeProperty(nodeId, path) {
  * Hook that provides the value of a node property and a setter.
  * @param {string} nodeId
  * @param {string} path
- * @param {*} [defaultValue]
+ * @param {object} [options]
+ * @param {any} [options.defaultValue]
+ * @param {number} [options.debounce=0]
  * @return {[ any, (value: any) => void ]}
  */
-export function useNodeProperty(nodeId, path, defaultValue) {
-    if (nodeId === undefined)
-        nodeId = useNodeId()
-
+export function useNodeProperty(nodeId, path, {
+    defaultValue,
+    debounce = 0,
+} = {}) {
     const value = useNodePropertyValue(nodeId, path)
-    const setValue = useSetNodeProperty(nodeId, path)
+    const setValue = useSetNodeProperty(nodeId, path, { debounce })
 
     useEffect(() => {
         if (defaultValue !== undefined && value === undefined)
             setValue(defaultValue)
-    }, [setValue])
+    }, [value, setValue, defaultValue])
 
     return [value, setValue]
 }
@@ -171,7 +175,7 @@ export function useCreateActionNode() {
                 definition: definitionId,
                 inputs: Object.entries(definition.inputs).flatMap(([id, input]) => {
                     if (input.group)
-                        return Array(input.groupMin).fill().map(() => createInput(id, input, {
+                        return Array(input.groupMin ?? 0).fill().map(() => createInput(id, input, {
                             name: `New ${input.name}`
                         }))
 
@@ -179,7 +183,7 @@ export function useCreateActionNode() {
                 }),
                 outputs: Object.entries(definition.outputs).flatMap(([id, output]) => {
                     if (output.group)
-                        return Array(output.groupMin).fill().map(() => createOutput(id))
+                        return Array(output.groupMin ?? 0).fill().map(() => createOutput(id))
 
                     return createOutput(id)
                 }),
@@ -248,3 +252,29 @@ export function useDisabled(nodeId) {
     return [disabled, isUpstreamDisabled, setDisabled, message]
 }
 
+
+/**
+ * @param {string} nodeId
+ * @param {"json" | "css"} [mode="json"]
+ */
+export function useNodeColors(nodeId, mode = "json") {
+
+    const definition = useDefinition(nodeId)
+
+    const baseColor = definition?.color || colors.gray[500]
+    const darkColor = useMemo(() => Color(baseColor).lightness(20).hex(), [baseColor])
+    const lightColor = useMemo(() => Color(baseColor).lightness(90).hex(), [baseColor])
+
+    switch (mode) {
+        case "css": return {
+            "--base-color": baseColor,
+            "--dark-color": darkColor,
+            "--light-color": lightColor,
+        }
+        case "json": return {
+            baseColor,
+            darkColor,
+            lightColor,
+        }
+    }
+}

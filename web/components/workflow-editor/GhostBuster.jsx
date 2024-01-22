@@ -9,7 +9,7 @@ export default function GhostBuster() {
 
     const handleMap = useStore(state => Object.fromEntries(
         [...state.nodeInternals.values()].map(node => {
-            const handleBounds = node[Symbol.for("internals")].handleBounds
+            const handleBounds = node[Symbol.for("internals")]?.handleBounds
 
             return [
                 node.id,

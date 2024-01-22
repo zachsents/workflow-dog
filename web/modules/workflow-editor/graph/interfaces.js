@@ -4,6 +4,21 @@ import { useCallback, useMemo } from "react"
 import { PREFIX } from "shared/prefixes"
 import { uniqueId } from "../util"
 import { useDefinition, useNodeProperty, useNodePropertyValue } from "./nodes"
+import { useNodeId, useReactFlow } from "reactflow"
+import { useDebouncedCallback } from "@react-hookz/web"
+
+
+
+export function useSetInputValue(nodeId, inputId, debounce = 0) {
+    nodeId ??= useNodeId()
+    const rf = useReactFlow()
+
+    return useDebouncedCallback((newValue) => {
+        rf.setNodes(produce(draft => {
+            draft.find(n => n.id == nodeId).data.inputs.find(i => i.id == inputId).value = newValue
+        }))
+    }, [nodeId, rf], debounce)
+}
 
 
 /**

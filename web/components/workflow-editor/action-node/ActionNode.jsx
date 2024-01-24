@@ -1,7 +1,7 @@
 import { useDefinition, useDisabled, useNodeColors, useUpdateInternals } from "@web/modules/workflow-editor/graph/nodes"
 import classNames from "classnames"
 import { forwardRef, useEffect, useMemo } from "react"
-import { useNodeId, useStore } from "reactflow"
+import { useNodeId, useStore, useReactFlow } from "reactflow"
 import ActionNodeHandle from "../ActionNodeHandle"
 // import CheckableMenuItem from "./CheckableMenuItem"
 import NodeModifierWrapper from "../NodeModifierWrapper"
@@ -17,6 +17,7 @@ import ActionNodeModal, { ConfigComponent } from "./ActionNodeModal"
 
 export default function ActionNode({ id, data, selected }) {
 
+    const rf = useReactFlow()
     const definition = useDefinition()
 
     // const hasValidationErrors = useNodeHasValidationErrors(id)
@@ -57,11 +58,18 @@ export default function ActionNode({ id, data, selected }) {
                             "hover:outline hover:outline-2 hover:outline-primary-200 hover:outline-offset-2": !selected,
                             "opacity-40": disabled,
                         })}
+                        onDoubleClick={() => rf.fitView({
+                            nodes: [{ id }],
+                            padding: 2.5,
+                            duration: 500,
+                        })}
                     >
                         <NodeModifierWrapper>
-                            <Card className={classNames("!transition rounded-xl border border-gray-800 overflow-visible min-w-[12rem] max-w-[28rem]",
-                                selected ? "shadow-xl" : "shadow-md",
-                            )}>
+                            <Card
+                                className={classNames("!transition rounded-xl border border-gray-800 overflow-visible min-w-[12rem] max-w-[28rem]",
+                                    selected ? "shadow-xl" : "shadow-md",
+                                )}
+                            >
                                 <CardHeader className="p-0 rounded-t-xl bg-[var(--dark-color)]">
                                     <ActionNodeHeader withSettings />
                                 </CardHeader>

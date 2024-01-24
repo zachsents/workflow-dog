@@ -157,11 +157,11 @@ const VisiblePath = forwardRef(function VisiblePath({ d, style, markerEnd, selec
         <path
             d={d}
             markerEnd={markerEnd}
-            className={classNames("fill-none stroke-gray-300 stroke-[5px] transition-colors", {
+            className={classNames("fill-none stroke-[5px] transition-colors", {
                 "stroke-primary-400": !forced && selected,
-                "group-hover:stroke-primary-300": !forced && !selected,
-                "stroke-amber-500": forced && selected,
-                "stroke-amber-200 group-hover:stroke-amber-400": forced && !selected,
+                "stroke-gray-300 group-hover:stroke-primary-300": !forced && !selected,
+                "!stroke-amber-500": forced && selected,
+                "!stroke-amber-200 group-hover:!stroke-amber-400": forced && !selected,
             })}
             style={style}
             {...props}

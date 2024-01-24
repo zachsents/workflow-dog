@@ -1,4 +1,5 @@
 export { default as basic_string } from "../basic/string/common.js"
+export { default as basic_object } from "../basic/object/common.js"
 export { default as basic_number } from "../basic/number/common.js"
 export { default as basic_date } from "../basic/date/common.js"
 export { default as basic_boolean } from "../basic/boolean/common.js"

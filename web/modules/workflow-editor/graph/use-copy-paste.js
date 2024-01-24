@@ -11,7 +11,7 @@ const CLIPBOARD_KEY = "clipboard"
 
 export function useGraphCopyPaste() {
 
-    const { setState } = useStoreApi()
+    const storeApi = useStoreApi()
     const { notify } = useNotifications()
 
     const _onCopy = useCopySelectionToClipboard()
@@ -27,7 +27,7 @@ export function useGraphCopyPaste() {
     }, [_onCopy])
 
     useEffect(() => {
-        setState({ copy: onCopy, paste: onPaste })
+        storeApi.setState({ copy: onCopy, paste: onPaste })
     }, [onCopy, onPaste])
 
     return [onCopy, onPaste]

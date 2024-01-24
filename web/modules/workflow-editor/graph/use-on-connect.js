@@ -62,7 +62,7 @@ export function useOnConnect() {
         console.debug("Tried to connect", typeMap[sourceType], "with", typeMap[targetType])
 
         const notifId = notify({
-            message: `A ${typeMap[sourceType]} output can't be connected to a ${typeMap[targetType]} input.`,
+            message: `A ${typeMap[sourceType]?.name || "Any"} output can't be connected to a ${typeMap[targetType]?.name || "Any"} input.`,
             classNames: {
                 icon: "bg-danger",
             },

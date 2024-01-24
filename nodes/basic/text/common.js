@@ -5,7 +5,7 @@ export default {
     outputs: {
         text: {
             name: "Text",
-            type: "data-type:basic.text",
+            type: "data-type:basic.string",
         },
     }
 }

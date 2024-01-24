@@ -138,11 +138,20 @@ export function useCreateActionNode() {
     const rf = useReactFlow()
     const domNode = useStore(s => s.domNode)
 
-    return useCallback(({
+    /**
+     * @param {object} options
+     * @param {string} options.definition
+     * @param {{ x: number, y: number }} [options.position]
+     * @param {object} [options.data]
+     * @param {boolean} [options.addToGraph=true]
+     * @param {Partial<import("reactflow").Edge & { sourceHandleType: string, targetHandleType: string }>[]} connect
+     */
+    const createNode = ({
         definition: definitionId,
         position,
         data = {},
         addToGraph = true,
+        connect = [],
     } = {}) => {
 
         if (!position) {
@@ -193,8 +202,26 @@ export function useCreateActionNode() {
         if (addToGraph)
             rf.addNodes(newNode)
 
+        const newEdges = connect.map(params => ({
+            id: uniqueId(PREFIX.EDGE),
+            ..._.omit(params, ["sourceHandleType", "targetHandleType"]),
+            ..."source" in params && {
+                target: newNode.id,
+                targetHandle: newNode.data.inputs.find(i => i.definition === params.targetHandleType).id,
+            },
+            ..."target" in params && {
+                source: newNode.id,
+                sourceHandle: newNode.data.outputs.find(o => o.definition === params.sourceHandleType).id,
+            },
+        }))
+
+        if (newEdges.length > 0)
+            rf.addEdges(newEdges)
+
         return newNode
-    }, [rf, domNode])
+    }
+
+    return useCallback(createNode, [rf, domNode])
 }
 
 

@@ -5,23 +5,23 @@ export default {
     description: "Triggered by a request to a URL. Responds as soon as the request is received.",
     inputs: {
         method: {
-            label: "Method",
+            name: "Method",
             type: "data-type:basic.string",
         },
         url: {
-            label: "URL",
+            name: "URL",
             type: "data-type:basic.string",
         },
         headers: {
-            label: "Headers",
+            name: "Headers",
             type: "data-type:basic.object",
         },
         body: {
-            label: "Body",
+            name: "Body",
             type: "data-type:basic.string",
         },
         params: {
-            label: "Query Parameters",
+            name: "Query Parameters",
             type: "data-type:basic.object",
         },
     }

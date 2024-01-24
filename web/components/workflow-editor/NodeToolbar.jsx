@@ -43,22 +43,22 @@ export default function NodeToolbar() {
 
     const hasIncomersToSelect = useStore(
         s => s.edges.some(
-            e => !s.nodeInternals.get(e.source).selected &&
-                s.nodeInternals.get(e.target).selected
+            e => !s.nodeInternals.get(e.source)?.selected &&
+                s.nodeInternals.get(e.target)?.selected
         )
     )
 
     const hasOutgoersToSelect = useStore(
         s => s.edges.some(
-            e => s.nodeInternals.get(e.source).selected &&
-                !s.nodeInternals.get(e.target).selected
+            e => s.nodeInternals.get(e.source)?.selected &&
+                !s.nodeInternals.get(e.target)?.selected
         )
     )
 
     const hasConnectionsToSelect = useStore(
         s => s.edges.some(
-            e => s.nodeInternals.get(e.source).selected &&
-                s.nodeInternals.get(e.target).selected &&
+            e => s.nodeInternals.get(e.source)?.selected &&
+                s.nodeInternals.get(e.target)?.selected &&
                 !e.selected
         )
     )

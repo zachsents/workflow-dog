@@ -2,6 +2,7 @@ import { Spinner } from "@nextui-org/react"
 import Center from "@web/components/layout/Center"
 import EditHeader from "@web/components/workflow-editor/EditHeader"
 import GraphEditor from "@web/components/workflow-editor/GraphEditor"
+import Runner from "@web/components/workflow-editor/Runner"
 import TriggerControl from "@web/components/workflow-editor/TriggerControl"
 import { useMustBeSignedIn } from "@web/modules/auth"
 import { useQueryParam } from "@web/modules/router"
@@ -20,8 +21,9 @@ export default function WorkflowPage() {
             <div className="flex flex-col items-stretch grow">
                 <EditHeader />
                 <div className="relative flex-1 flex items-stretch justify-stretch flex-col">
-                    <div className="absolute top-0 left-0 p-unit-xs pointer-events-none z-[1]">
+                    <div className="absolute top-0 left-0 w-full p-unit-xs pointer-events-none z-[1] flex justify-between items-start">
                         <TriggerControl />
+                        <Runner />
                     </div>
                     {isSuccess ?
                         <GraphEditor initialGraph={workflow?.graph} /> :

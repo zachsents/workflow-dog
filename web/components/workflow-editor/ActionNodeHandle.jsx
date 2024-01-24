@@ -1,16 +1,22 @@
 import { Button, Tooltip } from "@nextui-org/react"
-import { useDefinition } from "@web/modules/workflow-editor/graph/nodes"
+import { useCreateActionNode, useDefinition } from "@web/modules/workflow-editor/graph/nodes"
 import classNames from "classnames"
-import { TbActivity } from "react-icons/tb"
-import { Position, Handle as RFHandle, useStore, useNodeId } from "reactflow"
+import { TbActivity, TbArrowLeftSquare, TbArrowRightSquare, TbSparkles } from "react-icons/tb"
+import { Position, Handle as RFHandle, useNodeId, useStore, useReactFlow } from "reactflow"
 import util from "util"
 import Group from "../layout/Group"
+import { useRef } from "react"
 
 
 export default function ActionNodeHandle({ id, name, type, definition: passedDef }) {
 
+    const rf = useReactFlow()
     const nodeId = useNodeId()
     const nodeDefinition = useDefinition()
+
+    const ref = useRef()
+
+    const isSource = type === "source"
 
     const passedString = typeof passedDef === "string"
     let definition = passedString ? undefined : passedDef
@@ -36,8 +42,47 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
     const runValueNeedsExpansion = typeof runValue === "object" && Object.keys(runValue).length > 1 ||
         typeof runValue === "string" && runValue.length > 100
 
+    const isNodeSelected = useStore(s => s.nodeInternals.get(nodeId).selected)
+
+    // const menuDisclosure = useDisclosure()
+
+    const createNode = useCreateActionNode()
+    const addRecommended = () => {
+        if (!(isNodeSelected && !isConnected && definition?.recommendedNode))
+            return
+
+        const handleRect = ref.current.getBoundingClientRect()
+        const newNodePos = rf.screenToFlowPosition({
+            x: handleRect.left + handleRect.width / 2,
+            y: handleRect.top + handleRect.height / 2 - rf.getNode(nodeId).height / 2,
+        })
+        newNodePos.x += isSource ? 200 : -500
+
+        const { definition: newDef, ...newData } = definition.recommendedNode.data
+
+        createNode({
+            definition: newDef,
+            position: newNodePos,
+            data: newData,
+            connect: [isSource ? {
+                source: nodeId,
+                sourceHandle: id,
+                targetHandleType: definition.recommendedNode.handle,
+            } : {
+                target: nodeId,
+                targetHandle: id,
+                sourceHandleType: definition.recommendedNode.handle,
+            }],
+        })
+    }
+
     return (
-        <div>
+        <div
+            className="relative group"
+            // onMouseEnter={() => menuDisclosure.onOpen()}
+            // onMouseLeave={() => menuDisclosure.onClose()}
+            ref={ref}
+        >
             <RFHandle
                 id={id}
                 type={type}
@@ -51,29 +96,25 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
             >
                 <Group
                     className={classNames("flex-nowrap w-full pointer-events-none gap-1 px-3", {
-                        "flex-row-reverse": type == "source",
+                        "flex-row-reverse": isSource,
                     })}
                 >
                     {/* {definition.showHandleIcon && definition.icon &&
-                        <definition.icon size="0.7rem" color="currentColor" />} */}
-
+                                <definition.icon size="0.7rem" color="currentColor" />} */}
                     <p className="text-[0.625rem] text-current line-clamp-1">
                         {displayName}
                     </p>
                 </Group>
-
-                {selectedRun && type == "source" && hasRunValue &&
+                {selectedRun && isSource && hasRunValue &&
                     <div className="absolute top-1/2 -translate-y-1/2 nodrag left-full translate-x-2">
                         <Tooltip content={
                             <div className="flex flex-col items-stretch gap-unit-xs max-w-[20rem]">
                                 <p className="text-xs text-default-500 text-center">
                                     Output From Selected Run
                                 </p>
-
                                 <p className="line-clamp-4">
                                     {typeof runValue === "string" ? runValue : <pre>{util.inspect(runValue)}</pre>}
                                 </p>
-
                                 {runValueNeedsExpansion &&
                                     <p className="text-xs text-default-500 text-center">
                                         Click to view full data
@@ -89,6 +130,44 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
                         </Tooltip>
                     </div>}
             </RFHandle>
+
+            {isNodeSelected && !isConnected && definition?.recommendedNode &&
+                <Tooltip content={
+                    <Group className={classNames("gap-unit-sm", { "flex-row-reverse": isSource })}>
+                        {isSource ? <TbArrowRightSquare /> : <TbArrowLeftSquare />}
+                        <span>Add recommended node</span>
+                    </Group>
+                } closeDelay={0} placement={isSource ? "right" : "left"}>
+                    <Button
+                        size="sm" isIconOnly radius="full" color="primary"
+                        onPress={addRecommended}
+                        className={classNames(
+                            "absolute top-1/2 -translate-y-1/2 nodrag min-h-0 min-w-0 h-auto w-auto p-1 hover:scale-110 mx-0.5",
+                            isSource ? "left-full" : "right-full",
+                        )}
+                    >
+                        <TbSparkles className="text-[0.8em]" />
+                    </Button>
+                </Tooltip>}
+
+            {/* <Dropdown
+                isOpen
+                // isOpen={menuDisclosure.isOpen}
+                onOpenChange={menuDisclosure.onOpenChange}
+                placement={type == "target" ? "left" : "right"}
+            >
+                <DropdownTrigger>
+                    <div className="absolute left-0 h-full w-0 top-0" />
+                </DropdownTrigger>
+                <DropdownMenu>
+                    <DropdownItem startContent={<TbSparkles />} key="recommended">
+                        Add recommended node
+                    </DropdownItem>
+                    <DropdownItem startContent={<TbSearch />} key="search">
+                        Search nodes
+                    </DropdownItem>
+                </DropdownMenu>
+            </Dropdown> */}
         </div>
     )
 }

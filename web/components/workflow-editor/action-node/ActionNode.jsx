@@ -1,7 +1,7 @@
 import { useDefinition, useDisabled, useNodeColors, useUpdateInternals } from "@web/modules/workflow-editor/graph/nodes"
 import classNames from "classnames"
 import { forwardRef, useEffect, useMemo } from "react"
-import { useNodeId, useStore, useReactFlow } from "reactflow"
+import { useNodeId, useReactFlow, useStore } from "reactflow"
 import ActionNodeHandle from "../ActionNodeHandle"
 // import CheckableMenuItem from "./CheckableMenuItem"
 import NodeModifierWrapper from "../NodeModifierWrapper"
@@ -22,14 +22,25 @@ export default function ActionNode({ id, data, selected }) {
 
     // const hasValidationErrors = useNodeHasValidationErrors(id)
 
-    const shownInputs = useMemo(() => data.inputs?.filter(
-        input => input.mode == "handle" &&
-            !input.hidden
-    ), [data.inputs])
+    const inputGroups = useMemo(
+        () => Object.entries(definition?.inputs ?? {})
+            .map(([inputDefId, inputDef]) => [
+                inputDef.group ? inputDef.name : undefined,
+                data.inputs.filter(input => input.definition == inputDefId && !input.hidden && input.mode === "handle"),
+            ])
+            .filter(([, inputs]) => inputs.length > 0),
+        [data.inputs]
+    )
 
-    const shownOutputs = useMemo(() => data.outputs?.filter(
-        output => !output.hidden
-    ), [data.outputs])
+    const outputGroups = useMemo(
+        () => Object.entries(definition?.outputs ?? {})
+            .map(([outputDefId, outputDef]) => [
+                outputDef.group ? outputDef.name : undefined,
+                data.outputs.filter(output => output.definition == outputDefId && !output.hidden),
+            ])
+            .filter(([, outputs]) => outputs.length > 0),
+        [data.outputs]
+    )
 
     const [_disabled, upstreamDisabled, , disabledMessage] = useDisabled(id)
     const disabled = upstreamDisabled || _disabled
@@ -76,9 +87,20 @@ export default function ActionNode({ id, data, selected }) {
                                 <Group
                                     className="justify-between flex-nowrap py-unit-xs"
                                 >
-                                    <Group className="flex-col justify-center !items-start gap-2 -ml-2">
-                                        {shownInputs?.map(input =>
-                                            <ActionNodeHandle {...input} type="target" key={input.id} />
+                                    <Group className="flex-col justify-center !items-start gap-2">
+                                        {inputGroups.map(([groupName, inputs], i) =>
+                                            <div className="px-2" key={groupName || i}>
+                                                {groupName &&
+                                                    <p className="text-[0.625rem] text-default-500">
+                                                        {groupName}
+                                                    </p>}
+
+                                                <div className="flex flex-col items-start gap-1 -ml-4">
+                                                    {inputs.map(input =>
+                                                        <ActionNodeHandle {...input} type="target" key={input.id} />
+                                                    )}
+                                                </div>
+                                            </div>
                                         )}
                                     </Group>
 
@@ -97,12 +119,22 @@ export default function ActionNode({ id, data, selected }) {
                                                 />
                                             </div>
                                         )}
-
                                     </div>
 
-                                    <Group className="flex-col justify-center !items-end gap-2 -mr-2">
-                                        {shownOutputs?.map(output =>
-                                            <ActionNodeHandle {...output} type="source" key={output.id} />
+                                    <Group className="flex-col justify-center !items-end gap-2">
+                                        {outputGroups.map(([groupName, outputs], i) =>
+                                            <div className="px-2" key={groupName || i}>
+                                                {groupName &&
+                                                    <p className="text-[0.625rem] text-default-500">
+                                                        {groupName}
+                                                    </p>}
+
+                                                <div className="flex flex-col items-start gap-1 -mr-4">
+                                                    {outputs.map(output =>
+                                                        <ActionNodeHandle {...output} type="source" key={output.id} />
+                                                    )}
+                                                </div>
+                                            </div>
                                         )}
                                     </Group>
                                 </Group>

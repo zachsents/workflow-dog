@@ -10,9 +10,12 @@ export default function ActionNodeHeader({ withSettings = false }) {
     const id = useNodeId()
 
     const definition = useDefinition()
-    const displayName = useNodePropertyValue(undefined, "data.name") || definition?.name
+    const name = useNodePropertyValue(undefined, "data.name")
+    const displayName = name || definition?.name
 
     const storeApi = useStoreApi()
+
+    // const nodeName = useStore(s => s.nodeInternals.get(id).data.name)
 
     return (
         <Group className="w-full justify-between gap-unit-lg text-white p-1 pl-2">
@@ -24,9 +27,14 @@ export default function ActionNodeHeader({ withSettings = false }) {
                 <Group className="gap-unit-xs">
                     {definition.icon &&
                         <definition.icon />}
-                    <p className="text-sm font-semibold">
-                        {displayName}
-                    </p>
+                    <div>
+                        <p className="text-sm font-semibold">
+                            {displayName}
+                        </p>
+                        {!!name && <p className="text-xs opacity-75">
+                            {definition?.name}
+                        </p>}
+                    </div>
                 </Group>
             </Tooltip>
             <Group className="gap-1 flex-nowrap">

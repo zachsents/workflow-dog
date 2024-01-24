@@ -19,7 +19,7 @@ export default {
         template: {
             description: "The template to insert values into. Use {SubstitutionName} to insert a value.",
             defaultMode: "handle",
-            allowedModes: ["handle"],
+            allowedModes: ["handle", "config"],
             stringSettings: {
                 long: true,
             },
@@ -44,7 +44,7 @@ export default {
             name: "Substitutions",
             description: "A value to insert into the template. If your template contains {FirstName}, a substitution named FirstName will replace it.",
             defaultMode: "handle",
-            allowedModes: ["handle"],
+            allowedModes: ["handle", "config"],
             named: true,
             derivedFrom: "template",
         },

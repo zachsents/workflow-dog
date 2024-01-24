@@ -1,6 +1,7 @@
 import { Button, Divider, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Tab, Tabs, Textarea } from "@nextui-org/react"
 import { useDebouncedCallback, useDebouncedEffect } from "@react-hookz/web"
 import Group from "@web/components/layout/Group"
+import { singular } from "@web/modules/grammar"
 import { useRFStoreProperty } from "@web/modules/workflow-editor/graph"
 import { useSetInputValue } from "@web/modules/workflow-editor/graph/interfaces"
 import { useDefinition, useNodeColors } from "@web/modules/workflow-editor/graph/nodes"
@@ -11,9 +12,8 @@ import { Fragment, useEffect, useMemo } from "react"
 import { TbArrowLeftSquare, TbCursorText, TbPencil, TbPencilOff, TbPlus, TbX } from "react-icons/tb"
 import { useNodeId, useReactFlow, useStore } from "reactflow"
 import { PREFIX } from "shared/prefixes"
-import { typeLabel } from "shared/types"
+import { object as typeMap } from "data-types/common"
 import ActionNodeHeader from "./ActionNodeHeader"
-import { singular } from "@web/modules/grammar"
 
 
 export default function ActionNodeModal() {
@@ -444,7 +444,7 @@ function SelectConfig({ input, definition, label, ...props }) {
                     <div className="gap-unit-sm">
                         <p>{item.label}</p>
                         {item.type &&
-                            <p className="text-default-500 text-xs">{typeLabel(item.type)}</p>}
+                            <p className="text-default-500 text-xs">{typeMap[item.type]}</p>}
                     </div>
                 </SelectItem>}
         </Select>

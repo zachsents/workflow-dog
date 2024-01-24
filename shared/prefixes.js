@@ -11,4 +11,6 @@ export const PREFIX = {
     MODIFIER_TYPE: "modifier-type",
     MODIFIER_INPUT: "modifier-input",
     MODIFIER_OUTPUT: "modifier-output",
+    INTEGRATION: "integration",
+    DATA_TYPE: "data-type",
 }

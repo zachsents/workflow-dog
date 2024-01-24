@@ -1,6 +1,5 @@
-import { Type } from "shared/types"
-import { PREFIX } from "shared/prefixes"
 import { TbActivity, TbArrowsSplit2 } from "react-icons/tb"
+import { PREFIX } from "shared/prefixes"
 
 
 const modifiers = [
@@ -11,7 +10,7 @@ const modifiers = [
         inputs: {
             condition: {
                 name: "Condition",
-                type: Type.Boolean(),
+                type: "data-type:basic.boolean",
             }
         }
     },
@@ -22,13 +21,13 @@ const modifiers = [
         inputs: {
             promise: {
                 name: "Value",
-                type: Type.Any(),
+                type: null,
             }
         },
         outputs: {
             done: {
                 name: "Done",
-                type: Type.Any(),
+                type: null,
             }
         }
     }

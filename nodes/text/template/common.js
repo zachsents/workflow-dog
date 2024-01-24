@@ -1,4 +1,3 @@
-import { Type } from "shared/types.js"
 
 
 export default {
@@ -8,11 +7,11 @@ export default {
     inputs: {
         template: {
             name: "Template",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
         substitution: {
             name: "Substitution",
-            type: Type.String(),
+            type: "data-type:basic.string",
             group: true,
         },
     },
@@ -20,7 +19,7 @@ export default {
     outputs: {
         text: {
             name: "Text",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
     },
 }

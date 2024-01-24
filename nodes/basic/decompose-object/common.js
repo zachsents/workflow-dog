@@ -1,4 +1,3 @@
-import { Type } from "shared/types"
 
 export default {
     name: "Decompose Object",
@@ -6,13 +5,13 @@ export default {
     inputs: {
         object: {
             name: "Object",
-            type: Type.Object(),
+            type: "data-type:basic.object",
         },
     },
     outputs: {
         properties: {
             name: "Properties",
-            type: Type.Any(),
+            type: null,
             group: true,
         },
     },

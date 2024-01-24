@@ -18,14 +18,32 @@ importers:
       eslint-plugin-react: 7.33.2_eslint@8.56.0
       globals: 13.24.0
 
+  data-types:
+    specifiers:
+      '@zachsents/barrelboy': ^1.0.27
+      shared: workspace:*
+    dependencies:
+      '@zachsents/barrelboy': 1.0.27
+      shared: link:../shared
+
+  integrations:
+    specifiers:
+      '@zachsents/barrelboy': ^1.0.27
+      shared: workspace:*
+    dependencies:
+      '@zachsents/barrelboy': 1.0.27
+      shared: link:../shared
+
   nodes:
     specifiers:
       '@zachsents/barrelboy': ^1.0.27
+      data-types: workspace:*
       joi: ^17.11.1
       shared: workspace:*
       triggers: workspace:*
     dependencies:
       '@zachsents/barrelboy': 1.0.27
+      data-types: link:../data-types
       shared: link:../shared
       triggers: link:../triggers
     devDependencies:
@@ -37,9 +55,11 @@ importers:
   triggers:
     specifiers:
       '@zachsents/barrelboy': ^1.0.27
+      data-types: workspace:*
       shared: workspace:*
     dependencies:
       '@zachsents/barrelboy': 1.0.27
+      data-types: link:../data-types
       shared: link:../shared
 
   web:
@@ -64,11 +84,13 @@ importers:
       autoprefixer: ^10.4.14
       classnames: ^2.5.1
       color: ^4.2.3
+      data-types: workspace:*
       dayjs: ^1.11.9
       firebase: ^10.4.0
       framer-motion: ^10.12.18
       fuzzy: ^0.1.3
       immer: ^10.0.3
+      integrations: workspace:*
       javascript-time-ago: ^2.5.9
       joi: ^17.11.1
       lodash: ^4.17.21
@@ -104,11 +126,13 @@ importers:
       '@zachsents/fire-query': 1.2.5_react-dom@18.2.0
       classnames: 2.5.1
       color: 4.2.3
+      data-types: link:../data-types
       dayjs: 1.11.10
       firebase: 10.7.1
       framer-motion: 10.18.0_biqbaboplfbrettd7655fr4n2y
       fuzzy: 0.1.3
       immer: 10.0.3
+      integrations: link:../integrations
       javascript-time-ago: 2.5.9
       joi: 17.11.1
       lodash: 4.17.21

@@ -29,8 +29,6 @@ export default function GraphEditor({ initialGraph: { nodes: initialNodes = [], 
 
     const [onCopy, onPaste] = useGraphCopyPaste()
 
-    // useGraphSaving(nodes, edges, setNodes, setEdges)
-
     return (
         <>
             <ReactFlow
@@ -56,8 +54,15 @@ export default function GraphEditor({ initialGraph: { nodes: initialNodes = [], 
                 selectNodesOnDrag={false}
                 selectionKeyCode={"Control"}
                 multiSelectionKeyCode={"Shift"}
-                zoomActivationKeyCode={null}
+                zoomActivationKeyCode={"Control"}
                 deleteKeyCode={graphDeleteKeys}
+
+                // panOnScroll
+                // panOnScrollMode="free"
+                // panOnScrollSpeed={1.5}
+                // zoomOnPinch
+                // zoomOnDoubleClick
+                // zoomOnScroll={false}
 
                 className="flex-1"
 

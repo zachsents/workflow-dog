@@ -1,4 +1,3 @@
-import { Type } from "shared/types"
 
 export default {
     name: "Manual",
@@ -7,13 +6,13 @@ export default {
     inputs: {
         inputData: {
             name: "Input Data",
-            type: Type.Any(),
+            type: null,
         }
     },
     outputs: {
         outputData: {
             name: "Output Data",
-            type: Type.Any(),
+            type: null,
         }
     },
 }

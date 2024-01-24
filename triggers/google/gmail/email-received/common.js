@@ -1,4 +1,3 @@
-import { Type } from "shared/types.js"
 
 export default {
     name: "Gmail Email Received",
@@ -8,39 +7,39 @@ export default {
     inputs: {
         messageId: {
             name: "Message ID",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
         senderName: {
             name: "Sender Name",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
         senderEmailAddress: {
             name: "Sender Email Address",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
         subject: {
             name: "Subject",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
         date: {
             name: "Date",
-            type: Type.Date(),
+            type: "data-type:basic.date",
         },
         plainText: {
             name: "Plain Text",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
         html: {
             name: "HTML",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
         recipientName: {
             name: "Recipient Name",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
         recipientEmailAddress: {
             name: "Recipient Email Address",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
     }
 }

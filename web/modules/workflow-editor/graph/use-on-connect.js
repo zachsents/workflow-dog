@@ -1,12 +1,13 @@
 import { Button, Tooltip } from "@nextui-org/react"
 import { useNotifications } from "@web/modules/notifications"
 import { object as modifierDefs } from "@web/modules/workflow-editor/modifiers"
+import { object as typeMap } from "data-types/common"
 import { object as nodeDefs } from "nodes/web"
 import { useCallback } from "react"
 import { TbAlertTriangle } from "react-icons/tb"
 import { useReactFlow } from "reactflow"
 import { PREFIX } from "shared/prefixes"
-import { doTypesMatch, typeLabel } from "shared/types"
+import { doTypesMatch } from "data-types"
 import { uniqueId } from "../util"
 
 
@@ -58,10 +59,10 @@ export function useOnConnect() {
             return
         }
 
-        console.debug("Tried to connect", typeLabel(sourceType), "with", typeLabel(targetType))
+        console.debug("Tried to connect", typeMap[sourceType], "with", typeMap[targetType])
 
         const notifId = notify({
-            message: `A ${typeLabel(sourceType)} output can't be connected to a ${typeLabel(targetType)} input.`,
+            message: `A ${typeMap[sourceType]} output can't be connected to a ${typeMap[targetType]} input.`,
             classNames: {
                 icon: "bg-danger",
             },

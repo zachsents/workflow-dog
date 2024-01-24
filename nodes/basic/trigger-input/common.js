@@ -1,4 +1,3 @@
-import { Type } from "shared/types"
 
 export default {
     name: "Trigger Input",
@@ -6,13 +5,13 @@ export default {
     inputs: {
         input: {
             name: "Input",
-            type: Type.StringEnum(),
-        }
+            type: "data-type:basic.string",
+        },
     },
     outputs: {
         value: {
             name: "Value",
-            type: Type.Any(),
+            type: null,
         },
     },
 }

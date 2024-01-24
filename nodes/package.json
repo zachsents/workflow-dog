@@ -13,6 +13,7 @@
     "dependencies": {
         "@zachsents/barrelboy": "^1.0.27",
         "triggers": "workspace:*",
+        "data-types": "workspace:*",
         "shared": "workspace:*"
     },
     "devDependencies": {

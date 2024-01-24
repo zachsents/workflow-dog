@@ -1,43 +1,42 @@
-import { Type } from "shared/types.js"
 
 export default {
     name: "Request (Sync URL)",
     whenName: "When a URL is requested",
     description: "Triggered by a request to a URL. Responds after the script has finished running.",
-    workflowInputs: {
+    inputs: {
         method: {
             label: "Method",
-            type: Type.String("GET", "POST", "PUT", "PATCH", "DELETE"),
+            type: "data-type:basic.string",
         },
         url: {
             label: "URL",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
         headers: {
             label: "Headers",
-            type: Type.Object(),
+            type: "data-type:basic.object",
         },
         body: {
             label: "Body",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
         params: {
             label: "Query Parameters",
-            type: Type.Object(),
+            type: "data-type:basic.object",
         },
     },
-    workflowOutputs: {
+    outputs: {
         status: {
             label: "Status Code",
-            type: Type.Number(),
+            type: "data-type:basic.number",
         },
         headers: {
             label: "Headers",
-            type: Type.Object(),
+            type: "data-type:basic.object",
         },
         body: {
             label: "Body",
-            type: Type.String(),
+            type: "data-type:basic.string",
         },
     },
 }

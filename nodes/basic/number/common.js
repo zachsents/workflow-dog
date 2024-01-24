@@ -1,4 +1,3 @@
-import { Type } from "shared/types.js"
 
 export default {
     name: "Number",
@@ -6,7 +5,7 @@ export default {
     outputs: {
         number: {
             name: "Number",
-            type: Type.Number(),
+            type: "data-type:basic.number",
         },
     },
 }

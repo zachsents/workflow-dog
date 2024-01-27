@@ -34,7 +34,10 @@ export function useGraphSaving() {
         }
     )
 
-    const isReadyToSave = useMountDelay(2000)
+    const isReadyToSave = useMountDelay(1000, {
+        callback: () => console.debug("Ready to save graph"),
+        enabled: isWorkflowLoaded,
+    })
 
     useDebouncedEffect(() => {
         if (!isWorkflowLoaded || updateGraph.isPending || !isReadyToSave)

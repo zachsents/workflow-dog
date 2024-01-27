@@ -90,13 +90,26 @@ export function useSyncToState(value, setOtherValue) {
 }
 
 
-export function useMountDelay(delay = 1000) {
+export function useMountDelay(delay = 1000, {
+    callback,
+    enabled = true,
+} = {}) {
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
-        const timeout = setTimeout(() => setMounted(true), delay)
-        return () => clearTimeout(timeout)
-    }, [delay])
+        if (!enabled)
+            return
+
+        const timeoutId = setTimeout(() => {
+            setMounted(true)
+        }, delay)
+
+        return () => clearTimeout(timeoutId)
+    }, [delay, enabled])
+
+    useEffect(() => {
+        if (mounted) callback?.()
+    }, [mounted])
 
     return mounted
 }

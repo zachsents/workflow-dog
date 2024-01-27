@@ -1,4 +1,5 @@
 import { useDebouncedEffect } from "@react-hookz/web"
+import { useMountDelay } from "@web/modules/util"
 import _ from "lodash"
 import { useReactFlow, useStore } from "reactflow"
 
@@ -18,7 +19,13 @@ export default function GhostBuster() {
         })
     ), _.isEqual)
 
+    const isReadyToSave = useMountDelay(2000, {
+        callback: () => console.debug("[GhostBuster] Ready to work!"),
+    })
+
     useDebouncedEffect(() => {
+        if (!isReadyToSave) return
+
         const edgesToRemove = rf.getEdges().filter(edge => {
             const sourceExists = handleMap[edge.source]?.includes(edge.sourceHandle)
             const targetExists = handleMap[edge.target]?.includes(edge.targetHandle)

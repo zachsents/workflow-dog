@@ -1,11 +1,11 @@
+import { Select, SelectItem } from "@nextui-org/react"
+import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
+import { useWorkflow } from "@web/modules/workflows"
+import { object as typeMap } from "data-types/common"
+import { useMemo } from "react"
 import { TbPlayerSkipForward } from "react-icons/tb"
 import colors from "tailwindcss/colors"
-import { useWorkflow } from "@web/modules/workflows"
 import { object as triggerMap } from "triggers/web"
-import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
-import { useMemo } from "react"
-import { object as typeMap } from "data-types/common"
-import { Select, SelectItem } from "@nextui-org/react"
 
 
 export default {

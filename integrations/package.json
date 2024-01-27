@@ -12,5 +12,11 @@
     "dependencies": {
         "@zachsents/barrelboy": "^1.0.27",
         "shared": "workspace:*"
+    },
+    "optionalDependencies": {
+        "react-icons": "*",
+        "reactflow": "*",
+        "@nextui-org/react": "*",
+        "tailwindcss": "*"
     }
 }

@@ -13,5 +13,11 @@
         "@zachsents/barrelboy": "^1.0.27",
         "data-types": "workspace:*",
         "shared": "workspace:*"
+    },
+    "optionalDependencies": {
+        "react-icons": "*",
+        "reactflow": "*",
+        "@nextui-org/react": "*",
+        "tailwindcss": "*"
     }
 }

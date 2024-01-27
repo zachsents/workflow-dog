@@ -1,5 +1,11 @@
 lockfileVersion: 5.4
 
+overrides:
+  react-icons: ^4.10.1
+  reactflow: ^11.10.1
+  '@nextui-org/react': ^2.2.9
+  tailwindcss: ^3.4.1
+
 importers:
 
   .:
@@ -28,24 +34,42 @@ importers:
 
   integrations:
     specifiers:
+      '@nextui-org/react': ^2.2.9
       '@zachsents/barrelboy': ^1.0.27
+      react-icons: ^4.10.1
+      reactflow: ^11.10.1
       shared: workspace:*
+      tailwindcss: ^3.4.1
     dependencies:
       '@zachsents/barrelboy': 1.0.27
       shared: link:../shared
+    optionalDependencies:
+      '@nextui-org/react': 2.2.9_jt4seicc3u7ey7g5zdvw67nkiu
+      react-icons: 4.12.0_react@18.2.0
+      reactflow: 11.10.1_biqbaboplfbrettd7655fr4n2y
+      tailwindcss: 3.4.1
 
   nodes:
     specifiers:
+      '@nextui-org/react': ^2.2.9
       '@zachsents/barrelboy': ^1.0.27
       data-types: workspace:*
       joi: ^17.11.1
+      react-icons: ^4.10.1
+      reactflow: ^11.10.1
       shared: workspace:*
+      tailwindcss: ^3.4.1
       triggers: workspace:*
     dependencies:
       '@zachsents/barrelboy': 1.0.27
       data-types: link:../data-types
       shared: link:../shared
       triggers: link:../triggers
+    optionalDependencies:
+      '@nextui-org/react': 2.2.9_jt4seicc3u7ey7g5zdvw67nkiu
+      react-icons: 4.12.0_react@18.2.0
+      reactflow: 11.10.1_biqbaboplfbrettd7655fr4n2y
+      tailwindcss: 3.4.1
     devDependencies:
       joi: 17.11.1
 
@@ -54,13 +78,22 @@ importers:
 
   triggers:
     specifiers:
+      '@nextui-org/react': ^2.2.9
       '@zachsents/barrelboy': ^1.0.27
       data-types: workspace:*
+      react-icons: ^4.10.1
+      reactflow: ^11.10.1
       shared: workspace:*
+      tailwindcss: ^3.4.1
     dependencies:
       '@zachsents/barrelboy': 1.0.27
       data-types: link:../data-types
       shared: link:../shared
+    optionalDependencies:
+      '@nextui-org/react': 2.2.9_jt4seicc3u7ey7g5zdvw67nkiu
+      react-icons: 4.12.0_react@18.2.0
+      reactflow: 11.10.1_biqbaboplfbrettd7655fr4n2y
+      tailwindcss: 3.4.1
 
   web:
     specifiers:
@@ -902,7 +935,6 @@ packages:
   /@grpc/proto-loader/0.7.10:
     resolution: {integrity: sha512-CAqDfoaQ8ykFd9zqBDn4k6iWT9loLAlc2ETmDFS9JCD70gDcnA4L3AFEo2iV7KyAtAAHFW9ftq1Fz+Vsgq80RQ==}
     engines: {node: '>=6'}
-    hasBin: true
     dependencies:
       lodash.camelcase: 4.3.0
       long: 5.2.3
@@ -1305,6 +1337,46 @@ packages:
       - tailwind-variants
     dev: false
 
+  /@nextui-org/autocomplete/2.0.9_rksrmsymzvlox4h5catesuhk7y:
+    resolution: {integrity: sha512-ViPXrZnP35k7LF+TBA4w8nqu0OEj9p1z9Rt7rwrACmY2VmDGY6h6a6nDCMjhuTVXptftRvzxfIPsIyzBYqxb0g==}
+    peerDependencies:
+      '@nextui-org/system': '>=2.0.0'
+      '@nextui-org/theme': '>=2.1.0'
+      framer-motion: '>=4.0.0'
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@nextui-org/aria-utils': 2.0.15_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/button': 2.0.26_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/input': 2.1.16_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/listbox': 2.1.16_zmj373ow7wlb3fxfkhoilp2gaa
+      '@nextui-org/popover': 2.1.14_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/react-utils': 2.0.10_react@18.2.0
+      '@nextui-org/scroll-shadow': 2.1.12_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/shared-icons': 2.0.6_react@18.2.0
+      '@nextui-org/shared-utils': 2.0.4_react@18.2.0
+      '@nextui-org/spinner': 2.0.24_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/system': 2.0.15_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/theme': 2.1.17_tailwindcss@3.4.1
+      '@nextui-org/use-aria-button': 2.0.6_react@18.2.0
+      '@react-aria/combobox': 3.8.2_biqbaboplfbrettd7655fr4n2y
+      '@react-aria/focus': 3.16.0_react@18.2.0
+      '@react-aria/i18n': 3.10.0_react@18.2.0
+      '@react-aria/interactions': 3.20.1_react@18.2.0
+      '@react-aria/utils': 3.23.0_react@18.2.0
+      '@react-aria/visually-hidden': 3.8.8_react@18.2.0
+      '@react-stately/combobox': 3.8.1_react@18.2.0
+      '@react-types/combobox': 3.10.0_react@18.2.0
+      '@react-types/shared': 3.22.0_react@18.2.0
+      framer-motion: 10.18.0_biqbaboplfbrettd7655fr4n2y
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - tailwind-variants
+    dev: false
+    optional: true
+
   /@nextui-org/avatar/2.0.24_at2xkf7yqzmqn4s7m25g7j2qpi:
     resolution: {integrity: sha512-3QUn8v61iNvAYogUbEDVnhDjBK6WBxxFYLp95a0H52zN0p2LHXe+UNwdGZYFo5QNWx6CHGH3vh2AHlLLy3WFSQ==}
     peerDependencies:
@@ -1529,6 +1601,35 @@ packages:
       - tailwind-variants
     dev: false
 
+  /@nextui-org/dropdown/2.1.16_rksrmsymzvlox4h5catesuhk7y:
+    resolution: {integrity: sha512-3KINNvC7Cz+deQltCM8gaB7iJCfU4Qsp1fwnoy1wUEjeZhEtPOPR59oTyqT+gPaPIisP1+LLOfcqRl4jNQoVXw==}
+    peerDependencies:
+      '@nextui-org/system': '>=2.0.0'
+      '@nextui-org/theme': '>=2.1.0'
+      framer-motion: '>=4.0.0'
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@nextui-org/menu': 2.0.17_zmj373ow7wlb3fxfkhoilp2gaa
+      '@nextui-org/popover': 2.1.14_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/react-utils': 2.0.10_react@18.2.0
+      '@nextui-org/shared-utils': 2.0.4_react@18.2.0
+      '@nextui-org/system': 2.0.15_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/theme': 2.1.17_tailwindcss@3.4.1
+      '@react-aria/focus': 3.16.0_react@18.2.0
+      '@react-aria/menu': 3.12.0_biqbaboplfbrettd7655fr4n2y
+      '@react-aria/utils': 3.23.0_react@18.2.0
+      '@react-stately/menu': 3.6.0_react@18.2.0
+      '@react-types/menu': 3.9.6_react@18.2.0
+      framer-motion: 10.18.0_biqbaboplfbrettd7655fr4n2y
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - tailwind-variants
+    dev: false
+    optional: true
+
   /@nextui-org/framer-transitions/2.0.15_xv2ayqmglbikaocsxs2ey4gqky:
     resolution: {integrity: sha512-UlWMCAFdrq8wKrYFGwc+O4kFhKCkL4L9ZadBkP0PqjmfyAC2gA3ygRbNqtKhFMWeKbBAiC8qQ9aTBEA/+0r/EA==}
     peerDependencies:
@@ -1589,6 +1690,34 @@ packages:
     transitivePeerDependencies:
       - '@types/react'
     dev: false
+
+  /@nextui-org/input/2.1.16_at2xkf7yqzmqn4s7m25g7j2qpi:
+    resolution: {integrity: sha512-nUTlAvsXj5t88ycvQdICxf78/pko6Wznx2OomvYjb3E45eb77twQcWUDhydkJCWIh3b4AhGHSMM6GYxwWUgMDA==}
+    peerDependencies:
+      '@nextui-org/system': '>=2.0.0'
+      '@nextui-org/theme': '>=2.1.0'
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@nextui-org/react-utils': 2.0.10_react@18.2.0
+      '@nextui-org/shared-icons': 2.0.6_react@18.2.0
+      '@nextui-org/shared-utils': 2.0.4_react@18.2.0
+      '@nextui-org/system': 2.0.15_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/theme': 2.1.17_tailwindcss@3.4.1
+      '@react-aria/focus': 3.16.0_react@18.2.0
+      '@react-aria/interactions': 3.20.1_react@18.2.0
+      '@react-aria/textfield': 3.14.1_react@18.2.0
+      '@react-aria/utils': 3.23.0_react@18.2.0
+      '@react-stately/utils': 3.9.0_react@18.2.0
+      '@react-types/shared': 3.22.0_react@18.2.0
+      '@react-types/textfield': 3.9.0_react@18.2.0
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      react-textarea-autosize: 8.5.3_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+    dev: false
+    optional: true
 
   /@nextui-org/kbd/2.0.25_dknucdtmvthtbcpowyrb64dvsi:
     resolution: {integrity: sha512-cYwbEjp/+/tjtOdmiRy2UHjfBhP3bqd5e+JFTa5sY1HotckUZrCintATyBcg9bPa3iSPUI44M6Cb9e0oAUUeMA==}
@@ -1723,6 +1852,41 @@ packages:
       - tailwind-variants
     dev: false
 
+  /@nextui-org/modal/2.0.28_rksrmsymzvlox4h5catesuhk7y:
+    resolution: {integrity: sha512-unfP0EMF3FDg5CkRqou03s4/BopWbaBTeVIMZeA2A1WF5teHUOmpLdp44Z1KOoWB1RVMDVd4JeoauNHNhJMp0g==}
+    peerDependencies:
+      '@nextui-org/system': '>=2.0.0'
+      '@nextui-org/theme': '>=2.1.0'
+      framer-motion: '>=4.0.0'
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@nextui-org/framer-transitions': 2.0.15_xv2ayqmglbikaocsxs2ey4gqky
+      '@nextui-org/react-utils': 2.0.10_react@18.2.0
+      '@nextui-org/shared-icons': 2.0.6_react@18.2.0
+      '@nextui-org/shared-utils': 2.0.4_react@18.2.0
+      '@nextui-org/system': 2.0.15_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/theme': 2.1.17_tailwindcss@3.4.1
+      '@nextui-org/use-aria-button': 2.0.6_react@18.2.0
+      '@nextui-org/use-aria-modal-overlay': 2.0.6_biqbaboplfbrettd7655fr4n2y
+      '@nextui-org/use-disclosure': 2.0.6_react@18.2.0
+      '@react-aria/dialog': 3.5.10_biqbaboplfbrettd7655fr4n2y
+      '@react-aria/focus': 3.16.0_react@18.2.0
+      '@react-aria/interactions': 3.20.1_react@18.2.0
+      '@react-aria/overlays': 3.20.0_biqbaboplfbrettd7655fr4n2y
+      '@react-aria/utils': 3.23.0_react@18.2.0
+      '@react-stately/overlays': 3.6.4_react@18.2.0
+      '@react-types/overlays': 3.8.4_react@18.2.0
+      framer-motion: 10.18.0_biqbaboplfbrettd7655fr4n2y
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      react-remove-scroll: 2.5.7_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - tailwind-variants
+    dev: false
+    optional: true
+
   /@nextui-org/navbar/2.0.27_2amim45okcdukprcvislqbaxmm:
     resolution: {integrity: sha512-iP4Pn4ItQkAW1nbu1Jmrh5l9pMVG43lDxq9rbx6DbLjLnnZOOrE6fURb8uN5NVy3ooV5dF02zKAoxlkE5fN/xw==}
     peerDependencies:
@@ -1753,6 +1917,38 @@ packages:
       - '@types/react'
       - tailwind-variants
     dev: false
+
+  /@nextui-org/navbar/2.0.27_rksrmsymzvlox4h5catesuhk7y:
+    resolution: {integrity: sha512-iP4Pn4ItQkAW1nbu1Jmrh5l9pMVG43lDxq9rbx6DbLjLnnZOOrE6fURb8uN5NVy3ooV5dF02zKAoxlkE5fN/xw==}
+    peerDependencies:
+      '@nextui-org/system': '>=2.0.0'
+      '@nextui-org/theme': '>=2.1.0'
+      framer-motion: '>=4.0.0'
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@nextui-org/framer-transitions': 2.0.15_xv2ayqmglbikaocsxs2ey4gqky
+      '@nextui-org/react-utils': 2.0.10_react@18.2.0
+      '@nextui-org/shared-utils': 2.0.4_react@18.2.0
+      '@nextui-org/system': 2.0.15_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/theme': 2.1.17_tailwindcss@3.4.1
+      '@nextui-org/use-aria-toggle-button': 2.0.6_react@18.2.0
+      '@nextui-org/use-scroll-position': 2.0.4_react@18.2.0
+      '@react-aria/focus': 3.16.0_react@18.2.0
+      '@react-aria/interactions': 3.20.1_react@18.2.0
+      '@react-aria/overlays': 3.20.0_biqbaboplfbrettd7655fr4n2y
+      '@react-aria/utils': 3.23.0_react@18.2.0
+      '@react-stately/toggle': 3.7.0_react@18.2.0
+      '@react-stately/utils': 3.9.0_react@18.2.0
+      framer-motion: 10.18.0_biqbaboplfbrettd7655fr4n2y
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      react-remove-scroll: 2.5.7_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - tailwind-variants
+    dev: false
+    optional: true
 
   /@nextui-org/pagination/2.0.26_at2xkf7yqzmqn4s7m25g7j2qpi:
     resolution: {integrity: sha512-OVpkpXqUKRuMRIcYESBAL95d3pqZ17SKAyNINMiJ/DwWnrzJu/LXGmFwTuYRoBdqHFlm7guGqZbHmAkcS/Fgow==}
@@ -1810,6 +2006,41 @@ packages:
       - '@types/react'
       - tailwind-variants
     dev: false
+
+  /@nextui-org/popover/2.1.14_rksrmsymzvlox4h5catesuhk7y:
+    resolution: {integrity: sha512-fqqktFQ/chIBS9Y3MghL6KX6qAy3hodtXUDchnxLa1GL+oi6TCBLUjo+wgI5EMJrTTbqo/eFLui/Ks00JfCj+A==}
+    peerDependencies:
+      '@nextui-org/system': '>=2.0.0'
+      '@nextui-org/theme': '>=2.1.0'
+      framer-motion: '>=4.0.0'
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@nextui-org/aria-utils': 2.0.15_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/button': 2.0.26_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/framer-transitions': 2.0.15_xv2ayqmglbikaocsxs2ey4gqky
+      '@nextui-org/react-utils': 2.0.10_react@18.2.0
+      '@nextui-org/shared-utils': 2.0.4_react@18.2.0
+      '@nextui-org/system': 2.0.15_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/theme': 2.1.17_tailwindcss@3.4.1
+      '@nextui-org/use-aria-button': 2.0.6_react@18.2.0
+      '@react-aria/dialog': 3.5.10_biqbaboplfbrettd7655fr4n2y
+      '@react-aria/focus': 3.16.0_react@18.2.0
+      '@react-aria/interactions': 3.20.1_react@18.2.0
+      '@react-aria/overlays': 3.20.0_biqbaboplfbrettd7655fr4n2y
+      '@react-aria/utils': 3.23.0_react@18.2.0
+      '@react-stately/overlays': 3.6.4_react@18.2.0
+      '@react-types/button': 3.9.1_react@18.2.0
+      '@react-types/overlays': 3.8.4_react@18.2.0
+      framer-motion: 10.18.0_biqbaboplfbrettd7655fr4n2y
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      react-remove-scroll: 2.5.7_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - tailwind-variants
+    dev: false
+    optional: true
 
   /@nextui-org/progress/2.0.24_at2xkf7yqzmqn4s7m25g7j2qpi:
     resolution: {integrity: sha512-RPVsFCF8COFClS/8PqEepzryhDFtIcJGQLu/P+qAr7jIDlXizXaBDrp0X34GVtQsapNeE9ExxX9Kt+QIspuHHQ==}
@@ -1870,6 +2101,63 @@ packages:
       '@nextui-org/shared-utils': 2.0.4_react@18.2.0
       react: 18.2.0
     dev: false
+
+  /@nextui-org/react/2.2.9_jt4seicc3u7ey7g5zdvw67nkiu:
+    resolution: {integrity: sha512-QHkUQTxI9sYoVjrvTpYm5K68pMDRqD13+DVzdsrkJuETGhbvE2c2CCGc4on9EwXC3JsOxuP/OyqaAmOIuHhYkA==}
+    peerDependencies:
+      framer-motion: '>=4.0.0'
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@nextui-org/accordion': 2.0.28_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/autocomplete': 2.0.9_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/avatar': 2.0.24_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/badge': 2.0.24_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/breadcrumbs': 2.0.4_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/button': 2.0.26_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/card': 2.0.24_rbixvluwxajtjshttai6nk7bha
+      '@nextui-org/checkbox': 2.0.25_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/chip': 2.0.25_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/code': 2.0.24_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/divider': 2.0.25_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/dropdown': 2.1.16_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/image': 2.0.24_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/input': 2.1.16_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/kbd': 2.0.25_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/link': 2.0.26_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/listbox': 2.1.16_zmj373ow7wlb3fxfkhoilp2gaa
+      '@nextui-org/menu': 2.0.17_zmj373ow7wlb3fxfkhoilp2gaa
+      '@nextui-org/modal': 2.0.28_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/navbar': 2.0.27_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/pagination': 2.0.26_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/popover': 2.1.14_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/progress': 2.0.24_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/radio': 2.0.25_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/ripple': 2.0.24_rbixvluwxajtjshttai6nk7bha
+      '@nextui-org/scroll-shadow': 2.1.12_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/select': 2.1.20_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/skeleton': 2.0.24_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/slider': 2.2.5_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/snippet': 2.0.30_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/spacer': 2.0.24_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/spinner': 2.0.24_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/switch': 2.0.25_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/system': 2.0.15_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/table': 2.0.28_zmj373ow7wlb3fxfkhoilp2gaa
+      '@nextui-org/tabs': 2.0.26_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/theme': 2.1.17_tailwindcss@3.4.1
+      '@nextui-org/tooltip': 2.0.29_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/user': 2.0.25_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@react-aria/visually-hidden': 3.8.8_react@18.2.0
+      framer-motion: 10.18.0_biqbaboplfbrettd7655fr4n2y
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - tailwind-variants
+      - tailwindcss
+    dev: false
+    optional: true
 
   /@nextui-org/react/2.2.9_w4at7ebeq7eawkt7j53hdoc2dy:
     resolution: {integrity: sha512-QHkUQTxI9sYoVjrvTpYm5K68pMDRqD13+DVzdsrkJuETGhbvE2c2CCGc4on9EwXC3JsOxuP/OyqaAmOIuHhYkA==}
@@ -1995,6 +2283,41 @@ packages:
       - '@types/react'
       - tailwind-variants
     dev: false
+
+  /@nextui-org/select/2.1.20_rksrmsymzvlox4h5catesuhk7y:
+    resolution: {integrity: sha512-GCO9uzyYnFIdJTqIe6aDe2NnYlclcdYfZnECFAze/R2MW0jpoysk5ysGBDjVDmZis6tLu+BOFXJbIlYEi+LoUQ==}
+    peerDependencies:
+      '@nextui-org/system': '>=2.0.0'
+      '@nextui-org/theme': '>=2.1.0'
+      framer-motion: '>=4.0.0'
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@nextui-org/aria-utils': 2.0.15_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/listbox': 2.1.16_zmj373ow7wlb3fxfkhoilp2gaa
+      '@nextui-org/popover': 2.1.14_rksrmsymzvlox4h5catesuhk7y
+      '@nextui-org/react-utils': 2.0.10_react@18.2.0
+      '@nextui-org/scroll-shadow': 2.1.12_at2xkf7yqzmqn4s7m25g7j2qpi
+      '@nextui-org/shared-icons': 2.0.6_react@18.2.0
+      '@nextui-org/shared-utils': 2.0.4_react@18.2.0
+      '@nextui-org/spinner': 2.0.24_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/system': 2.0.15_dknucdtmvthtbcpowyrb64dvsi
+      '@nextui-org/theme': 2.1.17_tailwindcss@3.4.1
+      '@nextui-org/use-aria-button': 2.0.6_react@18.2.0
+      '@nextui-org/use-aria-multiselect': 2.1.3_biqbaboplfbrettd7655fr4n2y
+      '@react-aria/focus': 3.16.0_react@18.2.0
+      '@react-aria/interactions': 3.20.1_react@18.2.0
+      '@react-aria/utils': 3.23.0_react@18.2.0
+      '@react-aria/visually-hidden': 3.8.8_react@18.2.0
+      '@react-types/shared': 3.22.0_react@18.2.0
+      framer-motion: 10.18.0_biqbaboplfbrettd7655fr4n2y
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - tailwind-variants
+    dev: false
+    optional: true
 
   /@nextui-org/shared-icons/2.0.6_react@18.2.0:
     resolution: {integrity: sha512-Mw5utPJAclFaeKAZowznEgabI5gdhXrW0iMaMA18Y4zcZRTidAc0WFeGYUlX876NxYLPc1Zk4bZUhQvMe+7uWg==}
@@ -3598,6 +3921,23 @@ packages:
       react: 18.2.0
     dev: false
 
+  /@reactflow/background/11.3.6_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-06FPlSUOOMALEEs+2PqPAbpqmL7WDjrkbG2UsDr2d6mbcDDhHiV4tu9FYoz44SQvXo7ma9VRotlsaR4OiRcYsg==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+    dependencies:
+      '@reactflow/core': 11.10.1_biqbaboplfbrettd7655fr4n2y
+      classcat: 5.0.4
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      zustand: 4.4.7_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+    dev: false
+    optional: true
+
   /@reactflow/background/11.3.6_cr3kmq4pwnhpakq4bnkhwa2v6u:
     resolution: {integrity: sha512-06FPlSUOOMALEEs+2PqPAbpqmL7WDjrkbG2UsDr2d6mbcDDhHiV4tu9FYoz44SQvXo7ma9VRotlsaR4OiRcYsg==}
     peerDependencies:
@@ -3614,6 +3954,23 @@ packages:
       - immer
     dev: false
 
+  /@reactflow/controls/11.2.6_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-4QHT92/ACVlZkvV+Hq44bAPV8WbMhkJl+/J0EbXcqQ1+an7cWJsF84eeelJw7R5J76RoaSSpKdsWsL2v7HAVlw==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+    dependencies:
+      '@reactflow/core': 11.10.1_biqbaboplfbrettd7655fr4n2y
+      classcat: 5.0.4
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      zustand: 4.4.7_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+    dev: false
+    optional: true
+
   /@reactflow/controls/11.2.6_cr3kmq4pwnhpakq4bnkhwa2v6u:
     resolution: {integrity: sha512-4QHT92/ACVlZkvV+Hq44bAPV8WbMhkJl+/J0EbXcqQ1+an7cWJsF84eeelJw7R5J76RoaSSpKdsWsL2v7HAVlw==}
     peerDependencies:
@@ -3629,6 +3986,29 @@ packages:
       - '@types/react'
       - immer
     dev: false
+
+  /@reactflow/core/11.10.1_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-GIh3usY1W3eVobx//OO9+Cwm+5evQBBdPGxDaeXwm25UqPMWRI240nXQA5F/5gL5Mwpf0DUC7DR2EmrKNQy+Rw==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+    dependencies:
+      '@types/d3': 7.4.3
+      '@types/d3-drag': 3.0.7
+      '@types/d3-selection': 3.0.10
+      '@types/d3-zoom': 3.0.8
+      classcat: 5.0.4
+      d3-drag: 3.0.0
+      d3-selection: 3.0.0
+      d3-zoom: 3.0.0
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      zustand: 4.4.7_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+    dev: false
+    optional: true
 
   /@reactflow/core/11.10.1_cr3kmq4pwnhpakq4bnkhwa2v6u:
     resolution: {integrity: sha512-GIh3usY1W3eVobx//OO9+Cwm+5evQBBdPGxDaeXwm25UqPMWRI240nXQA5F/5gL5Mwpf0DUC7DR2EmrKNQy+Rw==}
@@ -3652,6 +4032,27 @@ packages:
       - immer
     dev: false
 
+  /@reactflow/minimap/11.7.6_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-kJEtyeQkTZYViLGebVWHVUJROMAGcvejvT+iX4DqKnFb5yK8E8LWlXQpRx2FrL9gDy80mJJaciy7IxnnQKE1bg==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+    dependencies:
+      '@reactflow/core': 11.10.1_biqbaboplfbrettd7655fr4n2y
+      '@types/d3-selection': 3.0.10
+      '@types/d3-zoom': 3.0.8
+      classcat: 5.0.4
+      d3-selection: 3.0.0
+      d3-zoom: 3.0.0
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      zustand: 4.4.7_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+    dev: false
+    optional: true
+
   /@reactflow/minimap/11.7.6_cr3kmq4pwnhpakq4bnkhwa2v6u:
     resolution: {integrity: sha512-kJEtyeQkTZYViLGebVWHVUJROMAGcvejvT+iX4DqKnFb5yK8E8LWlXQpRx2FrL9gDy80mJJaciy7IxnnQKE1bg==}
     peerDependencies:
@@ -3672,6 +4073,25 @@ packages:
       - immer
     dev: false
 
+  /@reactflow/node-resizer/2.2.6_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-1Xb6q97uP7hRBLpog9sRCNfnsHdDgFRGEiU+lQqGgPEAeYwl4nRjWa/sXwH6ajniKxBhGEvrdzOgEFn6CRMcpQ==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+    dependencies:
+      '@reactflow/core': 11.10.1_biqbaboplfbrettd7655fr4n2y
+      classcat: 5.0.4
+      d3-drag: 3.0.0
+      d3-selection: 3.0.0
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      zustand: 4.4.7_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+    dev: false
+    optional: true
+
   /@reactflow/node-resizer/2.2.6_cr3kmq4pwnhpakq4bnkhwa2v6u:
     resolution: {integrity: sha512-1Xb6q97uP7hRBLpog9sRCNfnsHdDgFRGEiU+lQqGgPEAeYwl4nRjWa/sXwH6ajniKxBhGEvrdzOgEFn6CRMcpQ==}
     peerDependencies:
@@ -3689,6 +4109,23 @@ packages:
       - '@types/react'
       - immer
     dev: false
+
+  /@reactflow/node-toolbar/1.3.6_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-JXDEuZ0wKjZ8z7qK2bIst0eZPzNyVEsiHL0e93EyuqT4fA9icoyE0fLq2ryNOOp7MXgId1h7LusnH6ta45F0yQ==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+    dependencies:
+      '@reactflow/core': 11.10.1_biqbaboplfbrettd7655fr4n2y
+      classcat: 5.0.4
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      zustand: 4.4.7_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+    dev: false
+    optional: true
 
   /@reactflow/node-toolbar/1.3.6_cr3kmq4pwnhpakq4bnkhwa2v6u:
     resolution: {integrity: sha512-JXDEuZ0wKjZ8z7qK2bIst0eZPzNyVEsiHL0e93EyuqT4fA9icoyE0fLq2ryNOOp7MXgId1h7LusnH6ta45F0yQ==}
@@ -4037,7 +4474,6 @@ packages:
 
   /@zachsents/barrelboy/1.0.27:
     resolution: {integrity: sha512-47XCQyV6cdjt+4+MNl/MP5CfOYb8UhpPwVemgMdrCp8zCfXd99yX7KNApPCK2cJJLFeXgvL5zyfe4noe9IhsAA==}
-    hasBin: true
     dependencies:
       glob: 10.3.10
       lodash.merge: 4.6.2
@@ -4058,7 +4494,6 @@ packages:
 
   /@zachsents/next-firebase-rewrites/1.1.1:
     resolution: {integrity: sha512-Jw77hVjF+/4B/bHEMq8ZnnA3gINRCSFDrDHsAWWEFDVKCIUmzDg+eobsCgwwsffoF0PkwgPU3XYtqqeERQzOew==}
-    hasBin: true
     dependencies:
       yargs: 17.7.2
     dev: true
@@ -4074,7 +4509,6 @@ packages:
   /acorn/8.11.3:
     resolution: {integrity: sha512-Y9rRfJG5jcKOE0CLisYbojUjIrIEE7AGMzA/Sm4BslANhbS+cDMpgBdcPT91oJ7OuJ9hYJBx59RjbhxVnrF8Xg==}
     engines: {node: '>=0.4.0'}
-    hasBin: true
     dev: true
 
   /ajv/6.12.6:
@@ -4282,7 +4716,6 @@ packages:
   /browserslist/4.22.2:
     resolution: {integrity: sha512-0UgcrvQmBDvZHFGdYUehrCNIazki7/lUP3kkoi/r3YB2amZbFM9J43ZRkJTXBUZK4gmx56+Sqk9+Vs9mwZx9+A==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
-    hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001576
       electron-to-chromium: 1.4.632
@@ -4800,7 +5233,6 @@ packages:
   /eslint/8.56.0:
     resolution: {integrity: sha512-Go19xM6T9puCOWntie1/P997aXxFsOi37JIHRWI514Hc6ZnaHGKY9xFhrU65RT6CcBEzZoGG1e6Nq+DT04ZtZQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-    hasBin: true
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0_eslint@8.56.0
       '@eslint-community/regexpp': 4.10.0
@@ -5098,7 +5530,6 @@ packages:
   /glob/10.3.10:
     resolution: {integrity: sha512-fa46+tv1Ak0UPK1TOy/pZrIybNNt4HCv7SDzwyfiOZkvZLEbjsZkJBPtDHVshZjbecAoAGSC20MjLDG/qr679g==}
     engines: {node: '>=16 || 14 >=14.17'}
-    hasBin: true
     dependencies:
       foreground-child: 3.1.1
       jackspeak: 2.3.6
@@ -5482,7 +5913,6 @@ packages:
 
   /jiti/1.21.0:
     resolution: {integrity: sha512-gFqAIbuKyyso/3G2qhiO2OM6shY6EPP/R0+mkDbyspxKazh8BXDC5FiFsUjlczgdNz/vfra0da2y+aHrusLG/Q==}
-    hasBin: true
 
   /joi/17.11.1:
     resolution: {integrity: sha512-671acnrx+w96PCcQOzvm0VYQVwNL2PVgZmDRaFuSsx8sIUmGzYElPw5lU8F3Cr0jOuPs1oM56p7W2a1cdDOwcw==}
@@ -5502,7 +5932,6 @@ packages:
 
   /js-yaml/4.1.0:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
-    hasBin: true
     dependencies:
       argparse: 2.0.1
     dev: true
@@ -5612,7 +6041,6 @@ packages:
 
   /loose-envify/1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
-    hasBin: true
     dependencies:
       js-tokens: 4.0.0
 
@@ -5692,12 +6120,10 @@ packages:
   /nanoid/3.3.7:
     resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
 
   /nanoid/5.0.4:
     resolution: {integrity: sha512-vAjmBf13gsmhXSgBrtIclinISzFFy22WwCYoyilZlsrRXNIHSwgFQ1bEdjRwMT3aoadeIF6HMuDRlOxzfXV8ig==}
     engines: {node: ^18 || >=20}
-    hasBin: true
     dev: false
 
   /natural-compare/1.4.0:
@@ -6086,6 +6512,22 @@ packages:
       tslib: 2.6.2
     dev: false
 
+  /react-remove-scroll-bar/2.3.4_react@18.2.0:
+    resolution: {integrity: sha512-63C4YQBUt0m6ALadE9XV56hV8BgJWDmmTPY758iIJjfQKt2nYwoUrPk0LXRXcB/yIj82T1/Ixfdpdk68LwIB0A==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      '@types/react': ^16.8.0 || ^17.0.0 || ^18.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      react: 18.2.0
+      react-style-singleton: 2.2.1_react@18.2.0
+      tslib: 2.6.2
+    dev: false
+    optional: true
+
   /react-remove-scroll/2.5.7_7kh72gklg5qjlh5zc6s6v3p6v4:
     resolution: {integrity: sha512-FnrTWO4L7/Bhhf3CYBNArEG/yROV0tKmTv7/3h9QCFvH6sndeFf1wPqOcbFVu5VAulS5dV1wGT3GZZ/1GawqiA==}
     engines: {node: '>=10'}
@@ -6105,6 +6547,25 @@ packages:
       use-sidecar: 1.1.2_7kh72gklg5qjlh5zc6s6v3p6v4
     dev: false
 
+  /react-remove-scroll/2.5.7_react@18.2.0:
+    resolution: {integrity: sha512-FnrTWO4L7/Bhhf3CYBNArEG/yROV0tKmTv7/3h9QCFvH6sndeFf1wPqOcbFVu5VAulS5dV1wGT3GZZ/1GawqiA==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      '@types/react': ^16.8.0 || ^17.0.0 || ^18.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      react: 18.2.0
+      react-remove-scroll-bar: 2.3.4_react@18.2.0
+      react-style-singleton: 2.2.1_react@18.2.0
+      tslib: 2.6.2
+      use-callback-ref: 1.3.1_react@18.2.0
+      use-sidecar: 1.1.2_react@18.2.0
+    dev: false
+    optional: true
+
   /react-style-singleton/2.2.1_7kh72gklg5qjlh5zc6s6v3p6v4:
     resolution: {integrity: sha512-ZWj0fHEMyWkHzKYUr2Bs/4zU6XLmq9HsgBURm7g5pAVfyn49DgUiNgY2d4lXRlYSiCif9YBGpQleewkcqddc7g==}
     engines: {node: '>=10'}
@@ -6121,6 +6582,23 @@ packages:
       react: 18.2.0
       tslib: 2.6.2
     dev: false
+
+  /react-style-singleton/2.2.1_react@18.2.0:
+    resolution: {integrity: sha512-ZWj0fHEMyWkHzKYUr2Bs/4zU6XLmq9HsgBURm7g5pAVfyn49DgUiNgY2d4lXRlYSiCif9YBGpQleewkcqddc7g==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      '@types/react': ^16.8.0 || ^17.0.0 || ^18.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      get-nonce: 1.0.1
+      invariant: 2.2.4
+      react: 18.2.0
+      tslib: 2.6.2
+    dev: false
+    optional: true
 
   /react-textarea-autosize/8.3.4_7kh72gklg5qjlh5zc6s6v3p6v4:
     resolution: {integrity: sha512-CdtmP8Dc19xL8/R6sWvtknD/eCXkQr30dtvC4VmGInhRsfF8X/ihXCq6+9l9qbxmKRiq407/7z5fxE7cVWQNgQ==}
@@ -6150,6 +6628,21 @@ packages:
       - '@types/react'
     dev: false
 
+  /react-textarea-autosize/8.5.3_react@18.2.0:
+    resolution: {integrity: sha512-XT1024o2pqCuZSuBt9FwHlaDeNtVrtCXu0Rnz88t1jUGheCLa3PhjE1GH8Ctm2axEtvdCl5SUHYschyQ0L5QHQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@babel/runtime': 7.23.8
+      react: 18.2.0
+      use-composed-ref: 1.3.0_react@18.2.0
+      use-latest: 1.2.1_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+    dev: false
+    optional: true
+
   /react-transition-group/4.4.2_biqbaboplfbrettd7655fr4n2y:
     resolution: {integrity: sha512-/RNYfRAMlZwDSr6z4zNKV6xu53/e2BuaBbGhbyYIXTrmgu/bGHzmqOs7mJSJBHy9Ud+ApHx3QjrkKSp1pxvlFg==}
     peerDependencies:
@@ -6170,6 +6663,26 @@ packages:
     dependencies:
       loose-envify: 1.4.0
     dev: false
+
+  /reactflow/11.10.1_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-Q616fElAc5/N37tMwjuRkkgm/VgmnLLTNNCj61z5mvJxae+/VXZQMfot1K6a5LLz9G3SVKqU97PMb9Ga1PRXew==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+    dependencies:
+      '@reactflow/background': 11.3.6_biqbaboplfbrettd7655fr4n2y
+      '@reactflow/controls': 11.2.6_biqbaboplfbrettd7655fr4n2y
+      '@reactflow/core': 11.10.1_biqbaboplfbrettd7655fr4n2y
+      '@reactflow/minimap': 11.7.6_biqbaboplfbrettd7655fr4n2y
+      '@reactflow/node-resizer': 2.2.6_biqbaboplfbrettd7655fr4n2y
+      '@reactflow/node-toolbar': 1.3.6_biqbaboplfbrettd7655fr4n2y
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+    dev: false
+    optional: true
 
   /reactflow/11.10.1_cr3kmq4pwnhpakq4bnkhwa2v6u:
     resolution: {integrity: sha512-Q616fElAc5/N37tMwjuRkkgm/VgmnLLTNNCj61z5mvJxae+/VXZQMfot1K6a5LLz9G3SVKqU97PMb9Ga1PRXew==}
@@ -6252,7 +6765,6 @@ packages:
 
   /resolve/2.0.0-next.5:
     resolution: {integrity: sha512-U7WjGVG9sH8tvjW5SmGbQuui75FiyjAX72HX15DwBBwF9dNiQZRQAg9nnPhYy+TUnE0+VcrttuvNI8oSxZcocA==}
-    hasBin: true
     dependencies:
       is-core-module: 2.13.1
       path-parse: 1.0.7
@@ -6265,7 +6777,6 @@ packages:
 
   /rimraf/3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
-    hasBin: true
     dependencies:
       glob: 7.2.3
 
@@ -6317,13 +6828,11 @@ packages:
 
   /semver/6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
-    hasBin: true
     dev: true
 
   /semver/7.5.4:
     resolution: {integrity: sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==}
     engines: {node: '>=10'}
-    hasBin: true
     dependencies:
       lru-cache: 6.0.0
     dev: true
@@ -6550,7 +7059,6 @@ packages:
   /tailwindcss/3.4.1:
     resolution: {integrity: sha512-qAYmXRfk3ENzuPBakNK0SRrUDipP8NQnEY6772uDhflcQz5EhRdD7JNZxyrFHVQNCwULPBn6FNPp9brpO7ctcA==}
     engines: {node: '>=14.0.0'}
-    hasBin: true
     dependencies:
       '@alloc/quick-lru': 5.2.0
       arg: 5.0.2
@@ -6719,6 +7227,21 @@ packages:
       tslib: 2.6.2
     dev: false
 
+  /use-callback-ref/1.3.1_react@18.2.0:
+    resolution: {integrity: sha512-Lg4Vx1XZQauB42Hw3kK7JM6yjVjgFmFC5/Ab797s79aARomD2nEErc4mCgM8EZrARLmmbWpi5DGCadmK50DcAQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      '@types/react': ^16.8.0 || ^17.0.0 || ^18.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      react: 18.2.0
+      tslib: 2.6.2
+    dev: false
+    optional: true
+
   /use-composed-ref/1.3.0_react@18.2.0:
     resolution: {integrity: sha512-GLMG0Jc/jiKov/3Ulid1wbv3r54K9HlMW29IWcDFPEqFkSO2nS0MuefWgMJpeHQ9YJeXDL3ZUF+P3jdXlZX/cQ==}
     peerDependencies:
@@ -6740,6 +7263,19 @@ packages:
       react: 18.2.0
     dev: false
 
+  /use-isomorphic-layout-effect/1.1.2_react@18.2.0:
+    resolution: {integrity: sha512-49L8yCO3iGT/ZF9QttjwLF/ZD9Iwto5LnH5LmEdk/6cFmXddqi2ulF0edxTwjj+7mqvpVVGQWvbXZdn32wRSHA==}
+    peerDependencies:
+      '@types/react': '*'
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      react: 18.2.0
+    dev: false
+    optional: true
+
   /use-latest/1.2.1_7kh72gklg5qjlh5zc6s6v3p6v4:
     resolution: {integrity: sha512-xA+AVm/Wlg3e2P/JiItTziwS7FK92LWrDB0p+hgXloIMuVCeJJ8v6f0eeHyPZaJrM+usM1FkFfbNCrJGs8A/zw==}
     peerDependencies:
@@ -6753,6 +7289,20 @@ packages:
       react: 18.2.0
       use-isomorphic-layout-effect: 1.1.2_7kh72gklg5qjlh5zc6s6v3p6v4
     dev: false
+
+  /use-latest/1.2.1_react@18.2.0:
+    resolution: {integrity: sha512-xA+AVm/Wlg3e2P/JiItTziwS7FK92LWrDB0p+hgXloIMuVCeJJ8v6f0eeHyPZaJrM+usM1FkFfbNCrJGs8A/zw==}
+    peerDependencies:
+      '@types/react': '*'
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      react: 18.2.0
+      use-isomorphic-layout-effect: 1.1.2_react@18.2.0
+    dev: false
+    optional: true
 
   /use-sidecar/1.1.2_7kh72gklg5qjlh5zc6s6v3p6v4:
     resolution: {integrity: sha512-epTbsLuzZ7lPClpz2TyryBfztm7m+28DlEv2ZCQ3MDr5ssiwyOwGH/e5F9CkfWjJ1t4clvI58yF822/GUkjjhw==}
@@ -6769,6 +7319,22 @@ packages:
       react: 18.2.0
       tslib: 2.6.2
     dev: false
+
+  /use-sidecar/1.1.2_react@18.2.0:
+    resolution: {integrity: sha512-epTbsLuzZ7lPClpz2TyryBfztm7m+28DlEv2ZCQ3MDr5ssiwyOwGH/e5F9CkfWjJ1t4clvI58yF822/GUkjjhw==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      '@types/react': ^16.9.0 || ^17.0.0 || ^18.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      detect-node-es: 1.1.0
+      react: 18.2.0
+      tslib: 2.6.2
+    dev: false
+    optional: true
 
   /use-sync-external-store/1.2.0_react@18.2.0:
     resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
@@ -6865,7 +7431,6 @@ packages:
   /which/2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
-    hasBin: true
     dependencies:
       isexe: 2.0.0
 
@@ -6938,6 +7503,26 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
+
+  /zustand/4.4.7_react@18.2.0:
+    resolution: {integrity: sha512-QFJWJMdlETcI69paJwhSMJz7PPWjVP8Sjhclxmxmxv/RYI7ZOvR5BHX+ktH0we9gTWQMxcne8q1OY8xxz604gw==}
+    engines: {node: '>=12.7.0'}
+    peerDependencies:
+      '@types/react': '>=16.8'
+      immer: '>=9.0'
+      react: '>=16.8'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+    dependencies:
+      react: 18.2.0
+      use-sync-external-store: 1.2.0_react@18.2.0
+    dev: false
+    optional: true
 
   /zustand/4.4.7_rhnzvccjzb2mak5dpqd5xkv3u4:
     resolution: {integrity: sha512-QFJWJMdlETcI69paJwhSMJz7PPWjVP8Sjhclxmxmxv/RYI7ZOvR5BHX+ktH0we9gTWQMxcne8q1OY8xxz604gw==}

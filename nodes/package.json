@@ -18,5 +18,11 @@
     },
     "devDependencies": {
         "joi": "^17.11.1"
+    },
+    "optionalDependencies": {
+        "react-icons": "*",
+        "reactflow": "*",
+        "@nextui-org/react": "*",
+        "tailwindcss": "*"
     }
 }

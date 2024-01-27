@@ -104,7 +104,7 @@ function HandleDefinitionConfig({ definition, definitionId, type }) {
             draft.find(node => node.id === nodeId).data[collection].push({
                 id: uniqueId(isInput ? PREFIX.INPUT : PREFIX.OUTPUT),
                 definition: definitionId,
-                ...isInput && { mode: definition.defaultMode },
+                ...isInput && { mode: definition.defaultMode || "handle" },
                 ...definition.named && { name: "" },
             })
         }))
@@ -173,7 +173,7 @@ function InputConfig({ input, definition }) {
                         {
                             id: uniqueId(PREFIX.INPUT),
                             definition: inputDefId,
-                            mode: nodeDefinition.inputs[inputDefId].defaultMode,
+                            mode: nodeDefinition.inputs[inputDefId].defaultMode || "handle",
                         },
                         node.data.inputs.find(input => input.definition === inputDefId && input[derived.keyBy] === newInput[derived.keyBy]),
                         newInput,
@@ -248,7 +248,7 @@ function InputConfig({ input, definition }) {
                 </Group>}
 
             <Group className="gap-unit-md justify-between">
-                {input.mode === "config" && definition.allowedModes.includes("handle") &&
+                {input.mode === "config" && definition.allowedModes?.includes("handle") &&
                     <Button
                         variant="light" color="primary" size="sm"
                         startContent={<TbArrowLeftSquare />}
@@ -258,7 +258,7 @@ function InputConfig({ input, definition }) {
                         Use as node input
                     </Button>}
 
-                {input.mode === "handle" && definition.allowedModes.includes("config") &&
+                {input.mode === "handle" && definition.allowedModes?.includes("config") &&
                     <Button
                         variant="light" color="primary" size="sm"
                         startContent={<TbCursorText />}

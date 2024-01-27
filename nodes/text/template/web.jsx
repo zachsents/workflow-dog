@@ -7,22 +7,9 @@ export default {
     icon: TbReplace,
     color: colors.gray[800],
     tags: ["Text"],
-    // renderBody: () => {
-    //     const nodeId = useNodeId()
-    //     const template = useStore(s => s.nodeInternals.get(nodeId).data.inputs.find(i => i.definition === "template"), _.isEqual)
-    //     return template.mode === "config" &&
-    //         <p className="text-default-500 text-xs line-clamp-3">
-    //             {template.value}
-    //         </p>
-    // },
     inputs: {
         template: {
             description: "The template to insert values into. Use {SubstitutionName} to insert a value.",
-            defaultMode: "handle",
-            allowedModes: ["handle", "config"],
-            stringSettings: {
-                long: true,
-            },
             deriveInputs: (value) => ({
                 substitution: {
                     keyBy: "name",
@@ -43,8 +30,6 @@ export default {
         substitution: {
             name: "Substitutions",
             description: "A value to insert into the template. If your template contains {FirstName}, a substitution named FirstName will replace it.",
-            defaultMode: "handle",
-            allowedModes: ["handle", "config"],
             named: true,
             derivedFrom: "template",
         },

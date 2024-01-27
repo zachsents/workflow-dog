@@ -2,7 +2,7 @@ import { Button, Tooltip } from "@nextui-org/react"
 import { useModifier } from "@web/modules/workflow-editor/graph/nodes"
 import { object as modDefs } from "@web/modules/workflow-editor/modifiers"
 import { TbX } from "react-icons/tb"
-import Group from "../layout/Group"
+import Group from "../../layout/Group"
 import ActionNodeHandle from "./ActionNodeHandle"
 import { PREFIX } from "shared/prefixes"
 

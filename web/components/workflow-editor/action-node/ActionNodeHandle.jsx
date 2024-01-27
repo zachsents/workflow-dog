@@ -4,7 +4,7 @@ import classNames from "classnames"
 import { TbActivity, TbArrowLeftSquare, TbArrowRightSquare, TbSparkles } from "react-icons/tb"
 import { Position, Handle as RFHandle, useNodeId, useStore, useReactFlow } from "reactflow"
 import util from "util"
-import Group from "../layout/Group"
+import Group from "../../layout/Group"
 import { useRef } from "react"
 
 

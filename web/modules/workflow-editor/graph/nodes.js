@@ -8,31 +8,16 @@ import { useNodeId, useReactFlow, useStore, useUpdateNodeInternals } from "react
 import { PREFIX } from "shared/prefixes"
 import colors from "tailwindcss/colors"
 import { uniqueId } from "../util"
-import { useNodeInputs } from "./interfaces"
+import { stringHash } from "@web/modules/util"
 
 
 /**
- * @param {string | import("reactflow").Node} nodeOrNodeId
- * @param {import("reactflow").ReactFlowInstance} rf
+ * @param {string} [nodeId]
  */
-export function getDefinition(nodeOrNodeId, rf) {
-    if (typeof nodeOrNodeId === "string")
-        nodeOrNodeId = rf.getNode(nodeOrNodeId)
-
-    return nodeDefs[nodeOrNodeId?.data?.definition]
-}
-
-
-/**
- * @param {string | import("reactflow").Node} [nodeOrNodeId]
- */
-export function useDefinition(nodeOrNodeId) {
-    const rf = useReactFlow()
-
-    if (nodeOrNodeId === undefined)
-        nodeOrNodeId = useNodeId()
-
-    return useMemo(() => getDefinition(nodeOrNodeId, rf), [nodeOrNodeId, rf])
+export function useDefinition(nodeId) {
+    nodeId ??= useNodeId()
+    const definitionId = useStore(s => s.nodeInternals.get(nodeId)?.data?.definition)
+    return useMemo(() => nodeDefs[definitionId], [definitionId])
 }
 
 
@@ -109,10 +94,11 @@ export function useNodeProperty(nodeId, path, {
 
 
 export function useNodeHasValidationErrors(nodeId) {
+    nodeId ??= useNodeId()
 
     const nodeDefinition = useDefinition(nodeId)
 
-    const inputs = useNodeInputs(nodeId)
+    const inputs = useStore(s => s.nodeInternals.get(nodeId)?.data?.inputs)
 
     const hasErrors = useMemo(() => inputs?.map(input => {
         const inputDefinition = nodeDefinition?.inputs[input.definition]
@@ -167,7 +153,7 @@ export function useCreateActionNode() {
         const createInput = (defId, def, extra = {}) => ({
             id: uniqueId(PREFIX.INPUT),
             definition: defId,
-            mode: def.defaultMode,
+            mode: def.defaultMode || "handle",
             ...extra,
         })
 
@@ -226,11 +212,8 @@ export function useCreateActionNode() {
 
 
 export function useUpdateInternals(nodeId) {
-    if (nodeId === undefined)
-        nodeId = useNodeId()
-
+    nodeId ??= useNodeId()
     const update = useUpdateNodeInternals()
-
     return useCallback(() => update(nodeId), [nodeId, update])
 }
 
@@ -250,9 +233,42 @@ export function useModifier(nodeId) {
 }
 
 
+
+export function useUpdateInternalsWhenNecessary(nodeId) {
+    nodeId ??= useNodeId()
+
+    const updateInternals = useUpdateInternals()
+
+    const handlesHash = useStore(s => {
+        const node = s.nodeInternals.get(nodeId)
+        return stringHash([
+            node.data.inputs?.map(input => _.pick(input, ["id", "hidden", "mode"])),
+            node.data.outputs?.map(output => _.pick(output, ["id", "hidden"])),
+            node.data.modifier?.id,
+        ])
+    })
+
+    useEffect(() => {
+        updateInternals()
+    }, [handlesHash])
+
+    const selected = useStore(s => s.nodeInternals.get(nodeId)?.selected)
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            updateInternals()
+        }, 75)
+
+        const cleanup = () => clearInterval(intervalId)
+        setTimeout(cleanup, 400)
+        return cleanup
+    }, [selected])
+}
+
+
+
 export function useDisabled(nodeId) {
-    if (nodeId === undefined)
-        nodeId = useNodeId()
+    nodeId ??= useNodeId()
 
     const [disabled, setDisabled] = useNodeProperty(nodeId, "data.disabled", false)
 

@@ -16,8 +16,6 @@ export default {
     inputs: {
         input: {
             description: "The input to get from the trigger.",
-            defaultMode: "config",
-            allowedModes: ["config"],
         },
     },
     outputs: {

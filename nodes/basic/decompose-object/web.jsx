@@ -8,8 +8,6 @@ export default {
     inputs: {
         object: {
             description: "The piece of data to get properties from.",
-            defaultMode: "handle",
-            allowedModes: ["handle"],
         }
     },
     outputs: {

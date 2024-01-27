@@ -90,6 +90,18 @@ export function useSyncToState(value, setOtherValue) {
 }
 
 
+export function useMountDelay(delay = 1000) {
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        const timeout = setTimeout(() => setMounted(true), delay)
+        return () => clearTimeout(timeout)
+    }, [delay])
+
+    return mounted
+}
+
+
 /**
  * @param {string} hotkey - e.g. "ctrl+b"
  * @param {(event: KeyboardEvent) => void} callback

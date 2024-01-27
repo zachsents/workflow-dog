@@ -1,5 +1,6 @@
 import { useDebouncedEffect, useDebouncedState } from "@react-hookz/web"
 import { useDatabaseMutation } from "@web/modules/db"
+import { useMountDelay } from "@web/modules/util"
 import { useWorkflow } from "@web/modules/workflows"
 import { produce } from "immer"
 import _ from "lodash"
@@ -12,15 +13,15 @@ export function useGraphSaving() {
     const nodes = useNodes()
     const edges = useEdges()
 
-    const { data: workflow, isSuccess } = useWorkflow()
+    const { data: workflow, isSuccess: isWorkflowLoaded } = useWorkflow()
 
     const [debouncedRawGraph, onGraphChange] = useDebouncedState({ nodes, edges }, 250)
     useEffect(() => {
-        if (!isSuccess)
+        if (!isWorkflowLoaded)
             return
 
         onGraphChange({ nodes, edges })
-    }, [nodes, edges, isSuccess])
+    }, [nodes, edges, isWorkflowLoaded])
 
     const convertedGraph = useMemo(() => convertGraphForRemote(debouncedRawGraph), [debouncedRawGraph])
     const convertedGraphStr = useMemo(() => JSON.stringify(convertedGraph), [convertedGraph])
@@ -33,8 +34,10 @@ export function useGraphSaving() {
         }
     )
 
+    const isReadyToSave = useMountDelay(2000)
+
     useDebouncedEffect(() => {
-        if (!isSuccess || updateGraph.isPending)
+        if (!isWorkflowLoaded || updateGraph.isPending || !isReadyToSave)
             return
 
         console.debug("Saving graph...", convertedGraph)
@@ -79,28 +82,4 @@ export function convertGraphForRemote(graph) {
         nodes: graph.nodes.map(n => _.omit(n, "selected")),
         edges: graph.edges.map(e => _.omit(e, "selected")),
     }
-}
-
-
-// eslint-disable-next-line no-unused-vars
-function merge(destination, source, keepDestinationProps = []) {
-
-    if (Array.isArray(source)) {
-        const usingIds = source.every(el => "id" in el)
-
-        if (usingIds)
-            return source.map(sourceItem => merge(destination?.find(destItem => destItem.id === sourceItem.id), sourceItem, keepDestinationProps))
-
-        return source.map((sourceItem, i) => merge(destination?.[i], sourceItem, keepDestinationProps))
-    }
-
-    if (typeof source === "object" && source !== null) {
-        const result = Object.fromEntries(
-            Object.entries(source).map(([key, value]) => [key, merge(destination?.[key], value, keepDestinationProps)])
-        )
-        keepDestinationProps.forEach(prop => result[prop] = destination?.[prop])
-        return result
-    }
-
-    return source
 }

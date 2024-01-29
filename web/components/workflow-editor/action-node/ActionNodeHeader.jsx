@@ -41,6 +41,7 @@ export default function ActionNodeHeader({ withSettings = false }) {
                         size="sm" variant="light" isIconOnly
                         className="nodrag text-white h-auto opacity-0 group-hover:opacity-100"
                         onPress={() => storeApi.setState({ nodeBeingConfigured: id })}
+                        onMouseDown={ev => ev.stopPropagation()}
                     >
                         <TbInfoCircle />
                     </Button>}

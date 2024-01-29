@@ -1,6 +1,7 @@
 
 export default {
     name: "Text",
+    description: "A simple text node",
     inputs: {},
     outputs: {
         text: {

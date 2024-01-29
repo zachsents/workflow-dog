@@ -1,7 +1,7 @@
 import { Button, Tooltip } from "@nextui-org/react"
 import Group from "@web/components/layout/Group"
 import { useDefinition, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
-import { TbSettings } from "react-icons/tb"
+import { TbInfoCircle } from "react-icons/tb"
 import { useNodeId, useStoreApi } from "reactflow"
 
 
@@ -15,10 +15,8 @@ export default function ActionNodeHeader({ withSettings = false }) {
 
     const storeApi = useStoreApi()
 
-    // const nodeName = useStore(s => s.nodeInternals.get(id).data.name)
-
     return (
-        <Group className="w-full justify-between gap-unit-lg text-white p-1 pl-2">
+        <Group className="group w-full bg-[var(--dark-color)] justify-between gap-unit-lg text-white p-1 pl-2">
             <Tooltip
                 content={definition?.name}
                 isDisabled={displayName == definition?.name}
@@ -37,14 +35,14 @@ export default function ActionNodeHeader({ withSettings = false }) {
                     </div>
                 </Group>
             </Tooltip>
-            <Group className="gap-1 flex-nowrap">
+            <Group className="gap-1 flex-nowrap self-stretch items-stretch">
                 {withSettings &&
                     <Button
                         size="sm" variant="light" isIconOnly
-                        className="nodrag text-white"
+                        className="nodrag text-white h-auto opacity-0 group-hover:opacity-100"
                         onPress={() => storeApi.setState({ nodeBeingConfigured: id })}
                     >
-                        <TbSettings />
+                        <TbInfoCircle />
                     </Button>}
             </Group>
         </Group>

@@ -39,6 +39,11 @@ export default function ActionNodeModal() {
                         <ActionNodeHeader />
                     </ModalHeader>
                     <ModalBody>
+                        {definition.description &&
+                            <p className="">
+                                {definition.description}
+                            </p>}
+
                         <Tabs
                             aria-label="Input/Output Configuration"
                             fullWidth variant="underlined"

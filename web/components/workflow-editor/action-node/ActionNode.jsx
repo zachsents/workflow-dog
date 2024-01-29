@@ -46,7 +46,7 @@ export default function ActionNode({ id, data, selected }) {
                         selected ? "shadow-xl" : "shadow-md",
                     )}
                 >
-                    <CardHeader className="p-0 rounded-t-xl bg-[var(--dark-color)]">
+                    <CardHeader className="p-0 rounded-t-xl overflow-clip">
                         <ActionNodeHeader withSettings />
                     </CardHeader>
                     <Group

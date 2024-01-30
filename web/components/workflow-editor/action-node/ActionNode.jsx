@@ -131,7 +131,7 @@ function RequiredIntegration() {
                         spinnerProps={{ size: "sm", color: "primary" }}
                         classNames={{
                             trigger: classNames(
-                                "rounded-full bg-white min-h-0 h-auto py-0.5 border shadow-sm",
+                                "rounded-full bg-white min-h-0 h-auto px-1 py-0.5 border shadow-sm",
                                 selectedAccount ? "!border-default-300" : "!border-danger-500",
                             ),
                             value: classNames(

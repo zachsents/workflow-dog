@@ -6,6 +6,8 @@ import { Position, Handle as RFHandle, useNodeId, useStore, useReactFlow } from 
 import util from "util"
 import Group from "../../layout/Group"
 import { useRef } from "react"
+import { useState } from "react"
+import { object as nodeDefs } from "nodes/web"
 
 
 export default function ActionNodeHandle({ id, name, type, definition: passedDef }) {
@@ -48,9 +50,6 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
 
     const createNode = useCreateActionNode()
     const addRecommended = () => {
-        if (!(isNodeSelected && !isConnected && definition?.recommendedNode))
-            return
-
         const handleRect = ref.current.getBoundingClientRect()
         const newNodePos = rf.screenToFlowPosition({
             x: handleRect.left + handleRect.width / 2,
@@ -76,11 +75,13 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
         })
     }
 
+    const [isHovered, setIsHovered] = useState(false)
+
     return (
         <div
             className="relative group"
-            // onMouseEnter={() => menuDisclosure.onOpen()}
-            // onMouseLeave={() => menuDisclosure.onClose()}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             ref={ref}
         >
             <RFHandle
@@ -131,24 +132,27 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
                     </div>}
             </RFHandle>
 
-            {isNodeSelected && !isConnected && definition?.recommendedNode &&
-                <Tooltip content={
-                    <Group className={classNames("gap-unit-sm", { "flex-row-reverse": isSource })}>
-                        {isSource ? <TbArrowRightSquare /> : <TbArrowLeftSquare />}
-                        <span>Add recommended node</span>
-                    </Group>
-                } closeDelay={0} placement={isSource ? "right" : "left"}>
-                    <Button
-                        size="sm" isIconOnly radius="full" color="primary"
-                        onPress={addRecommended}
-                        className={classNames(
-                            "absolute top-1/2 -translate-y-1/2 nodrag min-h-0 min-w-0 h-auto w-auto p-1 hover:scale-110 mx-0.5",
-                            isSource ? "left-full" : "right-full",
-                        )}
-                    >
-                        <TbSparkles className="text-[0.8em]" />
-                    </Button>
-                </Tooltip>}
+            {definition?.recommendedNode && !isConnected &&
+                <div className={classNames(
+                    "absolute top-1/2 -translate-y-1/2 nodrag flex justify-center items-center py-1 transition-opacity",
+                    isSource ? "left-full pl-0.5 pr-4" : "right-full pr-0.5 pl-4",
+                    (isNodeSelected || isHovered) ? "opacity-100" : "opacity-0",
+                )}>
+                    <Tooltip content={
+                        <Group className={classNames("gap-unit-sm", { "flex-row-reverse": isSource })}>
+                            {isSource ? <TbArrowRightSquare /> : <TbArrowLeftSquare />}
+                            <span>Add <b className="text-primary-600">{nodeDefs[definition.recommendedNode.data.definition].name}</b> node</span>
+                        </Group>
+                    } closeDelay={0} placement={isSource ? "right" : "left"}>
+                        <Button
+                            size="sm" isIconOnly radius="full" color="primary"
+                            onPress={addRecommended}
+                            className="min-h-0 min-w-0 h-auto w-auto p-1 hover:scale-110"
+                        >
+                            <TbSparkles className="text-[0.8em]" />
+                        </Button>
+                    </Tooltip>
+                </div>}
 
             {/* <Dropdown
                 isOpen
@@ -168,7 +172,7 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
                     </DropdownItem>
                 </DropdownMenu>
             </Dropdown> */}
-        </div>
+        </div >
     )
 }
 

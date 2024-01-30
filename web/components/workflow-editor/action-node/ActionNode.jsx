@@ -138,6 +138,7 @@ function RequiredIntegration() {
                                 "text-[0.5rem]",
                                 selectedAccount ? "text-default-900" : "text-danger-500",
                             ),
+                            popoverContent: "min-w-[20rem]"
                         }}
                         renderValue={items => items.map(item =>
                             <Group className="gap-unit-xs" key={`selected` + item.key}>

@@ -13,6 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout the repository
+      uses: actions/checkout@v3
+
+    - name: Echo secrets
+      run: |
+        echo ${{ secrets.SERVICE_ACCOUNT }} > api-server/service-account.json
+        echo ${{ secrets.ENV_FILE }} > api-server/.env
+
     - name: Build the Docker image
       run: docker build . --file ./api-server/Dockerfile --tag zachsents/wfd-api-server:$(date +%s)

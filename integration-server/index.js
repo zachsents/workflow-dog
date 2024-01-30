@@ -40,7 +40,7 @@ app.get("/integration/:serviceName/callback", (req, ...params) => passport.authe
 
 
 app.get("/integration/success", (req, res) => {
-    res.send("Integration successful! You can close this tab now.")
+    res.send("<p>Integration successful! You can close this tab now.</p><script>window.close()</script>")
 })
 
 app.listen(8080, () => {

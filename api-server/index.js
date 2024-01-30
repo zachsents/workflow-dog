@@ -1,6 +1,6 @@
 import "dotenv/config"
 import express from "express"
-import session from "express-session"
+import session from "cookie-session"
 import morgan from "morgan"
 import passport from "passport"
 import { setupStrategies } from "./passport.js"
@@ -44,7 +44,7 @@ app.get("/integration/success", (req, res) => {
 })
 
 
-const port = process.env.NODE_ENV === "production" ? 80 : 8080
+const port = process.env.NODE_ENV === "production" ? 443 : 8080
 
 app.listen(port, () => {
     console.log("Integration server is running on port", port)

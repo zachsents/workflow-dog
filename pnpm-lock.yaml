@@ -24,6 +24,32 @@ importers:
       eslint-plugin-react: 7.33.2_eslint@8.56.0
       globals: 13.24.0
 
+  api-server:
+    specifiers:
+      '@google-cloud/secret-manager': ^5.0.1
+      '@supabase/supabase-js': ^2.39.2
+      cookie-session: ^2.1.0
+      dotenv: ^16.4.1
+      express: ^4.18.2
+      googleapis: ^131.0.0
+      integrations: workspace:*
+      joi: ^17.11.1
+      morgan: ^1.10.0
+      passport: ^0.7.0
+      passport-google-oauth20: ^2.0.0
+    dependencies:
+      '@google-cloud/secret-manager': 5.0.1
+      '@supabase/supabase-js': 2.39.3
+      cookie-session: 2.1.0
+      dotenv: 16.4.1
+      express: 4.18.2
+      googleapis: 131.0.0
+      integrations: link:../integrations
+      joi: 17.11.1
+      morgan: 1.10.0
+      passport: 0.7.0
+      passport-google-oauth20: 2.0.0
+
   data-types:
     specifiers:
       '@zachsents/barrelboy': ^1.0.27
@@ -5049,6 +5075,18 @@ packages:
     resolution: {integrity: sha512-ASFBup0Mz1uyiIjANan1jzLQami9z1PoYSZCiiYW2FczPbenXc45FZdBZLzOT+r6+iciuEModtmCti+hjaAk0A==}
     dev: false
 
+  /cookie-session/2.1.0:
+    resolution: {integrity: sha512-u73BDmR8QLGcs+Lprs0cfbcAPKl2HnPcjpwRXT41sEV4DRJ2+W0vJEEZkG31ofkx+HZflA70siRIjiTdIodmOQ==}
+    engines: {node: '>= 0.10'}
+    dependencies:
+      cookies: 0.9.1
+      debug: 3.2.7
+      on-headers: 1.0.2
+      safe-buffer: 5.2.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /cookie-signature/1.0.6:
     resolution: {integrity: sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==}
     dev: false
@@ -5065,6 +5103,14 @@ packages:
   /cookie/0.6.0:
     resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
     engines: {node: '>= 0.6'}
+    dev: false
+
+  /cookies/0.9.1:
+    resolution: {integrity: sha512-TG2hpqe4ELx54QER/S3HQ9SRVnQnGBtKUz5bLQWtYAQ+o6GpgMs6sYUvaiJjVxb+UXwhRhAEP3m7LbsIZ77Hmw==}
+    engines: {node: '>= 0.8'}
+    dependencies:
+      depd: 2.0.0
+      keygrip: 1.1.0
     dev: false
 
   /cosmiconfig/7.1.0:
@@ -5176,6 +5222,17 @@ packages:
         optional: true
     dependencies:
       ms: 2.0.0
+    dev: false
+
+  /debug/3.2.7:
+    resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+    dependencies:
+      ms: 2.1.3
     dev: false
 
   /debug/4.3.4:
@@ -6492,6 +6549,13 @@ packages:
     dependencies:
       jwa: 2.0.0
       safe-buffer: 5.2.1
+    dev: false
+
+  /keygrip/1.1.0:
+    resolution: {integrity: sha512-iYSchDJ+liQ8iwbSI2QqsQOvqv58eJCEanyJPJi+Khyu8smkcKSFUCbPwzFcL7YVtZ6eONjqRX/38caJ7QjRAQ==}
+    engines: {node: '>= 0.6'}
+    dependencies:
+      tsscmp: 1.0.6
     dev: false
 
   /keyv/4.5.4:
@@ -7933,6 +7997,11 @@ packages:
 
   /tslib/2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
+    dev: false
+
+  /tsscmp/1.0.6:
+    resolution: {integrity: sha512-LxhtAkPDTkVCMQjt2h6eBVY28KCjikZqZfMcC15YBeNjkgUpdCfBu5HoiOTDu86v6smE8yOjyEktJ8hlbANHQA==}
+    engines: {node: '>=0.6.x'}
     dev: false
 
   /type-check/0.4.0:

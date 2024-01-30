@@ -1,5 +1,7 @@
 export { default as text_template } from "../text/template/server.js"
 export { default as basic_triggerInput } from "../basic/trigger-input/server.js"
 export { default as basic_text } from "../basic/text/server.js"
-export { default as basic_number } from "../basic/number/server.js"
 export { default as basic_decomposeObject } from "../basic/decompose-object/server.js"
+export { default as basic_number } from "../basic/number/server.js"
+export { default as google_sheets_getCell } from "../google/sheets/get-cell/server.js"
+export { default as google_gmail_getMessage } from "../google/gmail/get-message/server.js"

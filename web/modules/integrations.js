@@ -1,46 +1,10 @@
-import { FcGoogle } from "react-icons/fc"
-import { TbBrandAirtable, TbBrandDiscordFilled, TbBrandLinkedin, TbBrandStripe, TbBrandXFilled } from "react-icons/tb"
-import { INTEGRATION_SERVICE, INTEGRATION_INFO as SHARED_INTEGRATION_INFO } from "shared/integrations"
-import { useQueryParam } from "./router"
 import { useQuery } from "@tanstack/react-query"
+import { useNodeId } from "reactflow"
+import { useQueryParam } from "./router"
 import { supabase } from "./supabase"
 import { deepCamelCase } from "./util"
-
-
-export const INTEGRATION_INFO = {
-    [INTEGRATION_SERVICE.GOOGLE]: {
-        ...SHARED_INTEGRATION_INFO[INTEGRATION_SERVICE.GOOGLE],
-        icon: FcGoogle,
-        color: "blue",
-    },
-    [INTEGRATION_SERVICE.LINKEDIN]: {
-        ...SHARED_INTEGRATION_INFO[INTEGRATION_SERVICE.LINKEDIN],
-        icon: TbBrandLinkedin,
-        color: "blue",
-    },
-    [INTEGRATION_SERVICE.X]: {
-        ...SHARED_INTEGRATION_INFO[INTEGRATION_SERVICE.X],
-        icon: TbBrandXFilled,
-        color: "gray",
-        shade: 900,
-    },
-    [INTEGRATION_SERVICE.DISCORD]: {
-        ...SHARED_INTEGRATION_INFO[INTEGRATION_SERVICE.DISCORD],
-        icon: TbBrandDiscordFilled,
-        color: "violet",
-    },
-    [INTEGRATION_SERVICE.STRIPE]: {
-        ...SHARED_INTEGRATION_INFO[INTEGRATION_SERVICE.STRIPE],
-        icon: TbBrandStripe,
-        color: "purple",
-    },
-    [INTEGRATION_SERVICE.AIRTABLE]: {
-        ...SHARED_INTEGRATION_INFO[INTEGRATION_SERVICE.AIRTABLE],
-        icon: TbBrandAirtable,
-        color: "yellow",
-        shade: 400,
-    },
-}
+import { useDefinition } from "./workflow-editor/graph/nodes"
+import { useWorkflowIdFromUrl } from "./workflows"
 
 
 export function useIntegrationAccountsForTeam(teamId, selectKeys = ["*"]) {
@@ -80,4 +44,31 @@ export function useIntegrationAccount(integrationAccountId) {
         queryKey: ["integrationAccount", integrationAccountId],
         enabled: !!integrationAccountId,
     })
+}
+
+
+export function useNodeIntegrationAccount() {
+    const nodeId = useNodeId()
+    const definition = useDefinition(nodeId)
+
+    const workflowId = useWorkflowIdFromUrl()
+
+    const availableAccountsQuery = useQuery({
+        queryFn: async () => {
+            const { data } = await supabase
+                .from("workflows")
+                .select("teams (integration_accounts (id, display_name, service_name, service_user_id, scopes))")
+                .eq("id", workflowId)
+                .eq("teams.integration_accounts.service_name", definition.requiredIntegration.service)
+
+            return deepCamelCase(data.flatMap(item => item.teams.integration_accounts))
+        },
+        queryKey: ["integrationAccountsForWorkflow", workflowId, definition.requiredIntegration.service],
+        enabled: !!workflowId && !!definition.requiredIntegration?.service,
+    })
+
+    return {
+        available: availableAccountsQuery.data,
+        isPending: availableAccountsQuery.isLoading,
+    }
 }

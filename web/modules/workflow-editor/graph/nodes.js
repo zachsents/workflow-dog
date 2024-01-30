@@ -305,7 +305,7 @@ export function useNodeColors(nodeId, mode = "json") {
     const definition = useDefinition(nodeId)
 
     const baseColor = definition?.color || colors.gray[500]
-    const darkColor = useMemo(() => Color(baseColor).lightness(20).hex(), [baseColor])
+    const darkColor = useMemo(() => Color(baseColor).lightness(definition.darkShade ?? 20).hex(), [baseColor, definition.darkShade])
     const lightColor = useMemo(() => Color(baseColor).lightness(90).hex(), [baseColor])
 
     switch (mode) {

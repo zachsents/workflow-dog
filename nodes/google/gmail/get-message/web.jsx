@@ -1,10 +1,12 @@
-import {  } from "react-icons/tb"
+import { TbBrandGmail } from "react-icons/tb"
 import colors from "tailwindcss/colors"
 
 export default {
-    icon: null,
-    color: colors.gray[800],
-    renderConfig: () => {
-        
-    },
+    icon: TbBrandGmail,
+    color: colors.red[500],
+    darkShade: 40,
+    tags: ["Gmail", "Email"],
+    // renderConfig: () => {
+
+    // },
 }

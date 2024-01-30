@@ -1,13 +1,17 @@
-import { useDefinition, useUpdateInternalsWhenNecessary } from "@web/modules/workflow-editor/graph/nodes"
+import { Button, Card, CardHeader, Select, SelectItem, Tooltip } from "@nextui-org/react"
+import { useNodeIntegrationAccount } from "@web/modules/integrations"
+import { useDefinition, useNodeProperty, useUpdateInternalsWhenNecessary } from "@web/modules/workflow-editor/graph/nodes"
+import { useWorkflow } from "@web/modules/workflows"
 import classNames from "classnames"
+import { resolve as resolveIntegration } from "integrations/web"
 import { useMemo } from "react"
-import ActionNodeHandle from "./ActionNodeHandle"
-import NodeModifierWrapper from "./NodeModifierWrapper"
-import { Card, CardHeader } from "@nextui-org/react"
+import { TbExternalLink, TbPlus } from "react-icons/tb"
 import Group from "../../layout/Group"
+import ActionNodeHandle from "./ActionNodeHandle"
 import ActionNodeHeader from "./ActionNodeHeader"
 import { ConfigComponent } from "./ActionNodeModal"
 import ActionNodeShell from "./ActionNodeShell"
+import NodeModifierWrapper from "./NodeModifierWrapper"
 
 
 export default function ActionNode({ id, data, selected }) {
@@ -105,7 +109,121 @@ export default function ActionNode({ id, data, selected }) {
                     </Group>
                 </Card>
             </NodeModifierWrapper>
+
+            {definition.requiredIntegration &&
+                <div className={classNames(
+                    "transition-opacity",
+                    (data.integrationAccount && !selected) ? "opacity-0 pointer-events-none" : "opacity-100",
+                )}>
+                    <RequiredIntegration />
+                </div>}
         </ActionNodeShell>
     )
 }
 
+
+
+function RequiredIntegration() {
+
+    const { data: workflow } = useWorkflow()
+
+    const definition = useDefinition()
+    const { available, isPending } = useNodeIntegrationAccount()
+
+    const integration = resolveIntegration(definition.requiredIntegration.service)
+
+    const Icon = ({ className }) => <integration.icon className={classNames("text-white p-1 rounded-md aspect-square", className)} style={{
+        backgroundColor: integration.color,
+    }} />
+
+    const [selectedAccount, setSelectedAccount] = useNodeProperty(undefined, "data.integrationAccount")
+    const selectedKeys = useMemo(() => new Set(selectedAccount ? [selectedAccount] : []), [selectedAccount])
+    const onSelectionChange = keys => setSelectedAccount(keys.values().next().value)
+
+    const connectUrl = useMemo(() => {
+        const url = new URL(`http://localhost:8080/integration/${definition.requiredIntegration.service}/connect`)
+        url.searchParams.append("t", workflow?.teamId)
+
+        if (definition.requiredIntegration.scopes)
+            url.searchParams.append("scopes", definition.requiredIntegration.scopes.join(","))
+
+        return url.toString()
+    }, [definition.requiredIntegration.service, workflow?.teamId, definition.requiredIntegration.scopes])
+
+    return (
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-unit-xs max-w-full w-[16rem]">
+            {available?.length === 0 ?
+                <Button
+                    as="a" href={connectUrl} fullWidth color="primary"
+                    target="_blank"
+                    className="rounded-full text-[0.625rem] min-h-0 h-auto py-1"
+                    endContent={<TbExternalLink />}
+                >
+                    Connect {integration.name}
+                </Button> :
+                <Group className="gap-1">
+                    <Select
+                        size="sm" variant="bordered"
+                        aria-label="Select an account to use for this action"
+                        selectedKeys={selectedKeys}
+                        onSelectionChange={onSelectionChange}
+                        isLoading={isPending}
+                        items={available ?? []}
+                        placeholder={`Select a ${integration.name} account`}
+                        spinnerProps={{ size: "sm", color: "primary" }}
+                        classNames={{
+                            trigger: classNames(
+                                "rounded-full bg-white min-h-0 h-auto py-0.5 border shadow-sm",
+                                selectedAccount ? "!border-default-300" : "!border-danger-500",
+                            ),
+                            value: classNames(
+                                "text-[0.5rem]",
+                                selectedAccount ? "text-default-900" : "text-danger-500",
+                            ),
+                        }}
+                        renderValue={items => items.map(item =>
+                            <Group className="gap-unit-xs" key={`selected` + item.key}>
+                                <div className="shrink-0">
+                                    <Icon className="text-lg" />
+                                </div>
+                                <span>{item.data.displayName}</span>
+                            </Group>
+                        )}
+                    >
+                        {item => {
+                            const hasRequiredScopes = definition.requiredIntegration.scopes?.every(scope => item.scopes?.includes(scope)) ?? true
+                            return <SelectItem
+                                startContent={<Icon className="text-2xl" />}
+                                {...!hasRequiredScopes && {
+                                    endContent: <TbExternalLink className="text-danger-500" />,
+                                    as: "a",
+                                    href: connectUrl,
+                                    target: "_blank",
+                                }}
+                                aria-label={item.displayName}
+                                key={item.id}
+                            >
+                                <p>
+                                    {item.displayName}
+                                </p>
+                                {!hasRequiredScopes &&
+                                    <p className="text-default-500">
+                                        Needs additional permissions
+                                    </p>}
+                            </SelectItem>
+                        }}
+                    </Select>
+
+                    <Tooltip content="Add Account">
+                        <Button
+                            isIconOnly color="primary" variant="flat"
+                            className="rounded-full min-h-0 h-auto min-w-0 w-auto p-1"
+                            as="a" href={connectUrl} target="_blank"
+                        >
+                            <TbPlus />
+                        </Button>
+                    </Tooltip>
+                </Group>}
+        </div>
+    )
+}

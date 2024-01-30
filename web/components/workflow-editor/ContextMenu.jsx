@@ -2,7 +2,6 @@ import { useLocalStorage } from "@mantine/hooks"
 import { Button, Card, Input, Kbd, Listbox, ListboxItem, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@nextui-org/react"
 import { useLocalStorageValue } from "@react-hookz/web"
 import { stringHash } from "@web/modules/util"
-import { useRFStoreProperty } from "@web/modules/workflow-editor/graph"
 import { useCreateActionNode } from "@web/modules/workflow-editor/graph/nodes"
 import classNames from "classnames"
 import { object as nodeDefs } from "nodes/web"
@@ -17,14 +16,17 @@ export default function ContextMenu() {
 
     const rf = useReactFlow()
 
-    const [isOpen, setOpen] = useRFStoreProperty("contextMenu.isOpen")
+    const storeApi = useStoreApi()
+
     const position = useStore(s => s.contextMenu?.position)
-    const close = () => setOpen(false)
+    const isOpen = useStore(s => s.contextMenu?.isOpen)
+    const close = () => storeApi.setState({
+        contextMenu: { isOpen: false, position }
+    })
 
     const [query, setQuery] = useState("")
 
     const createNode = useCreateActionNode()
-
     const addNode = definition => {
         createNode({
             definition: definition.id,

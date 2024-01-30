@@ -1,6 +1,8 @@
 
 export default {
     name: "Get Message",
+    description: "Get a message from a Gmail account.",
+
     inputs: {
         messageId: {
             name: "Message ID",
@@ -8,4 +10,9 @@ export default {
         }
     },
     outputs: {},
+
+    requiredIntegration: {
+        service: "google",
+        scopes: ["https://www.googleapis.com/auth/gmail.readonly"],
+    },
 }

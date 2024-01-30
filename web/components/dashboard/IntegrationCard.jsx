@@ -2,9 +2,10 @@ import { Button, Card, CardBody, Code, Divider, Modal, ModalBody, ModalContent, 
 import Group from "@web/components/layout/Group"
 import { resolveTailwindColor } from "@web/modules/colors"
 import { useDatabaseMutation } from "@web/modules/db"
-import { INTEGRATION_INFO, useIntegrationAccount } from "@web/modules/integrations"
+import { useIntegrationAccount } from "@web/modules/integrations"
 import { useQueryParam } from "@web/modules/router"
 import { useTeamRoles } from "@web/modules/teams"
+import { resolve as resolveIntegration } from "integrations/web"
 import { TbDots } from "react-icons/tb"
 
 
@@ -12,9 +13,9 @@ export default function IntegrationCard({ id }) {
 
     const [teamId] = useQueryParam("team")
     const { data: account } = useIntegrationAccount(id)
-    const { displayId, type } = account || {}
+    const { displayName, serviceName } = account || {}
 
-    const info = INTEGRATION_INFO[type]
+    const info = resolveIntegration(serviceName)
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
@@ -41,7 +42,7 @@ export default function IntegrationCard({ id }) {
                             {info.name}
                         </p>
                         <p className="font-medium">
-                            {displayId}
+                            {displayName}
                         </p>
 
                         {/* <p className="text-xs text-default-500">
@@ -80,7 +81,7 @@ export default function IntegrationCard({ id }) {
                                         {info.name}
                                     </p>
                                     <p className="font-medium">
-                                        {displayId}
+                                        {displayName}
                                     </p>
                                 </div>
                             </Group>

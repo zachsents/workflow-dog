@@ -1,1 +1,1 @@
-export { default as google_gmail } from "../google/gmail/web.jsx"
+export { default as google } from "../google/web.jsx"

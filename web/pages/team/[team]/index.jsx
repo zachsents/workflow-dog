@@ -7,11 +7,12 @@ import Group from "@web/components/layout/Group"
 import { useUser } from "@web/modules/auth"
 import { useDatabaseMutation } from "@web/modules/db"
 import { plural } from "@web/modules/grammar"
-import { INTEGRATION_INFO, useIntegrationAccountsForTeam } from "@web/modules/integrations"
+import { useIntegrationAccountsForTeam } from "@web/modules/integrations"
 import { useQueryParam } from "@web/modules/router"
 import { useSearch } from "@web/modules/search"
 import { isEditor, useTeam, useTeamInvitees, useTeamMembers } from "@web/modules/teams"
 import { useSyncToState } from "@web/modules/util"
+import { resolve as resolveIntegration } from "integrations/web"
 import { useState } from "react"
 import { TbEye, TbMailFast, TbPencil, TbPuzzle, TbSettings, TbUserPlus, TbUsersGroup } from "react-icons/tb"
 
@@ -143,7 +144,7 @@ function IntegrationsSection() {
     const integrationsQuery = useIntegrationAccountsForTeam(undefined, ["id", "display_id", "type"])
 
     const [filteredAccounts, query, setQuery] = useSearch(integrationsQuery?.data ?? [], {
-        selector: account => `${account.displayId} ${INTEGRATION_INFO[account.type].name}`,
+        selector: account => `${account.displayId} ${resolveIntegration(account.serviceName).name}`,
         highlight: false,
     })
 

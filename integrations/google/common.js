@@ -1,4 +1,4 @@
 export default {
-    name: "Gmail",
+    name: "Google",
     authType: "oauth2",
 }

@@ -23,3 +23,9 @@ jobs:
 
     - name: Build the Docker image
       run: docker build . --file ./api-server/Dockerfile --tag zachsents/wfd-api-server:$(date +%s)
+
+    - name: Login in to Docker Hub
+      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Push the Docker image
+      run: docker push zachsents/wfd-api-server:$(date +%s)

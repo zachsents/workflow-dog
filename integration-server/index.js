@@ -43,8 +43,11 @@ app.get("/integration/success", (req, res) => {
     res.send("<p>Integration successful! You can close this tab now.</p><script>window.close()</script>")
 })
 
-app.listen(8080, () => {
-    console.log("Integration server is running on port 8080")
+
+const port = process.env.NODE_ENV === "production" ? 80 : 8080
+
+app.listen(port, () => {
+    console.log("Integration server is running on port", port)
 })
 
 

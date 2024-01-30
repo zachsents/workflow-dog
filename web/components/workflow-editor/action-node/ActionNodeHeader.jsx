@@ -24,14 +24,15 @@ export default function ActionNodeHeader({ withSettings = false }) {
             >
                 <Group className="gap-unit-xs">
                     {definition.icon &&
-                        <definition.icon />}
+                        <definition.icon className="text-xl" />}
                     <div>
-                        <p className="text-sm font-semibold">
+                        <p className="text-lg font-semibold">
                             {displayName}
                         </p>
-                        {!!name && <p className="text-xs opacity-75">
-                            {definition?.name}
-                        </p>}
+                        {!!name &&
+                            <p className="text-sm opacity-75">
+                                {definition?.name}
+                            </p>}
                     </div>
                 </Group>
             </Tooltip>

@@ -14,7 +14,7 @@ export default {
             bullet: true,
         }
     },
-    renderBody: () => {
+    renderNode: () => {
         const ref = useRef()
         const selected = useNodePropertyValue(undefined, "selected")
         useEffect(() => {
@@ -27,18 +27,24 @@ export default {
         })
 
         return (
-            <div className="flex justify-center items-stretch pr-unit-xs py-unit-xs">
+            <div className="relative">
                 <Textarea
                     defaultValue={value ?? ""}
                     onValueChange={setValue}
                     minRows={1}
                     maxRows={12}
-                    size="sm"
-                    className="nodrag"
+                    size="sm" variant="bordered"
+                    className="nodrag my-unit-sm relative translate-x-6 bg-white text-tiny"
+                    classNames={{
+                        input: "text-tiny"
+                    }}
                     placeholder="Type something..."
                     ref={ref}
                 />
+                <p className="absolute bottom-full text-tiny text-default-500 left-8">
+                    Text
+                </p>
             </div>
         )
-    }
+    },
 }

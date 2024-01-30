@@ -1,6 +1,6 @@
 import { Button, Card, CardHeader, Select, SelectItem, Tooltip } from "@nextui-org/react"
 import { useNodeIntegrationAccount } from "@web/modules/integrations"
-import { useDefinition, useNodeProperty, useUpdateInternalsWhenNecessary } from "@web/modules/workflow-editor/graph/nodes"
+import { useDefinition, useNodeProperty, useNodePropertyValue, useUpdateInternalsWhenNecessary } from "@web/modules/workflow-editor/graph/nodes"
 import { useWorkflow } from "@web/modules/workflows"
 import classNames from "classnames"
 import { resolve as resolveIntegration } from "integrations/web"
@@ -18,96 +18,54 @@ export default function ActionNode({ id, data, selected }) {
 
     const definition = useDefinition()
 
-    // const hasValidationErrors = useNodeHasValidationErrors(id)
-
-    const inputGroups = useMemo(
-        () => Object.entries(definition?.inputs ?? {})
-            .map(([inputDefId, inputDef]) => [
-                inputDef.group ? inputDef.name : undefined,
-                data.inputs.filter(input => input.definition == inputDefId && !input.hidden && input.mode === "handle"),
-            ])
-            .filter(([, inputs]) => inputs.length > 0),
-        [data.inputs]
-    )
-
-    const outputGroups = useMemo(
-        () => Object.entries(definition?.outputs ?? {})
-            .map(([outputDefId, outputDef]) => [
-                outputDef.group ? outputDef.name : undefined,
-                data.outputs.filter(output => output.definition == outputDefId && !output.hidden),
-            ])
-            .filter(([, outputs]) => outputs.length > 0),
-        [data.outputs]
-    )
-
     useUpdateInternalsWhenNecessary()
 
     return (
         <ActionNodeShell>
             <NodeModifierWrapper>
-                <Card
-                    className={classNames("!transition rounded-xl border border-gray-800 overflow-visible min-w-[12rem] max-w-[28rem]",
-                        selected ? "shadow-xl" : "shadow-md",
-                    )}
-                >
-                    <CardHeader className="p-0 rounded-t-xl overflow-clip">
-                        <ActionNodeHeader withSettings />
-                    </CardHeader>
-                    <Group
-                        className="justify-between flex-nowrap py-unit-xs"
-                    >
-                        <Group className="flex-col justify-center !items-start gap-2">
-                            {inputGroups.map(([groupName, inputs], i) =>
-                                <div className="px-2" key={groupName || i}>
-                                    {groupName &&
-                                        <p className="text-[0.625rem] text-default-500">
-                                            {groupName}
-                                        </p>}
+                {definition.renderNode ?
+                    <div className="flex flex-row items-stretch">
+                        <InputsRenderer />
 
-                                    <div className="flex flex-col items-start gap-1 -ml-4">
-                                        {inputs.map(input =>
-                                            <ActionNodeHandle {...input} type="target" key={input.id} />
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </Group>
-
-                        <div className="grow px-4">
-                            {definition.renderBody &&
-                                <definition.renderBody id={id} />}
-
-                            {Object.entries(definition.inputs).filter(([, inputDef]) => inputDef.renderInBody).map(([inputDefId, inputDef]) =>
-                                <div key={inputDefId}>
-                                    <p className="font-bold text-xs">
-                                        {inputDef.name}
-                                    </p>
-                                    <ConfigComponent
-                                        input={data.inputs.find(i => i.definition == inputDefId)}
-                                        definition={inputDef}
-                                    />
-                                </div>
-                            )}
+                        <div className="grow">
+                            <definition.renderNode id={id} />
                         </div>
 
-                        <Group className="flex-col justify-center !items-end gap-2">
-                            {outputGroups.map(([groupName, outputs], i) =>
-                                <div className="px-2" key={groupName || i}>
-                                    {groupName &&
-                                        <p className="text-[0.625rem] text-default-500">
-                                            {groupName}
-                                        </p>}
+                        <OutputsRenderer />
+                    </div> :
+                    <Card
+                        className={classNames("!transition rounded-xl border border-gray-800 overflow-visible max-w-[28rem]",
+                            selected ? "shadow-xl" : "shadow-md",
+                        )}
+                    >
+                        <CardHeader className="p-0 rounded-t-xl overflow-clip">
+                            <ActionNodeHeader withSettings />
+                        </CardHeader>
+                        <Group
+                            className="justify-between flex-nowrap py-unit-xs"
+                        >
+                            <InputsRenderer />
 
-                                    <div className="flex flex-col items-start gap-1 -mr-4">
-                                        {outputs.map(output =>
-                                            <ActionNodeHandle {...output} type="source" key={output.id} />
-                                        )}
+                            <div className="grow px-2">
+                                {definition.renderBody &&
+                                    <definition.renderBody id={id} />}
+
+                                {Object.entries(definition.inputs).filter(([, inputDef]) => inputDef.renderInBody).map(([inputDefId, inputDef]) =>
+                                    <div key={inputDefId}>
+                                        <p className="font-bold text-xs">
+                                            {inputDef.name}
+                                        </p>
+                                        <ConfigComponent
+                                            input={data.inputs.find(i => i.definition == inputDefId)}
+                                            definition={inputDef}
+                                        />
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
+
+                            <OutputsRenderer />
                         </Group>
-                    </Group>
-                </Card>
+                    </Card>}
             </NodeModifierWrapper>
 
             {definition.requiredIntegration &&
@@ -225,5 +183,77 @@ function RequiredIntegration() {
                     </Tooltip>
                 </Group>}
         </div>
+    )
+}
+
+
+function InputsRenderer() {
+
+    const definition = useDefinition()
+    const data = useNodePropertyValue(undefined, "data")
+
+    const inputGroups = useMemo(
+        () => Object.entries(definition?.inputs ?? {})
+            .map(([inputDefId, inputDef]) => [
+                inputDef.group ? inputDef.name : undefined,
+                data.inputs.filter(input => input.definition == inputDefId && !input.hidden && input.mode === "handle"),
+            ])
+            .filter(([, inputs]) => inputs.length > 0),
+        [data.inputs]
+    )
+
+    return (
+        <Group className="flex-col justify-center !items-start gap-2">
+            {inputGroups.map(([groupName, inputs], i) =>
+                <div className="px-2" key={groupName || i}>
+                    {groupName &&
+                        <p className="text-[0.625rem] text-default-500">
+                            {groupName}
+                        </p>}
+
+                    <div className="flex flex-col items-start gap-1 -ml-4">
+                        {inputs.map(input =>
+                            <ActionNodeHandle {...input} type="target" key={input.id} />
+                        )}
+                    </div>
+                </div>
+            )}
+        </Group>
+    )
+}
+
+
+function OutputsRenderer() {
+
+    const definition = useDefinition()
+    const data = useNodePropertyValue(undefined, "data")
+
+    const outputGroups = useMemo(
+        () => Object.entries(definition?.outputs ?? {})
+            .map(([outputDefId, outputDef]) => [
+                outputDef.group ? outputDef.name : undefined,
+                data.outputs.filter(output => output.definition == outputDefId && !output.hidden),
+            ])
+            .filter(([, outputs]) => outputs.length > 0),
+        [data.outputs]
+    )
+
+    return (
+        <Group className="flex-col justify-center !items-end gap-2">
+            {outputGroups.map(([groupName, outputs], i) =>
+                <div className="px-2" key={groupName || i}>
+                    {groupName &&
+                        <p className="text-[0.625rem] text-default-500">
+                            {groupName}
+                        </p>}
+
+                    <div className="flex flex-col items-start gap-1 -mr-4">
+                        {outputs.map(output =>
+                            <ActionNodeHandle {...output} type="source" key={output.id} />
+                        )}
+                    </div>
+                </div>
+            )}
+        </Group>
     )
 }

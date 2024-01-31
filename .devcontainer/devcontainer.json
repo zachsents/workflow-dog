@@ -6,5 +6,13 @@
         3000,
         3001,
         8080
-    ]
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "denoland.vscode-deno",
+                "oven.bun-vscode"
+            ]
+        }
+    }
 }

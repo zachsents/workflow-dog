@@ -5,7 +5,7 @@ import { project_id as projectId } from "./service-account.json"
 const auth = new GoogleAuth({
     // See https://cloud.google.com/secret-manager/docs/reference/rest/v1beta1/projects.secrets/get#authorization-scopes
     scopes: "https://www.googleapis.com/auth/cloud-platform",
-    keyFile: "./service-account.json"
+    keyFile: "./service-account.json",
 })
 
 async function getAccessToken() {

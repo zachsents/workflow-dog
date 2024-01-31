@@ -12,6 +12,15 @@
     "packageManager": "pnpm@7.15.0",
     "name": "workflow-dog",
     "type": "module",
+    "workspaces": [
+        "data-types",
+        "integration-server",
+        "integrations",
+        "nodes",
+        "shared",
+        "triggers",
+        "web"
+    ],
     "pnpm": {
         "overrides": {
             "react-icons": "^4.10.1",

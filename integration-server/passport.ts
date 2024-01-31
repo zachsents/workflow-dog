@@ -58,7 +58,7 @@ async function setupGoogleStrategy() {
                 scopes: tokenInfo.scopes,
             })
 
-            await addAccountToTeam(account.id, (req as unknown as { session }).session.teamId)
+            await addAccountToTeam(account.id, (req as unknown as { session: { teamId: string } }).session.teamId)
                 .catch(err => callback(err, null))
 
             callback(null, account)

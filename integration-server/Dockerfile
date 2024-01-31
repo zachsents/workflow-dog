@@ -1,10 +1,8 @@
 FROM oven/bun
 
-WORKDIR /wfd
-COPY . .
-RUN npm i -g pnpm
-RUN pnpm --filter api-server -P install
+WORKDIR /integration-server
+COPY ./build .
 
-EXPOSE 443
+EXPOSE 8000
 
-ENTRYPOINT [ "pnpm", "--filter", "api-server", "start" ]
+ENTRYPOINT [ "bun", "run", "index.js" ]

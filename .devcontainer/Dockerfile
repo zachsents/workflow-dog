@@ -1,4 +1,4 @@
 FROM oven/bun
 
-# Install git
+## Install git
 RUN apt-get update && apt-get install -y git

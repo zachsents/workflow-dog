@@ -63,7 +63,7 @@ app.get("/integration/success", (req, res) => {
 /*                                 Publish App                                */
 /* -------------------------------------------------------------------------- */
 
-const port = 8000
+const port = process.env.PORT ? parseInt(process.env.PORT) : 8080
 app.listen(port, () => {
     console.log("Integration server running on port", port)
 })

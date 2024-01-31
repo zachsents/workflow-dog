@@ -11,6 +11,6 @@ FROM oven/bun AS runtime
 WORKDIR /integration-server
 COPY --from=builder /wfd/integration-server/build .
 
-EXPOSE 8000
+EXPOSE 8080
 
 ENTRYPOINT [ "bun", "run", "index.js" ]

@@ -12,7 +12,8 @@
             "extensions": [
                 "denoland.vscode-deno",
                 "oven.bun-vscode",
-                "BriteSnow.vscode-toggle-quotes"
+                "BriteSnow.vscode-toggle-quotes",
+                "github.vscode-github-actions"
             ]
         }
     }

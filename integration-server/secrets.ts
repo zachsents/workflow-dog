@@ -6,13 +6,10 @@ const secretClient = new SecretManagerServiceClient({
 
 const projectId = await secretClient.getProjectId()
 
-export async function getSecret(name) {
+export async function getSecret(name: string) {
     const [version] = await secretClient.accessSecretVersion({
         name: `projects/${projectId}/secrets/${name}/versions/latest`,
     })
 
-    version.payload.data
-
-    const payload = version.payload.data.toString()
-    return payload
+    return version.payload.data.toString()
 }

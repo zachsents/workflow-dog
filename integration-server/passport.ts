@@ -7,14 +7,14 @@ import { google } from "googleapis"
 
 
 export async function setupStrategies() {
-    passport.serializeUser((user, callback) => {
+    passport.serializeUser((user: { id: string }, callback) => {
         if (!user?.id)
             return callback("User does not have an id", null)
 
         callback(null, user.id)
     })
 
-    passport.deserializeUser((id, callback) => {
+    passport.deserializeUser((id: string, callback) => {
         getIntegrationAccount(id)
             .then(account => callback(null, account))
             .catch(err => {
@@ -48,18 +48,23 @@ async function setupGoogleStrategy() {
             clientSecret,
         }).getTokenInfo(accessToken)
 
-        const account = await upsertIntegrationAccount(profile.provider, {
-            displayName: profile.emails[0].value,
-            accessToken,
-            refreshToken,
-            serviceUserId: profile.id,
-            profile,
-            scopes: tokenInfo.scopes,
-        }).catch(err => callback(err, null))
+        try {
+            const account = await upsertIntegrationAccount(profile.provider, {
+                displayName: profile.emails[0].value,
+                accessToken,
+                refreshToken,
+                serviceUserId: profile.id,
+                profile,
+                scopes: tokenInfo.scopes,
+            })
 
-        await addAccountToTeam(account.id, req.session.teamId)
-            .catch(err => callback(err, null))
+            await addAccountToTeam(account.id, (req as unknown as { session }).session.teamId)
+                .catch(err => callback(err, null))
 
-        callback(null, account)
+            callback(null, account)
+        }
+        catch (err) {
+            callback(err, null)
+        }
     }))
 }

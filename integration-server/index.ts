@@ -114,6 +114,7 @@ app.get("/oauth2/connect/:serviceName/callback", async (req, res) => {
             "Content-Type": "application/x-www-form-urlencoded",
         },
         redirect: "follow",
+        verbose: true,
         body: new URLSearchParams({
             client_id: clientId,
             client_secret: clientSecret,

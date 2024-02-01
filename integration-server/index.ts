@@ -6,6 +6,7 @@ import grant from "grant"
 import morgan from "morgan"
 import { addAccountToTeam, upsertIntegrationAccount } from "./db.js"
 import serviceConfigs, { grantConfigs } from "./service-configs.js"
+import cookieSession from "cookie-session"
 
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8080
@@ -16,13 +17,11 @@ const port = process.env.PORT ? parseInt(process.env.PORT) : 8080
 /* -------------------------------------------------------------------------- */
 const app = express()
 app.use(morgan("dev"))
-app.use(session({
-    secret: "grant",
-    resave: false,
-    saveUninitialized: true,
+app.use(cookieSession({
+    signed: false,
+    secure: false,
+    maxAge: 5 * 60 * 1000,
 }))
-
-app.use("/connect", setTeamId)
 
 
 /* -------------------------------------------------------------------------- */
@@ -34,21 +33,21 @@ app.use(grant.default.express({
         origin: process.env.NODE_ENV === "production" ?
             process.env.CLOUD_RUN_URL :
             `http://localhost:${port}`,
-        transport: "session",
+        transport: "state",
         response: ["tokens", "profile", "raw"],
     },
     ...grantConfigs,
 }))
 
 
-app.get("/finish/:serviceName", async (req, res) => {
+app.get("/connect/:serviceName/callback", async (req, res) => {
 
     const session = req.session as CustomSessionData
-    const { access_token, refresh_token, profile, raw: raw_token } = session.grant.response
-    const serviceConfig = serviceConfigs[session.grant.provider]
+    const { access_token, refresh_token, profile, raw: raw_token } = res.locals.grant.response
+    const serviceConfig = serviceConfigs[req.params.serviceName]
 
     const account = await upsertIntegrationAccount({
-        service_name: session.grant.provider,
+        service_name: req.params.serviceName,
         display_name: serviceConfig.getDisplayName(profile),
         service_user_id: serviceConfig.getServiceUserId(profile),
         access_token,
@@ -58,7 +57,7 @@ app.get("/finish/:serviceName", async (req, res) => {
         raw_token,
     })
 
-    await addAccountToTeam(account.id, session.team_id)
+    await addAccountToTeam(account.id, session.grant.dynamic.t)
 
     res.send("<p>Connected! You can close this tab now.</p><script>window.close()</script>")
 })
@@ -77,25 +76,11 @@ app.listen(port, () => {
 /*                                  Utilities                                 */
 /* -------------------------------------------------------------------------- */
 
-function setTeamId(req: Request, res: Response, next: NextFunction) {
-    if (req.path.split("/").length > 2)
-        return next()
-
-    if (!req.query.t)
-        res.status(400).send("Missing team ID")
-
-    if (typeof req.query.t !== "string")
-        res.status(400).send("Invalid team ID")
-
-    const session = req.session as CustomSessionData
-    session.team_id = req.query.t as string
-    next()
-}
-
 interface CustomSessionData extends SessionData {
-    team_id?: string,
     grant?: {
         provider: string,
-        response: any,
+        dynamic: {
+            t: string,
+        },
     }
 }

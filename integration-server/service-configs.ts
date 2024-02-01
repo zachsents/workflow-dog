@@ -14,7 +14,7 @@ const serviceConfigs = await createConfigs({
                 access_type: "offline",
                 include_granted_scopes: true,
             },
-            dynamic: ["scope", "test"],
+            dynamic: ["scope"],
         },
         getDisplayName: (profile: any) => profile.email,
         getServiceUserId: (profile: any) => profile.sub,
@@ -42,7 +42,6 @@ async function createConfigs(configs: Record<string, any>) {
             grantConfig: {
                 key: clientId,
                 secret: clientSecret,
-                callback: `/finish/${name}`,
             },
         }, config)]
     })

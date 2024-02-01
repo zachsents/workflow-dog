@@ -13,4 +13,6 @@ COPY --from=builder /wfd/integration-server/build .
 
 EXPOSE 8080
 
-ENTRYPOINT [ "bun", "run", "index.js" ]
+ENV NODE_ENV production
+
+ENTRYPOINT ["bun", "run", "index.js" ]

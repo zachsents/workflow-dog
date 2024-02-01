@@ -46,7 +46,7 @@ app.get("/oauth2/connect/:serviceName", async (req, res) => {
 
     const url = new URL(config.authUrl)
     url.searchParams.append("client_id", clientId)
-    url.searchParams.append("redirect_uri", `${req.protocol}://${req.get("host")}/oauth2/connect/${req.params.serviceName}/callback`)
+    url.searchParams.append("redirect_uri", redirectUri(req.get("host"), req.params.serviceName))
     url.searchParams.append("response_type", "code")
 
     const scopes = [...new Set(
@@ -118,7 +118,7 @@ app.get("/oauth2/connect/:serviceName/callback", async (req, res) => {
             client_secret: clientSecret,
             code: req.query.code,
             grant_type: "authorization_code",
-            redirect_uri: `${req.protocol}://${req.get("host")}/oauth2/connect/${req.params.serviceName}/callback`,
+            redirect_uri: redirectUri(req.get("host"), req.params.serviceName),
         } as Record<string, string>).toString(),
     }).then(res => {
         if (!res.ok) {
@@ -254,4 +254,9 @@ const defaultConfig = {
     state: false,
     scopes: [],
     allowAdditionalScopes: false,
+}
+
+
+function redirectUri(host: string, serviceName: string) {
+    return `${host.includes("localhost") ? "http" : "https"}://${host}/oauth2/connect/${serviceName}/callback`
 }

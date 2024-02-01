@@ -24,7 +24,7 @@ const serviceConfigs = await createConfigs({
             authorize_url: "https://api.close.com/oauth2/authorize",
             access_url: "https://api.close.com/oauth2/token",
             oauth: 2,
-            scope: ["all.full_access", "offline_access"],
+            scope: ["offline_access"],
         },
         getDisplayName: (profile: any) => "test",
         getServiceUserId: (profile: any) => "test",

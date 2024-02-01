@@ -19,7 +19,7 @@ await setupStrategies()
 app.use(morgan("dev"))
 app.use(cookieSession({
     // secret: await getSecret("INTEGRATION_SESSION_SECRET"),
-    secure: process.env.NODE_ENV === "production",
+    // secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 1000,
     signed: false,
 }))

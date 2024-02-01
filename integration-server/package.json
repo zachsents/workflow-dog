@@ -18,7 +18,8 @@
     "integrations": "workspace:*",
     "morgan": "^1.10.0",
     "passport": "0.5",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "passport-oauth2": "^1.7.0"
   },
   "type": "module",
   "devDependencies": {

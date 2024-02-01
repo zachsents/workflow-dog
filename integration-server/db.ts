@@ -11,7 +11,7 @@ export async function upsertIntegrationAccount(serviceName: string, options: {
     refreshToken: string,
     serviceUserId: string,
     profile: any,
-    scopes: string[],
+    scopes?: string[],
 }) {
     const { data } = await client.from("integration_accounts").upsert({
         display_name: options.displayName,

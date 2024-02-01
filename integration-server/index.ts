@@ -45,6 +45,14 @@ app.get(
 )
 
 app.get(
+    "/service/close/connect",
+    setTeamId,
+    (req, ...params) => passport.authenticate("oauth2", {
+        accessType: "offline",
+    })(req, ...params)
+)
+
+app.get(
     "/service/:serviceName/connect",
     setTeamId,
     (req, ...params) => passport.authenticate(req.params.serviceName, {

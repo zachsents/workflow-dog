@@ -4,6 +4,7 @@ import { getSecret } from "./secrets.js"
 import { upsertIntegrationAccount, getIntegrationAccount, addAccountToTeam } from "./db.js"
 import { callbackUrl } from "./callback.js"
 import { google } from "googleapis"
+import { Strategy as OAuth2Strategy } from "passport-oauth2"
 
 
 export async function setupStrategies() {
@@ -30,6 +31,7 @@ export async function setupStrategies() {
 
     await Promise.all([
         setupGoogleStrategy(),
+        setupCloseStrategy(),
     ])
 }
 
@@ -61,6 +63,50 @@ async function setupGoogleStrategy() {
                 serviceUserId: profile.id,
                 profile,
                 scopes: tokenInfo.scopes,
+            })
+
+            await addAccountToTeam(account.id, (req as unknown as { session: { teamId: string } }).session.teamId)
+
+            callback(null, account)
+        }
+        catch (err) {
+            console.error(err)
+            callback(err, null)
+        }
+    }))
+}
+
+
+async function setupCloseStrategy() {
+
+    const [clientID, clientSecret] = await Promise.all([
+        await getSecret("INTEGRATION_CLOSE_CLIENT_ID"),
+        await getSecret("INTEGRATION_CLOSE_CLIENT_SECRET"),
+    ])
+
+    passport.use(new OAuth2Strategy({
+        authorizationURL: "https://app.close.com/oauth2/authorize",
+        tokenURL: "https://api.close.com/oauth2/token",
+        clientID,
+        clientSecret,
+        callbackURL: callbackUrl("close"),
+        passReqToCallback: true,
+    }, async (req, accessToken, refreshToken, profile, callback) => {
+
+        // const tokenInfo = await new google.auth.OAuth2({
+        //     clientId: clientID,
+        //     clientSecret,
+        // }).getTokenInfo(accessToken)
+
+        try {
+            const account = await upsertIntegrationAccount(profile.provider, {
+                // displayName: profile.emails[0].value,
+                displayName: "test",
+                accessToken,
+                refreshToken,
+                serviceUserId: profile.id,
+                profile,
+                // scopes: tokenInfo.scopes,
             })
 
             await addAccountToTeam(account.id, (req as unknown as { session: { teamId: string } }).session.teamId)

@@ -5,23 +5,8 @@ import { getSecret } from "./secrets.js"
 const client = createClient(process.env.SUPABASE_URL, await getSecret("SUPABASE_SERVICE_KEY"))
 
 
-export async function upsertIntegrationAccount(serviceName: string, options: {
-    displayName: string,
-    accessToken: string,
-    refreshToken: string,
-    serviceUserId: string,
-    profile: any,
-    scopes?: string[],
-}) {
-    const { data } = await client.from("integration_accounts").upsert({
-        display_name: options.displayName,
-        access_token: options.accessToken,
-        refresh_token: options.refreshToken,
-        service_user_id: options.serviceUserId,
-        service_name: serviceName,
-        profile: options.profile,
-        scopes: options.scopes,
-    }, {
+export async function upsertIntegrationAccount(accountData: any) {
+    const { data } = await client.from("integration_accounts").upsert(accountData, {
         onConflict: "service_name, service_user_id",
     }).select("id").single().throwOnError()
 

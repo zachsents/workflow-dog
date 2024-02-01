@@ -99,7 +99,7 @@ function RequiredIntegration() {
     const onSelectionChange = keys => setSelectedAccount(keys.values().next().value)
 
     const connectUrl = useMemo(() => {
-        const url = new URL(`http://api.workflow.dog/integration/${definition.requiredIntegration.service}/connect`)
+        const url = new URL(`https://integrate-e45frdiv4a-uc.a.run.app/service/${definition.requiredIntegration.service}/connect`)
         url.searchParams.append("t", workflow?.teamId)
 
         if (definition.requiredIntegration.scopes)

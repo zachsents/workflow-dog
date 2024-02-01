@@ -64,7 +64,7 @@ app.get("/success", (req, res) => {
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8080
 app.listen(port, () => {
-    console.log("Integration server running on port", port)
+    console.log("Integration server running on port", port, `(${process.env.NODE_ENV})`)
 })
 
 

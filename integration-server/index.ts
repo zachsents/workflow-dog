@@ -1,4 +1,4 @@
-import session from "cookie-session"
+import cookieSession from "cookie-session"
 import type { NextFunction, Request, Response } from "express"
 import express from "express"
 import morgan from "morgan"
@@ -12,15 +12,19 @@ import { getSecret } from "./secrets.js"
 /* -------------------------------------------------------------------------- */
 
 const app = express()
+// app.set('trust proxy', 1)
+
+await setupStrategies()
 
 app.use(morgan("dev"))
-app.use(session({
-    secret: await getSecret("INTEGRATION_SESSION_SECRET"),
+app.use(cookieSession({
+    // secret: await getSecret("INTEGRATION_SESSION_SECRET"),
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 1000,
+    signed: false,
 }))
 app.use(passport.initialize())
 app.use(passport.session())
-
-await setupStrategies()
 
 
 /* -------------------------------------------------------------------------- */
@@ -48,9 +52,10 @@ app.get(
     })(req, ...params)
 )
 
-app.get("/service/:serviceName/callback", (req, ...params) => passport.authenticate(req.params.serviceName, {
-    failureMessage: "Failed to authorize integration. Please try again.",
+app.get("/service/:serviceName/callback", echoTeamId, (req, ...params) => passport.authenticate(req.params.serviceName, {
+    failureMessage: true,
     successRedirect: "/success",
+    failWithError: true,
 })(req, ...params))
 
 app.get("/success", (req, res) => {
@@ -77,9 +82,13 @@ function setTeamId(req: Request, res: Response, next: NextFunction) {
     next()
 }
 
+function echoTeamId(req: Request, res, next) {
+    console.debug("Team ID:", req.session.teamId)
+    next()
+}
 
 function parseScopes(scopes: any): string[] {
-    const splitScopes = str => str.split(/[,\s]+/)
+    const splitScopes = (str: string) => str.split(/[,\s]+/)
 
     if (Array.isArray(scopes))
         return scopes.flatMap(splitScopes)

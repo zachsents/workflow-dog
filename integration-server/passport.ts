@@ -8,19 +8,24 @@ import { google } from "googleapis"
 
 export async function setupStrategies() {
     passport.serializeUser((user: { id: string }, callback) => {
+        console.debug("serializing", user)
+
         if (!user?.id)
             return callback("User does not have an id", null)
 
         callback(null, user.id)
     })
 
-    passport.deserializeUser((id: string, callback) => {
-        getIntegrationAccount(id)
-            .then(account => callback(null, account))
-            .catch(err => {
-                console.error(err)
-                callback(null, null)
-            })
+    passport.deserializeUser(async (id: string, callback) => {
+        console.debug("deserializing", id)
+
+        try {
+            callback(null, await getIntegrationAccount(id))
+        }
+        catch (err) {
+            console.error(err)
+            callback(null, null)
+        }
     })
 
     await Promise.all([
@@ -59,11 +64,11 @@ async function setupGoogleStrategy() {
             })
 
             await addAccountToTeam(account.id, (req as unknown as { session: { teamId: string } }).session.teamId)
-                .catch(err => callback(err, null))
 
             callback(null, account)
         }
         catch (err) {
+            console.error(err)
             callback(err, null)
         }
     }))

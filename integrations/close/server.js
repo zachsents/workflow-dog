@@ -6,5 +6,6 @@ export default {
         profileUrl: "https://api.close.com/api/v1/me",
         getDisplayName: (profile) => profile.email,
         getServiceUserId: (profile) => profile.id,
+        includeRedirectUriInTokenRequest: false,
     },
 }

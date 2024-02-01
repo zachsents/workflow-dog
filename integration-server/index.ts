@@ -109,7 +109,7 @@ app.get("/oauth2/connect/:serviceName/callback", async (req, res) => {
     ])
 
     const response = await fetch(config.tokenUrl, {
-        method: "post",
+        method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -118,7 +118,7 @@ app.get("/oauth2/connect/:serviceName/callback", async (req, res) => {
             client_secret: clientSecret,
             code: req.query.code,
             grant_type: "authorization_code",
-            redirect_uri: redirectUri(req.get("host"), req.params.serviceName),
+            ...config.includeRedirectUriInTokenRequest && { redirect_uri: redirectUri(req.get("host"), req.params.serviceName) },
         } as Record<string, string>).toString(),
     }).then(res => {
         if (!res.ok) {
@@ -254,6 +254,7 @@ const defaultConfig = {
     state: false,
     scopes: [],
     allowAdditionalScopes: false,
+    includeRedirectUriInTokenRequest: true,
 }
 
 

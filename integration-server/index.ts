@@ -5,6 +5,11 @@ import grant from "grant"
 import morgan from "morgan"
 import { addAccountToTeam, upsertIntegrationAccount } from "./db.js"
 import serviceConfigs, { grantConfigs } from "./service-configs.js"
+import { createClient } from "@supabase/supabase-js"
+import { AuthorizationCode } from "simple-oauth2"
+import type { AccessToken } from "simple-oauth2"
+import defaultOAuthConfigs from "grant/config/oauth.json"
+import merge from "lodash.merge"
 
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8080
@@ -52,12 +57,71 @@ app.get("/connect/:serviceName/callback", async (req, res) => {
         refresh_token,
         profile,
         scopes: raw_token.scope?.split(/[\s,]+/) || [],
-        raw_token,
+        raw_token: replaceExpiresIn(raw_token),
     })
 
     await addAccountToTeam(account.id, session.grant.dynamic.t)
 
     res.send("<p>Connected! You can close this tab now.</p><script>window.close()</script>")
+})
+
+
+app.get("/account/:accountId/token", async (req, res) => {
+
+    const apiKey = req.headers.authorization?.split("Bearer ")[1] || ""
+    const client = createClient(process.env.SUPABASE_URL, apiKey)
+
+    const { data: { raw_token, service_name } } = await client.from("integration_accounts")
+        .select("raw_token, service_name")
+        .eq("id", req.params.accountId)
+        .single()
+        .throwOnError()
+
+    const serviceConfig = serviceConfigs[service_name]
+    const grantConfig = serviceConfig.grantConfig
+    const defaultGrantConfig = defaultOAuthConfigs[service_name]
+
+    const tokenUrl = new URL(defaultGrantConfig?.access_url || grantConfig.access_url)
+
+    const authClient = new AuthorizationCode({
+        client: {
+            id: serviceConfig.clientId,
+            secret: serviceConfig.clientSecret,
+        },
+        auth: {
+            tokenHost: tokenUrl.origin,
+            tokenPath: tokenUrl.pathname,
+        },
+    })
+
+    const token = authClient.createToken(raw_token)
+
+    if (!token.expired(120))
+        return res.send({
+            access_token: token.token.access_token,
+            refreshed: false,
+        })
+
+    try {
+        const newToken = await token.refresh()
+
+        await client.from("integration_accounts")
+            .update({
+                raw_token: merge({}, raw_token, replaceExpiresIn(newToken.token)),
+                access_token: newToken.token.access_token,
+                ...newToken.token.refresh_token && { refresh_token: newToken.token.refresh_token },
+            })
+            .eq("id", req.params.accountId)
+            .throwOnError()
+
+        return res.send({
+            access_token: newToken.token.access_token,
+            refreshed: true,
+        })
+    } catch (error) {
+        console.log("Error refreshing access token: ", error.message)
+        return res.status(500).send({ error: "Error refreshing access token" })
+    }
 })
 
 
@@ -80,5 +144,14 @@ interface CustomSessionData extends SessionData {
         dynamic: {
             t: string,
         },
+    }
+}
+
+function replaceExpiresIn(token: { expires_in?: number }) {
+    const { expires_in, ...rest } = token
+
+    return {
+        ...rest,
+        expires_at: new Date(Date.now() + (expires_in || 0) * 1000).toISOString()
     }
 }

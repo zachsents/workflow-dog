@@ -19,6 +19,16 @@ const serviceConfigs = await createConfigs({
         getDisplayName: (profile: any) => profile.email,
         getServiceUserId: (profile: any) => profile.sub,
     },
+    close: {
+        grantConfig: {
+            authorize_url: "https://api.close.com/oauth2/authorize",
+            access_url: "https://api.close.com/oauth2/token",
+            oauth: 2,
+            scope: ["all.full_access", "offline_access"],
+        },
+        getDisplayName: (profile: any) => "test",
+        getServiceUserId: (profile: any) => "test",
+    },
 })
 
 export default serviceConfigs

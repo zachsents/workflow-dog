@@ -40,6 +40,7 @@ app.get(
             ...parseScopes(req.query.scopes),
         ],
         accessType: "offline",
+        includeGrantedScopes: true,
     })(req, ...params)
 )
 

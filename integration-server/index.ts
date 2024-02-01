@@ -94,14 +94,14 @@ app.get("/oauth2/connect/:serviceName/callback", async (req, res) => {
     if (!session.team_id)
         return res.status(400).send("Missing team ID")
 
-    if (!session.state || session.state !== req.query.state)
-        return res.status(400).send("Invalid state")
-
     const baseConfig = resolveIntegration(req.params.serviceName)?.oauth2
     if (!baseConfig)
         return res.status(404).send("Service not found")
 
     const config = merge({}, defaultConfig, baseConfig)
+
+    if (config.state && !(session.state && req.query.state && session.state === req.query.state))
+        return res.status(400).send("Invalid state")
 
     const [clientId, clientSecret] = await Promise.all([
         getSecret(`INTEGRATION_${req.params.serviceName.toUpperCase()}_CLIENT_ID`),

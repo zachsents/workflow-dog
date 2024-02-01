@@ -4,7 +4,6 @@ import express from "express"
 import morgan from "morgan"
 import passport from "passport"
 import { setupStrategies } from "./passport.js"
-import { getSecret } from "./secrets.js"
 
 
 /* -------------------------------------------------------------------------- */
@@ -19,9 +18,9 @@ await setupStrategies()
 app.use(morgan("dev"))
 app.use(cookieSession({
     // secret: await getSecret("INTEGRATION_SESSION_SECRET"),
-    // secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 1000,
     signed: false,
+    sameSite: "none",
 }))
 app.use(passport.initialize())
 app.use(passport.session())

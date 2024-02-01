@@ -4,7 +4,7 @@ export default {
         tokenUrl: "https://api.close.com/oauth2/token",
         scopes: ["offline_access"],
         profileUrl: "https://api.close.com/api/v1/me",
-        getDisplayName: (profile) => console.log(profile) || "test",
-        getServiceUserId: (profile) => "test",
+        getDisplayName: (profile) => profile.email,
+        getServiceUserId: (profile) => profile.id,
     },
 }

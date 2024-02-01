@@ -21,7 +21,7 @@ const serviceConfigs = await createConfigs({
     },
     close: {
         grantConfig: {
-            authorize_url: "https://api.close.com/oauth2/authorize",
+            authorize_url: "https://app.close.com/oauth2/authorize",
             access_url: "https://api.close.com/oauth2/token",
             oauth: 2,
             scope: ["offline_access"],

@@ -28,33 +28,32 @@ await setupStrategies()
 /* -------------------------------------------------------------------------- */
 
 app.get(
-    "/integration/google/connect",
+    "/service/google/connect",
     setTeamId,
     (req, ...params) => passport.authenticate("google", {
         scope: [
             "profile",
             "email",
-            ...((Array.isArray(req.query.scopes) ? req.query.scopes : [req.query.scopes])
-                .flatMap(scope => (scope as string).split(/[,\s]+/)))
+            ...parseScopes(req.query.scopes),
         ],
         accessType: "offline",
     })(req, ...params)
 )
 
 app.get(
-    "/integration/:serviceName/connect",
+    "/service/:serviceName/connect",
     setTeamId,
     (req, ...params) => passport.authenticate(req.params.serviceName, {
         // scope: ["profile", "email"],
     })(req, ...params)
 )
 
-app.get("/integration/:serviceName/callback", (req, ...params) => passport.authenticate(req.params.serviceName, {
+app.get("/service/:serviceName/callback", (req, ...params) => passport.authenticate(req.params.serviceName, {
     failureMessage: "Failed to authorize integration. Please try again.",
-    successRedirect: "/integration/success",
+    successRedirect: "/success",
 })(req, ...params))
 
-app.get("/integration/success", (req, res) => {
+app.get("/success", (req, res) => {
     res.send("<p>Integration successful! You can close this tab now.</p><script>window.close()</script>")
 })
 
@@ -79,3 +78,14 @@ function setTeamId(req: Request, res: Response, next: NextFunction) {
 }
 
 
+function parseScopes(scopes: any): string[] {
+    const splitScopes = str => str.split(/[,\s]+/)
+
+    if (Array.isArray(scopes))
+        return scopes.flatMap(splitScopes)
+
+    if (typeof scopes === "string")
+        return splitScopes(scopes)
+
+    return []
+}

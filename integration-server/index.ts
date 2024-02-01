@@ -1,12 +1,10 @@
-import type { NextFunction, Request, Response } from "express"
+import cookieSession from "cookie-session"
 import express from "express"
 import type { SessionData } from "express-session"
-import session from "express-session"
 import grant from "grant"
 import morgan from "morgan"
 import { addAccountToTeam, upsertIntegrationAccount } from "./db.js"
 import serviceConfigs, { grantConfigs } from "./service-configs.js"
-import cookieSession from "cookie-session"
 
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8080

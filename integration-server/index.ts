@@ -1,15 +1,14 @@
+import { createClient } from "@supabase/supabase-js"
 import cookieSession from "cookie-session"
 import express from "express"
 import type { SessionData } from "express-session"
 import grant from "grant"
-import morgan from "morgan"
-import { addAccountToTeam, upsertIntegrationAccount } from "./db.js"
-import serviceConfigs, { grantConfigs } from "./service-configs.js"
-import { createClient } from "@supabase/supabase-js"
-import { AuthorizationCode } from "simple-oauth2"
-import type { AccessToken } from "simple-oauth2"
 import defaultOAuthConfigs from "grant/config/oauth.json"
 import merge from "lodash.merge"
+import morgan from "morgan"
+import { AuthorizationCode } from "simple-oauth2"
+import { addAccountToTeam, upsertIntegrationAccount } from "./db.js"
+import serviceConfigs, { grantConfigs } from "./service-configs.js"
 
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8080

@@ -14,8 +14,24 @@ async function getAccessToken() {
     return token
 }
 
-export async function getSecret(name: string) {
+export async function getSecret(name: string, useLocalIfAvailable = true) {
     console.debug("Getting secret", name)
+
+    if (process.env.NODE_ENV === "development" && useLocalIfAvailable) {
+        const doesLocalSecretExist = await fetch(`https://secretmanager.googleapis.com/v1beta1/projects/${projectId}/secrets/${name}_LOCAL`, {
+            headers: {
+                Authorization: `Bearer ${await getAccessToken()}`
+            }
+        }).then(res => res.ok)
+
+        if (doesLocalSecretExist) {
+            console.debug("\tUsing local secret")
+            name += "_LOCAL"
+        }
+        else {
+            console.debug("\tLocal secret not found. Using production version.")
+        }
+    }
 
     const encodedSecret = await fetch(`https://secretmanager.googleapis.com/v1beta1/projects/${projectId}/secrets/${name}/versions/latest:access`, {
         headers: {

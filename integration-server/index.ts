@@ -114,21 +114,16 @@ app.get("/oauth2/connect/:serviceName/callback", async (req, res) => {
             "Content-Type": "application/x-www-form-urlencoded",
         },
         redirect: "follow",
-        verbose: true,
         body: new URLSearchParams({
             client_id: clientId,
             client_secret: clientSecret,
             code: req.query.code,
             grant_type: "authorization_code",
-            ...config.includeRedirectUriInTokenRequest && { redirect_uri: redirectUri(req.get("host"), req.params.serviceName) },
+            ...config.includeRedirectUriInTokenRequest && {
+                redirect_uri: redirectUri(req.get("host"), req.params.serviceName)
+            },
         } as Record<string, string>).toString(),
-    }).then(res => {
-        if (!res.ok) {
-            console.debug(res)
-            throw new Error("Failed to get access token")
-        }
-        return res.json()
-    })
+    }).then(checkForErrorThenJson)
 
     const tokenObj = replaceExpiresIn(response) as any
 
@@ -136,7 +131,7 @@ app.get("/oauth2/connect/:serviceName/callback", async (req, res) => {
         headers: {
             Authorization: `Bearer ${tokenObj.access_token}`,
         },
-    }).then(res => res.json())
+    }).then(checkForErrorThenJson)
 
     const account = await upsertIntegrationAccount({
         service_name: req.params.serviceName,
@@ -262,4 +257,14 @@ const defaultConfig = {
 
 function redirectUri(host: string, serviceName: string) {
     return `${host.includes("localhost") ? "http" : "https"}://${host}/oauth2/connect/${serviceName}/callback`
+}
+
+
+async function checkForErrorThenJson(res: Response) {
+    if (!res.ok) {
+        console.debug(res)
+        console.debug(`Body:\n${await res.text()}`)
+        throw new Error(`Failed to fetch: ${res.statusText}`)
+    }
+    return res.json()
 }

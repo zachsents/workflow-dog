@@ -1,6 +1,5 @@
 import { Button, Card, CardBody, Code, Divider, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ScrollShadow, Skeleton, useDisclosure } from "@nextui-org/react"
 import Group from "@web/components/layout/Group"
-import { resolveTailwindColor } from "@web/modules/colors"
 import { useDatabaseMutation } from "@web/modules/db"
 import { useIntegrationAccount } from "@web/modules/integrations"
 import { useQueryParam } from "@web/modules/router"
@@ -13,9 +12,8 @@ export default function IntegrationCard({ id }) {
 
     const [teamId] = useQueryParam("team")
     const { data: account } = useIntegrationAccount(id)
-    const { displayName, serviceName } = account || {}
 
-    const info = resolveIntegration(serviceName)
+    const info = resolveIntegration(account?.serviceName || "")
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
@@ -35,14 +33,14 @@ export default function IntegrationCard({ id }) {
             <CardBody className="px-8 flex flex-row justify-between gap-10 items-center">
                 <Group className="gap-unit-md text-small">
                     <info.icon className="text-2xl" style={{
-                        color: resolveTailwindColor(info.color, info.shade)
+                        color: info.color,
                     }} />
                     <div>
                         <p className="text-default-500">
                             {info.name}
                         </p>
                         <p className="font-medium">
-                            {displayName}
+                            {account?.displayName}
                         </p>
 
                         {/* <p className="text-xs text-default-500">
@@ -74,14 +72,14 @@ export default function IntegrationCard({ id }) {
                         <ModalHeader>
                             <Group className="gap-unit-md text-medium">
                                 <info.icon className="text-2xl" style={{
-                                    color: resolveTailwindColor(info.color, info.shade)
+                                    color: info.color,
                                 }} />
                                 <div>
                                     <p className="text-default-500 font-normal">
                                         {info.name}
                                     </p>
                                     <p className="font-medium">
-                                        {displayName}
+                                        {account?.displayName}
                                     </p>
                                 </div>
                             </Group>
@@ -103,14 +101,14 @@ export default function IntegrationCard({ id }) {
                                 </Group>
                             </div>
                             <Divider />
-                            <ScrollShadow className="w-full h-[10rem]">
+                            <ScrollShadow size={10} className="w-full h-[10rem]">
                                 <p className="font-bold text-small mb-2">
                                     Approved Permissions:
                                 </p>
-                                <div className="grid grid-cols-2 gap-unit-xs">
-                                    {["read", "write"].map(scope =>
+                                <div className="grid grid-cols-1 gap-unit-xs">
+                                    {account.scopes?.map(scope =>
                                         <Code key={scope}>
-                                            {scope}
+                                            {info.transformScope?.(scope) || scope}
                                         </Code>
                                     )}
                                 </div>

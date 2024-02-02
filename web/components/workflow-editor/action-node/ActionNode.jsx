@@ -102,8 +102,12 @@ function RequiredIntegration() {
         const url = new URL(`https://integrate-e45frdiv4a-uc.a.run.app/oauth2/connect/${definition.requiredIntegration.service}`)
         url.searchParams.append("t", workflow?.teamId)
 
-        if (definition.requiredIntegration.scopes)
-            url.searchParams.append("scopes", definition.requiredIntegration.scopes.join(","))
+        if (definition.requiredIntegration.scopes) {
+            const requestScopes = definition.requiredIntegration.scopes
+                .map(scope => Array.isArray(scope) ? scope[0] : scope)
+                .join(",")
+            url.searchParams.append("scopes", requestScopes)
+        }
 
         return url.toString()
     }, [definition.requiredIntegration.service, workflow?.teamId, definition.requiredIntegration.scopes])
@@ -150,7 +154,12 @@ function RequiredIntegration() {
                         )}
                     >
                         {item => {
-                            const hasRequiredScopes = definition.requiredIntegration.scopes?.every(scope => item.scopes?.includes(scope)) ?? true
+                            const hasRequiredScopes = definition.requiredIntegration.scopes?.every(
+                                scope => Array.isArray(scope) ?
+                                    scope.some(s => item.scopes?.includes(s)) :
+                                    item.scopes?.includes(scope)
+                            ) ?? true
+
                             return <SelectItem
                                 startContent={<Icon className="text-2xl" />}
                                 {...!hasRequiredScopes && {

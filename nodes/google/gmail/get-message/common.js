@@ -13,6 +13,8 @@ export default {
 
     requiredIntegration: {
         service: "google",
-        scopes: ["https://www.googleapis.com/auth/gmail.readonly"],
+        scopes: [
+            ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail"]
+        ],
     },
 }

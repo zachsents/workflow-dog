@@ -141,10 +141,10 @@ function GeneralSection() {
 
 function IntegrationsSection() {
 
-    const integrationsQuery = useIntegrationAccountsForTeam(undefined, ["id", "display_id", "type"])
+    const integrationsQuery = useIntegrationAccountsForTeam(undefined, ["id", "display_name", "service_name"])
 
     const [filteredAccounts, query, setQuery] = useSearch(integrationsQuery?.data ?? [], {
-        selector: account => `${account.displayId} ${resolveIntegration(account.serviceName).name}`,
+        selector: account => `${account.displayName} ${resolveIntegration(account.serviceName).name}`,
         highlight: false,
     })
 

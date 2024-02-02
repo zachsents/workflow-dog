@@ -16,6 +16,7 @@
     "google-auth-library": "^9.6.0",
     "integrations": "workspace:*",
     "lodash.merge": "^4.6.2",
+    "lodash.omit": "^4.5.0",
     "morgan": "^1.10.0",
     "simple-oauth2": "^5.0.0"
   },

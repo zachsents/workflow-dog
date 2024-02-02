@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js"
 import cookieSession from "cookie-session"
 import express from "express"
-import type { SessionData } from "express-session"
 import { resolve as resolveIntegration } from "integrations/server.js"
 import merge from "lodash.merge"
 import morgan from "morgan"
@@ -9,6 +8,7 @@ import crypto from "node:crypto"
 import { AuthorizationCode } from "simple-oauth2"
 import { addAccountToTeam, upsertIntegrationAccount } from "./db.js"
 import { getSecret } from "./secrets.js"
+import omit from "lodash.omit"
 
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8080
@@ -72,6 +72,20 @@ app.get("/oauth2/connect/:serviceName", async (req, res) => {
         Object.entries(config.additionalParams).forEach(([key, value]) => {
             url.searchParams.set(key, value as string)
         })
+    }
+
+    if (config.allowAdditionalParams) {
+        const additionalParams = omit(req.query, ["t", "scopes", "state", "redirect_uri", "scope", "response_type", "client_id", "code"])
+
+        Object.entries(additionalParams)
+            .filter(([key]) =>
+                Array.isArray(config.allowAdditionalParams) ?
+                    config.allowAdditionalParams.includes(key) :
+                    true
+            )
+            .forEach(([key, value]) => {
+                url.searchParams.set(key, value as string)
+            })
     }
 
     res.redirect(url.toString())
@@ -226,7 +240,7 @@ app.listen(port, () => {
 /*                                  Utilities                                 */
 /* -------------------------------------------------------------------------- */
 
-interface CustomSessionData extends SessionData {
+interface CustomSessionData {
     team_id?: string,
     state?: string,
     grant?: {

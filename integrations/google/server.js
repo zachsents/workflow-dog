@@ -7,6 +7,7 @@ export default {
             access_type: "offline",
             include_granted_scopes: "true",
         },
+        allowAdditionalParams: ["login_hint"],
         state: true,
         scopes: ["email", "profile"],
         allowAdditionalScopes: true,

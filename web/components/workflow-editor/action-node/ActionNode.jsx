@@ -99,7 +99,7 @@ function RequiredIntegration() {
     const onSelectionChange = keys => setSelectedAccount(keys.values().next().value)
 
     const connectUrl = useMemo(() => {
-        const url = new URL(`https://integrate-e45frdiv4a-uc.a.run.app/connect/${definition.requiredIntegration.service}`)
+        const url = new URL(`https://integrate-e45frdiv4a-uc.a.run.app/oauth2/connect/${definition.requiredIntegration.service}`)
         url.searchParams.append("t", workflow?.teamId)
 
         if (definition.requiredIntegration.scopes)
@@ -176,7 +176,7 @@ function RequiredIntegration() {
                     <Tooltip content="Add Account">
                         <Button
                             isIconOnly color="primary" variant="flat"
-                            className="rounded-full min-h-0 h-auto min-w-0 w-auto p-1"
+                            className="rounded-full min-h-0 h-auto min-w-0 w-auto p-1 shrink-0"
                             as="a" href={connectUrl} target="_blank"
                         >
                             <TbPlus />

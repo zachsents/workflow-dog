@@ -90,9 +90,7 @@ function RequiredIntegration() {
 
     const integration = resolveIntegration(definition.requiredIntegration.service)
 
-    const Icon = ({ className }) => <integration.icon className={classNames("text-white p-1 rounded-md aspect-square", className)} style={{
-        backgroundColor: integration.color,
-    }} />
+    const Icon = ({ className }) => <integration.icon className={classNames("h-auto aspect-square", className)} />
 
     const [selectedAccount, setSelectedAccount] = useNodeProperty(undefined, "data.integrationAccount")
     const selectedKeys = useMemo(() => new Set(selectedAccount ? [selectedAccount] : []), [selectedAccount])
@@ -147,7 +145,7 @@ function RequiredIntegration() {
                         renderValue={items => items.map(item =>
                             <Group className="gap-unit-xs" key={`selected` + item.key}>
                                 <div className="shrink-0">
-                                    <Icon className="text-lg" />
+                                    <Icon className="w-3" />
                                 </div>
                                 <span>{item.data.displayName}</span>
                             </Group>
@@ -161,7 +159,7 @@ function RequiredIntegration() {
                             ) ?? true
 
                             return <SelectItem
-                                startContent={<Icon className="text-2xl" />}
+                                startContent={<Icon className="w-6" />}
                                 {...!hasRequiredScopes && {
                                     endContent: <TbExternalLink className="text-danger-500" />,
                                     as: "a",

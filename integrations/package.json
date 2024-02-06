@@ -17,6 +17,7 @@
         "react-icons": "*",
         "reactflow": "*",
         "@nextui-org/react": "*",
-        "tailwindcss": "*"
+        "tailwindcss": "*",
+        "@zachsents/brand-icons": "*"
     }
 }

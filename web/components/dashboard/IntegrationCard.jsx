@@ -32,7 +32,7 @@ export default function IntegrationCard({ id }) {
         <Card>
             <CardBody className="px-8 flex flex-row justify-between gap-10 items-center">
                 <Group className="gap-unit-md text-small">
-                    <info.icon className="w-8" style={{
+                    <info.icon className="w-8 h-auto" style={{
                         color: info.color,
                     }} />
                     <div>
@@ -71,7 +71,7 @@ export default function IntegrationCard({ id }) {
                     <>
                         <ModalHeader>
                             <Group className="gap-unit-md text-medium">
-                                <info.icon className="w-8" style={{
+                                <info.icon className="w-8 h-auto" style={{
                                     color: info.color,
                                 }} />
                                 <div>
@@ -101,7 +101,7 @@ export default function IntegrationCard({ id }) {
                                 </Group>
                             </div>
                             <Divider />
-                            <ScrollShadow size={10} className="w-full h-[10rem]">
+                            <ScrollShadow size={10} className="w-full h-[12rem]">
                                 <p className="font-bold text-small mb-2">
                                     Approved Permissions:
                                 </p>

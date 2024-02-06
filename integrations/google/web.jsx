@@ -1,4 +1,4 @@
-import GoogleIcon from "@zachsents/brand-icons/icons/google.svg"
+import GoogleIcon from "./google.svg"
 import colors from "tailwindcss/colors"
 
 export default {

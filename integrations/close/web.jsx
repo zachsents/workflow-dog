@@ -1,4 +1,4 @@
-import CloseIcon from "@zachsents/brand-icons/icons/close.svg"
+import CloseIcon from "./close.svg"
 import colors from "tailwindcss/colors"
 
 export default {

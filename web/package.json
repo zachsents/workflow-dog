@@ -21,7 +21,6 @@
         "@react-hookz/web": "^24.0.2",
         "@supabase/supabase-js": "^2.39.2",
         "@tanstack/react-query": "^5.17.5",
-        "@zachsents/brand-icons": "*",
         "@zachsents/fire-query": "^1.2.5",
         "classnames": "^2.5.1",
         "color": "^4.2.3",

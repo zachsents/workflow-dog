@@ -1,8 +1,8 @@
 Web:
     Integration Server:
-        ☐ Add brand icons to frontend
+        ✔ Add brand icons to frontend @done (2/6/2024, 1:22:49 AM)
         ☐ Double-check token retrieval/refresh
         ☐ Add support for API keys
         ☐ Make nonexistent accounts be unselected
-        
+
     ☐ Make nonexistent trigger inputs be unselected

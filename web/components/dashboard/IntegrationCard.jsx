@@ -32,7 +32,7 @@ export default function IntegrationCard({ id }) {
         <Card>
             <CardBody className="px-8 flex flex-row justify-between gap-10 items-center">
                 <Group className="gap-unit-md text-small">
-                    <info.icon className="text-2xl" style={{
+                    <info.icon className="w-8" style={{
                         color: info.color,
                     }} />
                     <div>
@@ -71,7 +71,7 @@ export default function IntegrationCard({ id }) {
                     <>
                         <ModalHeader>
                             <Group className="gap-unit-md text-medium">
-                                <info.icon className="text-2xl" style={{
+                                <info.icon className="w-8" style={{
                                     color: info.color,
                                 }} />
                                 <div>

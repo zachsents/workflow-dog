@@ -14,6 +14,7 @@ export default function IntegrationCard({ id }) {
     const { data: account } = useIntegrationAccount(id)
 
     const info = resolveIntegration(account?.serviceName || "")
+    const isOAuth2 = info?.authType === "oauth2"
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
@@ -101,18 +102,19 @@ export default function IntegrationCard({ id }) {
                                 </Group>
                             </div>
                             <Divider />
-                            <ScrollShadow size={10} className="w-full h-[12rem]">
-                                <p className="font-bold text-small mb-2">
-                                    Approved Permissions:
-                                </p>
-                                <div className="grid grid-cols-1 gap-unit-xs">
-                                    {account.scopes?.map(scope =>
-                                        <Code key={scope}>
-                                            {info.transformScope?.(scope) || scope}
-                                        </Code>
-                                    )}
-                                </div>
-                            </ScrollShadow>
+                            {isOAuth2 &&
+                                <ScrollShadow size={10} className="w-full h-[12rem]">
+                                    <p className="font-bold text-small mb-2">
+                                        Approved Permissions:
+                                    </p>
+                                    <div className="grid grid-cols-1 gap-unit-xs">
+                                        {account.scopes?.map(scope =>
+                                            <Code key={scope}>
+                                                {info.transformScope?.(scope) || scope}
+                                            </Code>
+                                        )}
+                                    </div>
+                                </ScrollShadow>}
                         </ModalBody>
                         <ModalFooter>
                             <Button variant="light" onPress={onClose}>

@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js"
 import { getSecret } from "./secrets.js"
 
 
-const client = createClient(process.env.SUPABASE_URL, await getSecret("SUPABASE_SERVICE_KEY"))
+export const client = createClient(process.env.SUPABASE_URL, await getSecret("SUPABASE_SERVICE_KEY"))
 
 
 export async function upsertIntegrationAccount(accountData: any) {
@@ -30,4 +30,22 @@ export async function addAccountToTeam(accountId: string, teamId: string) {
         integration_account_id: accountId,
         team_id: teamId,
     }).throwOnError()
+}
+
+
+export async function isUserEditorForTeam(userId: string, teamId: string) {
+    const conditions = await Promise.all([
+        await client.rpc("is_user_on_team", {
+            _user_id: userId,
+            _team_id: teamId,
+        }).then(res => res.data),
+
+        await client.rpc('has_role', {
+            _team_id: teamId,
+            _user_id: userId,
+            role: "editor",
+        }).then(res => res.data)
+    ])
+
+    return conditions.every(Boolean)
 }

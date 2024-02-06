@@ -1,14 +1,14 @@
 import { createClient } from "@supabase/supabase-js"
 import cookieSession from "cookie-session"
+import cors from "cors"
 import express from "express"
 import { resolve as resolveIntegration } from "integrations/server.js"
 import merge from "lodash.merge"
-import morgan from "morgan"
-import crypto from "node:crypto"
-import { AuthorizationCode } from "simple-oauth2"
-import { addAccountToTeam, upsertIntegrationAccount } from "./db.js"
-import { getSecret } from "./secrets.js"
 import omit from "lodash.omit"
+import morgan from "morgan"
+import crypto, { createHash } from "node:crypto"
+import { addAccountToTeam, client, isUserEditorForTeam, upsertIntegrationAccount } from "./db.js"
+import { getSecret } from "./secrets.js"
 
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8080
@@ -18,6 +18,8 @@ const port = process.env.PORT ? parseInt(process.env.PORT) : 8080
 /*                           App & Middleware Setup                           */
 /* -------------------------------------------------------------------------- */
 const app = express()
+app.use(cors())
+app.use(express.json())
 app.use(morgan("dev"))
 app.use(cookieSession({
     signed: false,
@@ -229,6 +231,53 @@ app.get("/account/:accountId/token", async (req, res) => {
         console.error(err)
         return res.status(500).send("Failed to refresh token")
     }
+})
+
+
+app.post("/apikey/connect/:serviceName", async (req, res) => {
+
+    if (!req.body.teamId || !req.body.apiKey)
+        return res.status(400).send("Missing parameters")
+
+    const baseConfig = resolveIntegration(req.params.serviceName)?.apiKey
+    if (!baseConfig)
+        return res.status(404).send("Service not found")
+
+    const config = merge({}, defaultConfig, baseConfig)
+
+    const token = req.header("authorization")?.split("Bearer ")[1]
+    if (!token)
+        return res.status(400).send("Missing token")
+
+    const { data: { user } } = await client.auth.getUser(token)
+
+    if (!isUserEditorForTeam(user.id, req.body.teamId))
+        return res.status(403).send("User is not an editor for the team")
+
+    const profile = await fetchProfile(config.profileUrl, req.body.apiKey)
+
+    try {
+        const { data: { id: newAccountId } } = await client
+            .from("integration_accounts")
+            .insert({
+                service_name: req.params.serviceName,
+                display_name: config.getDisplayName(profile, { access_token: req.body.apiKey }),
+                service_user_id: createHash("sha256").update(req.body.apiKey).digest("hex"),
+                access_token: req.body.apiKey,
+                profile,
+            })
+            .select("id")
+            .single()
+            .throwOnError()
+
+        await addAccountToTeam(newAccountId, req.body.teamId)
+    }
+    catch (err) {
+        console.error(err)
+        return res.status(500).send("Failed to connect account")
+    }
+
+    res.status(204).send()
 })
 
 

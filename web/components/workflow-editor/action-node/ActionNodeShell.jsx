@@ -39,11 +39,11 @@ export default function ActionNodeShell({ children }) {
                             "hover:outline hover:outline-2 hover:outline-primary-200 hover:outline-offset-4": !isSelected,
                             "opacity-40": isDisabled,
                         })}
-                        onDoubleClick={() => rf.fitView({
-                            nodes: [{ id: nodeId }],
-                            padding: 2.5,
-                            duration: 500,
-                        })}
+                    // onDoubleClick={() => rf.fitView({
+                    //     nodes: [{ id: nodeId }],
+                    //     padding: 2.5,
+                    //     duration: 500,
+                    // })}
                     >
                         {children}
 

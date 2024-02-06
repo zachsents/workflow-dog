@@ -1,8 +1,13 @@
 Web:
     Integration Server:
         ✔ Add brand icons to frontend @done (2/6/2024, 1:22:49 AM)
-        ☐ Double-check token retrieval/refresh
-        ☐ Add support for API keys
+        ✔ Double-check token retrieval/refresh @done (2/6/2024, 2:37:11 AM)
+        ✔ Add support for API keys @done (2/6/2024, 9:15:21 PM)
         ☐ Make nonexistent accounts be unselected
 
     ☐ Make nonexistent trigger inputs be unselected
+
+    Execution:
+        ☐ Set up workflowman that receives workflow runs from the queue and executes them
+        ☐ Make triggerman that receives trigger requests and queues tasks
+        ☐ Set up run viewer in frontend

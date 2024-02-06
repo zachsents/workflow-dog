@@ -1,5 +1,9 @@
-import { Button, Card, CardHeader, Select, SelectItem, Tooltip } from "@nextui-org/react"
+import { Button, Card, CardHeader, Input, Link, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Tooltip, useDisclosure } from "@nextui-org/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useForm } from "@web/modules/form"
 import { useNodeIntegrationAccount } from "@web/modules/integrations"
+import { useNotifications } from "@web/modules/notifications"
+import { supabase } from "@web/modules/supabase"
 import { useDefinition, useNodeProperty, useNodePropertyValue, useUpdateInternalsWhenNecessary } from "@web/modules/workflow-editor/graph/nodes"
 import { useWorkflow } from "@web/modules/workflows"
 import classNames from "classnames"
@@ -89,6 +93,8 @@ function RequiredIntegration() {
     const { available, isPending } = useNodeIntegrationAccount()
 
     const integration = resolveIntegration(definition.requiredIntegration.service)
+    const isOAuth2 = integration.authType === "oauth2"
+    const isAPIKey = integration.authType === "apikey"
 
     const Icon = ({ className }) => <integration.icon className={classNames("h-auto aspect-square", className)} />
 
@@ -97,6 +103,9 @@ function RequiredIntegration() {
     const onSelectionChange = keys => setSelectedAccount(keys.values().next().value)
 
     const connectUrl = useMemo(() => {
+        if (!isOAuth2)
+            return
+
         const url = new URL(`https://integrate-e45frdiv4a-uc.a.run.app/oauth2/connect/${definition.requiredIntegration.service}`)
         url.searchParams.append("t", workflow?.teamId)
 
@@ -110,14 +119,21 @@ function RequiredIntegration() {
         return url.toString()
     }, [definition.requiredIntegration.service, workflow?.teamId, definition.requiredIntegration.scopes])
 
-    return (
+    const apiKeyModal = useDisclosure()
+
+    return (<>
         <div className="absolute top-full left-1/2 -translate-x-1/2 mt-unit-xs max-w-full w-[16rem]">
             {available?.length === 0 ?
                 <Button
-                    as="a" href={connectUrl} fullWidth color="primary"
-                    target="_blank"
+                    {...isOAuth2 && {
+                        as: "a", href: connectUrl, target: "_blank",
+                        endContent: <TbExternalLink />,
+                    }}
+                    {...isAPIKey && {
+                        onPress: () => apiKeyModal.onOpen(),
+                    }}
+                    fullWidth color="primary"
                     className="rounded-full text-[0.625rem] min-h-0 h-auto py-1"
-                    endContent={<TbExternalLink />}
                 >
                     Connect {integration.name}
                 </Button> :
@@ -184,14 +200,24 @@ function RequiredIntegration() {
                         <Button
                             isIconOnly color="primary" variant="flat"
                             className="rounded-full min-h-0 h-auto min-w-0 w-auto p-1 shrink-0"
-                            as="a" href={connectUrl} target="_blank"
+                            {...isOAuth2 && {
+                                as: "a", href: connectUrl, target: "_blank",
+                            }}
+                            {...isAPIKey && {
+                                onPress: () => apiKeyModal.onOpen(),
+                            }}
                         >
                             <TbPlus />
                         </Button>
                     </Tooltip>
                 </Group>}
         </div>
-    )
+
+        {isAPIKey &&
+            <APIKeyModal
+                {...apiKeyModal}
+            />}
+    </>)
 }
 
 
@@ -263,5 +289,88 @@ function OutputsRenderer() {
                 </div>
             )}
         </Group>
+    )
+}
+
+
+function APIKeyModal({ isOpen, onClose }) {
+
+    const queryClient = useQueryClient()
+    const { notify } = useNotifications()
+
+    const definition = useDefinition()
+    const integration = resolveIntegration(definition.requiredIntegration.service)
+    const serviceName = definition.requiredIntegration.service
+
+    const { data: workflow } = useWorkflow()
+
+    const form = useForm({
+        initial: {
+            apikey: "",
+        },
+    })
+
+    const addApiKey = useMutation({
+        mutationFn: async values => fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_SERVER_URL}/apikey/connect/${serviceName}`, {
+            method: "post",
+            headers: {
+                Authorization: `Bearer ${await supabase.auth.getSession().then(session => session.data.session.access_token)}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                apiKey: values.apikey,
+                teamId: workflow?.teamId,
+            }),
+        }).then(res => {
+            if (!res.ok) throw new Error("Failed to connect account")
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["integrationAccountsForWorkflow", workflow.id, serviceName],
+            })
+            onClose()
+            notify({
+                title: null,
+                message: "Account connected!",
+            })
+        },
+        onError: () => {
+            notify({
+                title: null,
+                message: "Failed to connect account",
+                classNames: { icon: "!bg-danger" },
+            })
+        },
+    })
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose}>
+            <ModalContent>
+                <ModalHeader>
+                    Connect {integration.name}
+                </ModalHeader>
+                <ModalBody>
+                    <form onSubmit={form.submit(addApiKey.mutate)} className="flex flex-col gap-unit-sm">
+                        <Input
+                            label="API Key"
+                            {...form.inputProps("apikey", { required: true })}
+                            autoFocus
+                        />
+
+                        {integration.generateApiKeyUrl &&
+                            <p className="text-sm text-default-500">
+                                You can create an API key <Link href={integration.generateApiKeyUrl} target="_blank" className="text-sm">here</Link>.
+                            </p>}
+
+                        <Button type="submit" color="primary" isLoading={addApiKey.isPending}>
+                            Connect
+                        </Button>
+                    </form>
+                </ModalBody>
+                <ModalFooter>
+
+                </ModalFooter>
+            </ModalContent>
+        </Modal>
     )
 }

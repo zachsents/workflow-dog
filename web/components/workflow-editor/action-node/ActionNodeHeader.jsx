@@ -24,9 +24,9 @@ export default function ActionNodeHeader({ withSettings = false }) {
             >
                 <Group className="gap-unit-xs">
                     {definition.icon &&
-                        <definition.icon className="text-xl" />}
+                        <definition.icon className="text-lg stroke-[1.5px]" />}
                     <div>
-                        <p className="text-lg font-semibold">
+                        <p className="text-md font-semibold">
                             {displayName}
                         </p>
                         {!!name &&

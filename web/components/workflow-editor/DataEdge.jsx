@@ -7,13 +7,12 @@ import { getBezierPath, useReactFlow } from "reactflow"
 
 const INTERACTION_PADDING = 20
 const FOREIGN_OBJECT_SIZE = 60
-const OVERLAP = 5
+const OVERLAP = 0
 // const BROKEN_EDGE_LENGTH = 80
 // const BROKEN_STROKE_DASH_ARRAY = "8 6"
 
 
 export default function DataEdge(props) {
-
     return (
         <UnbrokenEdge {...props} />
     )
@@ -152,14 +151,14 @@ const VisiblePath = forwardRef(function VisiblePath({ d, style, markerEnd, selec
         <path
             d={d}
             markerEnd={markerEnd}
-            className="stroke-white stroke-[8px] fill-none"
+            className="stroke-gray-100 stroke-[8px] fill-none"
         />
         <path
             d={d}
             markerEnd={markerEnd}
-            className={classNames("fill-none stroke-[5px] transition-colors", {
+            className={classNames("fill-none stroke-[4px] transition-colors", {
                 "stroke-primary-400": !forced && selected,
-                "stroke-gray-300 group-hover:stroke-primary-300": !forced && !selected,
+                "stroke-gray-600 group-hover:stroke-primary-300": !forced && !selected,
                 "!stroke-amber-500": forced && selected,
                 "!stroke-amber-200 group-hover:!stroke-amber-400": forced && !selected,
             })}

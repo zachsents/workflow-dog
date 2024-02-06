@@ -1,7 +1,7 @@
 import { Button, Tooltip } from "@nextui-org/react"
 import { useCreateActionNode, useDefinition } from "@web/modules/workflow-editor/graph/nodes"
 import classNames from "classnames"
-import { TbActivity, TbArrowLeftSquare, TbArrowRightSquare, TbSparkles } from "react-icons/tb"
+import { TbActivity, TbArrowLeftSquare, TbArrowRight, TbArrowRightSquare, TbSparkles } from "react-icons/tb"
 import { Position, Handle as RFHandle, useNodeId, useStore, useReactFlow } from "reactflow"
 import util from "util"
 import Group from "../../layout/Group"
@@ -102,6 +102,11 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
                 >
                     {/* {definition.showHandleIcon && definition.icon &&
                                 <definition.icon size="0.7rem" color="currentColor" />} */}
+                    {isConnected && <TbArrowRight className={classNames(
+                        "text-xs",
+                        isSource ? "-mr-2" : "-ml-2",
+                    )} />}
+
                     <p className="text-[0.625rem] text-current line-clamp-1">
                         {displayName}
                     </p>

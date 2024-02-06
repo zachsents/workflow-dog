@@ -34,11 +34,11 @@ export default function ActionNode({ id, data, selected }) {
                         <OutputsRenderer />
                     </div> :
                     <Card
-                        className={classNames("!transition rounded-xl border border-gray-800 overflow-visible max-w-[28rem]",
+                        className={classNames("!transition rounded-md overflow-visible max-w-[28rem] p-1 border border-gray-700",
                             selected ? "shadow-xl" : "shadow-md",
                         )}
                     >
-                        <CardHeader className="p-0 rounded-t-xl overflow-clip">
+                        <CardHeader className="p-0 rounded-md overflow-clip border border-gray-700">
                             <ActionNodeHeader withSettings />
                         </CardHeader>
                         <Group
@@ -219,7 +219,7 @@ function InputsRenderer() {
                             {groupName}
                         </p>}
 
-                    <div className="flex flex-col items-start gap-1 -ml-4">
+                    <div className="flex flex-col items-start gap-1 -ml-5">
                         {inputs.map(input =>
                             <ActionNodeHandle {...input} type="target" key={input.id} />
                         )}
@@ -255,7 +255,7 @@ function OutputsRenderer() {
                             {groupName}
                         </p>}
 
-                    <div className="flex flex-col items-start gap-1 -mr-4">
+                    <div className="flex flex-col items-start gap-1 -mr-5">
                         {outputs.map(output =>
                             <ActionNodeHandle {...output} type="source" key={output.id} />
                         )}

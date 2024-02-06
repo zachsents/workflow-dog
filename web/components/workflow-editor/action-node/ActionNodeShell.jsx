@@ -34,9 +34,9 @@ export default function ActionNodeShell({ children }) {
                     className="max-w-[16-rem]" closeDelay={0}
                 >
                     <div
-                        className={classNames("rounded-xl transition-transform", {
-                            "outline outline-2 outline-primary-300 outline-offset-2 scale-105": isSelected,
-                            "hover:outline hover:outline-2 hover:outline-primary-200 hover:outline-offset-2": !isSelected,
+                        className={classNames("rounded-lg transition-transform", {
+                            "outline outline-2 outline-primary-300 outline-offset-4 scale-105": isSelected,
+                            "hover:outline hover:outline-2 hover:outline-primary-200 hover:outline-offset-4": !isSelected,
                             "opacity-40": isDisabled,
                         })}
                         onDoubleClick={() => rf.fitView({

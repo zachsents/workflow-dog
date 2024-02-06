@@ -7,7 +7,7 @@ import { useOnConnect } from "@web/modules/workflow-editor/graph/use-on-connect"
 import { useSelectAll } from "@web/modules/workflow-editor/graph/use-select-all"
 import { useEditorSettings } from "@web/modules/workflow-editor/settings"
 import { TbArrowBack, TbArrowForward } from "react-icons/tb"
-import { Background, ControlButton, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState, useStore } from "reactflow"
+import { Background, ControlButton, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState, useStore, MarkerType } from "reactflow"
 import "reactflow/dist/style.css"
 import colors from "tailwindcss/colors"
 import Group from "../layout/Group"
@@ -64,7 +64,7 @@ export default function GraphEditor({ initialGraph: { nodes: initialNodes = [], 
                 // zoomOnDoubleClick
                 // zoomOnScroll={false}
 
-                className="flex-1"
+                className="flex-1 bg-gray-50"
 
                 onCopy={onCopy}
                 onPaste={() => onPaste()}

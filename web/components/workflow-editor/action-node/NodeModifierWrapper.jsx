@@ -13,7 +13,7 @@ export default function NodeModifierWrapper({ children }) {
     const modDef = modDefs[modifier?.type]
 
     return modifier ?
-        <div className="px-3 pb-3 pt-1 rounded-xl bg-gray-200 bg-opacity-50 border-dashed border-1">
+        <div className="px-3 pb-3 pt-1 rounded-lg bg-gray-200 bg-opacity-50 border-dashed border-1">
             <Group className="justify-between mb-unit-xs !items-stretch">
                 <div className="flex flex-col items-start justify-between">
                     <p className="text-default-500 text-xs py-1">

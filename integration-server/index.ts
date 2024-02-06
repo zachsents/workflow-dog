@@ -26,8 +26,9 @@ app.use(cookieSession({
 }))
 
 
-// See: https://developers.google.com/identity/protocols/oauth2/web-server
-
+/**
+ * @see https://developers.google.com/identity/protocols/oauth2/web-server
+ */
 app.get("/oauth2/connect/:serviceName", async (req, res) => {
 
     const baseConfig = resolveIntegration(req.params.serviceName)?.oauth2
@@ -141,11 +142,7 @@ app.get("/oauth2/connect/:serviceName/callback", async (req, res) => {
 
     const tokenObj = replaceExpiresIn(response) as any
 
-    const profile = await fetch(config.profileUrl, {
-        headers: {
-            Authorization: `Bearer ${tokenObj.access_token}`,
-        },
-    }).then(checkForErrorThenJson)
+    const profile = await fetchProfile(config.profileUrl, tokenObj.access_token)
 
     const account = await upsertIntegrationAccount({
         service_name: req.params.serviceName,
@@ -169,60 +166,68 @@ app.get("/account/:accountId/token", async (req, res) => {
     const apiKey = req.headers.authorization?.split("Bearer ")[1] || ""
     const client = createClient(process.env.SUPABASE_URL, apiKey)
 
-    const { data: { raw_token, service_name } } = await client.from("integration_accounts")
-        .select("raw_token, service_name")
+    const { data: { refresh_token, raw_token, service_name } } = await client.from("integration_accounts")
+        .select("refresh_token, raw_token, service_name")
         .eq("id", req.params.accountId)
         .single()
         .throwOnError()
 
+    // If the token is not expired, return it. Includes a 2 minute buffer.
+    if (new Date(raw_token.expires_at) > new Date(Date.now() + 120 * 1000))
+        return res.send({
+            access_token: raw_token.access_token,
+            refreshed: false,
+        })
+
+    if (!refresh_token)
+        return res.status(400).send("No refresh token available. You might need to revoke access to WorkflowDog through the service's settings and then try connecting again.")
+
     const baseConfig = resolveIntegration(service_name)?.oauth2
     const config = merge({}, defaultConfig, baseConfig)
-
-    const tokenUrl = new URL(config.tokenUrl)
 
     const [clientId, clientSecret] = await Promise.all([
         getSecret(`INTEGRATION_${service_name.toUpperCase()}_CLIENT_ID`),
         getSecret(`INTEGRATION_${service_name.toUpperCase()}_CLIENT_SECRET`),
     ])
 
-    const authClient = new AuthorizationCode({
-        client: {
-            id: clientId,
-            secret: clientSecret,
-        },
-        auth: {
-            tokenHost: tokenUrl.origin,
-            tokenPath: tokenUrl.pathname,
-        },
-    })
-
-    const token = authClient.createToken(raw_token)
-
-    if (!token.expired(120))
-        return res.send({
-            access_token: token.token.access_token,
-            refreshed: false,
-        })
-
     try {
-        const newToken = await token.refresh()
+        const refreshResponse = await fetch(config.tokenUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            redirect: "follow",
+            body: new URLSearchParams({
+                client_id: clientId,
+                client_secret: clientSecret,
+                grant_type: "refresh_token",
+                refresh_token,
+            } as Record<string, string>).toString(),
+        })
+            .then(checkForErrorThenJson)
+
+        const newToken = replaceExpiresIn(refreshResponse) as any
+        const profile = await fetchProfile(config.profileUrl, newToken.access_token as string)
 
         await client.from("integration_accounts")
             .update({
-                raw_token: merge({}, raw_token, replaceExpiresIn(newToken.token)),
-                access_token: newToken.token.access_token,
-                ...newToken.token.refresh_token && { refresh_token: newToken.token.refresh_token },
+                raw_token: merge({}, raw_token, newToken),
+                access_token: newToken.access_token,
+                profile,
+                display_name: config.getDisplayName(profile, newToken),
+                ...newToken.refresh_token && { refresh_token: newToken.refresh_token },
             })
             .eq("id", req.params.accountId)
             .throwOnError()
 
         return res.send({
-            access_token: newToken.token.access_token,
+            access_token: newToken.access_token,
             refreshed: true,
         })
-    } catch (error) {
-        console.log("Error refreshing access token: ", error.message)
-        return res.status(500).send({ error: "Error refreshing access token" })
+    }
+    catch (err) {
+        console.error(err)
+        return res.status(500).send("Failed to refresh token")
     }
 })
 
@@ -281,4 +286,13 @@ async function checkForErrorThenJson(res: Response) {
         throw new Error(`Failed to fetch: ${res.statusText}`)
     }
     return res.json()
+}
+
+
+async function fetchProfile(profileUrl: string, accessToken: string) {
+    return fetch(profileUrl, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    }).then(checkForErrorThenJson)
 }

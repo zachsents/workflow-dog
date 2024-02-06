@@ -17,15 +17,13 @@
     "integrations": "workspace:*",
     "lodash.merge": "^4.6.2",
     "lodash.omit": "^4.5.0",
-    "morgan": "^1.10.0",
-    "simple-oauth2": "^5.0.0"
+    "morgan": "^1.10.0"
   },
   "type": "module",
   "devDependencies": {
     "@types/cookie-session": "^2.0.48",
     "@types/express": "^4.17.21",
     "@types/morgan": "^1.9.9",
-    "@types/node": "^17.0.12",
-    "@types/simple-oauth2": "^5.0.7"
+    "@types/node": "^17.0.12"
   }
 }

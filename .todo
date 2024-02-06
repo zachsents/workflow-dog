@@ -1,0 +1,8 @@
+Web:
+    Integration Server:
+        ☐ Add brand icons to frontend
+        ☐ Double-check token retrieval/refresh
+        ☐ Add support for API keys
+        ☐ Make nonexistent accounts be unselected
+        
+    ☐ Make nonexistent trigger inputs be unselected

@@ -1,0 +1,25 @@
+{
+    "name": "workflow-man",
+    "module": "index.ts",
+    "type": "module",
+    "dependencies": {
+        "@supabase/supabase-js": "^2.39.3",
+        "express": "^4.18.2",
+        "integrations": "workspace:*",
+        "morgan": "^1.10.0",
+        "nodes": "workspace:*",
+        "rxjs": "^7.8.1",
+        "triggers": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@types/express": "^4.17.21",
+        "@types/morgan": "^1.9.9"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "scripts": {
+        "build": "bun build ./index.ts --outdir ./build --target bun && cp .env ./build/.env && cp service-account.json ./build/service-account.json"
+    }
+}

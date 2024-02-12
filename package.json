@@ -19,7 +19,8 @@
         "nodes",
         "shared",
         "triggers",
-        "web"
+        "web",
+        "workflow-man"
     ],
     "overrides": {
         "react-icons": "^4.10.1",

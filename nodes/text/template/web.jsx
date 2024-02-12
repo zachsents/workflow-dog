@@ -30,7 +30,6 @@ export default {
         substitution: {
             name: "Substitutions",
             description: "A value to insert into the template. If your template contains {FirstName}, a substitution named FirstName will replace it.",
-            named: true,
             derivedFrom: "template",
         },
     },

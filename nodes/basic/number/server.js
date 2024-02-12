@@ -1,3 +1,10 @@
 export default {
-    action: ({ node }) => ({ number: node.data.state.value }),
+    action: (_, { node }) => {
+        const parsed = parseFloat(node.data.state.value)
+
+        if (isNaN(parsed))
+            throw new Error("Invalid number")
+
+        return { number: parsed }
+    },
 }

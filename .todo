@@ -8,6 +8,15 @@ Web:
     ☐ Make nonexistent trigger inputs be unselected
 
     Execution:
-        ☐ Set up workflowman that receives workflow runs from the queue and executes them
+        ✔ Set up workflowman that receives workflow runs from the queue and executes them @done (2/7/2024, 6:56:51 PM)
+        ✔ Set up taskqueue that points to workflow-man @done (2/12/2024, 12:00:53 AM)
         ☐ Make triggerman that receives trigger requests and queues tasks
         ☐ Set up run viewer in frontend
+        ✔ Catch errors @done (2/7/2024, 5:51:40 PM)
+        ✔ Do named outputs @done (2/7/2024, 2:24:33 AM)
+    
+    ☐ Add interface for searching and adding nodes
+    ☐ Make text nodes autosize
+    ☐ minify number nodes
+    ☐ Add renaming + adding for group handles
+    ☐ Set up homepage redirect

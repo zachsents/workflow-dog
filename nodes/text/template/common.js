@@ -13,6 +13,7 @@ export default {
             name: "Substitution",
             type: "data-type:basic.string",
             group: true,
+            named: true,
         },
     },
 

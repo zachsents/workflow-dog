@@ -22,7 +22,7 @@ app.post("/workflow-runs/:runId/execute", async (req, res) => {
 
     const { data: { workflows: workflow, ...run } } = await client
         .from("workflow_runs")
-        .select("*, workflows (id, graph)")
+        .select("*, workflows (id, graph, is_enabled)")
         .eq("id", req.params.runId)
         .single()
         .throwOnError()
@@ -34,6 +34,19 @@ app.post("/workflow-runs/:runId/execute", async (req, res) => {
 
     if (!["pending", "scheduled"].includes(run.status)) {
         res.status(200).send("Run is not pending or scheduled. Not running")
+        return
+    }
+
+    if (!workflow.is_enabled) {
+        await updateRun(req.params.runId, {
+            status: "failed",
+            has_errors: true,
+            finished_at: new Date().toISOString(),
+            state: {
+                errors: { "workflow": "Workflow is disabled" }
+            },
+        })
+        res.status(200).send("Workflow is disabled. Not running")
         return
     }
 

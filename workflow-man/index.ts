@@ -71,11 +71,20 @@ app.post("/workflow-runs/:runId/execute", async (req, res) => {
 // Create workflow run
 app.post("/workflows/:workflowId/run", async (req, res) => {
 
+    const { data: { count } } = await client
+        .from("workflow_runs")
+        .select("count")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single()
+        .throwOnError()
+
     const { data: { id: newRunId } } = await client
         .from("workflow_runs")
         .insert({
             workflow_id: req.params.workflowId,
             trigger_data: req.body.triggerData,
+            count: (count || 0) + 1,
             ...req.body.scheduledFor && {
                 status: "scheduled",
                 scheduled_for: req.body.scheduledFor,
@@ -116,6 +125,8 @@ app.post("/workflows/:workflowId/run", async (req, res) => {
 
 
 app.all("/workflows/:workflowId/trigger/request", async (req, res) => {
+    // TO DO: verify trigger type 
+
     await fetch(`${process.env.CLOUD_RUN_URL}/workflows/${req.params.workflowId}/run`, {
         method: "post",
         headers: {

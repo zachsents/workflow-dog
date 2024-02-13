@@ -86,3 +86,24 @@ export function useCreateWorkflow() {
         }
     })
 }
+
+
+export function useWorkflowRuns(workflowId) {
+
+    workflowId = useWorkflowIdFromUrl(workflowId)
+
+    return useQuery({
+        queryFn: async () => {
+            const { data } = await supabase
+                .from("workflow_runs")
+                .select("id, count, created_at, status")
+                .eq("workflow_id", workflowId)
+                .order("created_at", { ascending: false })
+                .limit(100)
+                .throwOnError()
+            return deepCamelCase(data)
+        },
+        queryKey: ["workflow-runs", workflowId],
+        enabled: !!workflowId,
+    })
+}

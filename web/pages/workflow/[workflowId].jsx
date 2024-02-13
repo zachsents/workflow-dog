@@ -7,6 +7,7 @@ import TriggerControl from "@web/components/workflow-editor/TriggerControl"
 import { useMustBeSignedIn } from "@web/modules/auth"
 import { useQueryParam } from "@web/modules/router"
 import { useWorkflow } from "@web/modules/workflows"
+import RunViewer from "@web/components/workflow-editor/RunViewer"
 import { ReactFlowProvider } from "reactflow"
 
 
@@ -23,8 +24,12 @@ export default function WorkflowPage() {
                 <div className="relative flex-1 flex items-stretch justify-stretch flex-col">
                     <div className="absolute top-0 left-0 w-full p-unit-xs pointer-events-none z-[1] flex justify-between items-start">
                         <TriggerControl />
-                        <Runner />
+                        <div className="flex flex-col items-end gap-unit-xs">
+                            <Runner />
+                            <RunViewer />
+                        </div>
                     </div>
+
                     {isSuccess ?
                         <GraphEditor initialGraph={workflow?.graph} /> :
                         <Center className="w-full flex-1">

@@ -5,15 +5,19 @@
     "forwardPorts": [
         3000,
         3001,
-        8080
+        8080,
+        8081
     ],
     "customizations": {
         "vscode": {
             "extensions": [
-                "denoland.vscode-deno",
                 "oven.bun-vscode",
                 "BriteSnow.vscode-toggle-quotes",
-                "github.vscode-github-actions"
+                "github.vscode-github-actions",
+                "bradlc.vscode-tailwindcss",
+                "GitHub.copilot",
+                "GitHub.copilot-chat",
+                "formulahendry.auto-rename-tag"
             ]
         }
     }

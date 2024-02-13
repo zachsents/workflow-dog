@@ -5,18 +5,35 @@ Web:
         ✔ Add support for API keys @done (2/6/2024, 9:15:21 PM)
         ☐ Make nonexistent accounts be unselected
 
-    ☐ Make nonexistent trigger inputs be unselected
 
     Execution:
         ✔ Set up workflowman that receives workflow runs from the queue and executes them @done (2/7/2024, 6:56:51 PM)
         ✔ Set up taskqueue that points to workflow-man @done (2/12/2024, 12:00:53 AM)
-        ☐ Make triggerman that receives trigger requests and queues tasks
-        ☐ Set up run viewer in frontend
+        ✔ Make triggerman that receives trigger requests and queues tasks @done (2/13/2024, 12:20:31 AM)
+        ✘ Catch errors for things like invalid triggers, invalid worklow IDs, etc. @cancelled (2/13/2024, 4:33:54 AM)
         ✔ Catch errors @done (2/7/2024, 5:51:40 PM)
         ✔ Do named outputs @done (2/7/2024, 2:24:33 AM)
-    
+        Running:
+            ☐ Set up run manually panel
+            ☐ Make JSON builder component
+        Run viewer: 
+            ☐ Design run viewer panel
+            ☐ Design object/json viewer
+            ☐ Port old run viewer to new frontend
+        Triggers:
+            ☐ Combine URL and webhook triggers
+            ☐ Add gmail trigger endpoint/infra
+            ☐ Catch errors for invalid triggers
+            ☐ Add configuration for triggers
+
+    ✔ Make nonexistent trigger inputs be unselected @done (2/13/2024, 4:34:53 AM)
     ☐ Add interface for searching and adding nodes
     ☐ Make text nodes autosize
     ☐ minify number nodes
     ☐ Add renaming + adding for group handles
     ☐ Set up homepage redirect
+
+    Nodes:
+        ☐ JSON stringify
+        ☐ JSON parse
+        ☐ Expand object

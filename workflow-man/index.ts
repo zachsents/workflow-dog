@@ -115,6 +115,29 @@ app.post("/workflows/:workflowId/run", async (req, res) => {
 })
 
 
+app.all("/workflows/:workflowId/trigger/request", async (req, res) => {
+    await fetch(`${process.env.CLOUD_RUN_URL}/workflows/${req.params.workflowId}/run`, {
+        method: "post",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            triggerData: {
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: typeof req.body === "object" ? JSON.stringify(req.body) : req.body,
+                params: req.query,
+            },
+        })
+    })
+
+    // TO DO: subscribe to created document and send response to client
+
+    res.sendStatus(201)
+})
+
+
 /* -------------------------------------------------------------------------- */
 /*                                 Publish App                                */
 /* -------------------------------------------------------------------------- */

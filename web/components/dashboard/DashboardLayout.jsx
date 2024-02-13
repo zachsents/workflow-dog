@@ -19,7 +19,7 @@ export default function DashboardLayout({ children, title, rightContent }) {
     useMustBeSignedIn()
 
     return (
-        <div className="w-screen h-full min-h-screen flex flex-col items-stretch grid-bg">
+        <div className="w-screen h-full min-h-screen flex flex-col items-stretch grid-bg bg-gray-50">
             <header className="p-10 flex flex-row justify-between gap-20">
                 <Group className="gap-10">
                     <Link href="/">

@@ -3,7 +3,7 @@ import { useMustBeSignedIn } from "@web/modules/auth"
 import { useQueryParam } from "@web/modules/router"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { TbBorderOuter, TbBrandStackshare, TbDatabase } from "react-icons/tb"
+import { TbBrandStackshare } from "react-icons/tb"
 import Logo from "../Logo"
 import Group from "../layout/Group"
 import TeamSelector from "./TeamSelector"
@@ -40,7 +40,7 @@ export default function DashboardLayout({ children, title, rightContent }) {
                             </TabLabel>}
                             as={Link} href={`/workflows?team=${selectedTeam}`} shallow
                         />
-                        <Tab
+                        {/* <Tab
                             key="/snippets"
                             title={<TabLabel
                                 comingSoon
@@ -59,7 +59,7 @@ export default function DashboardLayout({ children, title, rightContent }) {
                             >
                                 Stores
                             </TabLabel>}
-                        />
+                        /> */}
                     </Tabs>
                 </Group>
 

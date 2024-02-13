@@ -1,5 +1,4 @@
 import Providers from "@web/components/Providers"
-import "@web/modules/firebase"
 import siteInfo from "@web/site-info.json"
 import "@web/styles/globals.css"
 import { enableMapSet } from "immer"

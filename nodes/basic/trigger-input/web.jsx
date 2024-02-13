@@ -2,7 +2,7 @@ import { Select, SelectItem } from "@nextui-org/react"
 import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
 import { useWorkflow } from "@web/modules/workflows"
 import { object as typeMap } from "data-types/common"
-import { useMemo } from "react"
+import { useMemo, useEffect } from "react"
 import { TbPlayerSkipForward } from "react-icons/tb"
 import colors from "tailwindcss/colors"
 import { object as triggerMap } from "triggers/web"
@@ -13,11 +13,7 @@ export default {
     icon: TbPlayerSkipForward,
     color: colors.gray[800],
     tags: ["Trigger", "Basic"],
-    inputs: {
-        input: {
-            description: "The input to get from the trigger.",
-        },
-    },
+    inputs: {},
     outputs: {
         value: {
         }
@@ -32,11 +28,16 @@ export default {
             type: value.type,
         }))
 
-        const [triggerInput, setTriggerInput] = useNodeProperty(undefined, "data.input")
+        const [triggerInput, setTriggerInput] = useNodeProperty(undefined, "data.state.input")
         const selectedKeys = useMemo(() => new Set(triggerInput ? [triggerInput] : []), [triggerInput])
         const onSelectionChange = (keys) => {
             setTriggerInput(keys.values().next().value)
         }
+
+        useEffect(() => {
+            if (triggerInputs.length > 0 && triggerInput && !triggerInputs.find(i => i.id === triggerInput))
+                setTriggerInput(triggerInputs[0].id)
+        }, [JSON.stringify(triggerInputs), triggerInput])
 
         return (
             <Select

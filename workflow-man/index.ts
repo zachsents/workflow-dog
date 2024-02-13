@@ -55,7 +55,7 @@ app.post("/workflow-runs/:runId/execute", async (req, res) => {
         started_at: new Date().toISOString(),
     })
 
-    const runState = await runWorkflow(run, workflow) // mutates run
+    const runState = await runWorkflow(run, workflow)
 
     await updateRun(req.params.runId, {
         status: "completed",

@@ -101,7 +101,7 @@ export function useWorkflowRuns(workflowId, selectKeys = ["*"]) {
                 .select(selectKeys.join(","))
                 .eq("workflow_id", workflowId)
                 .order("created_at", { ascending: false })
-                .limit(100)
+                .limit(50)
                 .throwOnError()
             return deepCamelCase(data)
         },
@@ -120,7 +120,7 @@ export function useWorkflowRun(runId) {
                 .eq("id", runId)
                 .single()
                 .throwOnError()
-            return deepCamelCase(data, { excludeDashedKeys: true })
+            return deepCamelCase(data, { excludeDashedKeys: true, excludeColonKeys: true })
         },
         queryKey: ["workflow-run", runId],
         enabled: !!runId,

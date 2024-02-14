@@ -13,6 +13,7 @@ Web:
         ✘ Catch errors for things like invalid triggers, invalid worklow IDs, etc. @cancelled (2/13/2024, 4:33:54 AM)
         ✔ Catch errors @done (2/7/2024, 5:51:40 PM)
         ✔ Do named outputs @done (2/7/2024, 2:24:33 AM)
+        ☐ Add modifiers support to execution engine
         Running:
             ✔ Set up run manually panel @done (2/13/2024, 9:38:41 PM)
             ☐ Make JSON builder component
@@ -26,7 +27,7 @@ Web:
             ✔ Add re-run button @done (2/14/2024, 2:20:49 AM)
             ✔ Add run duration @done (2/14/2024, 1:08:45 AM)
             ✔ Add scroll shadow @done (2/14/2024, 1:08:50 AM)
-            ☐ Add error tooltips
+            ✔ Add error tooltips @done (2/14/2024, 2:40:07 AM)
             ☐ Make run list realtime
         Triggers:
             ☐ Combine URL and webhook triggers

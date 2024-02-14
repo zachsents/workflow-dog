@@ -11,6 +11,7 @@ import { Subject, debounceTime, tap } from "rxjs"
  * @param {object} obj
  * @param {object} [options]
  * @param {boolean} options.excludeDashedKeys
+ * @param {boolean} options.excludeColonKeys
  */
 export function deepCamelCase(obj, options = {}) {
     if (obj instanceof Array)
@@ -19,7 +20,14 @@ export function deepCamelCase(obj, options = {}) {
     if (obj?.constructor === Object) {
         const withNewKeys = _.mapKeys(
             obj,
-            (v, key) => (options.excludeDashedKeys && key.includes?.("-")) ? key : _.camelCase(key)
+            (v, key) => {
+                if (options.excludeColonKeys && key.includes?.(":"))
+                    return key
+                if (options.excludeDashedKeys && key.includes?.("-"))
+                    return key
+
+                return _.camelCase(key)
+            }
         )
         return _.mapValues(withNewKeys, obj => deepCamelCase(obj, options))
     }

@@ -1,15 +1,14 @@
-import { Button, Card, Tooltip } from "@nextui-org/react"
-import { plural } from "@web/modules/grammar"
+import { Card, Chip, Tooltip } from "@nextui-org/react"
 import { useDefinition, useDisabled, useNodeColors } from "@web/modules/workflow-editor/graph/nodes"
+import { useSelectedWorkflowRun } from "@web/modules/workflows"
 import classNames from "classnames"
-import _ from "lodash"
-import { useNodeId, useReactFlow, useStore } from "reactflow"
+import { useMemo } from "react"
+import { useNodeId, useStore } from "reactflow"
 import ActionNodeModal from "./ActionNodeModal"
 
 
 export default function ActionNodeShell({ children }) {
 
-    const rf = useReactFlow()
     const nodeId = useNodeId()
 
     const definition = useDefinition()
@@ -20,8 +19,11 @@ export default function ActionNodeShell({ children }) {
     const [disabled, upstreamDisabled, , disabledMessage] = useDisabled()
     const isDisabled = upstreamDisabled || disabled
 
-    const runErrors = useStore(s => s.selectedRun?.errors?.filter(error => error.node == nodeId), _.isEqual)
-    const hasRunErrors = runErrors?.length > 0
+    const { data: selectedRun } = useSelectedWorkflowRun()
+    const [hasRunError, runError] = useMemo(() => {
+        const errors = selectedRun?.state?.errors ?? {}
+        return [nodeId in errors, errors[nodeId]]
+    }, [selectedRun?.state?.errors, nodeId])
 
     return (
         <div
@@ -39,33 +41,22 @@ export default function ActionNodeShell({ children }) {
                             "hover:outline hover:outline-2 hover:outline-primary-200 hover:outline-offset-4": !isSelected,
                             "opacity-40": isDisabled,
                         })}
-                    // onDoubleClick={() => rf.fitView({
-                    //     nodes: [{ id: nodeId }],
-                    //     padding: 2.5,
-                    //     duration: 500,
-                    // })}
                     >
                         {children}
 
-                        {hasRunErrors &&
-                            <Tooltip placement="bottom" color="danger" closeDelay={0} content={
-                                <div className="flex flex-col gap-1 items-stretch">
-                                    {runErrors.map((error, i) =>
-                                        <p className="text-white font-bold" key={i}>
-                                            {error.message}
-                                        </p>
-                                    )}
-                                </div>
-                            }>
-                                <div className="absolute left-1/2 top-full -translate-x-1/2 mt-xs ">
-                                    <Button
-                                        className="border-solid border-1 border-red"
-                                        color="red" size="sm" compact variant="light"
+                        {hasRunError &&
+                            <div className="absolute left-1/2 top-full -translate-x-1/2 mt-unit-xs max-w-full">
+                                <Tooltip closeDelay={0} delay={750} content={runError} placement="bottom">
+                                    <Chip
+                                        color="danger" size="sm" aria-multiline
+                                        className="max-w-full"
                                     >
-                                        {runErrors.length} {plural("error", runErrors.length)}
-                                    </Button>
-                                </div>
-                            </Tooltip>}
+                                        <span className="opacity-50">Error:</span>
+                                        {" "}
+                                        <span>{runError}</span>
+                                    </Chip>
+                                </Tooltip>
+                            </div>}
                     </div >
                 </Tooltip>
                 <ActionNodeModal />

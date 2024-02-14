@@ -9,7 +9,7 @@ import { TbAlertCircle, TbAlertHexagon, TbCheck, TbCircle, TbClock, TbClockPlay,
 
 export default function RunViewer() {
 
-    const { data: runs } = useWorkflowRuns(undefined, ["id", "count", "created_at", "started_at", "finished_at", "status", "error_count", "has_errors"])
+    const { data: runs } = useWorkflowRuns(undefined, ["id", "count", "created_at", "started_at", "finished_at", "status", "error_count", "has_errors", "scheduled_for", "workflow_id"])
 
     const [selectedRunId, setSelectedRunId] = useEditorStoreState("selectedRunId")
     const { selectedKeys, onSelectionChange } = useControlledSelectedKeys(selectedRunId, setSelectedRunId)
@@ -81,7 +81,7 @@ export default function RunViewer() {
                                             })}
                                         </TableCell>
                                         <TableCell key="duration">
-                                            {Math.round(Math.abs(new Date(run.finishedAt) - new Date(run.startedAt)) / 100) / 10}s
+                                            {Math.round(Math.abs(new Date(run.scheduledFor || run.createdAt) - new Date(run.startedAt)) / 100) / 10}s
                                         </TableCell>
                                         <TableCell key="status">
                                             <StatusIcon

@@ -1,8 +1,9 @@
 import { Button, Tooltip } from "@nextui-org/react"
 import Group from "@web/components/layout/Group"
 import { useDefinition, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
+import { useEditorStoreApi } from "@web/modules/workflow-editor/store"
 import { TbInfoCircle } from "react-icons/tb"
-import { useNodeId, useStoreApi } from "reactflow"
+import { useNodeId } from "reactflow"
 
 
 export default function ActionNodeHeader({ withSettings = false }) {
@@ -13,7 +14,7 @@ export default function ActionNodeHeader({ withSettings = false }) {
     const name = useNodePropertyValue(undefined, "data.name")
     const displayName = name || definition?.name
 
-    const storeApi = useStoreApi()
+    const editorStore = useEditorStoreApi()
 
     return (
         <Group className="group w-full bg-[var(--dark-color)] justify-between gap-unit-lg text-white p-1 pl-2">
@@ -41,7 +42,7 @@ export default function ActionNodeHeader({ withSettings = false }) {
                     <Button
                         size="sm" variant="light" isIconOnly
                         className="nodrag text-white h-auto opacity-0 group-hover:opacity-100 rounded-md"
-                        onPress={() => storeApi.setState({ nodeBeingConfigured: id })}
+                        onPress={() => editorStore.setState({ nodeBeingConfigured: id })}
                         onMouseDown={ev => ev.stopPropagation()}
                     >
                         <TbInfoCircle />

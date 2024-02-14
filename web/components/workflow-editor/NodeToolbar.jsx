@@ -13,6 +13,7 @@ import { useMemo } from "react"
 import { TbArrowLeftSquare, TbArrowRightSquare, TbChartDots3, TbClipboard, TbConfetti, TbConfettiOff, TbCopy, TbTrash } from "react-icons/tb"
 import { getNodesBounds, useReactFlow, useStore, useViewport } from "reactflow"
 import Group from "../layout/Group"
+import { useEditorStore } from "@web/modules/workflow-editor/store"
 
 
 export default function NodeToolbar() {
@@ -192,7 +193,7 @@ function EnableControl() {
 
 
 function CopyControl() {
-    const copy = useStore(s => s.copy)
+    const copy = useEditorStore(s => s.copy)
 
     return (
         <ToolbarButton

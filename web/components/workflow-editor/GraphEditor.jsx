@@ -6,8 +6,9 @@ import { useGraphUndoRedo } from "@web/modules/workflow-editor/graph/use-graph-u
 import { useOnConnect } from "@web/modules/workflow-editor/graph/use-on-connect"
 import { useSelectAll } from "@web/modules/workflow-editor/graph/use-select-all"
 import { useEditorSettings } from "@web/modules/workflow-editor/settings"
+import { useEditorStore } from "@web/modules/workflow-editor/store"
 import { TbArrowBack, TbArrowForward } from "react-icons/tb"
-import { Background, ControlButton, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState, useStore } from "reactflow"
+import { Background, ControlButton, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState } from "reactflow"
 import "reactflow/dist/style.css"
 import colors from "tailwindcss/colors"
 import Group from "../layout/Group"
@@ -116,8 +117,8 @@ function GraphHooks() {
 
 function AdditionalControls() {
 
-    const undo = useStore(s => s.undo)
-    const redo = useStore(s => s.redo)
+    const undo = useEditorStore(s => s.undo)
+    const redo = useEditorStore(s => s.redo)
 
     return (<>
         <AdditionalControlButton

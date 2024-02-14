@@ -2,10 +2,9 @@ import { useDebouncedEffect, useDebouncedState } from "@react-hookz/web"
 import { useDatabaseMutation } from "@web/modules/db"
 import { useMountDelay } from "@web/modules/util"
 import { useWorkflow } from "@web/modules/workflows"
-import { produce } from "immer"
 import _ from "lodash"
-import { useCallback, useEffect, useMemo } from "react"
-import { useEdges, useNodes, useStore, useStoreApi } from "reactflow"
+import { useEffect, useMemo } from "react"
+import { useEdges, useNodes } from "reactflow"
 
 
 export function useGraphSaving() {
@@ -46,29 +45,6 @@ export function useGraphSaving() {
         console.debug("Saving graph...", convertedGraph)
         updateGraph.mutateAsync().then(() => console.log("Graph saved"))
     }, [convertedGraphStr], 500)
-}
-
-
-/**
- * Hook to control a property of the RF store
- * @param {string} property
- */
-export function useRFStoreProperty(path, defaultValue) {
-    const storeApi = useStoreApi()
-
-    const value = useStore(s => _.get(s, path))
-    const setValue = useCallback(newValue => {
-        storeApi.setState(produce(draft => {
-            _.set(draft, path, newValue)
-        }))
-    }, [storeApi, path])
-
-    useEffect(() => {
-        if (defaultValue !== undefined && value === undefined)
-            setValue(defaultValue)
-    }, [defaultValue, value, setValue])
-
-    return [value, setValue]
 }
 
 

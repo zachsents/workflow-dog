@@ -4,13 +4,14 @@ import Group from "@web/components/layout/Group"
 import { singular } from "@web/modules/grammar"
 import { useSetInputValue } from "@web/modules/workflow-editor/graph/interfaces"
 import { useDefinition, useNodeColors } from "@web/modules/workflow-editor/graph/nodes"
+import { useEditorStore, useEditorStoreApi } from "@web/modules/workflow-editor/store"
 import { uniqueId } from "@web/modules/workflow-editor/util"
 import { object as typeMap } from "data-types/common"
 import { produce } from "immer"
 import _ from "lodash"
 import { Fragment, useEffect, useMemo } from "react"
 import { TbArrowLeftSquare, TbCursorText, TbPencil, TbPencilOff, TbPlus, TbX } from "react-icons/tb"
-import { useNodeId, useReactFlow, useStore, useStoreApi } from "reactflow"
+import { useNodeId, useReactFlow, useStore } from "reactflow"
 import { PREFIX } from "shared/prefixes"
 import ActionNodeHeader from "./ActionNodeHeader"
 
@@ -20,10 +21,10 @@ export default function ActionNodeModal() {
     const id = useNodeId()
     const definition = useDefinition()
 
-    const storeApi = useStoreApi()
+    const editorStore = useEditorStoreApi()
 
-    const isOpen = useStore(s => s.nodeBeingConfigured === id)
-    const onClose = () => storeApi.setState({ nodeBeingConfigured: null })
+    const isOpen = useEditorStore(s => s.nodeBeingConfigured === id)
+    const onClose = () => editorStore.setState({ nodeBeingConfigured: null })
 
     const nodeColors = useNodeColors(undefined, "css")
 

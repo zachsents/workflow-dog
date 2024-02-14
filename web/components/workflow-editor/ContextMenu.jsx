@@ -3,11 +3,12 @@ import { Button, Card, Input, Kbd, Listbox, ListboxItem, Popover, PopoverContent
 import { useLocalStorageValue } from "@react-hookz/web"
 import { stringHash } from "@web/modules/util"
 import { useCreateActionNode } from "@web/modules/workflow-editor/graph/nodes"
+import { useEditorStore, useEditorStoreApi, useEditorStoreState } from "@web/modules/workflow-editor/store"
 import classNames from "classnames"
 import { object as nodeDefs } from "nodes/web"
 import { useMemo, useState } from "react"
 import { TbArrowBack, TbArrowForward, TbClipboardText, TbPinnedOff } from "react-icons/tb"
-import { useReactFlow, useStore, useStoreApi } from "reactflow"
+import { useReactFlow } from "reactflow"
 import Group from "../layout/Group"
 import NodeSearch from "./NodeSearch"
 
@@ -16,13 +17,9 @@ export default function ContextMenu() {
 
     const rf = useReactFlow()
 
-    const storeApi = useStoreApi()
-
-    const position = useStore(s => s.contextMenu?.position)
-    const isOpen = useStore(s => s.contextMenu?.isOpen)
-    const close = () => storeApi.setState({
-        contextMenu: { isOpen: false, position }
-    })
+    const position = useEditorStore(s => s.contextMenu?.position)
+    const [isOpen, setIsOpen] = useEditorStoreState("contextMenu.isOpen")
+    const close = () => setIsOpen(false)
 
     const [query, setQuery] = useState("")
 
@@ -132,15 +129,14 @@ function PinnedNode({ id, onAdd }) {
 function ControlList({ onClose }) {
 
     const rf = useReactFlow()
-    const paste = useStore(s => s.paste)
-    const storeApi = useStoreApi()
+    const paste = useEditorStore(s => s.paste)
+    const editorStore = useEditorStoreApi()
 
     const actions = {
-        undo: useStore(s => s.undo),
-        redo: useStore(s => s.redo),
-        // copy: useStore(s => s.copy),
+        undo: useEditorStore(s => s.undo),
+        redo: useEditorStore(s => s.redo),
         paste: () => {
-            paste(rf.screenToFlowPosition(storeApi.getState().contextMenu?.position))
+            paste(rf.screenToFlowPosition(editorStore.getState().contextMenu.position))
         },
     }
 
@@ -165,13 +161,6 @@ function ControlList({ onClose }) {
             >
                 Redo
             </ListboxItem>
-            {/* <ListboxItem
-                startContent={<TbCopy />}
-                endContent={<Kbd keys={["command"]}>C</Kbd>}
-                key="copy"
-            >
-                Copy
-            </ListboxItem> */}
             <ListboxItem
                 startContent={<TbClipboardText />}
                 endContent={<Kbd keys={["command"]}>V</Kbd>}

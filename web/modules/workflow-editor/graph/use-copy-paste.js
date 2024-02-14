@@ -1,7 +1,8 @@
 import { useNotifications } from "@web/modules/notifications"
 import { useCallback, useEffect } from "react"
 import { TbClipboardCheck } from "react-icons/tb"
-import { getConnectedEdges, getNodesBounds, useReactFlow, useStore, useStoreApi } from "reactflow"
+import { getConnectedEdges, getNodesBounds, useReactFlow, useStore } from "reactflow"
+import { useEditorStoreApi } from "../store"
 import { duplicateElements } from "./duplicate"
 
 
@@ -11,7 +12,7 @@ const CLIPBOARD_KEY = "clipboard"
 
 export function useGraphCopyPaste() {
 
-    const storeApi = useStoreApi()
+    const editorStore = useEditorStoreApi()
     const { notify } = useNotifications()
 
     const _onCopy = useCopySelectionToClipboard()
@@ -27,7 +28,7 @@ export function useGraphCopyPaste() {
     }, [_onCopy])
 
     useEffect(() => {
-        storeApi.setState({ copy: onCopy, paste: onPaste })
+        editorStore.setState({ copy: onCopy, paste: onPaste })
     }, [onCopy, onPaste])
 
     return [onCopy, onPaste]

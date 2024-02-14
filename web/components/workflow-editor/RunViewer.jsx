@@ -1,4 +1,4 @@
-import { Button, Popover, PopoverContent, PopoverTrigger, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react"
+import { Button, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react"
 import { plural } from "@web/modules/grammar"
 import { useWorkflowRuns } from "@web/modules/workflows"
 import classNames from "classnames"

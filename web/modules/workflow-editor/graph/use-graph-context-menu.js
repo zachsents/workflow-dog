@@ -1,13 +1,13 @@
 import { useCallback } from "react"
-import { useStoreApi } from "reactflow"
+import { useEditorStoreApi } from "../store"
 
 
 export function useGraphContextMenu() {
-    const storeApi = useStoreApi()
+    const editorStore = useEditorStoreApi()
 
     const handler = useCallback(ev => {
         ev.preventDefault()
-        storeApi.setState({
+        editorStore.setState({
             contextMenu: {
                 isOpen: true,
                 position: {
@@ -16,7 +16,7 @@ export function useGraphContextMenu() {
                 },
             }
         })
-    }, [storeApi])
+    }, [editorStore])
 
     return handler
 }

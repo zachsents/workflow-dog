@@ -1,4 +1,5 @@
 import { Button, Divider, Input, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Textarea } from "@nextui-org/react"
+import { useMutation } from "@tanstack/react-query"
 import { useForm } from "@web/modules/form"
 import { useWorkflow } from "@web/modules/workflows"
 import { TbClearFormatting, TbPlayerPlay } from "react-icons/tb"
@@ -44,6 +45,16 @@ function RunnerForm() {
         ),
     })
 
+    const submitMutation = useMutation({
+        mutationFn: async (values) => fetch(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflow.id}/run`, {
+            method: "post",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                triggerData: values,
+            })
+        }).then(res => res.ok ? res.json() : Promise.reject(res.text())),
+    })
+
     return (
         <>
             <div className="flex items-center justify-between gap-unit-xs">
@@ -61,7 +72,10 @@ function RunnerForm() {
 
             <Divider />
 
-            <form className="flex flex-col items-stretch gap-unit-xs">
+            <form
+                onSubmit={form.submit(submitMutation.mutate)}
+                className="flex flex-col items-stretch gap-unit-xs"
+            >
                 <ScrollShadow
                     size={4}
                     className="max-h-[calc(100vh-16rem)] -m-unit-xs p-unit-xs"
@@ -77,7 +91,8 @@ function RunnerForm() {
                     </div>
                 </ScrollShadow>
                 <Button
-                    color="primary" size="sm"
+                    color="primary" size="sm" type="submit"
+                    isLoading={submitMutation.isPending}
                     startContent={<TbPlayerPlay />}
                     className="mt-unit-md"
                 >

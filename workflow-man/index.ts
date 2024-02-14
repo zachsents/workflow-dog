@@ -40,6 +40,7 @@ app.post("/workflow-runs/:runId/execute", async (req, res) => {
         await updateRun(req.params.runId, {
             status: "failed",
             has_errors: true,
+            error_count: 1,
             finished_at: new Date().toISOString(),
             state: {
                 errors: { "workflow": "Workflow is disabled" }

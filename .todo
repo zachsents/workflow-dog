@@ -14,12 +14,12 @@ Web:
         ✔ Catch errors @done (2/7/2024, 5:51:40 PM)
         ✔ Do named outputs @done (2/7/2024, 2:24:33 AM)
         Running:
-            ☐ Set up run manually panel
+            ✔ Set up run manually panel @done (2/13/2024, 9:38:41 PM)
             ☐ Make JSON builder component
         Run viewer: 
-            ☐ Design run viewer panel
+            ✔ Design run viewer panel @done (2/13/2024, 9:38:44 PM)
             ☐ Design object/json viewer
-            ☐ Port old run viewer to new frontend
+            ✘ Port old run viewer to new frontend @cancelled (2/13/2024, 9:38:51 PM)
             ☐ Add most recent run to run viewer UI
             ☐ set up zustand store
         Triggers:

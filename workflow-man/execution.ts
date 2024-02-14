@@ -78,7 +78,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
         runState.outputs[node.id] ??= {}
 
         const normalizedOutputs = Object.fromEntries(
-            Object.entries(outputs).flatMap(([outputDefId, outputValue]) => {
+            Object.entries(outputs || {}).flatMap(([outputDefId, outputValue]) => {
                 const outputDefinition = definition.outputs[outputDefId]
 
                 if (!outputDefinition.group) {

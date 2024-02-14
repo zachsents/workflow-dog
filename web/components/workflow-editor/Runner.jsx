@@ -1,6 +1,8 @@
-import { Button, Divider, Input, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Textarea } from "@nextui-org/react"
+import { Button, Divider, Input, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Textarea, useDisclosure } from "@nextui-org/react"
 import { useMutation } from "@tanstack/react-query"
 import { useForm } from "@web/modules/form"
+import { useNotifications } from "@web/modules/notifications"
+import { useEditorStoreState } from "@web/modules/workflow-editor/store"
 import { useWorkflow } from "@web/modules/workflows"
 import { TbClearFormatting, TbPlayerPlay } from "react-icons/tb"
 import { object as triggerMap } from "triggers/web"
@@ -11,8 +13,14 @@ export default function Runner() {
     const { data: workflow } = useWorkflow()
     const triggerDef = triggerMap[workflow?.trigger?.type]
 
+    const disclosure = useDisclosure()
+
     return (
-        <Popover placement="bottom-end">
+        <Popover
+            isOpen={disclosure.isOpen}
+            onOpenChange={disclosure.onOpenChange}
+            placement="bottom-end"
+        >
             <PopoverTrigger>
                 <Button
                     size="sm" color="primary"
@@ -25,14 +33,16 @@ export default function Runner() {
             <PopoverContent
                 className="pointer-events-auto p-unit-md flex flex-col gap-unit-md items-stretch"
             >
-                {triggerDef && <RunnerForm />}
+                {triggerDef && <RunnerForm onClose={disclosure.onClose} />}
             </PopoverContent>
         </Popover>
     )
 }
 
 
-function RunnerForm() {
+function RunnerForm({ onClose }) {
+
+    const { notify } = useNotifications()
 
     const { data: workflow } = useWorkflow()
     const triggerDef = triggerMap[workflow?.trigger?.type]
@@ -45,14 +55,25 @@ function RunnerForm() {
         ),
     })
 
+    const [, setSelectedRunId] = useEditorStoreState("selectedRunId")
+
     const submitMutation = useMutation({
-        mutationFn: async (values) => fetch(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflow.id}/run`, {
-            method: "post",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                triggerData: values,
+        mutationFn: async (values) => {
+            const { id, state, error_count, has_errors } = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflow.id}/run?subscribe`, {
+                method: "post",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    triggerData: values,
+                })
+            }).then(res => res.ok ? res.json() : Promise.reject(res.text()))
+            setSelectedRunId(id)
+            onClose?.()
+            notify({
+                title: "Run finished!",
+                message: `${Object.keys(state.outputs).length} outputs, ${error_count} errors`,
+                classNames: { icon: has_errors ? "bg-danger-500" : "bg-success-500" }
             })
-        }).then(res => res.ok ? res.json() : Promise.reject(res.text())),
+        },
     })
 
     return (

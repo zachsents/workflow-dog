@@ -16,15 +16,18 @@ Web:
         Running:
             ✔ Set up run manually panel @done (2/13/2024, 9:38:41 PM)
             ☐ Make JSON builder component
+            ✔ Make manual runner subscribe @done (2/14/2024, 12:59:33 AM)
         Run viewer: 
             ✔ Design run viewer panel @done (2/13/2024, 9:38:44 PM)
             ☐ Design object/json viewer
             ✘ Port old run viewer to new frontend @cancelled (2/13/2024, 9:38:51 PM)
             ☐ Add most recent run to run viewer UI
-            ☐ set up zustand store
+            ✔ set up zustand store @done (2/13/2024, 11:45:56 PM)
             ☐ Add re-run button
             ☐ Add run duration
             ☐ Add scroll shadow
+            ☐ Add error tooltips
+            ☐ Make run list realtime
         Triggers:
             ☐ Combine URL and webhook triggers
             ☐ Add gmail trigger endpoint/infra

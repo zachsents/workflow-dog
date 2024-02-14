@@ -20,6 +20,8 @@ Web:
             ☐ Design run viewer panel
             ☐ Design object/json viewer
             ☐ Port old run viewer to new frontend
+            ☐ Add most recent run to run viewer UI
+            ☐ set up zustand store
         Triggers:
             ☐ Combine URL and webhook triggers
             ☐ Add gmail trigger endpoint/infra

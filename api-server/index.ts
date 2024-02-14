@@ -376,9 +376,27 @@ app.post("/workflows/:workflowId/run", async (req, res) => {
 
 
 app.all("/workflows/:workflowId/trigger/request", async (req, res) => {
-    // TO DO: verify trigger type 
 
-    await fetch(`${process.env.API_SERVER_URL}/workflows/${req.params.workflowId}/run`, {
+    const { data: { triggerType, triggerConfig } } = await client
+        .from("workflows")
+        .select("triggerType: trigger->type, triggerConfig: trigger->config")
+        .eq("id", req.params.workflowId)
+        .single()
+        .throwOnError()
+
+    if (triggerType !== "trigger:basic.request") {
+        res.status(400).send("Invalid trigger type")
+        return
+    }
+
+    const url = new URL(`${process.env.API_SERVER_URL}/workflows/${req.params.workflowId}/run`)
+
+    const waitUntilFinished: boolean = (triggerConfig as any)?.waitUntilFinished
+    if(waitUntilFinished) {
+        url.searchParams.set("subscribe", "true")
+    }
+
+    const response = await fetch(url.toString(), {
         method: "post",
         headers: {
             "Content-Type": "application/json",
@@ -392,10 +410,20 @@ app.all("/workflows/:workflowId/trigger/request", async (req, res) => {
                 params: req.query,
             },
         })
-    })
+    }).then(res => res.json())
 
+    if(waitUntilFinished) {
+        const { status, headers, body } = response.state?.workflowOutputs ?? {}
+        
+        Object.entries(headers ?? {}).forEach(([key, value]) => {
+            res.setHeader(key, value as string)
+        })
 
-    res.sendStatus(201)
+        res.status(status ?? 200).send(body ?? "")      
+        return  
+    }
+
+    res.sendStatus(204)
 })
 
 

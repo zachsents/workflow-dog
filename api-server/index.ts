@@ -333,9 +333,35 @@ app.post("/workflows/:workflowId/run", async (req, res) => {
         .then(res => res.json())
         .then(res => res.error ? Promise.reject(res.error) : res)
 
-    // TO DO: optionally ?subscribe to created document and send response to client
+    if (!("subscribe" in req.query)) {
+        res.status(201).send({ id: newRunId })
+        return
+    }
 
-    res.status(201).send({ id: newRunId })
+    const finishedRun = await new Promise((resolve, reject) => {
+        const channel = client
+            .channel(`workflow_run-${newRunId}-changes`)
+            .on("postgres_changes", {
+                event: "UPDATE",
+                schema: "public",
+                table: "workflow_runs",
+                filter: `id=eq.${newRunId}`,
+            }, (payload) => {
+                console.log(payload)
+
+                if (!["completed", "failed"].includes(payload.new.status))
+                    return
+
+                if (payload.errors?.length > 0)
+                    reject(payload.errors)
+
+                channel.unsubscribe()
+                resolve(payload.new)
+            })
+            .subscribe()
+    })
+
+    res.send(finishedRun)
 })
 
 

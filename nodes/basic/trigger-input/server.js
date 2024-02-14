@@ -1,5 +1,7 @@
 export default {
     action: (_, { node, triggerData }) => {
-        return { value: triggerData[node.data.state.input] }
+        return {
+            value: triggerData[node.data.state.input] ?? null
+        }
     },
 }

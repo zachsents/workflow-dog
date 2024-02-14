@@ -3,6 +3,7 @@ import { useUser } from "./auth"
 import { useQueryParam } from "./router"
 import { supabase } from "./supabase"
 import { deepCamelCase } from "./util"
+import { useEditorStore } from "./workflow-editor/store"
 
 
 export function useWorkflowIdFromUrl(skip) {
@@ -106,4 +107,27 @@ export function useWorkflowRuns(workflowId) {
         queryKey: ["workflow-runs", workflowId],
         enabled: !!workflowId,
     })
+}
+
+
+export function useWorkflowRun(runId) {
+    return useQuery({
+        queryFn: async () => {
+            const { data } = await supabase
+                .from("workflow_runs")
+                .select("*")
+                .eq("id", runId)
+                .single()
+                .throwOnError()
+            return deepCamelCase(data, { excludeDashedKeys: true })
+        },
+        queryKey: ["workflow-run", runId],
+        enabled: !!runId,
+    })
+}
+
+
+export function useSelectedWorkflowRun() {
+    const selectedRunId = useEditorStore(s => s.selectedRunId)
+    return useWorkflowRun(selectedRunId)
 }

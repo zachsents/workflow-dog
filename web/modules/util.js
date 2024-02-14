@@ -7,13 +7,21 @@ import { useRef } from "react"
 import { Subject, debounceTime, tap } from "rxjs"
 
 
-export function deepCamelCase(obj) {
+/**
+ * @param {object} obj
+ * @param {object} [options]
+ * @param {boolean} options.excludeDashedKeys
+ */
+export function deepCamelCase(obj, options = {}) {
     if (obj instanceof Array)
-        return obj.map(deepCamelCase)
+        return obj.map(obj => deepCamelCase(obj, options))
 
     if (obj?.constructor === Object) {
-        const withNewKeys = _.mapKeys(obj, (v, key) => _.camelCase(key))
-        return _.mapValues(withNewKeys, deepCamelCase)
+        const withNewKeys = _.mapKeys(
+            obj,
+            (v, key) => (options.excludeDashedKeys && key.includes?.("-")) ? key : _.camelCase(key)
+        )
+        return _.mapValues(withNewKeys, obj => deepCamelCase(obj, options))
     }
 
     return obj
@@ -220,4 +228,14 @@ export function useHover() {
     }
 
     return [hovered, handlers]
+}
+
+
+export function useControlledSelectedKeys(value, setValue) {
+    const selectedKeys = useMemo(() => new Set(value ? [value] : []), [value])
+    const onSelectionChange = (keys) => {
+        setValue(keys.values().next().value)
+    }
+
+    return { selectedKeys, onSelectionChange }
 }

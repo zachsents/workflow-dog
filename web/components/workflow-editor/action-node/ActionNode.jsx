@@ -84,7 +84,6 @@ export default function ActionNode({ id, data, selected }) {
 }
 
 
-
 function RequiredIntegration() {
 
     const { data: workflow } = useWorkflow()

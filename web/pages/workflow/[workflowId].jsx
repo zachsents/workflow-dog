@@ -7,7 +7,7 @@ import Runner from "@web/components/workflow-editor/Runner"
 import TriggerControl from "@web/components/workflow-editor/TriggerControl"
 import { useMustBeSignedIn } from "@web/modules/auth"
 import { useQueryParam } from "@web/modules/router"
-import { EditorStoreProvider } from "@web/modules/workflow-editor/store"
+import { EditorStoreProvider, useEditorStore } from "@web/modules/workflow-editor/store"
 import { useWorkflow } from "@web/modules/workflows"
 import { ReactFlowProvider } from "reactflow"
 

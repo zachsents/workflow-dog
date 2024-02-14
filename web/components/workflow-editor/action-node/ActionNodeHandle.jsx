@@ -5,9 +5,11 @@ import { TbActivity, TbArrowLeftSquare, TbArrowRight, TbArrowRightSquare, TbSpar
 import { Position, Handle as RFHandle, useNodeId, useStore, useReactFlow } from "reactflow"
 import util from "util"
 import Group from "../../layout/Group"
-import { useRef } from "react"
+import { useMemo, useRef } from "react"
 import { useState } from "react"
 import { object as nodeDefs } from "nodes/web"
+import { useEditorStore } from "@web/modules/workflow-editor/store"
+import { useSelectedWorkflowRun } from "@web/modules/workflows"
 
 
 export default function ActionNodeHandle({ id, name, type, definition: passedDef }) {
@@ -37,16 +39,16 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
 
     const isConnected = useStore(s => s.edges.some(edge => edge.source == nodeId && edge.sourceHandle == id || edge.target == nodeId && edge.targetHandle == id))
 
-    const selectedRun = useStore(s => s.selectedRun)
-    const hasRunValue = id in (selectedRun?.outputs ?? {})
-    const runValue = selectedRun?.outputs?.[id]
+    const { data: selectedRun } = useSelectedWorkflowRun()
+    const [hasRunValue, runValue] = useMemo(() => {
+        const handleValues = Object.fromEntries(Object.values(selectedRun?.state?.outputs ?? {}).flatMap(v => Object.entries(v)))
+        return [id in handleValues, handleValues[id]]
+    }, [selectedRun?.state?.outputs, id])
 
     const runValueNeedsExpansion = typeof runValue === "object" && Object.keys(runValue).length > 1 ||
         typeof runValue === "string" && runValue.length > 100
 
     const isNodeSelected = useStore(s => s.nodeInternals.get(nodeId).selected)
-
-    // const menuDisclosure = useDisclosure()
 
     const createNode = useCreateActionNode()
     const addRecommended = () => {
@@ -113,7 +115,7 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
                 </Group>
                 {selectedRun && isSource && hasRunValue &&
                     <div className="absolute top-1/2 -translate-y-1/2 nodrag left-full translate-x-2">
-                        <Tooltip content={
+                        <Tooltip closeDelay={0} content={
                             <div className="flex flex-col items-stretch gap-unit-xs max-w-[20rem]">
                                 <p className="text-xs text-default-500 text-center">
                                     Output From Selected Run

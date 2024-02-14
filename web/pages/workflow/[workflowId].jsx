@@ -2,12 +2,12 @@ import { Spinner } from "@nextui-org/react"
 import Center from "@web/components/layout/Center"
 import EditHeader from "@web/components/workflow-editor/EditHeader"
 import GraphEditor from "@web/components/workflow-editor/GraphEditor"
+import RunViewer from "@web/components/workflow-editor/RunViewer"
 import Runner from "@web/components/workflow-editor/Runner"
 import TriggerControl from "@web/components/workflow-editor/TriggerControl"
 import { useMustBeSignedIn } from "@web/modules/auth"
 import { useQueryParam } from "@web/modules/router"
 import { useWorkflow } from "@web/modules/workflows"
-import RunViewer from "@web/components/workflow-editor/RunViewer"
 import { ReactFlowProvider } from "reactflow"
 
 

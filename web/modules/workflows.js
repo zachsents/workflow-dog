@@ -96,7 +96,7 @@ export function useWorkflowRuns(workflowId) {
         queryFn: async () => {
             const { data } = await supabase
                 .from("workflow_runs")
-                .select("id, count, created_at, status")
+                .select("id, count, created_at, status, has_errors, error_count")
                 .eq("workflow_id", workflowId)
                 .order("created_at", { ascending: false })
                 .limit(100)

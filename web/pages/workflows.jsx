@@ -118,7 +118,7 @@ function WorkflowCard({ id, highlightParts }) {
                         <div className="mt-4">
                             <p className="text-xs text-default-500">
                                 {lastEditedAt ?
-                                    `Last edited ${new TimeAgo("en-US").format(lastEditedAt.toDate())}` :
+                                    `Last edited ${new TimeAgo("en-US").format(new Date(lastEditedAt))}` :
                                     "Never edited"}
                             </p>
                         </div>

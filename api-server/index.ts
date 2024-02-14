@@ -292,6 +292,16 @@ app.post("/workflows/:workflowId/run", async (req, res) => {
         .single()
         .throwOnError()
 
+    if (req.body.copyTriggerDataFrom) {
+        const { data: { trigger_data } } = await client
+            .from("workflow_runs")
+            .select("trigger_data")
+            .eq("id", req.body.copyTriggerDataFrom)
+            .single()
+            .throwOnError()
+        req.body.triggerData = trigger_data
+    }
+
     const { data: { id: newRunId } } = await client
         .from("workflow_runs")
         .insert({

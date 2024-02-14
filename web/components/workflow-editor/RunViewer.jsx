@@ -1,15 +1,15 @@
-import { Button, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, useDisclosure } from "@nextui-org/react"
+import { Button, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, useDisclosure } from "@nextui-org/react"
 import { plural } from "@web/modules/grammar"
 import { useControlledSelectedKeys } from "@web/modules/util"
 import { useEditorStoreState } from "@web/modules/workflow-editor/store"
-import { useWorkflowRun, useWorkflowRuns } from "@web/modules/workflows"
+import { useRunWorkflowMutation, useWorkflowRun, useWorkflowRuns } from "@web/modules/workflows"
 import classNames from "classnames"
-import { TbAlertCircle, TbAlertHexagon, TbCheck, TbCircle, TbClock, TbClockPlay, TbEye, TbRun, TbX } from "react-icons/tb"
+import { TbAlertCircle, TbAlertHexagon, TbCheck, TbCircle, TbClock, TbClockPlay, TbEye, TbRotateClockwise2, TbRun, TbX } from "react-icons/tb"
 
 
 export default function RunViewer() {
 
-    const { data: runs } = useWorkflowRuns()
+    const { data: runs } = useWorkflowRuns(undefined, ["id", "count", "created_at", "started_at", "finished_at", "status", "error_count", "has_errors"])
 
     const [selectedRunId, setSelectedRunId] = useEditorStoreState("selectedRunId")
     const { selectedKeys, onSelectionChange } = useControlledSelectedKeys(selectedRunId, setSelectedRunId)
@@ -17,6 +17,12 @@ export default function RunViewer() {
     const { data: selectedRun, isLoading } = useWorkflowRun(selectedRunId)
 
     const disclosure = useDisclosure()
+
+    const runMutation = useRunWorkflowMutation(selectedRun?.workflowId, {
+        subscribe: true,
+        mutationKey: ["rerun", selectedRunId],
+    })
+    const rerun = () => runMutation.mutate({ copyTriggerDataFrom: selectedRunId })
 
     return (
         <>
@@ -29,7 +35,7 @@ export default function RunViewer() {
                     <Button
                         size="sm" variant="bordered"
                         startContent={<TbClockPlay />}
-                        className="pointer-events-auto"
+                        className="pointer-events-auto bg-white/70 backdrop-blur-sm"
                     >
                         View Runs
                     </Button>
@@ -53,7 +59,9 @@ export default function RunViewer() {
                                 <TableColumn key="number">#</TableColumn>
                                 <TableColumn key="date">Date</TableColumn>
                                 <TableColumn key="time">Time</TableColumn>
+                                <TableColumn key="duration">Duration</TableColumn>
                                 <TableColumn key="status">Status</TableColumn>
+                                <TableColumn key="actions">Actions</TableColumn>
                             </TableHeader>
                             <TableBody items={runs}>
                                 {(run) => (
@@ -72,11 +80,21 @@ export default function RunViewer() {
                                                 timeStyle: "short"
                                             })}
                                         </TableCell>
+                                        <TableCell key="duration">
+                                            {Math.round(Math.abs(new Date(run.finishedAt) - new Date(run.startedAt)) / 100) / 10}s
+                                        </TableCell>
                                         <TableCell key="status">
                                             <StatusIcon
                                                 status={run.status}
                                                 errorCount={run.errorCount}
                                                 hasErrors={run.hasErrors}
+                                            />
+                                        </TableCell>
+                                        <TableCell key="actions" className="flex gap-1">
+                                            <RerunButton
+                                                workflowId={run.workflowId}
+                                                runId={run.id}
+                                                onClose={disclosure.onClose}
                                             />
                                         </TableCell>
                                     </TableRow>
@@ -88,18 +106,32 @@ export default function RunViewer() {
             </Popover>
 
             {selectedRunId &&
-                <Tooltip placement="left" closeDelay={0} content="Deselect Run">
-                    <Button
-                        size="sm" variant="bordered"
-                        isLoading={isLoading}
-                        startContent={<TbEye />}
-                        endContent={<TbX className="opacity-0 group-hover:opacity-100 transition-opacity" />}
-                        className="pointer-events-auto group"
-                        onPress={() => setSelectedRunId(null)}
-                    >
+                <div className="flex flex-col gap-1 mt-unit-xs items-end">
+                    <p className="text-xs text-default-500">
                         Currently Viewing Run #{selectedRun?.count}
-                    </Button>
-                </Tooltip>}
+                    </p>
+                    {isLoading ?
+                        <Spinner size="sm" className="mx-unit-xl" /> :
+                        <div className="flex gap-1 [&_button]:pointer-events-auto">
+                            <Button
+                                size="sm" variant="bordered"
+                                className="bg-white/70 backdrop-blur-sm"
+                                isLoading={runMutation.isPending}
+                                startContent={<TbRotateClockwise2 />}
+                                onPress={rerun}
+                            >
+                                Re-run
+                            </Button>
+                            <Button
+                                size="sm" variant="bordered"
+                                className="bg-white/70 backdrop-blur-sm"
+                                startContent={<TbX />}
+                                onPress={() => setSelectedRunId(null)}
+                            >
+                                Deselect Run
+                            </Button>
+                        </div>}
+                </div>}
         </>
     )
 }
@@ -138,5 +170,28 @@ function StatusText({ className, icon: Icon, children }) {
             <Icon />
             <span className="text-xs">{children}</span>
         </div>
+    )
+}
+
+function RerunButton({ onClose, workflowId, runId }) {
+
+    const runMutation = useRunWorkflowMutation(workflowId, {
+        subscribe: true,
+        onSuccess: () => {
+            onClose?.()
+        },
+        mutationKey: ["rerun", runId],
+    })
+
+    return (
+        <Tooltip closeDelay={0} content="Re-run with same inputs">
+            <Button
+                isIconOnly size="sm" variant="light"
+                isLoading={runMutation.isPending}
+                onPress={() => runMutation.mutate({ copyTriggerDataFrom: runId })}
+            >
+                <TbRotateClockwise2 />
+            </Button>
+        </Tooltip>
     )
 }

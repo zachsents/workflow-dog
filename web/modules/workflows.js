@@ -3,7 +3,8 @@ import { useUser } from "./auth"
 import { useQueryParam } from "./router"
 import { supabase } from "./supabase"
 import { deepCamelCase } from "./util"
-import { useEditorStore } from "./workflow-editor/store"
+import { useEditorStore, useEditorStoreApi } from "./workflow-editor/store"
+import { useNotifications } from "./notifications"
 
 
 export function useWorkflowIdFromUrl(skip) {
@@ -89,7 +90,7 @@ export function useCreateWorkflow() {
 }
 
 
-export function useWorkflowRuns(workflowId) {
+export function useWorkflowRuns(workflowId, selectKeys = ["*"]) {
 
     workflowId = useWorkflowIdFromUrl(workflowId)
 
@@ -97,7 +98,7 @@ export function useWorkflowRuns(workflowId) {
         queryFn: async () => {
             const { data } = await supabase
                 .from("workflow_runs")
-                .select("id, count, created_at, status, has_errors, error_count")
+                .select(selectKeys.join(","))
                 .eq("workflow_id", workflowId)
                 .order("created_at", { ascending: false })
                 .limit(100)
@@ -130,4 +131,46 @@ export function useWorkflowRun(runId) {
 export function useSelectedWorkflowRun() {
     const selectedRunId = useEditorStore(s => s.selectedRunId)
     return useWorkflowRun(selectedRunId)
+}
+
+
+/**
+ * @param {string} workflowId
+ * @param {{ subscribe: boolean, sendNotification: boolean, selectRun: boolean } & import("@tanstack/react-query").UseMutationOptions} options
+ */
+export function useRunWorkflowMutation(workflowId, {
+    subscribe = false,
+    sendNotification = true,
+    selectRun = true,
+    ...options
+} = {}) {
+    workflowId = useWorkflowIdFromUrl(workflowId)
+    const { notify } = useNotifications()
+    const editorStore = useEditorStoreApi()
+
+    return useMutation({
+        mutationFn: async (body) => {
+            const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflowId}/run`)
+
+            if (subscribe)
+                url.searchParams.set("subscribe", "true")
+
+            const run = await fetch(url.toString(), {
+                method: "post",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            }).then(res => res.ok ? res.json() : Promise.reject(res.text()))
+
+            if (selectRun)
+                editorStore.setState({ selectedRunId: run.id })
+
+            if (sendNotification)
+                notify({
+                    title: `Run #${run.count} finished!`,
+                    message: `${Object.keys(run.state.outputs).length} outputs, ${run.error_count} errors`,
+                    classNames: { icon: run.has_errors ? "bg-danger-500" : "bg-success-500" }
+                })
+        },
+        ...options,
+    })
 }

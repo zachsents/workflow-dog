@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query"
 import { useForm } from "@web/modules/form"
 import { useNotifications } from "@web/modules/notifications"
 import { useEditorStoreState } from "@web/modules/workflow-editor/store"
-import { useWorkflow } from "@web/modules/workflows"
+import { useRunWorkflowMutation, useWorkflow } from "@web/modules/workflows"
 import { TbClearFormatting, TbPlayerPlay } from "react-icons/tb"
 import { object as triggerMap } from "triggers/web"
 
@@ -42,8 +42,6 @@ export default function Runner() {
 
 function RunnerForm({ onClose }) {
 
-    const { notify } = useNotifications()
-
     const { data: workflow } = useWorkflow()
     const triggerDef = triggerMap[workflow?.trigger?.type]
 
@@ -55,25 +53,11 @@ function RunnerForm({ onClose }) {
         ),
     })
 
-    const [, setSelectedRunId] = useEditorStoreState("selectedRunId")
-
-    const submitMutation = useMutation({
-        mutationFn: async (values) => {
-            const { id, state, error_count, has_errors } = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflow.id}/run?subscribe`, {
-                method: "post",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    triggerData: values,
-                })
-            }).then(res => res.ok ? res.json() : Promise.reject(res.text()))
-            setSelectedRunId(id)
+    const submitMutation = useRunWorkflowMutation(undefined, {
+        subscribe: true,
+        onSuccess: () => {
             onClose?.()
-            notify({
-                title: "Run finished!",
-                message: `${Object.keys(state.outputs).length} outputs, ${error_count} errors`,
-                classNames: { icon: has_errors ? "bg-danger-500" : "bg-success-500" }
-            })
-        },
+        }
     })
 
     return (
@@ -94,7 +78,7 @@ function RunnerForm({ onClose }) {
             <Divider />
 
             <form
-                onSubmit={form.submit(submitMutation.mutate)}
+                onSubmit={form.submit(values => submitMutation.mutate({ triggerData: values }))}
                 className="flex flex-col items-stretch gap-unit-xs"
             >
                 <ScrollShadow

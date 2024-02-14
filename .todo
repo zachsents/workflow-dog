@@ -23,9 +23,9 @@ Web:
             ✘ Port old run viewer to new frontend @cancelled (2/13/2024, 9:38:51 PM)
             ☐ Add most recent run to run viewer UI
             ✔ set up zustand store @done (2/13/2024, 11:45:56 PM)
-            ☐ Add re-run button
-            ☐ Add run duration
-            ☐ Add scroll shadow
+            ✔ Add re-run button @done (2/14/2024, 2:20:49 AM)
+            ✔ Add run duration @done (2/14/2024, 1:08:45 AM)
+            ✔ Add scroll shadow @done (2/14/2024, 1:08:50 AM)
             ☐ Add error tooltips
             ☐ Make run list realtime
         Triggers:

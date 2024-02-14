@@ -2,14 +2,14 @@ import { Button, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Spinner,
 import { plural } from "@web/modules/grammar"
 import { useControlledSelectedKeys } from "@web/modules/util"
 import { useEditorStoreState } from "@web/modules/workflow-editor/store"
-import { useRunWorkflowMutation, useWorkflowRun, useWorkflowRuns } from "@web/modules/workflows"
+import { useRunWorkflowMutation, useWorkflowRun, useWorkflowRunsRealtime } from "@web/modules/workflows"
 import classNames from "classnames"
-import { TbAlertCircle, TbAlertHexagon, TbCheck, TbCircle, TbClock, TbClockPlay, TbEye, TbRotateClockwise2, TbRun, TbX } from "react-icons/tb"
+import { TbAlertCircle, TbAlertHexagon, TbCheck, TbCircle, TbClock, TbClockPlay, TbRotateClockwise2, TbRun, TbX } from "react-icons/tb"
 
 
 export default function RunViewer() {
 
-    const { data: runs } = useWorkflowRuns(undefined, ["id", "count", "created_at", "started_at", "finished_at", "status", "error_count", "has_errors", "scheduled_for", "workflow_id"])
+    const { data: runs } = useWorkflowRunsRealtime(undefined, ["id", "count", "created_at", "started_at", "finished_at", "status", "error_count", "has_errors", "scheduled_for", "workflow_id"])
 
     const [selectedRunId, setSelectedRunId] = useEditorStoreState("selectedRunId")
     const { selectedKeys, onSelectionChange } = useControlledSelectedKeys(selectedRunId, setSelectedRunId)
@@ -81,7 +81,9 @@ export default function RunViewer() {
                                             })}
                                         </TableCell>
                                         <TableCell key="duration">
-                                            {Math.round(Math.abs(new Date(run.scheduledFor || run.createdAt) - new Date(run.startedAt)) / 100) / 10}s
+                                            {["completed", "failed"].includes(run.status) ?
+                                            `${Math.round(Math.abs(new Date(run.scheduledFor || run.createdAt) - new Date(run.finishedAt)) / 100) / 10}s` :
+                                            "-"}
                                         </TableCell>
                                         <TableCell key="status">
                                             <StatusIcon

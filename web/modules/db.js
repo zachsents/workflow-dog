@@ -1,6 +1,7 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { supabase, throwOnPolicyViolation } from "./supabase"
 import { useNotifications } from "./notifications"
+import { useEffect } from "react"
 
 
 /**
@@ -55,4 +56,33 @@ export function useDatabaseMutation(queryCreator, {
         },
         ...mutationOptions,
     })
+}
+
+
+/**
+ * @param {import("@supabase/supabase-js").RealtimePostgresChangesFilter<unknown>} filterOptions
+ * @param {import("@tanstack/react-query").UseQueryOptions} useQueryOptions
+ */
+export function useRealtimeQuery(filterOptions, useQueryOptions) {
+    const queryClient = useQueryClient()
+
+    if (!("queryKey") in useQueryOptions) {
+        throw new Error("useRealtimeQuery requires a queryKey in useQueryOptions")
+    }
+
+    useEffect(() => {
+        const channel = supabase
+            .channel("realtime-db-query")
+            .on("postgres_changes", filterOptions, () => {
+                console.debug("Realtime query invalidated", useQueryOptions.queryKey)
+                queryClient.invalidateQueries(useQueryOptions.queryKey)
+            })
+            .subscribe()
+
+        return () => {
+            channel.unsubscribe()
+        }
+    }, [JSON.stringify(useQueryOptions.queryKey), JSON.stringify(filterOptions)])
+
+    return useQuery(useQueryOptions)
 }

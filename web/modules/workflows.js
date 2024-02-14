@@ -1,10 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useUser } from "./auth"
+import { useRealtimeQuery } from "./db"
+import { useNotifications } from "./notifications"
 import { useQueryParam } from "./router"
 import { supabase } from "./supabase"
 import { deepCamelCase } from "./util"
 import { useEditorStore, useEditorStoreApi } from "./workflow-editor/store"
-import { useNotifications } from "./notifications"
 
 
 export function useWorkflowIdFromUrl(skip) {
@@ -106,6 +107,32 @@ export function useWorkflowRuns(workflowId, selectKeys = ["*"]) {
             return deepCamelCase(data)
         },
         queryKey: ["workflow-runs", workflowId],
+        enabled: !!workflowId,
+    })
+}
+
+
+export function useWorkflowRunsRealtime(workflowId, selectKeys = ["*"]) {
+
+    workflowId = useWorkflowIdFromUrl(workflowId)
+
+    return useRealtimeQuery({
+        schema: "public",
+        table: "workflow_runs",
+        event: "*",
+        filter: `workflow_id=eq.${workflowId}`,
+    }, {
+        queryFn: async () => {
+            const { data } = await supabase
+                .from("workflow_runs")
+                .select(selectKeys.join(","))
+                .eq("workflow_id", workflowId)
+                .order("created_at", { ascending: false })
+                .limit(50)
+                .throwOnError()
+            return deepCamelCase(data)
+        },
+        queryKey: ["realtime", "workflow-runs", workflowId, selectKeys],
         enabled: !!workflowId,
     })
 }

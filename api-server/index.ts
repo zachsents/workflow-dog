@@ -359,8 +359,6 @@ app.post("/workflows/:workflowId/run", async (req, res) => {
                 table: "workflow_runs",
                 filter: `id=eq.${newRunId}`,
             }, (payload) => {
-                console.log(payload)
-
                 if (!["completed", "failed"].includes(payload.new.status))
                     return
 

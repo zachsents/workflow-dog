@@ -54,7 +54,7 @@ type WorkflowRun = {
 
 export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
-    const triggerData = run.trigger_data
+    const triggerData = run.trigger_data || {}
 
     const { nodes, edges } = workflow.graph
 

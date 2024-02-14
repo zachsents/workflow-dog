@@ -35,50 +35,55 @@ export default function RunViewer() {
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="pointer-events-auto p-unit-xs">
-                    <Table
-                        removeWrapper
-                        selectionMode="single"
-                        selectedKeys={selectedKeys}
-                        onSelectionChange={(...args) => {
-                            onSelectionChange(...args)
-                            disclosure.onClose()
-                        }}
-                        aria-label="Workflow runs"
+                    <ScrollShadow
+                        size={4}
+                        className="max-h-[calc(100vh-16rem)] -m-unit-xs p-unit-xs"
                     >
-                        <TableHeader>
-                            <TableColumn key="number">#</TableColumn>
-                            <TableColumn key="date">Date</TableColumn>
-                            <TableColumn key="time">Time</TableColumn>
-                            <TableColumn key="status">Status</TableColumn>
-                        </TableHeader>
-                        <TableBody items={runs}>
-                            {(run) => (
-                                <TableRow className="cursor-pointer" key={run.id}>
-                                    <TableCell key="number">
-                                        <span className="text-default-400">#</span>
-                                        <span className="font-bold">{run.count}</span>
-                                    </TableCell>
-                                    <TableCell key="date">
-                                        {new Date(run.createdAt).toLocaleDateString(undefined, {
-                                            dateStyle: "medium"
-                                        })}
-                                    </TableCell>
-                                    <TableCell key="time">
-                                        {new Date(run.createdAt).toLocaleTimeString(undefined, {
-                                            timeStyle: "short"
-                                        })}
-                                    </TableCell>
-                                    <TableCell key="status">
-                                        <StatusIcon
-                                            status={run.status}
-                                            errorCount={run.errorCount}
-                                            hasErrors={run.hasErrors}
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                        <Table
+                            removeWrapper
+                            selectionMode="single"
+                            selectedKeys={selectedKeys}
+                            onSelectionChange={(...args) => {
+                                onSelectionChange(...args)
+                                disclosure.onClose()
+                            }}
+                            aria-label="Workflow runs"
+                        >
+                            <TableHeader>
+                                <TableColumn key="number">#</TableColumn>
+                                <TableColumn key="date">Date</TableColumn>
+                                <TableColumn key="time">Time</TableColumn>
+                                <TableColumn key="status">Status</TableColumn>
+                            </TableHeader>
+                            <TableBody items={runs}>
+                                {(run) => (
+                                    <TableRow className="cursor-pointer" key={run.id}>
+                                        <TableCell key="number">
+                                            <span className="text-default-400">#</span>
+                                            <span className="font-bold">{run.count}</span>
+                                        </TableCell>
+                                        <TableCell key="date">
+                                            {new Date(run.createdAt).toLocaleDateString(undefined, {
+                                                dateStyle: "medium"
+                                            })}
+                                        </TableCell>
+                                        <TableCell key="time">
+                                            {new Date(run.createdAt).toLocaleTimeString(undefined, {
+                                                timeStyle: "short"
+                                            })}
+                                        </TableCell>
+                                        <TableCell key="status">
+                                            <StatusIcon
+                                                status={run.status}
+                                                errorCount={run.errorCount}
+                                                hasErrors={run.hasErrors}
+                                            />
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </ScrollShadow>
                 </PopoverContent>
             </Popover>
 

@@ -11,7 +11,7 @@ on:
 env:
   PROJECT_ID: workflow-dog # Google Cloud project id
   GAR_LOCATION: us-central1 # Artifact Registry location
-  SERVICE: integrate # Cloud Run service name
+  SERVICE: api # Cloud Run service name
   REGION: us-central1 # Cloud Run service region
   REPO: workflow-dog
 

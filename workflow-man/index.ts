@@ -2,7 +2,6 @@ import express from "express"
 import morgan from "morgan"
 import { client, updateRun } from "./db.js"
 import { runWorkflow } from "./execution.js"
-import { getAccessToken, projectId } from "./secrets.js"
 
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8081
@@ -64,87 +63,6 @@ app.post("/workflow-runs/:runId/execute", async (req, res) => {
         finished_at: new Date().toISOString(),
         state: runState,
     })
-
-    res.sendStatus(201)
-})
-
-
-// Create workflow run
-app.post("/workflows/:workflowId/run", async (req, res) => {
-
-    const { data: { count } } = await client
-        .from("workflow_runs")
-        .select("count")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single()
-        .throwOnError()
-
-    const { data: { id: newRunId } } = await client
-        .from("workflow_runs")
-        .insert({
-            workflow_id: req.params.workflowId,
-            trigger_data: req.body.triggerData,
-            count: (count || 0) + 1,
-            ...req.body.scheduledFor && {
-                status: "scheduled",
-                scheduled_for: req.body.scheduledFor,
-            }
-        })
-        .select("id")
-        .single()
-        .throwOnError()
-
-    const taskParent = `projects/${projectId}/locations/us-central1/queues/workflow-runs/tasks`
-
-    await fetch(`https://cloudtasks.googleapis.com/v2beta3/${taskParent}`, {
-        method: "post",
-        headers: {
-            Authorization: `Bearer ${await getAccessToken()}`,
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            task: {
-                name: `${taskParent}/${newRunId}`,
-                httpRequest: {
-                    url: `${process.env.CLOUD_RUN_URL}/workflow-runs/${newRunId}/execute`,
-                },
-                ...req.body.scheduledFor && {
-                    scheduleTime: {
-                        seconds: Math.floor(new Date(req.body.scheduledFor).getTime() / 1000),
-                        nanos: 0,
-                    }
-                }
-            }
-        }),
-    })
-        .then(res => res.json())
-        .then(res => res.error ? Promise.reject(res.error) : res)
-
-    res.status(201).send({ id: newRunId })
-})
-
-
-app.all("/workflows/:workflowId/trigger/request", async (req, res) => {
-    // TO DO: verify trigger type 
-
-    await fetch(`${process.env.CLOUD_RUN_URL}/workflows/${req.params.workflowId}/run`, {
-        method: "post",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            triggerData: {
-                method: req.method,
-                url: req.url,
-                headers: req.headers,
-                body: typeof req.body === "object" ? JSON.stringify(req.body) : req.body,
-                params: req.query,
-            },
-        })
-    })
-
-    // TO DO: subscribe to created document and send response to client
 
     res.sendStatus(201)
 })

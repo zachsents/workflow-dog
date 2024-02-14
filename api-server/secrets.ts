@@ -8,7 +8,9 @@ const auth = new GoogleAuth({
     keyFile: "./service-account.json",
 })
 
-async function getAccessToken() {
+
+
+export async function getAccessToken() {
     const client = await auth.getClient()
     const { token } = await client.getAccessToken()
     return token
@@ -43,3 +45,6 @@ export async function getSecret(name: string, useLocalIfAvailable = true) {
 
     return Buffer.from(encodedSecret, "base64").toString()
 }
+
+
+export { projectId }

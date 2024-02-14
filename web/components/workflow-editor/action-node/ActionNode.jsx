@@ -106,7 +106,7 @@ function RequiredIntegration() {
         if (!isOAuth2)
             return
 
-        const url = new URL(`https://integrate-e45frdiv4a-uc.a.run.app/oauth2/connect/${definition.requiredIntegration.service}`)
+        const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/oauth2/connect/${definition.requiredIntegration.service}`)
         url.searchParams.append("t", workflow?.teamId)
 
         if (definition.requiredIntegration.scopes) {
@@ -311,7 +311,7 @@ function APIKeyModal({ isOpen, onClose }) {
     })
 
     const addApiKey = useMutation({
-        mutationFn: async values => fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_SERVER_URL}/apikey/connect/${serviceName}`, {
+        mutationFn: async values => fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/apikey/connect/${serviceName}`, {
             method: "post",
             headers: {
                 Authorization: `Bearer ${await supabase.auth.getSession().then(session => session.data.session.access_token)}`,

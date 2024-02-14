@@ -1,12 +1,12 @@
-name: Build & Deploy Integration Server
+name: Build & Deploy API Server
 
 on:
   push:
     branches: ["main"]
     paths:
-      - integration-server/**
+      - api-server/**
       - integrations/**
-      - .github/build-deploy-integration-server.yml
+      - .github/build-deploy-api-server.yml
 
 env:
   PROJECT_ID: workflow-dog # Google Cloud project id
@@ -39,12 +39,12 @@ jobs:
 
       - name: Create environment & credentials files
         run: |-
-          echo '${{ secrets.INTEGRATION_SERVER_SERVICE_ACCOUNT_KEY }}' > integration-server/service-account.json
-          echo '${{ secrets.INTEGRATION_SERVER_ENV_FILE }}' > integration-server/.env
+          echo '${{ secrets.API_SERVER_SERVICE_ACCOUNT_KEY }}' > api-server/service-account.json
+          echo '${{ secrets.API_SERVER_ENV_FILE }}' > api-server/.env
 
       - name: Build and Push Container
         run: |-
-          docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:${{ github.sha }}" -f ./integration-server/Dockerfile .
+          docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:${{ github.sha }}" -f ./api-server/Dockerfile .
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:${{ github.sha }}"
 
       - name: Deploy to Cloud Run

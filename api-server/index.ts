@@ -287,6 +287,7 @@ app.post("/workflows/:workflowId/run", async (req, res) => {
     const { data: { count } } = await client
         .from("workflow_runs")
         .select("count")
+        .eq("workflow_id", req.params.workflowId)
         .order("created_at", { ascending: false })
         .limit(1)
         .single()
@@ -297,6 +298,7 @@ app.post("/workflows/:workflowId/run", async (req, res) => {
             .from("workflow_runs")
             .select("trigger_data")
             .eq("id", req.body.copyTriggerDataFrom)
+            .eq("workflow_id", req.params.workflowId)
             .single()
             .throwOnError()
         req.body.triggerData = trigger_data

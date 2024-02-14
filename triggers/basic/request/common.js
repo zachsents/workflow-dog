@@ -1,6 +1,6 @@
 
 export default {
-    name: "Request (Sync URL)",
+    name: "Request",
     whenName: "When a URL is requested",
     description: "Triggered by a request to a URL. Responds after the script has finished running.",
     inputs: {
@@ -8,21 +8,17 @@ export default {
             name: "Method",
             type: "data-type:basic.string",
         },
-        url: {
-            name: "URL",
-            type: "data-type:basic.string",
-        },
         headers: {
             name: "Headers",
+            type: "data-type:basic.object",
+        },
+        params: {
+            name: "Query Parameters",
             type: "data-type:basic.object",
         },
         body: {
             name: "Body",
             type: "data-type:basic.string",
-        },
-        params: {
-            name: "Query Parameters",
-            type: "data-type:basic.object",
         },
     },
     outputs: {

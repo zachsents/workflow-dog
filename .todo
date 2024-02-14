@@ -28,9 +28,9 @@ Web:
             ✔ Add run duration @done (2/14/2024, 1:08:45 AM)
             ✔ Add scroll shadow @done (2/14/2024, 1:08:50 AM)
             ✔ Add error tooltips @done (2/14/2024, 2:40:07 AM)
-            ☐ Make run list realtime
+            ✔ Make run list realtime @done (2/14/2024, 11:16:37 AM)
         Triggers:
-            ☐ Combine URL and webhook triggers
+            ✔ Combine URL and webhook triggers @done (2/14/2024, 11:34:06 AM)
             ☐ Add gmail trigger endpoint/infra
             ☐ Catch errors for invalid triggers
             ☐ Add configuration for triggers

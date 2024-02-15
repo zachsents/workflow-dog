@@ -76,3 +76,4 @@ app.post("/workflow-runs/:runId/execute", async (req, res) => {
 app.listen(port, () => {
     console.log("WorkflowMan running on port", port, `(${process.env.NODE_ENV})`)
 })
+

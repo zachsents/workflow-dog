@@ -19,6 +19,13 @@ const port = process.env.PORT ? parseInt(process.env.PORT) : 8080
 /* -------------------------------------------------------------------------- */
 const app = express()
 app.use(cors())
+app.use((req, res, next) => {
+    (req as any).rawBody = ''
+    req.on("data", chunk => {
+        (req as any).rawBody += chunk
+    })
+    next()
+})
 app.use(express.json())
 app.use(morgan("dev"))
 app.use(cookieSession({
@@ -392,7 +399,7 @@ app.all("/workflows/:workflowId/trigger/request", async (req, res) => {
     const url = new URL(`${process.env.API_SERVER_URL}/workflows/${req.params.workflowId}/run`)
 
     const waitUntilFinished: boolean = (triggerConfig as any)?.waitUntilFinished
-    if(waitUntilFinished) {
+    if (waitUntilFinished) {
         url.searchParams.set("subscribe", "true")
     }
 
@@ -406,21 +413,21 @@ app.all("/workflows/:workflowId/trigger/request", async (req, res) => {
                 method: req.method,
                 url: req.url,
                 headers: req.headers,
-                body: typeof req.body === "object" ? JSON.stringify(req.body) : req.body,
+                body: (req as any).rawBody,
                 params: req.query,
             },
         })
     }).then(res => res.json())
 
-    if(waitUntilFinished) {
+    if (waitUntilFinished) {
         const { status, headers, body } = response.state?.workflowOutputs ?? {}
-        
+
         Object.entries(headers ?? {}).forEach(([key, value]) => {
             res.setHeader(key, value as string)
         })
 
-        res.status(status ?? 200).send(body ?? "")      
-        return  
+        res.status(status ?? 200).send(body ?? "")
+        return
     }
 
     res.sendStatus(204)

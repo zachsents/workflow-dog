@@ -14,6 +14,7 @@ Web:
         ✔ Catch errors @done (2/7/2024, 5:51:40 PM)
         ✔ Do named outputs @done (2/7/2024, 2:24:33 AM)
         ☐ Add modifiers support to execution engine
+        ☐ Make execution honor disabled nodes
         Running:
             ✔ Set up run manually panel @done (2/13/2024, 9:38:41 PM)
             ☐ Make JSON builder component
@@ -29,6 +30,8 @@ Web:
             ✔ Add scroll shadow @done (2/14/2024, 1:08:50 AM)
             ✔ Add error tooltips @done (2/14/2024, 2:40:07 AM)
             ✔ Make run list realtime @done (2/14/2024, 11:16:37 AM)
+            ✔ Make run viewer load previous version of run if it's not the most recent @done (2/15/2024, 5:34:25 PM)
+            ✔ Make a spot for workflow errors @done (2/15/2024, 5:34:28 PM)
         Triggers:
             ✔ Combine URL and webhook triggers @done (2/14/2024, 11:34:06 AM)
             ☐ Add gmail trigger endpoint/infra
@@ -40,7 +43,8 @@ Web:
     ☐ Make text nodes autosize
     ☐ minify number nodes
     ☐ Add renaming + adding for group handles
-    ☐ Set up homepage redirect
+    ✔ Set up homepage redirect @done (2/15/2024, 4:48:46 PM)
+    ☐ Add node comments
 
     Nodes:
         ☐ JSON stringify

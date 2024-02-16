@@ -5,6 +5,7 @@ import classNames from "classnames"
 import { useMemo } from "react"
 import { useNodeId, useStore } from "reactflow"
 import ActionNodeModal from "./ActionNodeModal"
+import { TbExclamationCircle } from "react-icons/tb"
 
 
 export default function ActionNodeShell({ children }) {
@@ -46,14 +47,16 @@ export default function ActionNodeShell({ children }) {
 
                         {hasRunError &&
                             <div className="absolute left-1/2 top-full -translate-x-1/2 mt-unit-xs max-w-full">
-                                <Tooltip closeDelay={0} delay={750} content={runError} placement="bottom">
+                                <Tooltip
+                                    closeDelay={0} content={runError} placement="bottom"
+                                    classNames={{ content: "max-w-[20rem]" }}
+                                >
                                     <Chip
                                         color="danger" size="sm" aria-multiline
-                                        className="max-w-full"
+                                        startContent={<TbExclamationCircle />}
+                                        className="px-unit-sm pointer-events-auto cursor-default"
                                     >
-                                        <span className="opacity-50">Error:</span>
-                                        {" "}
-                                        <span>{runError}</span>
+                                        Hover to view error
                                     </Chip>
                                 </Tooltip>
                             </div>}

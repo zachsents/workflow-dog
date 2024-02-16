@@ -39,6 +39,9 @@ export default function GraphEditor({ initialGraph: { nodes: initialNodes = [], 
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
 
+
+                // nodesDraggable
+
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
@@ -65,7 +68,7 @@ export default function GraphEditor({ initialGraph: { nodes: initialNodes = [], 
                 // zoomOnDoubleClick
                 // zoomOnScroll={false}
 
-                className="flex-1 bg-gray-50"
+                className="w-full h-full bg-gray-50"
 
                 onCopy={onCopy}
                 onPaste={() => onPaste()}

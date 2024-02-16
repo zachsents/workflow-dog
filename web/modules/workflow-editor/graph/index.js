@@ -42,6 +42,10 @@ export function useGraphSaving() {
         if (!isWorkflowLoaded || updateGraph.isPending || !isReadyToSave)
             return
 
+        // Prevent empty graph from being saved -- this happens sometimes
+        if (convertedGraph.nodes.length === 0 && convertedGraph.edges.length === 0)
+            return console.debug("Graph is empty, not saving")
+
         console.debug("Saving graph...", convertedGraph)
         updateGraph.mutateAsync().then(() => console.log("Graph saved"))
     }, [convertedGraphStr], 500)

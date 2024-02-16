@@ -31,6 +31,12 @@ export default {
             name: "Substitutions",
             description: "A value to insert into the template. If your template contains {FirstName}, a substitution named FirstName will replace it.",
             derivedFrom: "template",
+            recommendedNode: {
+                data: {
+                    definition: "node-type:basic.text",
+                },
+                handle: "text",
+            },
         },
     },
     outputs: {

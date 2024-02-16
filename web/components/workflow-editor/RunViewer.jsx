@@ -1,10 +1,9 @@
 import { Button, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, useDisclosure } from "@nextui-org/react"
-import { plural } from "@web/modules/grammar"
 import { useControlledSelectedKeys } from "@web/modules/util"
 import { useEditorStoreState } from "@web/modules/workflow-editor/store"
 import { useRunWorkflowMutation, useWorkflowRun, useWorkflowRunsRealtime } from "@web/modules/workflows"
-import classNames from "classnames"
-import { TbAlertCircle, TbAlertHexagon, TbCheck, TbCircle, TbClock, TbClockPlay, TbRotateClockwise2, TbRun, TbX } from "react-icons/tb"
+import { TbClockPlay, TbRotateClockwise2, TbX } from "react-icons/tb"
+import StatusIcon from "./StatusIcon"
 
 
 export default function RunViewer() {
@@ -17,12 +16,6 @@ export default function RunViewer() {
     const { data: selectedRun, isLoading } = useWorkflowRun(selectedRunId)
 
     const disclosure = useDisclosure()
-
-    const runMutation = useRunWorkflowMutation(selectedRun?.workflowId, {
-        subscribe: true,
-        mutationKey: ["rerun", selectedRunId],
-    })
-    const rerun = () => runMutation.mutate({ copyTriggerDataFrom: selectedRunId })
 
     return (
         <>
@@ -82,8 +75,8 @@ export default function RunViewer() {
                                         </TableCell>
                                         <TableCell key="duration">
                                             {["completed", "failed"].includes(run.status) ?
-                                            `${Math.round(Math.abs(new Date(run.scheduledFor || run.createdAt) - new Date(run.finishedAt)) / 100) / 10}s` :
-                                            "-"}
+                                                `${Math.round(Math.abs(new Date(run.scheduledFor || run.createdAt) - new Date(run.finishedAt)) / 100) / 10}s` :
+                                                "-"}
                                         </TableCell>
                                         <TableCell key="status">
                                             <StatusIcon
@@ -118,15 +111,6 @@ export default function RunViewer() {
                             <Button
                                 size="sm" variant="bordered"
                                 className="bg-white/70 backdrop-blur-sm"
-                                isLoading={runMutation.isPending}
-                                startContent={<TbRotateClockwise2 />}
-                                onPress={rerun}
-                            >
-                                Re-run
-                            </Button>
-                            <Button
-                                size="sm" variant="bordered"
-                                className="bg-white/70 backdrop-blur-sm"
                                 startContent={<TbX />}
                                 onPress={() => setSelectedRunId(null)}
                             >
@@ -139,41 +123,7 @@ export default function RunViewer() {
 }
 
 
-function StatusIcon({ status, hasErrors, errorCount }) {
 
-    switch (status) {
-        case "completed":
-            return hasErrors ?
-                <StatusText icon={TbAlertCircle} className="text-danger-500">
-                    {errorCount != null ?
-                        `${errorCount} ${plural("error", errorCount)}` :
-                        "Errors"
-                    }
-                </StatusText> :
-                <StatusText icon={TbCheck} className="text-success-600">Completed</StatusText>
-        case "failed":
-            return <StatusText icon={TbAlertHexagon} className="text-danger-500">Failed</StatusText>
-        case "running":
-            return <StatusText icon={TbRun} className="text-primary-500">Running</StatusText>
-        case "scheduled":
-            return <StatusText icon={TbClock} className="text-primary-500">Scheduled</StatusText>
-        case "cancelled":
-            return <StatusText icon={TbX} className="text-default-500">Cancelled</StatusText>
-        case "pending":
-            return <StatusText icon={TbCircle} className="text-default-500">Pending</StatusText>
-        default:
-            return <StatusText icon={TbCircle} className="text-default-500">Unknown</StatusText>
-    }
-}
-
-function StatusText({ className, icon: Icon, children }) {
-    return (
-        <div className={classNames("flex flex-nowrap items-center gap-1", className)}>
-            <Icon />
-            <span className="text-xs">{children}</span>
-        </div>
-    )
-}
 
 function RerunButton({ onClose, workflowId, runId }) {
 

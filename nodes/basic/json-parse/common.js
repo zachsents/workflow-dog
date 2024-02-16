@@ -11,7 +11,7 @@ export default {
     outputs: {
         object: {
             name: "Object",
-            type: "data-type:basic.string",
+            type: "data-type:basic.object",
         },
     },
 }

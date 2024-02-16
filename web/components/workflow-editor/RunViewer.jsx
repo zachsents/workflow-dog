@@ -98,6 +98,12 @@ export default function RunViewer() {
                                 )}
                             </TableBody>
                         </Table>
+
+                        {runs?.length === 0 &&
+                            <p className="text-default-500 text-sm text-center py-unit-md">
+                                No runs yet
+                            </p>}
+
                     </ScrollShadow>
                 </PopoverContent>
             </Popover>

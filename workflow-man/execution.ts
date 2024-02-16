@@ -16,6 +16,7 @@ type Node = {
             definition: string
             name?: string
         }[]
+        disabled: boolean
     }
 }
 
@@ -108,39 +109,44 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
     const checkIfNodeCanRun = async (nodeId: string) => {
         const node = nodes.find(node => node.id === nodeId)!
 
+        if (node.data.disabled)
+            return
+
         const allInputsAvailable = node.data.inputs.every(input => {
             const attachedEdge = edges.find(edge => edge.target === nodeId && edge.targetHandle === input.id)
-            if (!attachedEdge) return true
+            if (!attachedEdge)
+                return true
 
             return runState.outputs[attachedEdge.source]?.[attachedEdge.sourceHandle] !== undefined
         })
 
-        if (allInputsAvailable) {
-            const inputValues = node.data.inputs.reduce((acc, input) => {
-                const attachedEdge = edges.find(edge => edge.target === nodeId && edge.targetHandle === input.id)
-                if (!attachedEdge) return acc
+        if (!allInputsAvailable)
+            return
 
-                const definition = nodeDefinitions[node.data.definition].inputs[input.definition]
-                const value = runState.outputs[attachedEdge.source]?.[attachedEdge.sourceHandle]
+        const inputValues = node.data.inputs.reduce((acc, input) => {
+            const attachedEdge = edges.find(edge => edge.target === nodeId && edge.targetHandle === input.id)
+            if (!attachedEdge) return acc
 
-                if (!definition.group) {
-                    acc[input.definition] = value
-                    return acc
-                }
+            const definition = nodeDefinitions[node.data.definition].inputs[input.definition]
+            const value = runState.outputs[attachedEdge.source]?.[attachedEdge.sourceHandle]
 
-                if (definition.named) {
-                    acc[input.definition] ??= {}
-                    acc[input.definition][input.name] = value
-                    return acc
-                }
-
-                acc[input.definition] ??= []
-                acc[input.definition].push(value)
+            if (!definition.group) {
+                acc[input.definition] = value
                 return acc
-            }, {})
+            }
 
-            await runNode(node, inputValues)
-        }
+            if (definition.named) {
+                acc[input.definition] ??= {}
+                acc[input.definition][input.name] = value
+                return acc
+            }
+
+            acc[input.definition] ??= []
+            acc[input.definition].push(value)
+            return acc
+        }, {})
+
+        await runNode(node, inputValues)
     }
 
     await Promise.all(startingNodes.map(node => runNode(node, {})))

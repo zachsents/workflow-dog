@@ -144,56 +144,16 @@ function HeaderMenu() {
 
 
 function UsersOnline() {
-
-    const { data: user } = useUser()
-    const { data: workflow } = useWorkflow()
-
-    const updateLastOnline = useDatabaseMutation(
-        supa => supa.from("users_workflows_last_online")
-            .upsert({
-                user_id: user?.id,
-                workflow_id: workflow?.id,
-                last_online: new Date().toISOString(),
-            })
-            .eq("user_id", user?.id)
-            .eq("workflow_id", workflow?.id),
-        {
-            enabled: !!workflow && !!user,
-            invalidateKey: ["users-workflows-last-online", workflow?.id],
-        }
-    )
-
-    const { data: onlineUsers } = useQuery({
-        queryFn: async () => {
-            const { data } = await supabase.from("users_workflows_last_online")
-                .select("users (id, name, email, photo_url)")
-                .eq("workflow_id", workflow?.id)
-                .gt("last_online", new Date(Date.now() - 60 * 1000).toISOString())
-
-            return deepCamelCase(data.map(item => item.users))
-        },
-        queryKey: ["users-workflows-last-online", workflow?.id],
-        enabled: !!workflow,
-    })
-
-    useEffect(() => {
-        updateLastOnline.mutate()
-    }, [])
-
-    useIntervalEffect(() => {
-        updateLastOnline.mutate()
-    }, 60 * 1000)
-
     return (
         <AvatarGroup>
-            {onlineUsers?.map(user =>
+            {/* {onlineUsers?.map(user =>
                 <UserAvatar
                     name={user.name}
                     email={user.email}
                     photoUrl={user.photoUrl}
                     key={user.id}
                 />
-            )}
+            )} */}
         </AvatarGroup>
     )
 }

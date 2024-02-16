@@ -1,15 +1,13 @@
 import { Button, Tooltip } from "@nextui-org/react"
 import { useCreateActionNode, useDefinition } from "@web/modules/workflow-editor/graph/nodes"
+import { useSelectedWorkflowRun } from "@web/modules/workflows"
 import classNames from "classnames"
+import { object as nodeDefs } from "nodes/web"
+import { useMemo, useRef, useState } from "react"
 import { TbActivity, TbArrowLeftSquare, TbArrowRight, TbArrowRightSquare, TbSparkles } from "react-icons/tb"
-import { Position, Handle as RFHandle, useNodeId, useStore, useReactFlow } from "reactflow"
+import { Position, Handle as RFHandle, useNodeId, useReactFlow, useStore } from "reactflow"
 import util from "util"
 import Group from "../../layout/Group"
-import { useMemo, useRef } from "react"
-import { useState } from "react"
-import { object as nodeDefs } from "nodes/web"
-import { useEditorStore } from "@web/modules/workflow-editor/store"
-import { useSelectedWorkflowRun } from "@web/modules/workflows"
 
 
 export default function ActionNodeHandle({ id, name, type, definition: passedDef }) {
@@ -35,7 +33,9 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
         }
     }
 
-    const displayName = definition?.bullet ? <>&bull;</> : (name || (definition.named ? null : definition?.name) || <>&nbsp;</>)
+    const displayName = definition?.bullet ?
+        <>&bull;</> :
+        (name || (definition.named ? null : definition?.name) || <>&nbsp;</>)
 
     const isConnected = useStore(s => s.edges.some(edge => edge.source == nodeId && edge.sourceHandle == id || edge.target == nodeId && edge.targetHandle == id))
 
@@ -104,6 +104,7 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
                 >
                     {/* {definition.showHandleIcon && definition.icon &&
                                 <definition.icon size="0.7rem" color="currentColor" />} */}
+
                     {isConnected && <TbArrowRight className={classNames(
                         "text-xs",
                         isSource ? "-mr-2" : "-ml-2",

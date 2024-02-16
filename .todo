@@ -43,8 +43,8 @@ Web:
 
     ✔ Make nonexistent trigger inputs be unselected @done (2/13/2024, 4:34:53 AM)
     ☐ Add interface for searching and adding nodes
-    ☐ Make text nodes autosize
-    ☐ minify number nodes
+    ✔ Make text nodes autosize @done (2/15/2024, 9:40:41 PM)
+    ✔ minify number nodes @done (2/15/2024, 9:58:57 PM)
     ☐ Add renaming + adding for group handles
     ✔ Set up homepage redirect @done (2/15/2024, 4:48:46 PM)
     ☐ Add node comments

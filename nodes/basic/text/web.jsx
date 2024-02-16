@@ -39,7 +39,7 @@ export default {
                     minRows={1}
                     maxRows={12}
                     size="sm" variant="bordered"
-                    className="nodrag my-unit-sm relative translate-x-6 bg-white text-tiny"
+                    className="nodrag my-unit-sm bg-white"
                     classNames={{
                         input: "text-tiny min-w-[13ch] max-w-[28ch] w-[calc(var(--chars)*1ch+1rem)]"
                     }}
@@ -55,7 +55,7 @@ export default {
                         ev.stopPropagation()
                     }}
                 />
-                <p className="absolute bottom-full text-tiny text-default-500 left-8">
+                <p className="absolute bottom-full text-tiny text-default-500 left-2">
                     Text
                 </p>
             </div>

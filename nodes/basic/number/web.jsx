@@ -13,7 +13,7 @@ export default {
             bullet: true,
         }
     },
-    renderBody: ({ id }) => {
+    renderNode: ({ id }) => {
 
         const [value, _setValue] = useNodeProperty(id, "data.state.value")
 
@@ -21,47 +21,56 @@ export default {
 
         const increment = () => {
             const newValue = parseNumber(value) + 1
-            if (!isNaN(newValue)) setValue(newValue.toString())
+            if (!isNaN(newValue))
+                setValue(newValue.toString())
         }
 
         const decrement = () => {
             const newValue = parseNumber(value) - 1
-            if (!isNaN(newValue)) setValue(newValue.toString())
+            if (!isNaN(newValue))
+                setValue(newValue.toString())
         }
 
         return (
-            <div className="flex justify-center items-stretch py-unit-xs gap-2">
-                <div className="text-4xl" style={{
-                    width: `${Math.max((value?.toString().length || 0) + 1, 2)}ch`
-                }}>
-                    <Input
-                        value={value ?? ""}
-                        onValueChange={setValue}
-                        size="lg"
-                        placeholder="0"
-                        classNames={{
-                            input: "text-center text-4xl",
-                            inputWrapper: "p-2 nodrag",
-                        }}
-                    />
+            <div className="relative group">
+                <div className="flex justify-center items-stretch py-unit-xs gap-1">
+                    <div style={{
+                        width: `${Math.max((value?.toString().length || 0) + 1, 2)}ch`
+                    }}>
+                        <Input
+                            value={value ?? ""}
+                            onValueChange={setValue}
+                            size="sm" variant="bordered"
+                            placeholder="0"
+                            className="nodrag"
+                            classNames={{
+                                input: "text-center",
+                                inputWrapper: "p-0 h-auto nodrag",
+                            }}
+                        />
+                    </div>
+                    <div className="flex flex-col items-stretch gap-1">
+                        <Button
+                            size="sm" variant="flat" className="min-w-0 px-1 h-auto flex-1 nodrag text-default-500 rounded-sm opacity-50 group-hover:opacity-100 transition-opacity"
+                            onPress={increment}
+                        >
+                            <TbPlus />
+                        </Button>
+                        <Button
+                            size="sm" variant="flat" className="min-w-0 px-1 h-auto flex-1 nodrag text-default-500 rounded-sm opacity-50 group-hover:opacity-100 transition-opacity"
+                            onPress={decrement}
+                        >
+                            <TbMinus />
+                        </Button>
+                    </div>
                 </div>
-                <div className="flex flex-col items-stretch gap-1">
-                    <Button
-                        size="sm" variant="flat" className="min-w-0 px-2 h-auto flex-1 nodrag"
-                        onPress={increment}
-                    >
-                        <TbPlus />
-                    </Button>
-                    <Button
-                        size="sm" variant="flat" className="min-w-0 px-2 h-auto flex-1 nodrag"
-                        onPress={decrement}
-                    >
-                        <TbMinus />
-                    </Button>
-                </div>
+
+                <p className="absolute bottom-full text-tiny text-default-500 left-2">
+                    Number
+                </p>
             </div>
         )
-    },
+    }
 }
 
 

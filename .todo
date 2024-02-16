@@ -14,7 +14,9 @@ Web:
         ✔ Catch errors @done (2/7/2024, 5:51:40 PM)
         ✔ Do named outputs @done (2/7/2024, 2:24:33 AM)
         ☐ Add modifiers support to execution engine
-        ☐ Make execution honor disabled nodes
+        ✔ Make execution honor disabled nodes @done (2/15/2024, 6:26:06 PM)
+        ☐ Add info messages to nodes
+
         Running:
             ✔ Set up run manually panel @done (2/13/2024, 9:38:41 PM)
             ☐ Make JSON builder component
@@ -23,8 +25,8 @@ Web:
             ✔ Design run viewer panel @done (2/13/2024, 9:38:44 PM)
             ☐ Design object/json viewer
             ✘ Port old run viewer to new frontend @cancelled (2/13/2024, 9:38:51 PM)
-            ☐ Add most recent run to run viewer UI
-            ✔ set up zustand store @done (2/13/2024, 11:45:56 PM)
+            ✔ Add most recent run to run viewer UI @done (2/15/2024, 6:55:25 PM)
+            ✔ Set up zustand store @done (2/13/2024, 11:45:56 PM)
             ✔ Add re-run button @done (2/14/2024, 2:20:49 AM)
             ✔ Add run duration @done (2/14/2024, 1:08:45 AM)
             ✔ Add scroll shadow @done (2/14/2024, 1:08:50 AM)
@@ -32,6 +34,7 @@ Web:
             ✔ Make run list realtime @done (2/14/2024, 11:16:37 AM)
             ✔ Make run viewer load previous version of run if it's not the most recent @done (2/15/2024, 5:34:25 PM)
             ✔ Make a spot for workflow errors @done (2/15/2024, 5:34:28 PM)
+            ☐ Make dates consider scheduled time and add status icon
         Triggers:
             ✔ Combine URL and webhook triggers @done (2/14/2024, 11:34:06 AM)
             ☐ Add gmail trigger endpoint/infra

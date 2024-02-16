@@ -2,7 +2,7 @@ import { Button, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Spinner,
 import { useControlledSelectedKeys } from "@web/modules/util"
 import { useEditorStoreState } from "@web/modules/workflow-editor/store"
 import { useRunWorkflowMutation, useWorkflowRun, useWorkflowRunsRealtime } from "@web/modules/workflows"
-import { TbClockPlay, TbRotateClockwise2, TbX } from "react-icons/tb"
+import { TbClockPlay, TbRotateClockwise2, TbRun, TbX } from "react-icons/tb"
 import StatusIcon from "./StatusIcon"
 
 
@@ -13,9 +13,11 @@ export default function RunViewer() {
     const [selectedRunId, setSelectedRunId] = useEditorStoreState("selectedRunId")
     const { selectedKeys, onSelectionChange } = useControlledSelectedKeys(selectedRunId, setSelectedRunId)
 
-    const { data: selectedRun, isLoading } = useWorkflowRun(selectedRunId)
+    const { data: selectedRun } = useWorkflowRun(selectedRunId)
 
     const disclosure = useDisclosure()
+
+    const mostRecentRun = runs?.[0]
 
     return (
         <>
@@ -100,24 +102,43 @@ export default function RunViewer() {
                 </PopoverContent>
             </Popover>
 
-            {selectedRunId &&
-                <div className="flex flex-col gap-1 mt-unit-xs items-end">
-                    <p className="text-xs text-default-500">
-                        Currently Viewing Run #{selectedRun?.count}
-                    </p>
-                    {isLoading ?
-                        <Spinner size="sm" className="mx-unit-xl" /> :
-                        <div className="flex gap-1 [&_button]:pointer-events-auto">
+            <div className="flex flex-col gap-1 mt-unit-xs items-end">
+                {selectedRunId ?
+                    <>
+                        <p className="text-xs text-default-500">
+                            Currently Viewing Run #{selectedRun?.count}
+                        </p>
+                        <Button
+                            size="sm" variant="bordered"
+                            className="bg-white/70 backdrop-blur-sm pointer-events-auto"
+                            startContent={<TbX />}
+                            onPress={() => setSelectedRunId(null)}
+                        >
+                            Deselect Run
+                        </Button>
+                    </> :
+                    mostRecentRun ?
+                        <>
+                            <p className="text-xs text-default-500">
+                                Most recent
+                            </p>
                             <Button
                                 size="sm" variant="bordered"
-                                className="bg-white/70 backdrop-blur-sm"
-                                startContent={<TbX />}
-                                onPress={() => setSelectedRunId(null)}
+                                className="bg-white/70 backdrop-blur-sm pointer-events-auto"
+                                startContent={<span>
+                                    #{mostRecentRun.count}
+                                </span>}
+                                onPress={() => setSelectedRunId(mostRecentRun.id)}
                             >
-                                Deselect Run
+                                <span className="text-default-500">
+                                    {new Date(mostRecentRun.createdAt).toLocaleString(undefined, {
+                                        timeStyle: "short",
+                                        dateStyle: "medium",
+                                    })}
+                                </span>
                             </Button>
-                        </div>}
-                </div>}
+                        </> : null}
+            </div>
         </>
     )
 }

@@ -69,6 +69,7 @@ function GraphRenderer({ nodes, edges }) {
 
             className="w-full h-full bg-gray-50"
             fitView
+            fitViewOptions={fitViewOptions}
         >
             <Controls showInteractive={false} />
         </ReactFlow>
@@ -82,4 +83,8 @@ const nodeTypes = {
 
 const edgeTypes = {
     data: DataEdge,
+}
+
+const fitViewOptions = {
+    padding: 0.75,
 }

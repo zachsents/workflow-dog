@@ -51,5 +51,6 @@ Web:
 
     Nodes:
         ☐ JSON stringify
-        ☐ JSON parse
-        ☐ Expand object
+        ✔ JSON parse @done (2/15/2024, 10:34:52 PM)
+        ✔ Expand object @done (2/15/2024, 10:34:56 PM)
+        ✔ Compose object @done (2/15/2024, 10:40:22 PM)

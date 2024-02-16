@@ -2,7 +2,7 @@ import { TbAbc } from "react-icons/tb"
 import colors from "tailwindcss/colors"
 import { useNodeProperty, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
 import { Textarea } from "@nextui-org/react"
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 
 
 export default {
@@ -26,20 +26,34 @@ export default {
             debounce: 200,
         })
 
+        const [textLength, setTextLength] = useState(0)
+
         return (
             <div className="relative">
                 <Textarea
                     defaultValue={value ?? ""}
-                    onValueChange={setValue}
+                    onValueChange={val => {
+                        setValue(val)
+                        setTextLength(val.length)
+                    }}
                     minRows={1}
                     maxRows={12}
                     size="sm" variant="bordered"
                     className="nodrag my-unit-sm relative translate-x-6 bg-white text-tiny"
                     classNames={{
-                        input: "text-tiny"
+                        input: "text-tiny min-w-[13ch] max-w-[28ch] w-[calc(var(--chars)*1ch+1rem)]"
+                    }}
+                    style={{
+                        "--chars": textLength,
                     }}
                     placeholder="Type something..."
                     ref={ref}
+                    onCopy={ev => {
+                        ev.stopPropagation()
+                    }}
+                    onPaste={ev => {
+                        ev.stopPropagation()
+                    }}
                 />
                 <p className="absolute bottom-full text-tiny text-default-500 left-8">
                     Text

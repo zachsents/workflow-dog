@@ -1,6 +1,7 @@
 export { default as basic_jsonStringify } from "../basic/json-stringify/common.js"
 export { default as basic_jsonParse } from "../basic/json-parse/common.js"
 export { default as basic_composeObject } from "../basic/compose-object/common.js"
+export { default as basic_and } from "../basic/and/common.js"
 export { default as basic_decomposeObject } from "../basic/decompose-object/common.js"
 export { default as basic_triggerInput } from "../basic/trigger-input/common.js"
 export { default as basic_number } from "../basic/number/common.js"

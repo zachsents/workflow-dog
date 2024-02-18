@@ -33,12 +33,26 @@ export function duplicateElements(rf, nodes, edges, {
     const positionOffsetY = position ? position.y - rect.y : 0
 
     const nodeIdMap = {}
+    const nodeInputIdMap = {}
+    const nodeOutputIdMap = {}
     const newNodes = nodes?.map(n => {
         const newNode = structuredClone(n)
         newNode.id = uniqueId(PREFIX.NODE)
         newNode.position.x += position ? positionOffsetX : (xOffset ?? offset)
         newNode.position.y += position ? positionOffsetY : (yOffset ?? offset)
         newNode.selected = true
+
+        newNode.data.inputs?.forEach(input => {
+            const newInputId = uniqueId(PREFIX.INPUT)
+            nodeInputIdMap[input.id] = newInputId
+            input.id = newInputId
+        })
+
+        newNode.data.outputs?.forEach(output => {
+            const newOutputId = uniqueId(PREFIX.OUTPUT)
+            nodeOutputIdMap[output.id] = newOutputId
+            output.id = newOutputId
+        })
 
         nodeIdMap[n.id] = newNode.id
 
@@ -49,7 +63,9 @@ export function duplicateElements(rf, nodes, edges, {
         const newEdge = structuredClone(e)
         newEdge.id = uniqueId(PREFIX.EDGE)
         newEdge.source = nodeIdMap[e.source]
+        newEdge.sourceHandle = nodeOutputIdMap[e.sourceHandle] || e.sourceHandle
         newEdge.target = nodeIdMap[e.target]
+        newEdge.targetHandle = nodeInputIdMap[e.targetHandle] || e.targetHandle
         newEdge.selected = true
 
         if (!newEdge.source || !newEdge.target)

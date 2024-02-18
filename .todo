@@ -53,6 +53,8 @@ Web:
         ☐ Looping groups
         ✔ Add custom domain to cloud run containers @done (2/18/2024, 10:19:52 AM)
         ☐ Re-add node pinning
+        ☐ @today Graph saving bug
+        ✔ Investigate duplicate input ID bug @done (2/18/2024, 4:34:26 PM)
 
     Nodes:
         ✔ JSON stringify @done (2/15/2024, 10:43:34 PM)

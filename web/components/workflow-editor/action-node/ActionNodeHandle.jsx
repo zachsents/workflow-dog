@@ -41,9 +41,9 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
 
     const { data: selectedRun } = useSelectedWorkflowRun()
     const [hasRunValue, runValue] = useMemo(() => {
-        const handleValues = Object.fromEntries(Object.values(selectedRun?.state?.outputs ?? {}).flatMap(v => Object.entries(v)))
+        const handleValues = selectedRun?.state?.outputs?.[nodeId] ?? {}
         return [id in handleValues, handleValues[id]]
-    }, [selectedRun?.state?.outputs, id])
+    }, [selectedRun, nodeId, id])
 
     const runValueNeedsExpansion = typeof runValue === "object" && Object.keys(runValue).length > 1 ||
         typeof runValue === "string" && runValue.length > 100

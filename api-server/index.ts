@@ -291,14 +291,15 @@ app.post("/apikey/connect/:serviceName", async (req, res) => {
 // Create workflow run
 app.post("/workflows/:workflowId/run", async (req, res) => {
 
-    const { data: { count } } = await client
+    const { data } = await client
         .from("workflow_runs")
         .select("count")
         .eq("workflow_id", req.params.workflowId)
         .order("created_at", { ascending: false })
         .limit(1)
-        .single()
         .throwOnError()
+ 
+    const count = data?.[0]?.count
 
     if (req.body.copyTriggerDataFrom) {
         const { data: { trigger_data } } = await client

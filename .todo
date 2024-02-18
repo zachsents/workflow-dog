@@ -49,7 +49,7 @@ Web:
         ✔ Set up homepage redirect @done (2/15/2024, 4:48:46 PM)
         ☐ Add node comments
         ☐ Looping groups
-        ☐ Add custom domain to cloud run containers
+        ✔ Add custom domain to cloud run containers @done (2/18/2024, 10:19:52 AM)
         ☐ Re-add node pinning
 
     Nodes:

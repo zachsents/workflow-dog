@@ -39,9 +39,10 @@ export default {
                     minRows={1}
                     maxRows={12}
                     size="sm" variant="bordered"
-                    className="nodrag my-unit-sm bg-white"
+                    className="nodrag my-unit-sm"
                     classNames={{
-                        input: "text-tiny min-w-[13ch] max-w-[28ch] w-[calc(var(--chars)*1ch+1rem)]"
+                        input: "text-tiny min-w-[13ch] max-w-[28ch] w-[calc(var(--chars)*1ch+1rem)]",
+                        inputWrapper: "bg-white",
                     }}
                     style={{
                         "--chars": textLength,

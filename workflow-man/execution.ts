@@ -45,7 +45,7 @@ type Workflow = {
     }
 }
 
-type WorkflowRun = {
+export type WorkflowRun = {
     id: string
     status: "pending" | "running" | "completed" | "failed" | "scheduled" | "canceled"
     state: RunState

@@ -1,6 +1,7 @@
 import express from "express"
 import morgan from "morgan"
 import { client, updateRun } from "./db.js"
+import type { WorkflowRun } from "./execution.js"
 import { runWorkflow } from "./execution.js"
 
 
@@ -67,6 +68,25 @@ app.post("/workflow-runs/:runId/execute", async (req, res) => {
 
     res.sendStatus(201)
 })
+
+
+if (process.env.NODE_ENV === "development") {
+    app.all("/test/run/:workflowId", async (req, res) => {
+        const { data: workflow } = await client
+            .from("workflows")
+            .select("*")
+            .eq("id", req.params.workflowId)
+            .single()
+            .throwOnError()
+
+        const runState = await runWorkflow({
+            trigger_data: req.body || {},
+        } as WorkflowRun, workflow)
+
+        console.log(runState)
+        res.send(runState)
+    })
+}
 
 
 /* -------------------------------------------------------------------------- */

@@ -12,7 +12,7 @@ Web:
         ✘ Catch errors for things like invalid triggers, invalid worklow IDs, etc. @cancelled (2/13/2024, 4:33:54 AM)
         ✔ Catch errors @done (2/7/2024, 5:51:40 PM)
         ✔ Do named outputs @done (2/7/2024, 2:24:33 AM)
-        ☐ Add modifiers support to execution engine
+        ✔ Add modifiers support to execution engine @done (2/18/2024, 2:37:13 PM)
         ✔ Make execution honor disabled nodes @done (2/15/2024, 6:26:06 PM)
         ✘ Add info messages to nodes @cancelled (2/18/2024, 10:09:53 AM)
 
@@ -20,6 +20,7 @@ Web:
         ✔ Set up run manually panel @done (2/13/2024, 9:38:41 PM)
         ☐ Make JSON builder component
         ✔ Make manual runner subscribe @done (2/14/2024, 12:59:33 AM)
+
     Run viewer: 
         ✔ Design run viewer panel @done (2/13/2024, 9:38:44 PM)
         ☐ Design object/json viewer
@@ -34,6 +35,7 @@ Web:
         ✔ Make run viewer load previous version of run if it's not the most recent @done (2/15/2024, 5:34:25 PM)
         ✔ Make a spot for workflow errors @done (2/15/2024, 5:34:28 PM)
         ☐ Make dates consider scheduled time and add status icon
+
     Triggers:
         ✔ Combine URL and webhook triggers @done (2/14/2024, 11:34:06 AM)
         ☐ Add gmail trigger endpoint/infra
@@ -58,3 +60,5 @@ Web:
         ✔ Expand object @done (2/15/2024, 10:34:56 PM)
         ✔ Compose object @done (2/15/2024, 10:40:22 PM)
         ✔ Fix compose object node @done (2/18/2024, 10:13:16 AM)
+        ☐ Web scraping
+        ☐ Pass through

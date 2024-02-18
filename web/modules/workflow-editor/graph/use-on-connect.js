@@ -29,11 +29,8 @@ export function useOnConnect() {
             const node = rf.getNode(nodeId)
             const [prefix, restOfId] = handleId.split(":")
 
-            if (prefix === PREFIX.MODIFIER_INPUT)
-                return modifierDefs[node.data.modifier.type].inputs[restOfId].type
-
-            if (prefix === PREFIX.MODIFIER_OUTPUT)
-                return modifierDefs[node.data.modifier.type].outputs[restOfId].type
+            if (prefix === PREFIX.CONTROL_INPUT || prefix === PREFIX.CONTROL_OUTPUT)
+                return modifierDefs[restOfId].type
 
             if (prefix === PREFIX.INPUT)
                 return nodeDefs[node.data.definition].inputs[node.data.inputs.find(i => i.id === handleId).definition].type

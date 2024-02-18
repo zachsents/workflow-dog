@@ -1,55 +1,45 @@
-import { Button, Tooltip } from "@nextui-org/react"
-import { useModifier } from "@web/modules/workflow-editor/graph/nodes"
-import { object as modDefs } from "@web/modules/workflow-editor/modifiers"
-import { TbX } from "react-icons/tb"
+import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
+import { list as modList } from "@web/modules/workflow-editor/modifiers"
+import { useMemo } from "react"
+import { PREFIX } from "shared/prefixes"
 import Group from "../../layout/Group"
 import ActionNodeHandle from "./ActionNodeHandle"
-import { PREFIX } from "shared/prefixes"
 
 
 export default function NodeModifierWrapper({ children }) {
 
-    const [modifier, , clearModifier] = useModifier()
-    const modDef = modDefs[modifier?.type]
+    const [modifiers] = useNodeProperty(undefined, "data.controlModifiers")
+    const hasAnyModifiers = useMemo(() => Object.values(modifiers || {}).some(Boolean), [modifiers])
 
-    return modifier ?
+    const controlInputs = useMemo(() => modList.filter(mod => mod.handleType === "input" && modifiers?.[mod.id]), [modifiers])
+    const controlOutputs = useMemo(() => modList.filter(mod => mod.handleType === "output" && modifiers?.[mod.id]), [modifiers])
+
+    return hasAnyModifiers ?
         <div className="px-3 pb-3 pt-1 rounded-lg bg-gray-200 bg-opacity-50 border-dashed border-1">
+            <p className="text-default-500 text-xs py-1">
+                Control Modifiers
+            </p>
             <Group className="justify-between mb-unit-xs !items-stretch">
-                <div className="flex flex-col items-start justify-between">
-                    <p className="text-default-500 text-xs py-1">
-                        {modDef.name}
-                    </p>
-                    <div className="-mx-5 flex flex-col gap-1">
-                        {Object.entries(modDef.inputs ?? {}).map(([id, input]) =>
-                            <ActionNodeHandle
-                                id={`${PREFIX.MODIFIER_INPUT}:${id}`}
-                                type="target"
-                                definition={input}
-                                key={id}
-                            />
-                        )}
-                    </div>
+                <div className="-mx-5 flex flex-col items-start gap-1">
+                    {controlInputs.map(control =>
+                        <ActionNodeHandle
+                            id={`${PREFIX.CONTROL_INPUT}:${control.id}`}
+                            type="target"
+                            definition={control}
+                            key={control.id}
+                        />
+                    )}
                 </div>
-                <div className="flex flex-col items-end justify-between">
-                    <Tooltip content="Remove Modifier" closeDelay={0}>
-                        <Button
-                            isIconOnly size="sm" variant="light" onPress={clearModifier}
-                            className="-mr-2"
-                        >
-                            <TbX />
-                        </Button>
-                    </Tooltip>
 
-                    <div className="-mx-5 flex flex-col gap-1">
-                        {Object.entries(modDef.outputs ?? {}).map(([id, output]) =>
-                            <ActionNodeHandle
-                                id={`${PREFIX.MODIFIER_OUTPUT}:${id}`}
-                                type="source"
-                                definition={output}
-                                key={id}
-                            />
-                        )}
-                    </div>
+                <div className="-mx-5 flex flex-col items-end gap-1">
+                    {controlOutputs.map(control =>
+                        <ActionNodeHandle
+                            id={`${PREFIX.CONTROL_OUTPUT}:${control.id}`}
+                            type="source"
+                            definition={control}
+                            key={control.id}
+                        />
+                    )}
                 </div>
             </Group>
 

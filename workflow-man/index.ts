@@ -83,7 +83,7 @@ if (process.env.NODE_ENV === "development") {
             trigger_data: req.body || {},
         } as WorkflowRun, workflow)
 
-        console.log(runState)
+        // console.log(runState)
         res.send(runState)
     })
 }

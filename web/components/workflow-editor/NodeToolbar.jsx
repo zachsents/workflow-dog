@@ -1,19 +1,17 @@
-// import { useCopyElementsToClipboard, useDuplicateElements } from "@web/modules/graph/duplicate"
-// import { useSelectConnectedEdges, useSelectIncomers, useSelectOutgoers, useSelection } from "@web/modules/graph/selection"
 import { Button, Card, Divider, Kbd, Select, SelectItem, Tooltip } from "@nextui-org/react"
 import { useHotkey } from "@web/modules/util"
 import { duplicateElements } from "@web/modules/workflow-editor/graph/duplicate"
-import { useModifier } from "@web/modules/workflow-editor/graph/nodes"
 import { getSelectedEdges, getSelectedNodes, selectConnectedEdges, selectIncomers, selectOutgoers, useSelectedEdges, useSelectedNodes } from "@web/modules/workflow-editor/graph/selection"
-import { list as modifiersList } from "@web/modules/workflow-editor/modifiers"
+import { useEditorStore } from "@web/modules/workflow-editor/store"
 import classNames from "classnames"
 import { produce } from "immer"
 import _ from "lodash"
 import { useMemo } from "react"
-import { TbArrowLeftSquare, TbArrowRightSquare, TbChartDots3, TbClipboard, TbConfetti, TbConfettiOff, TbCopy, TbTrash } from "react-icons/tb"
+import { TbActivity, TbArrowLeftSquare, TbArrowRightSquare, TbArrowsSplit2, TbChartDots3, TbClipboard, TbClock, TbConfetti, TbConfettiOff, TbCopy, TbTrash } from "react-icons/tb"
 import { getNodesBounds, useReactFlow, useStore, useViewport } from "reactflow"
 import Group from "../layout/Group"
-import { useEditorStore } from "@web/modules/workflow-editor/store"
+import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
+import { list as modList, object as modDefs } from "@web/modules/workflow-editor/modifiers"
 
 
 export default function NodeToolbar() {
@@ -97,8 +95,9 @@ export default function NodeToolbar() {
 
                     <Divider orientation="vertical" className="h-[30px] mx-2 first:hidden last:hidden" />
 
-                    {isSingleNode &&
-                        <ModifierSelector />}
+                    {isSingleNode && modList.map(modType =>
+                        <ModifierButton {...modType} key={modType.id} />
+                    )}
                 </Group>
             </Card>
         </div>
@@ -243,55 +242,36 @@ function DeleteControl() {
 }
 
 
-function ModifierSelector() {
+function ModifierButton({ id, icon: Icon, name }) {
 
     const selectedNodeId = useStore(s => s.getNodes().find(n => n.selected)?.id)
-    const [modifier, setModifier, clearModifier] = useModifier(selectedNodeId)
-
-    const selectedKeys = useMemo(() => new Set(modifier?.type ? [modifier.type] : []), [modifier?.type])
-
-    const onSelect = selected => {
-        if (selected.size === 0)
-            clearModifier()
-        else
-            setModifier(selected.values().next().value)
-    }
+    const [enabled, setEnabled] = useNodeProperty(selectedNodeId, `data.controlModifiers.${id}`)
 
     return (
-        <Select
-            size="sm"
-            label={modifier ? "Modifier" : "No modifier"}
-            selectedKeys={selectedKeys}
-            onSelectionChange={onSelect}
-            items={modifiersList}
-            classNames={{
-                base: "min-w-[12rem] self-stretch",
-                mainWrapper: "h-full",
-                trigger: "min-h-0 h-full py-0.5 bg-transparent shadow-none",
+        <ToolbarButton
+            label={`${enabled ? "Remove" : "Add"} modifier: ${name}`}
+            icon={Icon}
+            onPress={() => setEnabled(!enabled)}
+            buttonProps={{
+                // variant: enabled ? "bordered" : "light",
+                color: enabled ? "primary" : "default",
             }}
-        >
-            {modType =>
-                <SelectItem
-                    startContent={<modType.icon />}
-                    key={modType.id}
-                >
-                    {modType.name}
-                </SelectItem>}
-        </Select>
+        />
     )
 }
 
 
-function ToolbarButton({ label, shortcutKey, shortcutModifiers = ["command"], icon: Icon, onPress }) {
+function ToolbarButton({ label, shortcutKey, shortcutModifiers = ["command"], icon: Icon, onPress, buttonProps = {} }) {
 
     return (
         <Tooltip closeDelay={0} content={<Group className="gap-unit-sm">
             <span>{label}</span>
-            <Kbd keys={shortcutModifiers}>{shortcutKey}</Kbd>
+            {shortcutKey && <Kbd keys={shortcutModifiers}>{shortcutKey}</Kbd>}
         </Group>}>
             <Button
                 isIconOnly variant="light"
                 onPress={onPress}
+                {...buttonProps}
             >
                 <Icon className="text-[1.25em]" />
             </Button>

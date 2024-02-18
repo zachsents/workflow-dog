@@ -7,6 +7,7 @@ export default {
             name: "Properties",
             type: null,
             group: true,
+            named: true,
         },
     },
     outputs: {

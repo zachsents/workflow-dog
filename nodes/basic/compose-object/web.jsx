@@ -8,7 +8,6 @@ export default {
     inputs: {
         properties: {
             description: "The properties to compose into the data object.",
-            named: true,
         }
     },
     outputs: {

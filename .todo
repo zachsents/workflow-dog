@@ -14,7 +14,7 @@ Web:
         ✔ Do named outputs @done (2/7/2024, 2:24:33 AM)
         ☐ Add modifiers support to execution engine
         ✔ Make execution honor disabled nodes @done (2/15/2024, 6:26:06 PM)
-        ☐ Add info messages to nodes
+        ✘ Add info messages to nodes @cancelled (2/18/2024, 10:09:53 AM)
 
     Running:
         ✔ Set up run manually panel @done (2/13/2024, 9:38:41 PM)
@@ -57,3 +57,4 @@ Web:
         ✔ JSON parse @done (2/15/2024, 10:34:52 PM)
         ✔ Expand object @done (2/15/2024, 10:34:56 PM)
         ✔ Compose object @done (2/15/2024, 10:40:22 PM)
+        ✔ Fix compose object node @done (2/18/2024, 10:13:16 AM)

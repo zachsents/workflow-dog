@@ -13,7 +13,6 @@ export default {
     outputs: {
         properties: {
             description: "The properties from the data.",
-            named: true,
         }
     },
 }

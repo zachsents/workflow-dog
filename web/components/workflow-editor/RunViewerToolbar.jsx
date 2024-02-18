@@ -1,7 +1,6 @@
-import { Button, Card, Chip, Divider, Slider, Spinner } from "@nextui-org/react"
+import { Button, Card, Divider, Spinner } from "@nextui-org/react"
 import { useEditorStoreState } from "@web/modules/workflow-editor/store"
 import { useRunWorkflowMutation, useSelectedWorkflowRun } from "@web/modules/workflows"
-import classNames from "classnames"
 import { TbRotateClockwise2, TbX } from "react-icons/tb"
 import StatusIcon from "./StatusIcon"
 
@@ -9,7 +8,6 @@ import StatusIcon from "./StatusIcon"
 export default function RunViewerToolbar() {
 
     const [selectedRunId, setSelectedRunId] = useEditorStoreState("selectedRunId")
-    const isRunSelected = !!selectedRunId
 
     const { data: run, isLoading } = useSelectedWorkflowRun()
 
@@ -20,9 +18,7 @@ export default function RunViewerToolbar() {
     const rerun = () => runMutation.mutate({ copyTriggerDataFrom: selectedRunId })
 
     return (
-        <Card className={classNames("p-unit-xs transition-opacity flex flex-col items-stretch gap-unit-xs",
-            isRunSelected ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        )}>
+        <Card className="p-unit-xs transition-opacity flex flex-col items-stretch gap-unit-xs pointer-events-auto">
             {isLoading ?
                 <Spinner size="sm" className="self-center" /> :
                 <>

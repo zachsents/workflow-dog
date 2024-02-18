@@ -32,7 +32,7 @@ export default function ContextMenu() {
         close()
     }
 
-    const { value: pinned } = useLocalStorageValue("pinnedNodes")
+    // const { value: pinned } = useLocalStorageValue("pinnedNodes")
 
     const popoverKey = useMemo(() => stringHash(position), [position])
 
@@ -64,9 +64,12 @@ export default function ContextMenu() {
             >
                 <div className="flex flex-col items-stretch gap-unit-xs w-50 relative">
                     <Group className="justify-center absolute bottom-full left-1/2 mb-8 -translate-x-1/2 w-60 gap-2">
-                        {pinned?.filter(id => id in nodeDefs).map((id, i) =>
+                        <PinnedNode id="node-type:basic.text" onAdd={addNode} />
+                        <PinnedNode id="node-type:basic.number" onAdd={addNode} />
+                        <PinnedNode id="node-type:text.template" onAdd={addNode} />
+                        {/* {pinned?.filter(id => id in nodeDefs).map((id, i) =>
                             <PinnedNode id={id} onAdd={addNode} key={i} />
-                        )}
+                        )} */}
                     </Group>
                     <Input
                         value={query} onValueChange={setQuery}
@@ -95,7 +98,7 @@ function PinnedNode({ id, onAdd }) {
 
     const definition = nodeDefs[id]
     const [unpinning, setUnpinning] = useState(false)
-    const toggleUnpinning = () => setUnpinning(!unpinning)
+    // const toggleUnpinning = () => setUnpinning(!unpinning)
 
     const [, setPinnedNodes] = useLocalStorage({
         key: "pinnedNodes",
@@ -112,10 +115,10 @@ function PinnedNode({ id, onAdd }) {
                     else
                         onAdd?.(definition)
                 }}
-                onContextMenu={ev => {
-                    ev.preventDefault()
-                    toggleUnpinning()
-                }}
+            // onContextMenu={ev => {
+            //     ev.preventDefault()
+            //     toggleUnpinning()
+            // }}
             >
                 {unpinning ?
                     <TbPinnedOff /> :

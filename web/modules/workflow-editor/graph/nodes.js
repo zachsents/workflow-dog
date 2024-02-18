@@ -301,8 +301,17 @@ export function useDisabled(nodeId) {
  * @param {"json" | "css"} [mode="json"]
  */
 export function useNodeColors(nodeId, mode = "json") {
-
     const definition = useDefinition(nodeId)
+    return useNodeDefinitionColors(definition?.id, mode)
+}
+
+
+/**
+ * @param {string} definitionId
+ * @param {"json" | "css"} [mode="json"]
+ */
+export function useNodeDefinitionColors(definitionId, mode="json") {
+    const definition = nodeDefs[definitionId]
 
     const baseColor = definition?.color || colors.gray[500]
     const darkColor = useMemo(() => Color(baseColor).lightness(definition.darkShade ?? 20).hex(), [baseColor, definition.darkShade])

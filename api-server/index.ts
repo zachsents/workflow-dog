@@ -349,7 +349,7 @@ app.post("/workflows/:workflowId/run", async (req, res) => {
             }
         }),
     })
-        .then(res => res.json())
+        .then(checkForErrorThenJson)
         .then(res => res.error ? Promise.reject(res.error) : res)
 
     if (!("subscribe" in req.query)) {
@@ -417,20 +417,20 @@ app.all("/workflows/:workflowId/trigger/request", async (req, res) => {
                 params: req.query,
             },
         })
-    }).then(res => res.json())
+    }).then(checkForErrorThenJson)
 
-    if (waitUntilFinished) {
-        const { status, headers, body } = response.state?.workflowOutputs ?? {}
-
-        Object.entries(headers ?? {}).forEach(([key, value]) => {
-            res.setHeader(key, value as string)
-        })
-
-        res.status(status ?? 200).send(body ?? "")
+    if (!waitUntilFinished) {
+        res.sendStatus(204)
         return
     }
 
-    res.sendStatus(204)
+    const { status, headers, body } = response.state?.workflowOutputs ?? {}
+
+    Object.entries(headers ?? {}).forEach(([key, value]) => {
+        res.setHeader(key, value as string)
+    })
+
+    res.status(status ?? 200).send(body ?? "")
 })
 
 
@@ -440,7 +440,7 @@ app.all("/workflows/:workflowId/trigger/request", async (req, res) => {
 /* -------------------------------------------------------------------------- */
 
 app.listen(port, () => {
-    console.log("Integration server running on port", port, `(${process.env.NODE_ENV})`)
+    console.log("API server running on port", port, `(${process.env.NODE_ENV})`)
 })
 
 

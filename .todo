@@ -5,7 +5,6 @@ Web:
         ✔ Add support for API keys @done (2/6/2024, 9:15:21 PM)
         ☐ Make nonexistent accounts be unselected
 
-
     Execution:
         ✔ Set up workflowman that receives workflow runs from the queue and executes them @done (2/7/2024, 6:56:51 PM)
         ✔ Set up taskqueue that points to workflow-man @done (2/12/2024, 12:00:53 AM)
@@ -17,37 +16,38 @@ Web:
         ✔ Make execution honor disabled nodes @done (2/15/2024, 6:26:06 PM)
         ☐ Add info messages to nodes
 
-        Running:
-            ✔ Set up run manually panel @done (2/13/2024, 9:38:41 PM)
-            ☐ Make JSON builder component
-            ✔ Make manual runner subscribe @done (2/14/2024, 12:59:33 AM)
-        Run viewer: 
-            ✔ Design run viewer panel @done (2/13/2024, 9:38:44 PM)
-            ☐ Design object/json viewer
-            ✘ Port old run viewer to new frontend @cancelled (2/13/2024, 9:38:51 PM)
-            ✔ Add most recent run to run viewer UI @done (2/15/2024, 6:55:25 PM)
-            ✔ Set up zustand store @done (2/13/2024, 11:45:56 PM)
-            ✔ Add re-run button @done (2/14/2024, 2:20:49 AM)
-            ✔ Add run duration @done (2/14/2024, 1:08:45 AM)
-            ✔ Add scroll shadow @done (2/14/2024, 1:08:50 AM)
-            ✔ Add error tooltips @done (2/14/2024, 2:40:07 AM)
-            ✔ Make run list realtime @done (2/14/2024, 11:16:37 AM)
-            ✔ Make run viewer load previous version of run if it's not the most recent @done (2/15/2024, 5:34:25 PM)
-            ✔ Make a spot for workflow errors @done (2/15/2024, 5:34:28 PM)
-            ☐ Make dates consider scheduled time and add status icon
-        Triggers:
-            ✔ Combine URL and webhook triggers @done (2/14/2024, 11:34:06 AM)
-            ☐ Add gmail trigger endpoint/infra
-            ☐ Catch errors for invalid triggers
-            ☐ Add configuration for triggers
+    Running:
+        ✔ Set up run manually panel @done (2/13/2024, 9:38:41 PM)
+        ☐ Make JSON builder component
+        ✔ Make manual runner subscribe @done (2/14/2024, 12:59:33 AM)
+    Run viewer: 
+        ✔ Design run viewer panel @done (2/13/2024, 9:38:44 PM)
+        ☐ Design object/json viewer
+        ✘ Port old run viewer to new frontend @cancelled (2/13/2024, 9:38:51 PM)
+        ✔ Add most recent run to run viewer UI @done (2/15/2024, 6:55:25 PM)
+        ✔ Set up zustand store @done (2/13/2024, 11:45:56 PM)
+        ✔ Add re-run button @done (2/14/2024, 2:20:49 AM)
+        ✔ Add run duration @done (2/14/2024, 1:08:45 AM)
+        ✔ Add scroll shadow @done (2/14/2024, 1:08:50 AM)
+        ✔ Add error tooltips @done (2/14/2024, 2:40:07 AM)
+        ✔ Make run list realtime @done (2/14/2024, 11:16:37 AM)
+        ✔ Make run viewer load previous version of run if it's not the most recent @done (2/15/2024, 5:34:25 PM)
+        ✔ Make a spot for workflow errors @done (2/15/2024, 5:34:28 PM)
+        ☐ Make dates consider scheduled time and add status icon
+    Triggers:
+        ✔ Combine URL and webhook triggers @done (2/14/2024, 11:34:06 AM)
+        ☐ Add gmail trigger endpoint/infra
+        ☐ Catch errors for invalid triggers
+        ☐ Add configuration for triggers
 
-    ✔ Make nonexistent trigger inputs be unselected @done (2/13/2024, 4:34:53 AM)
-    ☐ Add interface for searching and adding nodes
-    ✔ Make text nodes autosize @done (2/15/2024, 9:40:41 PM)
-    ✔ minify number nodes @done (2/15/2024, 9:58:57 PM)
-    ☐ Add renaming + adding for group handles
-    ✔ Set up homepage redirect @done (2/15/2024, 4:48:46 PM)
-    ☐ Add node comments
+    Misc:
+        ✔ Make nonexistent trigger inputs be unselected @done (2/13/2024, 4:34:53 AM)
+        ☐ Add interface for searching and adding nodes
+        ✔ Make text nodes autosize @done (2/15/2024, 9:40:41 PM)
+        ✔ minify number nodes @done (2/15/2024, 9:58:57 PM)
+        ☐ Add renaming + adding for group handles
+        ✔ Set up homepage redirect @done (2/15/2024, 4:48:46 PM)
+        ☐ Add node comments
 
     Nodes:
         ✔ JSON stringify @done (2/15/2024, 10:43:34 PM)

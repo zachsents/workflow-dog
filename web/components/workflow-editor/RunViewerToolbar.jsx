@@ -39,7 +39,10 @@ export default function RunViewerToolbar() {
                     <Divider className="first:hidden" />
 
                     <div className="flex items-center justify-between gap-unit-xl">
-                        <p className="text-xs text-default-500">
+                        <p
+                            className="text-xs text-default-500"
+                            onDoubleClick={() => window.navigator.clipboard.writeText(run?.id)}
+                        >
                             Currently Viewing Run #{run?.count}
                         </p>
                         <div className="flex gap-unit-xs">

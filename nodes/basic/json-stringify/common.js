@@ -1,6 +1,6 @@
 
 export default {
-    name: "Covner to JSON Text",
+    name: "Convert to JSON Text",
     description: "Converts a data object into JSON text.",
     inputs: {
         object: {

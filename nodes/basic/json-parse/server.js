@@ -6,7 +6,7 @@ export default {
             }
         }
         catch(err){
-            console.debug(err)
+            // console.debug(err)
             throw new Error("Invalid JSON text.")
         }
     },

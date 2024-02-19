@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 
 
 const _uniqueId = customAlphabet(alphanumeric, 10)
-export const uniqueId = (prefix = "") => `${prefix}:${_uniqueId()}`
+export const uniqueId = (prefix = "") => `${prefix}${prefix ? ":" : ""}${_uniqueId()}`
 
 
 /**

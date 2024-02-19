@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "paths": {
+            "@api/*": [
+                "./*"
+            ]
+        },
+        "target": "ESNext",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true
+    }
+}

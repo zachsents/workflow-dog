@@ -4,7 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build": "bun build ./index.ts --outdir ./build --target bun && cp .env ./build/.env && cp service-account.json ./build/service-account.json"
+        "build-routes": "bun ./build-routes.ts",
+        "build": "bun run build-routes && bun build ./index.ts --outdir ./build --target bun && cp .env ./build/.env && cp service-account.json ./build/service-account.json"
     },
     "keywords": [],
     "author": "",

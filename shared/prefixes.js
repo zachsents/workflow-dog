@@ -15,4 +15,5 @@ export const PREFIX = {
     DATA_TYPE: "data-type",
     CONTROL_INPUT: "control-input",
     CONTROL_OUTPUT: "control-output",
+    SCHEDULE_INTERVAL: "schedule-interval",
 }

@@ -41,7 +41,7 @@ export default {
                             pre: "text-ellipsis line-clamp-1",
                         }}
                     >
-                        {`https://api-e45frdiv4a-uc.a.run.app/workflows/${workflowId}/trigger/request`}
+                        {`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflowId}/trigger/request`}
                     </Snippet>
                 </div>
 

@@ -62,7 +62,7 @@ function ConfigureTrigger({ openModal }) {
                     </Group>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[20rem] p-unit-md flex flex-col items-stretch gap-unit-xs pointer-events-auto">
+            <PopoverContent className="w-[24rem] p-unit-md flex flex-col items-stretch gap-unit-xs pointer-events-auto">
                 <p className="font-bold text-large">
                     Configure Trigger
                 </p>

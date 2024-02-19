@@ -29,12 +29,15 @@ export default function EditorToolbar() {
         <Card className="p-unit-xs transition-opacity flex flex-row items-stretch flex-nowrap gap-unit-xs pointer-events-auto">
             {fixedNodes.map(nodeDefId => {
                 const definition = nodeDefs[nodeDefId]
-                return <Tooltip closeDelay={0} content={`Add "${definition.name}"`}>
+                return <Tooltip
+                    closeDelay={0}
+                    content={`Add "${definition.name}"`}
+                    key={nodeDefId}
+                >
                     <Button
                         isIconOnly variant="bordered"
                         className="h-auto p-0 shrink-0 min-w-0 max-w-none w-12"
                         onPress={() => addNode(nodeDefId)}
-                        key={nodeDefId}
                     >
                         <definition.icon />
                     </Button>

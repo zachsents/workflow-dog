@@ -195,12 +195,16 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
         // check for delay control modifier
         if (node.data.controlModifiers?.delay) {
-            const delayValue = parseFloat(getEdgeOutputValue(getAttachedEdge("control-input:delay")))
+            const attachedEdge = getAttachedEdge("control-input:delay")
 
-            if (delayValue < 0 || delayValue > 5000)
-                throw new Error("Delay must be between 0 and 5000")
+            if (attachedEdge) {
+                const delayValue = parseFloat(getEdgeOutputValue(attachedEdge))
 
-            await new Promise(resolve => setTimeout(resolve, delayValue))
+                if (delayValue < 0 || delayValue > 5000)
+                    throw new Error("Delay must be between 0 and 5000")
+
+                await new Promise(resolve => setTimeout(resolve, delayValue))
+            }
         }
 
         await runNode(node, inputValues)

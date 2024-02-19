@@ -18,12 +18,11 @@ Web:
 
     Running:
         ✔ Set up run manually panel @done (2/13/2024, 9:38:41 PM)
-        ☐ Make JSON builder component
         ✔ Make manual runner subscribe @done (2/14/2024, 12:59:33 AM)
+        ☐ Make JSON builder component
 
     Run viewer: 
         ✔ Design run viewer panel @done (2/13/2024, 9:38:44 PM)
-        ☐ Design object/json viewer
         ✘ Port old run viewer to new frontend @cancelled (2/13/2024, 9:38:51 PM)
         ✔ Add most recent run to run viewer UI @done (2/15/2024, 6:55:25 PM)
         ✔ Set up zustand store @done (2/13/2024, 11:45:56 PM)
@@ -34,12 +33,13 @@ Web:
         ✔ Make run list realtime @done (2/14/2024, 11:16:37 AM)
         ✔ Make run viewer load previous version of run if it's not the most recent @done (2/15/2024, 5:34:25 PM)
         ✔ Make a spot for workflow errors @done (2/15/2024, 5:34:28 PM)
+        ☐ Design object/json viewer
         ☐ Make dates consider scheduled time and add status icon
 
     Triggers:
         ✔ Combine URL and webhook triggers @done (2/14/2024, 11:34:06 AM)
         ☐ Add gmail trigger endpoint/infra
-        ☐ Catch errors for invalid triggers
+        ✘ Catch errors for invalid triggers @cancelled (2/18/2024, 7:18:56 PM)
         ☐ Add configuration for triggers
 
     Misc:
@@ -53,8 +53,10 @@ Web:
         ☐ Looping groups
         ✔ Add custom domain to cloud run containers @done (2/18/2024, 10:19:52 AM)
         ☐ Re-add node pinning
-        ☐ @today Graph saving bug
+        ☐ Graph saving bug
         ✔ Investigate duplicate input ID bug @done (2/18/2024, 4:34:26 PM)
+        ☐ Investigate text node bug error from screenshot
+        ☐ Type labels on edges
 
     Nodes:
         ✔ JSON stringify @done (2/15/2024, 10:43:34 PM)
@@ -64,3 +66,6 @@ Web:
         ✔ Fix compose object node @done (2/18/2024, 10:13:16 AM)
         ☐ Web scraping
         ☐ Pass through
+        ☐ Logical operators
+        ☐ Switch
+        ☐ Math operators

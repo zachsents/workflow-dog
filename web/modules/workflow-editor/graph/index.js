@@ -48,7 +48,7 @@ export function useGraphSaving() {
 
         console.debug("Saving graph...", convertedGraph)
         updateGraph.mutateAsync().then(() => console.log("Graph saved"))
-    }, [convertedGraphStr], 500)
+    }, [convertedGraphStr], 1000)
 }
 
 

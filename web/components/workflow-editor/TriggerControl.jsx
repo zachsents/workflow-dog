@@ -68,7 +68,7 @@ function ConfigureTrigger({ openModal }) {
                 </p>
 
                 {triggerDef?.renderConfig ?
-                    <triggerDef.renderConfig workflowId={workflow?.id} workflow={workflow} /> :
+                    <triggerDef.renderConfig workflowId={workflow?.id} workflow={workflow} onClose={popoverDisclosure.onClose} /> :
                     <p className="text-sm text-default-500 text-center">
                         No configuration needed.
                     </p>}

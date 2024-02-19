@@ -52,11 +52,13 @@ export function useForm({ initial = {}, validate = {} } = {}) {
             defaultValue = "",
             valueKey = "value",
             eventKey = "onValueChange",
+            transformValue = value => value,
+            transformEvent = event => event,
         } = {}) => ({
             name: key,
-            [valueKey]: values[key] ?? defaultValue,
+            [valueKey]: transformValue(values[key] ?? defaultValue),
             [eventKey]: newValue => {
-                setValue(key, newValue)
+                setValue(key, transformEvent(newValue))
                 setTouched(key)
             },
             required,

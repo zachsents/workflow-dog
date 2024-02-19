@@ -1,8 +1,8 @@
 import { Checkbox, Snippet } from "@nextui-org/react"
-import { useDatabaseMutation } from "@web/modules/db"
-import _ from "lodash"
+import { useApiMutation } from "@web/modules/api"
 import { TbLink } from "react-icons/tb"
 import colors from "tailwindcss/colors"
+import { useState, useEffect } from "react"
 
 
 export default {
@@ -10,19 +10,25 @@ export default {
     color: colors.gray[800],
     renderConfig: ({ workflowId, workflow }) => {
 
-        const updateWaitUntilFinished = useDatabaseMutation(
-            (supa, value) => supa.from("workflows").update({
-                trigger: _.merge({}, workflow?.trigger, {
-                    config: {
-                        waitUntilFinished: value,
-                    }
-                })
-            }).eq("id", workflowId),
-            {
-                enabled: !!workflowId,
-                invalidateKey: ["workflow", workflowId],
-            }
-        )
+        const [waitUntilFinished, setWaitUntilFinished] = useState(workflow?.trigger?.config?.waitUntilFinished || false)
+
+        const updateTriggerConfig = useApiMutation(`workflows/${workflowId}/update/triggerConfig`, {
+            invalidateQueries: ["workflow", workflowId],
+        })
+
+        useEffect(() => {
+            if (updateTriggerConfig.isPending || workflow?.trigger?.config?.waitUntilFinished === waitUntilFinished)
+                return
+
+            const debugMessage = `Saving waitUntilFinished trigger setting: ${waitUntilFinished}`
+            console.time(debugMessage)
+
+            updateTriggerConfig.mutateAsync({
+                waitUntilFinished,
+            }).then(() => {
+                console.timeEnd(debugMessage)
+            })
+        }, [waitUntilFinished])
 
         return (
             <div className="flex flex-col items-stretch gap-unit-lg mt-unit-md">
@@ -51,9 +57,9 @@ export default {
                     </p>
                     <Checkbox
                         size="sm"
-                        isSelected={workflow?.trigger?.config?.waitUntilFinished}
-                        onValueChange={updateWaitUntilFinished.mutate}
-                        isDisabled={updateWaitUntilFinished.isPending}
+                        isSelected={waitUntilFinished}
+                        onValueChange={setWaitUntilFinished}
+                    // isDisabled={updateTriggerConfig.isPending}
                     >
                         Wait until the workflow finishes running
                     </Checkbox>

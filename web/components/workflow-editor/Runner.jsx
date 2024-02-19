@@ -44,7 +44,7 @@ function RunnerForm({ onClose }) {
 
     const form = useForm({
         initial: Object.fromEntries(
-            Object.entries(triggerDef.inputs).map(([inputId, inputDef]) =>
+            Object.entries(triggerDef.inputs || {}).map(([inputId, inputDef]) =>
                 [inputId, inputDef.type === "data-type:basic.date" ? new Date().toISOString() : ""]
             )
         ),

@@ -42,6 +42,7 @@ Web:
         ✘ Catch errors for invalid triggers @cancelled (2/18/2024, 7:18:56 PM)
         ☐ Add configuration for triggers
         ☐ Change URL trigger to always return JSON
+        ☐ Allow custom values in trigger data node
 
     Misc:
         ✔ Make nonexistent trigger inputs be unselected @done (2/13/2024, 4:34:53 AM)
@@ -56,8 +57,9 @@ Web:
         ☐ Re-add node pinning
         ☐ Graph saving bug
         ✔ Investigate duplicate input ID bug @done (2/18/2024, 4:34:26 PM)
-        ☐ Investigate text node bug error from screenshot
+        ✔ Investigate text node bug error from screenshot @done (2/19/2024, 3:21:47 PM)
         ☐ Type labels on edges
+        ☐ Make workflow fetching realtime
 
     Dev Ops:
         ✔ Check .env templates into git @done (2/19/2024, 9:25:09 AM)

@@ -1,8 +1,22 @@
 import { createClient } from "@supabase/supabase-js"
 import { getSecret } from "./secrets.js"
+import { Request } from "express"
 
 
 export const client = createClient(process.env.SUPABASE_URL, await getSecret("SUPABASE_SERVICE_KEY"))
+
+
+export async function getAuthenticatedClient(req: Request) {
+    const anonKey = await getSecret("SUPABASE_ANON_KEY")
+    return createClient(process.env.SUPABASE_URL, anonKey, {
+        global: {
+            headers: {
+                apikey: anonKey,
+                authorization: req.headers.authorization,
+            }
+        }
+    })
+}
 
 
 export async function upsertIntegrationAccount(accountData: any) {

@@ -121,9 +121,13 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
                                 <p className="text-xs text-default-500 text-center">
                                     Output From Selected Run
                                 </p>
-                                <p className="line-clamp-4">
-                                    {typeof runValue === "string" ? runValue : <pre>{util.inspect(runValue)}</pre>}
-                                </p>
+                                {typeof runValue === "string" ?
+                                    <p className="line-clamp-4">
+                                        {runValue}
+                                    </p> :
+                                    <pre>
+                                        {util.inspect(runValue)}
+                                    </pre>}
                                 {runValueNeedsExpansion &&
                                     <p className="text-xs text-default-500 text-center">
                                         Click to view full data

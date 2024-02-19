@@ -48,8 +48,8 @@ function fileNameToModulePath(fileName: string) {
 }
 
 function fileNameToRoute(fileName: string) {
-    return fileName
+    return `/${fileName
         .replaceAll(/\\/g, "/")
         .replace(/\.(?:ts|js)$/, "")
-        .replace(/\/index$/, "")
+        .replace(/\/index$/, "")}`
 }

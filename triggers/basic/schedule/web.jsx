@@ -8,6 +8,7 @@ import { useEffect, useState } from "react"
 import { TbCheck, TbClock, TbPlus, TbX } from "react-icons/tb"
 import { PREFIX } from "shared/prefixes"
 import colors from "tailwindcss/colors"
+import _ from "lodash"
 
 
 export default {
@@ -26,7 +27,7 @@ export default {
             console.time(debugMessage)
 
             updateTriggerConfig.mutateAsync({
-                intervals,
+                intervals: intervals.map(cleanInterval),
             }).then(() => {
                 onClose?.()
                 console.timeEnd(debugMessage)
@@ -48,6 +49,9 @@ export default {
                 draft.find(interval => interval.id == id).value = value
             }))
         }
+
+        const timezoneOffset = parseInt(new Date().getTimezoneOffset() / 60)
+        const timezoneSymbol = timezoneOffset > 0 ? "+" : "-"
 
         return (
             <div className="flex flex-col items-stretch gap-unit-lg mt-unit-md">
@@ -78,6 +82,14 @@ export default {
                         </div>
                     ))}
 
+                    <p className="text-xs text-default-500">
+                        Schedule times are in UTC. For you, it's currently {new Date().toLocaleString(undefined, {
+                            timeZone: "UTC",
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                        })} ({timezoneSymbol}{Math.abs(timezoneOffset)} hours).
+                    </p>
+
                     <div className="flex items-center gap-unit-xs justify-between">
                         <Button
                             size="sm" startContent={<TbPlus />}
@@ -105,14 +117,14 @@ export default {
 function Interval({ initial, onChange, className }) {
 
     const form = useForm({
-        initial: initial || {
+        initial: {
             quantity: 1,
             unit: "minute",
             offsetMinutes: 0,
-            offsetHours: 0,
             offsetDays: 1,
-            offsetWeekday: "monday",
+            offsetWeekday: "mon",
             offsetTime: "09:00",
+            ...initial,
         },
     })
 
@@ -126,12 +138,13 @@ function Interval({ initial, onChange, className }) {
                 <span>
                     Every
                 </span>
-                <NumberInput
-                    className="w-20"
-                    {...form.inputProps("quantity", {
-                        required: true,
-                    })}
-                />
+                {form.values.unit !== "week" &&
+                    <NumberInput
+                        className="w-20"
+                        {...form.inputProps("quantity", {
+                            required: true,
+                        })}
+                    />}
                 <Select
                     disallowEmptySelection
                     size="sm" placeholder="minute, hour, etc."
@@ -150,7 +163,7 @@ function Interval({ initial, onChange, className }) {
                 >
                     {interval =>
                         <SelectItem key={interval.id} value={interval.id}>
-                            {`${interval.id}(s)`}
+                            {interval.label}
                         </SelectItem>}
                 </Select>
             </FlexRow>
@@ -194,21 +207,21 @@ function Interval({ initial, onChange, className }) {
 
 
 const units = [
-    { id: "minute" },
-    { id: "hour" },
-    { id: "day" },
-    { id: "week" },
-    { id: "month" },
+    { id: "minute", label: "minute(s)" },
+    { id: "hour", label: "hour(s)" },
+    { id: "day", label: "day(s)" },
+    { id: "week", label: "week" },
+    { id: "month", label: "month(s)" },
 ]
 
 const weekdays = [
-    { id: "sunday", name: "Sunday" },
-    { id: "monday", name: "Monday" },
-    { id: "tuesday", name: "Tuesday" },
-    { id: "wednesday", name: "Wednesday" },
-    { id: "thursday", name: "Thursday" },
-    { id: "friday", name: "Friday" },
-    { id: "saturday", name: "Saturday" },
+    { id: "sun", name: "Sunday" },
+    { id: "mon", name: "Monday" },
+    { id: "tue", name: "Tuesday" },
+    { id: "wed", name: "Wednesday" },
+    { id: "thu", name: "Thursday" },
+    { id: "fri", name: "Friday" },
+    { id: "sat", name: "Saturday" },
 ]
 
 
@@ -337,4 +350,18 @@ function getSuffix(n) {
         return "rd"
 
     return "th"
+}
+
+
+function cleanInterval(interval) {
+    return {
+        id: interval.id,
+        value: _.pick(interval.value, {
+            minute: ["quantity", "unit"],
+            hour: ["quantity", "unit", "offsetMinutes"],
+            day: ["quantity", "unit", "offsetTime"],
+            week: ["unit", "offsetWeekday", "offsetTime"],
+            month: ["quantity", "unit", "offsetDays", "offsetTime"],
+        }[interval.value.unit]),
+    }
 }

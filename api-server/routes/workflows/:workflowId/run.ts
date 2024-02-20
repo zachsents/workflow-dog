@@ -1,6 +1,5 @@
 import { client } from "@api/db.js"
-import { getAccessToken, projectId } from "@api/secrets.js"
-import { checkForErrorThenJson } from "@api/util.js"
+import { fetchGoogleApi } from "@api/google.js"
 import { Request, Response } from "express"
 
 
@@ -41,31 +40,25 @@ export async function post(req: Request, res: Response) {
         .single()
         .throwOnError()
 
-    const taskParent = `projects/${projectId}/locations/us-central1/queues/workflow-runs/tasks`
-
-    await fetch(`https://cloudtasks.googleapis.com/v2beta3/${taskParent}`, {
+    await fetchGoogleApi({
+        api: "cloudtasks",
+        version: "v2beta3",
+        resourcePath: "queues/workflow-runs/tasks",
         method: "post",
-        headers: {
-            Authorization: `Bearer ${await getAccessToken()}`,
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            task: {
-                name: `${taskParent}/${newRunId}`,
-                httpRequest: {
-                    url: `${process.env.WORKFLOW_MAN_URL}/workflow-runs/${newRunId}/execute`,
-                },
-                ...req.body.scheduledFor && {
-                    scheduleTime: {
-                        seconds: Math.floor(new Date(req.body.scheduledFor).getTime() / 1000),
-                        nanos: 0,
-                    }
+    }, ({ fullResourcePath }) => ({
+        task: {
+            name: `${fullResourcePath}/${newRunId}`,
+            httpRequest: {
+                url: `${process.env.WORKFLOW_MAN_URL}/workflow-runs/${newRunId}/execute`,
+            },
+            ...req.body.scheduledFor && {
+                scheduleTime: {
+                    seconds: Math.floor(new Date(req.body.scheduledFor).getTime() / 1000),
+                    nanos: 0,
                 }
             }
-        }),
-    })
-        .then(checkForErrorThenJson)
-        .then(res => res.error ? Promise.reject(res.error) : res)
+        }
+    }))
 
     if (!("subscribe" in req.query)) {
         res.status(201).send({ id: newRunId })

@@ -1,4 +1,4 @@
-import { Button, Tooltip } from "@nextui-org/react"
+import { Button, ScrollShadow, Tooltip } from "@nextui-org/react"
 import { useCreateActionNode, useDefinition } from "@web/modules/workflow-editor/graph/nodes"
 import { useSelectedWorkflowRun } from "@web/modules/workflows"
 import classNames from "classnames"
@@ -121,17 +121,19 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
                                 <p className="text-xs text-default-500 text-center">
                                     Output From Selected Run
                                 </p>
-                                {typeof runValue === "string" ?
-                                    <p className="line-clamp-4">
-                                        {runValue}
-                                    </p> :
-                                    <pre>
-                                        {util.inspect(runValue)}
-                                    </pre>}
-                                {runValueNeedsExpansion &&
+                                <ScrollShadow isEnabled={false} className="max-w-full max-h-[30rem]">
+                                    {typeof runValue === "string" ?
+                                        <p className="line-clamp-4">
+                                            {runValue}
+                                        </p> :
+                                        <pre>
+                                            {util.inspect(runValue)}
+                                        </pre>}
+                                </ScrollShadow>
+                                {/* {runValueNeedsExpansion &&
                                     <p className="text-xs text-default-500 text-center">
                                         Click to view full data
-                                    </p>}
+                                    </p>} */}
                             </div>
                         }>
                             <Button

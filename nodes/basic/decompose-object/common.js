@@ -1,6 +1,6 @@
 
 export default {
-    name: "Decompose Object",
+    name: "Unpack Object",
     description: "Decomposes an object into its properties.",
     inputs: {
         object: {

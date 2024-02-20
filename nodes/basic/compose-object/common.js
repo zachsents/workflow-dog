@@ -1,6 +1,6 @@
 
 export default {
-    name: "Compose Object",
+    name: "Pack Object",
     description: "Decomposes an object into its properties.",
     inputs: {
         properties: {

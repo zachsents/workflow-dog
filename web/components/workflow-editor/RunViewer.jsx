@@ -1,8 +1,8 @@
-import { Button, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, useDisclosure } from "@nextui-org/react"
+import { Button, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, useDisclosure } from "@nextui-org/react"
 import { useControlledSelectedKeys } from "@web/modules/util"
 import { useEditorStoreState } from "@web/modules/workflow-editor/store"
 import { useRunWorkflowMutation, useWorkflowRun, useWorkflowRunsRealtime } from "@web/modules/workflows"
-import { TbClockPlay, TbRotateClockwise2, TbRun, TbX } from "react-icons/tb"
+import { TbClockPlay, TbRotateClockwise2, TbX } from "react-icons/tb"
 import StatusIcon from "./StatusIcon"
 
 

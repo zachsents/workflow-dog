@@ -4,12 +4,12 @@ export default {
     description: "Subtracts the second input from the first.",
     inputs: {
         minuend: {
-            name: "a",
+            name: "A",
             type: "data-type:basic.number",
             description: "The number from which another number is to be subtracted.",
         },
         subtrahend: {
-            name: "b",
+            name: "B",
             type: "data-type:basic.number",
             description: "The number that is to be subtracted from the other number.",
         },

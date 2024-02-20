@@ -1,4 +1,4 @@
-
+// basic/nodes/text/common.js
 export default {
     name: "Text",
     description: "A simple text node",

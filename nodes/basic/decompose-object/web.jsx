@@ -2,6 +2,7 @@ import { TbArrowsSplit } from "react-icons/tb"
 import colors from "tailwindcss/colors"
 
 export default {
+    name: "Extract Values",
     icon: TbArrowsSplit,
     color: colors.gray[800],
     tags: ["Basic"],

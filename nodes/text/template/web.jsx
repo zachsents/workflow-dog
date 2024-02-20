@@ -1,9 +1,8 @@
-import { } from "@web/modules/workflow-editor/graph/nodes"
+// text/template/web.jsx
 import { TbReplace } from "react-icons/tb"
 import colors from "tailwindcss/colors"
 
 export default {
-    name: "Fill Text Template",
     icon: TbReplace,
     color: colors.gray[800],
     tags: ["Text"],

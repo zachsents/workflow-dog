@@ -1,7 +1,6 @@
-
-
+// text/template/common.js
 export default {
-    name: "Dynamic Text",
+    name: "Fill Text Template",
     description: "Dynamically creates text using a template.",
 
     inputs: {

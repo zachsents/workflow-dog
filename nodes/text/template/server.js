@@ -1,3 +1,4 @@
+// text/template/server.js
 export default {
     action: ({ template, substitution }) => {
 

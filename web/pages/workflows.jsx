@@ -136,8 +136,8 @@ function WorkflowCard({ id, highlightParts }) {
             <Group className="gap-unit-sm justify-between">
                 <Group className="gap-unit-sm">
                     <WorkflowStatusChip workflowId={id} />
-                    <Chip color="warning">2 config problems</Chip>
-                    <Chip color="danger">4 run errors</Chip>
+                    {/* <Chip color="warning">2 config problems</Chip>
+                    <Chip color="danger">4 run errors</Chip> */}
                 </Group>
 
                 <Dropdown placement="bottom-end">

@@ -11,7 +11,7 @@ const imports = []
 const routes = []
 
 for await (const file of glob.scan(ROUTES_DIR)) {
-    if(path.basename(file).startsWith("_"))
+    if (path.basename(file).startsWith("_"))
         continue
 
     const modulePath = fileNameToModulePath(file)

@@ -9,7 +9,7 @@ export async function fetchGoogleApi({
     location = "us-central1",
     resourcePath,
     verb,
-    method = "get",
+    method = "GET",
     params,
 }: GoogleFetchOptions = {} as GoogleFetchOptions, body?: object | GoogleFetchBodyCreator) {
 
@@ -62,8 +62,8 @@ type GoogleFetchOptions = {
     /** Do not include leading `:` */
     verb?: string
 
-    /** Defaults to `get` */
-    method?: "get" | "post" | "patch" | "delete"
+    /** Defaults to `GET` */
+    method?: "GET" | "POST" | "PATCH" | "DELETE" | "PUT"
 
     params?: Record<string, string>
 }

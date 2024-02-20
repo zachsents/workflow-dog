@@ -40,7 +40,7 @@ Web:
         ✔ Combine URL and webhook triggers @done (2/14/2024, 11:34:06 AM)
         ☐ Add gmail trigger endpoint/infra
         ✘ Catch errors for invalid triggers @cancelled (2/18/2024, 7:18:56 PM)
-        ☐ Add configuration for triggers
+        ✔ Add configuration for triggers @done (2/20/2024, 12:22:00 AM)
         ☐ Change URL trigger to always return JSON
         ☐ Allow custom values in trigger data node
 

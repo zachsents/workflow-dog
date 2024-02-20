@@ -16,7 +16,8 @@ export default {
     color: colors.gray[800],
     renderConfig: ({ workflow, workflowId, onClose }) => {
 
-        const updateTriggerConfig = useApiMutation(`workflows/${workflowId}/update/triggerConfig`, {
+        const updateTriggerConfig = useApiMutation(`workflows/${workflowId}/trigger`, {
+            method: "PATCH",
             invalidateQueries: ["workflow", workflowId],
         })
 
@@ -27,7 +28,9 @@ export default {
             console.time(debugMessage)
 
             updateTriggerConfig.mutateAsync({
-                intervals: intervals.map(cleanInterval),
+                config: {
+                    intervals: intervals.map(cleanInterval),
+                }
             }).then(() => {
                 onClose?.()
                 console.timeEnd(debugMessage)

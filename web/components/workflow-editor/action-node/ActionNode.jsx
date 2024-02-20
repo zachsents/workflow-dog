@@ -311,7 +311,7 @@ function APIKeyModal({ isOpen, onClose }) {
 
     const addApiKey = useMutation({
         mutationFn: async values => fetch(`${process.env.NEXT_PUBLIC_API_URL}/apikeys/connect/${serviceName}`, {
-            method: "post",
+            method: "POST",
             headers: {
                 Authorization: `Bearer ${await supabase.auth.getSession().then(session => session.data.session.access_token)}`,
                 "Content-Type": "application/json",

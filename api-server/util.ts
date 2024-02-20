@@ -1,3 +1,4 @@
+import mergeWith from "lodash.mergewith"
 
 
 export const defaultAccountConfig = {
@@ -49,4 +50,12 @@ export async function fetchProfile(profileUrl: string, accessToken: string) {
             Authorization: `Bearer ${accessToken}`,
         },
     }).then(checkForErrorThenJson)
+}
+
+
+export function mergeObjectsOverwriteArrays(a: any, b: any) {
+    return mergeWith({}, a, b, (objValue, srcValue) => {
+        if (Array.isArray(objValue) && Array.isArray(srcValue))
+            return srcValue
+    })
 }

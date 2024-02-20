@@ -25,7 +25,7 @@ export async function all(req: Request, res: Response) {
     }
 
     const response = await fetch(url.toString(), {
-        method: "post",
+        method: "POST",
         headers: {
             "Content-Type": "application/json",
         },

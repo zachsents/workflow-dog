@@ -1,5 +1,5 @@
 import { Button, Input, Listbox, ListboxItem, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Popover, PopoverContent, PopoverTrigger, ScrollShadow, Spinner, useDisclosure } from "@nextui-org/react"
-import { useDatabaseMutation } from "@web/modules/db"
+import { useApiMutation } from "@web/modules/api"
 import { plural } from "@web/modules/grammar"
 import { useSearch } from "@web/modules/search"
 import { useWorkflow, useWorkflowIdFromUrl } from "@web/modules/workflows"
@@ -93,15 +93,14 @@ function SetTriggerModal({ onClose, ...props }) {
 
     const workflowId = useWorkflowIdFromUrl()
 
-    const setTrigger = useDatabaseMutation(
-        (supa, triggerId) => supa.from("workflows").update({ trigger: { type: triggerId } })
-            .eq("id", workflowId),
-        {
-            enabled: !!workflowId,
-            invalidateKey: ["workflow", workflowId],
+    const setTriggerMutation = useApiMutation(`workflows/${workflowId}/trigger`, {
+        method: "PUT",
+        invalidateQueries: ["workflow", workflowId],
+        mutationOptions: {
             onSuccess: onClose,
-        }
-    )
+        },
+    })
+    const setTrigger = type => setTriggerMutation.mutate({ type })
 
     const [filteredTriggers, query, setQuery] = useSearch(triggers, {
         selector: trigger => trigger.name,
@@ -129,7 +128,7 @@ function SetTriggerModal({ onClose, ...props }) {
                                 <ScrollShadow className="h-[20rem]">
                                     <Listbox
                                         items={filteredTriggers || []}
-                                        onAction={triggerId => setTrigger.mutate(triggerId)}
+                                        onAction={setTrigger}
                                     >
                                         {trigger =>
                                             <ListboxItem key={trigger.id}>
@@ -145,7 +144,7 @@ function SetTriggerModal({ onClose, ...props }) {
                                 <TriggerCard
                                     withWrapper
                                     trigger={resolveTrigger("basic", "manual")}
-                                    onClick={() => setTrigger.mutate(resolveTriggerId("basic", "manual"))}
+                                    onClick={() => setTrigger(resolveTriggerId("basic", "manual"))}
                                 />
                                 {/* <TriggerCard
                                     withWrapper
@@ -161,7 +160,9 @@ function SetTriggerModal({ onClose, ...props }) {
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        {setTrigger.isPending && <Spinner size="sm" />}
+                        {setTriggerMutation.isPending &&
+                            <Spinner size="sm" />}
+
                         <Button variant="light" onPress={onClose}>
                             Cancel
                         </Button>

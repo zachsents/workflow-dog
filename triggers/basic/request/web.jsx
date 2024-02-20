@@ -12,7 +12,8 @@ export default {
 
         const [waitUntilFinished, setWaitUntilFinished] = useState(workflow?.trigger?.config?.waitUntilFinished || false)
 
-        const updateTriggerConfig = useApiMutation(`workflows/${workflowId}/update/triggerConfig`, {
+        const updateTriggerConfig = useApiMutation(`workflows/${workflowId}/trigger`, {
+            method: "PATCH",
             invalidateQueries: ["workflow", workflowId],
         })
 
@@ -24,7 +25,9 @@ export default {
             console.time(debugMessage)
 
             updateTriggerConfig.mutateAsync({
-                waitUntilFinished,
+                config: {
+                    waitUntilFinished
+                },
             }).then(() => {
                 console.timeEnd(debugMessage)
             })

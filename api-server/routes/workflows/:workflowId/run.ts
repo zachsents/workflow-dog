@@ -44,7 +44,7 @@ export async function post(req: Request, res: Response) {
         api: "cloudtasks",
         version: "v2beta3",
         resourcePath: "queues/workflow-runs/tasks",
-        method: "post",
+        method: "POST",
     }, ({ fullResourcePath }) => ({
         task: {
             name: `${fullResourcePath}/${newRunId}`,

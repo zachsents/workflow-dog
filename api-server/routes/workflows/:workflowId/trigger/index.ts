@@ -1,24 +1,68 @@
 import { getAuthenticatedClient } from "@api/db.js"
 import { fetchGoogleApi } from "@api/google.js"
+import { mergeObjectsOverwriteArrays } from "@api/util.js"
 import { Request, Response } from "express"
 import isEqual from "lodash.isequal"
+import { z } from "zod"
 
 
-export async function post(req: Request, res: Response) {
+export async function put(req: Request, res: Response) {
+    const validation = z.object({
+        type: z.string().startsWith("trigger:"),
+        config: z.record(z.any()).optional(),
+    }).safeParse(req.body)
+
+    if (!validation.success) {
+        res.status(400).send({ error: (validation as any).error })
+        return
+    }
+
     const client = await getAuthenticatedClient(req)
 
-    const { data: { trigger } } = await client.from("workflows")
+    const { data: { trigger: oldTrigger } } = await client.from("workflows")
+        .select("trigger")
+        .eq("id", req.params.workflowId)
+        .single()
+        .throwOnError()
+
+    const newTrigger = validation.data
+
+    await client.from("workflows")
+        .update({ trigger: newTrigger })
+        .eq("id", req.params.workflowId)
+        .throwOnError()
+
+    await Promise.all([
+        handleTriggerChange(req.params.workflowId, oldTrigger, null),
+        handleTriggerChange(req.params.workflowId, null, newTrigger),
+    ])
+
+    res.sendStatus(204)
+}
+
+
+export async function patch(req: Request, res: Response) {
+
+    const validation = z.object({
+        config: z.record(z.any()),
+    }).safeParse(req.body)
+
+    if (!validation.success) {
+        res.status(400).send({ error: (validation as any).error })
+        return
+    }
+
+    const client = await getAuthenticatedClient(req)
+
+    const { data: { trigger: oldTrigger } } = await client.from("workflows")
         .select("trigger")
         .eq("id", req.params.workflowId)
         .single()
         .throwOnError()
 
     const newTrigger = {
-        ...trigger,
-        config: {
-            ...trigger.config,
-            ...req.body,
-        }
+        ...oldTrigger,
+        config: mergeObjectsOverwriteArrays(oldTrigger.config, validation.data.config),
     }
 
     await client.from("workflows")
@@ -26,22 +70,28 @@ export async function post(req: Request, res: Response) {
         .eq("id", req.params.workflowId)
         .throwOnError()
 
-    console.debug(`Updated fields (${Object.keys(req.body)}) in trigger config for workflow (${req.params.workflowId})`)
+    console.debug(`Updated fields (${Object.keys(validation.data)}) in trigger config for workflow (${req.params.workflowId})`)
 
-    switch (trigger.type) {
-        case "trigger:basic.schedule":
-            await handleScheduleChange(req.params.workflowId, trigger, newTrigger)
-            break
-    }
+    await handleTriggerChange(req.params.workflowId, oldTrigger, newTrigger)
 
     res.sendStatus(204)
 }
 
 
+async function handleTriggerChange(workflowId: string, oldTrigger: any, newTrigger: any) {
+    const type = newTrigger?.type || oldTrigger?.type
+    switch (type) {
+        case "trigger:basic.schedule":
+            await handleScheduleChange(workflowId, oldTrigger, newTrigger)
+            break
+    }
+}
+
+
 async function handleScheduleChange(workflowId: string, oldTrigger: ScheduleTrigger, newTrigger: ScheduleTrigger) {
 
-    const oldJobMap = Object.fromEntries(oldTrigger.config.intervals.map(interval => [interval.id, interval]))
-    const newJobMap = Object.fromEntries(newTrigger.config.intervals.map(interval => [interval.id, interval]))
+    const oldJobMap = Object.fromEntries(oldTrigger?.config?.intervals?.map(interval => [interval.id, interval]) ?? [])
+    const newJobMap = Object.fromEntries(newTrigger?.config?.intervals?.map(interval => [interval.id, interval]) ?? [])
 
     const oldJobIds = Object.keys(oldJobMap)
     const newJobIds = Object.keys(newJobMap)
@@ -54,14 +104,14 @@ async function handleScheduleChange(workflowId: string, oldTrigger: ScheduleTrig
         api: "cloudscheduler",
         version: "v1beta1",
         resourcePath: `jobs/${safeId(id)}`,
-        method: "delete",
+        method: "DELETE",
     }))
 
     const addPromises = jobsToAdd.map(async id => fetchGoogleApi({
         api: "cloudscheduler",
         version: "v1beta1",
         resourcePath: `jobs`,
-        method: "post",
+        method: "POST",
     }, ({ fullResourcePath }) => ({
         name: `${fullResourcePath}/${safeId(id)}`,
         description: `Workflow: (${workflowId}), Schedule Interval: (${id})`,
@@ -82,7 +132,7 @@ async function handleScheduleChange(workflowId: string, oldTrigger: ScheduleTrig
         api: "cloudscheduler",
         version: "v1beta1",
         resourcePath: `jobs/${safeId(id)}`,
-        method: "patch",
+        method: "PATCH",
         params: { updateMask: "schedule" },
     }, {
         schedule: intervalToCron(newJobMap[id].value),

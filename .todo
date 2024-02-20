@@ -15,6 +15,7 @@ Web:
         ✔ Add modifiers support to execution engine @done (2/18/2024, 2:37:13 PM)
         ✔ Make execution honor disabled nodes @done (2/15/2024, 6:26:06 PM)
         ✘ Add info messages to nodes @cancelled (2/18/2024, 10:09:53 AM)
+        ☐ Check security of how i'm passing integration tokens to the execution engine
 
     Running UI:
         ✔ Set up run manually panel @done (2/13/2024, 9:38:41 PM)

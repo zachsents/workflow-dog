@@ -1,5 +1,5 @@
 import { addAccountToTeam, client, isUserEditorForTeam } from "@api/db.js"
-import { defaultAccountConfig, fetchProfile } from "@api/util.js"
+import { defaultOAuth2AccountConfig, fetchProfile } from "@api/util.js"
 import { Request, Response } from "express"
 import { resolve as resolveIntegration } from "integrations/server.js"
 import merge from "lodash.merge"
@@ -14,7 +14,7 @@ export async function post(req: Request, res: Response) {
     if (!baseConfig)
         return res.status(404).send("Service not found")
 
-    const config = merge({}, defaultAccountConfig, baseConfig)
+    const config = merge({}, defaultOAuth2AccountConfig, baseConfig)
 
     const token = req.header("authorization")?.split("Bearer ")[1]
     if (!token)

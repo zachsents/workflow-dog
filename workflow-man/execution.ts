@@ -1,4 +1,5 @@
 import { object as nodeDefinitions } from "nodes/server.js"
+import { fetchIntegrationToken } from "./db.js"
 
 
 type Node = {
@@ -24,6 +25,7 @@ type Node = {
             finished?: boolean
             error?: boolean
         }
+        integrationAccount?: string
     }
 }
 
@@ -79,11 +81,20 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
         const definition = nodeDefinitions[node.data.definition]
         runState.outputs[node.id] ??= {}
 
-        const normalizedOutputs = {}
+        const token = node.data.integrationAccount ?
+            await fetchIntegrationToken(node.data.integrationAccount) :
+            undefined
 
         const callAction = async () => {
-            return definition.action(inputValues, { node, triggerData, runState })
+            return definition.action(inputValues, {
+                node,
+                triggerData,
+                runState,
+                token,
+            })
         }
+
+        const normalizedOutputs = {}
 
         const actionOutputs = await callAction()
             .then((outputs: any) => {

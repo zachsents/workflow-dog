@@ -1,7 +1,7 @@
 import mergeWith from "lodash.mergewith"
 
 
-export const defaultAccountConfig = {
+export const defaultOAuth2AccountConfig = {
     scopeDelimiter: " ",
     state: false,
     scopes: [],

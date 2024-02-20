@@ -1,5 +1,6 @@
+import { client } from "@api/db.js"
 import { getSecret } from "@api/secrets.js"
-import { checkForErrorThenJson, defaultAccountConfig, fetchProfile, replaceExpiresIn } from "@api/util.js"
+import { checkForErrorThenJson, defaultOAuth2AccountConfig, fetchProfile, replaceExpiresIn } from "@api/util.js"
 import { createClient } from "@supabase/supabase-js"
 import { Request, Response } from "express"
 import { resolve as resolveIntegration } from "integrations/server.js"
@@ -8,10 +9,43 @@ import merge from "lodash.merge"
 
 export async function get(req: Request, res: Response) {
 
-    const apiKey = req.headers.authorization?.split("Bearer ")[1] || ""
-    const client = createClient(process.env.SUPABASE_URL, apiKey)
+    const { data: { service_name } } = await client.from("integration_accounts")
+        .select("service_name")
+        .eq("id", req.params.accountId)
+        .single()
+        .throwOnError()
 
-    const { data: { refresh_token, raw_token, service_name } } = await client.from("integration_accounts")
+    const { authType } = resolveIntegration(service_name) ?? {}
+
+    if (authType === "oauth2")
+        return getTokenForOAuth2(req, res)
+    if (authType === "apikey")
+        return getTokenForApiKey(req, res)
+    else
+        return res.status(500).send("Unsupported auth type")
+}
+
+
+async function getTokenForApiKey(req: Request, res: Response) {
+    const bearerKey = req.headers.authorization?.split("Bearer ")[1] || ""
+    const requesterClient = createClient(process.env.SUPABASE_URL, bearerKey)
+
+    const { data: { access_token } } = await requesterClient.from("integration_accounts")
+        .select("access_token")
+        .eq("id", req.params.accountId)
+        .single()
+        .throwOnError()
+
+    res.send({ access_token })
+}
+
+
+async function getTokenForOAuth2(req: Request, res: Response) {
+
+    const bearerKey = req.headers.authorization?.split("Bearer ")[1] || ""
+    const requesterClient = createClient(process.env.SUPABASE_URL, bearerKey)
+
+    const { data: { refresh_token, raw_token, service_name } } = await requesterClient.from("integration_accounts")
         .select("refresh_token, raw_token, service_name")
         .eq("id", req.params.accountId)
         .single()
@@ -28,7 +62,7 @@ export async function get(req: Request, res: Response) {
         return res.status(400).send("No refresh token available. You might need to revoke access to WorkflowDog through the service's settings and then try connecting again.")
 
     const baseConfig = resolveIntegration(service_name)?.oauth2
-    const config = merge({}, defaultAccountConfig, baseConfig)
+    const config = merge({}, defaultOAuth2AccountConfig, baseConfig)
 
     const [clientId, clientSecret] = await Promise.all([
         getSecret(`INTEGRATION_${service_name.toUpperCase()}_CLIENT_ID`),
@@ -54,7 +88,7 @@ export async function get(req: Request, res: Response) {
         const newToken = replaceExpiresIn(refreshResponse) as any
         const profile = await fetchProfile(config.profileUrl, newToken.access_token as string)
 
-        await client.from("integration_accounts")
+        await requesterClient.from("integration_accounts")
             .update({
                 raw_token: merge({}, raw_token, newToken),
                 access_token: newToken.access_token,

@@ -1,5 +1,5 @@
 import { getSecret } from "@api/secrets.js"
-import { CustomSessionData, defaultAccountConfig, redirectUri } from "@api/util.js"
+import { CustomSessionData, defaultOAuth2AccountConfig, redirectUri } from "@api/util.js"
 import type { Request, Response } from "express"
 import { resolve as resolveIntegration } from "integrations/server.js"
 import merge from "lodash.merge"
@@ -23,7 +23,7 @@ export async function get(req: Request, res: Response) {
     const session = req.session as CustomSessionData
     session.team_id = req.query.t as string
 
-    const config = merge({}, defaultAccountConfig, baseConfig)
+    const config = merge({}, defaultOAuth2AccountConfig, baseConfig)
 
     const clientId = await getSecret(`INTEGRATION_${req.params.serviceName.toUpperCase()}_CLIENT_ID`)
 

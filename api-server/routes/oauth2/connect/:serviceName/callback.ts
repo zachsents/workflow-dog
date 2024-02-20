@@ -1,6 +1,6 @@
 import { addAccountToTeam, upsertIntegrationAccount } from "@api/db.js"
 import { getSecret } from "@api/secrets.js"
-import { CustomSessionData, checkForErrorThenJson, defaultAccountConfig, fetchProfile, redirectUri, replaceExpiresIn } from "@api/util.js"
+import { CustomSessionData, checkForErrorThenJson, defaultOAuth2AccountConfig, fetchProfile, redirectUri, replaceExpiresIn } from "@api/util.js"
 import { Request, Response } from "express"
 import { resolve as resolveIntegration } from "integrations/server.js"
 import merge from "lodash.merge"
@@ -26,7 +26,7 @@ export async function get(req: Request, res: Response) {
     if (!baseConfig)
         return res.status(404).send("Service not found")
 
-    const config = merge({}, defaultAccountConfig, baseConfig)
+    const config = merge({}, defaultOAuth2AccountConfig, baseConfig)
 
     if (config.state && !(session.state && req.query.state && session.state === req.query.state))
         return res.status(400).send("Invalid state")

@@ -9,6 +9,11 @@ export const defaultOAuth2AccountConfig = {
     includeRedirectUriInTokenRequest: true,
 }
 
+export const defaultApiKeyAccountConfig = {
+    generateAuthHeader: (key: string) => `Bearer ${key}`,
+    getDisplayName: (profile: any, { access_token }) => `${access_token.slice(0, 8)}... (${profile.email})`,
+}
+
 export function redirectUri(host: string, serviceName: string) {
     return `${host.includes("localhost") ? "http" : "https"}://${host}/oauth2/connect/${serviceName}/callback`
 }

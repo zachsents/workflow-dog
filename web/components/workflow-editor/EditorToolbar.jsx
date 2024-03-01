@@ -9,11 +9,12 @@ import { TbMapSearch, TbSearch } from "react-icons/tb"
 export default function EditorToolbar() {
 
     const modal = useDisclosure()
-    const searchRef = useRef()
+    const modalSearchRef = useRef()
+    const toolbarSearchRef = useRef()
 
-    useHotkey("/", () => searchRef.current?.focus(), {
+    useHotkey("/", () => toolbarSearchRef.current?.focus(), {
         preventDefault: true,
-        callbackDependencies: [searchRef],
+        callbackDependencies: [toolbarSearchRef],
         preventInInputs: true,
     })
 
@@ -22,7 +23,9 @@ export default function EditorToolbar() {
         createNode({
             definition: defId,
         })
-        searchRef.current?.blur()
+        toolbarSearchRef.current?.blur()
+        if (modal.isOpen)
+            modal.onClose()
     }
 
     return (<>
@@ -52,8 +55,10 @@ export default function EditorToolbar() {
                 isClearable
                 endContent={<Kbd className="group-data-[focus=true]:opacity-0 transition-opacity">/</Kbd>}
                 onKeyDown={ev => {
-                    if (ev.key === "/")
+                    if (ev.key === "/") {
                         ev.preventDefault()
+                        modal.onOpen()
+                    }
                 }}
                 scrollShadowProps={{
                     isEnabled: false
@@ -61,7 +66,10 @@ export default function EditorToolbar() {
                 selectedKey={null}
                 onSelectionChange={addNode}
                 className="group"
-                ref={searchRef}
+                classNames={{
+                    listboxWrapper: "max-h-[calc(100vh-30rem)] min-h-[10rem]"
+                }}
+                ref={toolbarSearchRef}
             >
                 {nodeDef =>
                     <AutocompleteItem
@@ -96,6 +104,7 @@ export default function EditorToolbar() {
                     <ModalBody>
                         <Input
                             size="sm" placeholder="Search for tasks (actions, nodes, etc.)"
+                            ref={modalSearchRef}
                         />
                     </ModalBody>
                 </>}

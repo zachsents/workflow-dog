@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build-routes": "bun ./build-routes.ts",
-    "build": "bun run build-routes && bun build ./index.ts --outdir ./build --target bun && cp .env ./build/.env && cp service-account.json ./build/service-account.json"
+    "build": "bun build ./index.ts --outdir ./build --target bun && cp .env ./build/.env && cp service-account.json ./build/service-account.json"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +17,8 @@
     "express": "^4.18.2",
     "google-auth-library": "^9.6.0",
     "integrations": "workspace:*",
+    "packages": "workspace:*",
+    "shared": "workspace:*",
     "lodash.isequal": "^4.5.0",
     "lodash.merge": "^4.6.2",
     "lodash.mergewith": "^4.6.2",
@@ -27,6 +29,7 @@
   "type": "module",
   "devDependencies": {
     "@types/cookie-session": "^2.0.48",
+    "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/lodash.isequal": "^4.5.8",
     "@types/lodash.merge": "^4.6.9",

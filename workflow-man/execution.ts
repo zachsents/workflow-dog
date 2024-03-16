@@ -1,65 +1,6 @@
-import { object as nodeDefinitions } from "nodes/server.js"
+import { NodeDefinitions } from "packages/server.js"
+import type { Node, Workflow, WorkflowRun, WorkflowRunState } from "shared/types.js"
 import { fetchIntegrationToken } from "./db.js"
-
-
-type Node = {
-    id: string
-    data: {
-        definition: string
-        state: Record<string, any>
-        inputs: {
-            id: string
-            definition: string
-            name?: string
-        }[]
-        outputs: {
-            id: string
-            definition: string
-            name?: string
-        }[]
-        disabled: boolean
-        controlModifiers?: {
-            conditional?: boolean
-            waitFor?: boolean
-            delay?: boolean
-            finished?: boolean
-            error?: boolean
-        }
-        integrationAccount?: string
-    }
-}
-
-type RunState = {
-    outputs?: {
-        [nodeId: string]: {
-            [outputId: string]: any
-        }
-    },
-    errors?: {
-        [nodeId: string]: string
-    }
-}
-
-type Workflow = {
-    id: string
-    graph: {
-        nodes: Node[]
-        edges: {
-            id: string
-            source: string
-            sourceHandle: string
-            target: string
-            targetHandle: string
-        }[]
-    }
-}
-
-export type WorkflowRun = {
-    id: string
-    status: "pending" | "running" | "completed" | "failed" | "scheduled" | "canceled"
-    state: RunState
-    trigger_data: Record<string, any>
-}
 
 
 export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
@@ -68,7 +9,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
     const { nodes, edges } = workflow.graph
 
-    const runState: RunState = { errors: {}, outputs: {} }
+    const runState: WorkflowRunState = { errors: {}, outputs: {} }
 
     const startingNodes = nodes.filter(node =>
         edges.every(edge => edge.target !== node.id)
@@ -78,7 +19,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
         console.debug("Running node", node.id, `(${node.data.definition})`)
 
-        const definition = nodeDefinitions[node.data.definition]
+        const definition = NodeDefinitions.asMap.get(node.data.definition)
         runState.outputs[node.id] ??= {}
 
         const token = node.data.integrationAccount ?
@@ -185,7 +126,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
             if (!attachedEdge)
                 return acc
 
-            const definition = nodeDefinitions[node.data.definition].inputs[input.definition]
+            const definition = NodeDefinitions.asMap.get(node.data.definition).inputs[input.definition]
             const value = getEdgeOutputValue(attachedEdge)
 
             if (!definition.group) {

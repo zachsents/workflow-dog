@@ -1,7 +1,7 @@
 import { Autocomplete, AutocompleteItem, Button, Card, Input, Kbd, Modal, ModalBody, ModalContent, ModalHeader, Tooltip, useDisclosure } from "@nextui-org/react"
 import { useHotkey } from "@web/modules/util"
 import { useCreateActionNode } from "@web/modules/workflow-editor/graph/nodes"
-import { list as nodesList, object as nodeDefs } from "nodes/web"
+import { NodeDefinitions } from "packages/web"
 import { useRef } from "react"
 import { TbMapSearch, TbSearch } from "react-icons/tb"
 
@@ -31,27 +31,29 @@ export default function EditorToolbar() {
     return (<>
         <Card className="p-unit-xs transition-opacity flex flex-row items-stretch flex-nowrap gap-unit-xs pointer-events-auto">
             {fixedNodes.map(nodeDefId => {
-                const definition = nodeDefs[nodeDefId]
-                return <Tooltip
-                    closeDelay={0}
-                    content={`Add "${definition.name}"`}
-                    key={nodeDefId}
-                >
-                    <Button
-                        isIconOnly variant="bordered"
-                        className="h-auto p-0 shrink-0 min-w-0 max-w-none w-12"
-                        onPress={() => addNode(nodeDefId)}
+                const definition = NodeDefinitions.asMap.get(nodeDefId)
+                return (
+                    <Tooltip
+                        closeDelay={0}
+                        content={`Add "${definition.name}"`}
+                        key={nodeDefId}
                     >
-                        <definition.icon />
-                    </Button>
-                </Tooltip>
+                        <Button
+                            isIconOnly variant="bordered"
+                            className="h-auto p-0 shrink-0 min-w-0 max-w-none w-12"
+                            onPress={() => addNode(nodeDefId)}
+                        >
+                            <definition.icon />
+                        </Button>
+                    </Tooltip>
+                )
             })}
 
             <Autocomplete
                 size="sm"
                 placeholder="Search for tasks"
                 startContent={<TbSearch />}
-                defaultItems={nodesList}
+                defaultItems={NodeDefinitions.asArray}
                 isClearable
                 endContent={<Kbd className="group-data-[focus=true]:opacity-0 transition-opacity">/</Kbd>}
                 onKeyDown={ev => {
@@ -115,7 +117,7 @@ export default function EditorToolbar() {
 
 
 const fixedNodes = [
-    "node-type:basic.text",
-    "node-type:basic.number",
-    "node-type:text.template",
+    "https://nodes.workflow.dog/basic/text",
+    "https://nodes.workflow.dog/basic/number",
+    // "https://nodes.workflow.dog/text/template",
 ]

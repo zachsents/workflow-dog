@@ -1,13 +1,13 @@
 import { Button, Tooltip } from "@nextui-org/react"
 import { useNotifications } from "@web/modules/notifications"
 import { object as modifierDefs } from "@web/modules/workflow-editor/modifiers"
+import { doTypesMatch } from "data-types"
 import { object as typeMap } from "data-types/common"
-import { object as nodeDefs } from "nodes/web"
+import { NodeDefinitions } from "packages/web"
 import { useCallback } from "react"
 import { TbAlertTriangle } from "react-icons/tb"
 import { useReactFlow } from "reactflow"
 import { PREFIX } from "shared/prefixes"
-import { doTypesMatch } from "data-types"
 import { uniqueId } from "../util"
 
 
@@ -33,10 +33,10 @@ export function useOnConnect() {
                 return modifierDefs[restOfId].type
 
             if (prefix === PREFIX.INPUT)
-                return nodeDefs[node.data.definition].inputs[node.data.inputs.find(i => i.id === handleId).definition].type
+                return NodeDefinitions.asMap.get(node.data.definition).inputs[node.data.inputs.find(i => i.id === handleId).definition].type
 
             if (prefix === PREFIX.OUTPUT)
-                return nodeDefs[node.data.definition].outputs[node.data.outputs.find(o => o.id === handleId).definition].type
+                return NodeDefinitions.asMap.get(node.data.definition).outputs[node.data.outputs.find(o => o.id === handleId).definition].type
         }
 
         const sourceType = getType(params.source, params.sourceHandle)

@@ -1,7 +1,7 @@
 import { useDebouncedValue } from "@mantine/hooks"
 import { Listbox, ListboxItem } from "@nextui-org/react"
 import { searchNodes } from "@web/modules/workflow-editor/search-nodes"
-import { object as nodeDefs } from "nodes/web"
+import { NodeDefinitions } from "packages/web"
 import { useMemo } from "react"
 
 
@@ -10,7 +10,7 @@ export default function NodeSearch({ query, tags, onAdd, maxResults = Infinity }
     const [debouncedQuery] = useDebouncedValue(query, 100)
     const results = useMemo(() => searchNodes(query, tags).slice(0, maxResults), [debouncedQuery, tags])
 
-    const onAction = (defId) => onAdd?.(nodeDefs[defId])
+    const onAction = (defId) => onAdd?.(NodeDefinitions.asMap.get(defId))
 
     return (
         <Listbox onAction={onAction} items={results}>

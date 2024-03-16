@@ -1,4 +1,3 @@
-// basic/nodes/text/web.jsx
 import { TbAbc } from "react-icons/tb"
 import colors from "tailwindcss/colors"
 import { useNodeProperty, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"

@@ -2,7 +2,7 @@ import { Button, ScrollShadow, Tooltip } from "@nextui-org/react"
 import { useCreateActionNode, useDefinition } from "@web/modules/workflow-editor/graph/nodes"
 import { useSelectedWorkflowRun } from "@web/modules/workflows"
 import classNames from "classnames"
-import { object as nodeDefs } from "nodes/web"
+import { NodeDefinitions } from "packages/web"
 import { useMemo, useRef, useState } from "react"
 import { TbActivity, TbArrowLeftSquare, TbArrowRight, TbArrowRightSquare, TbSparkles } from "react-icons/tb"
 import { Position, Handle as RFHandle, useNodeId, useReactFlow, useStore } from "reactflow"
@@ -155,7 +155,7 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
                     <Tooltip content={
                         <Group className={classNames("gap-unit-sm", { "flex-row-reverse": isSource })}>
                             {isSource ? <TbArrowRightSquare /> : <TbArrowLeftSquare />}
-                            <span>Add <b className="text-primary-600">{nodeDefs[definition.recommendedNode.data.definition].name}</b> node</span>
+                            <span>Add <b className="text-primary-600">{NodeDefinitions.asMap.get(definition.recommendedNode.data.definition).name}</b> node</span>
                         </Group>
                     } closeDelay={0} placement={isSource ? "right" : "left"}>
                         <Button

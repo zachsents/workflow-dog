@@ -1,5 +1,5 @@
 import lunr from "lunr"
-import { list as nodeDefList, object as nodeDefs } from "nodes/web"
+import { NodeDefinitions } from "packages/web"
 
 
 const interfaceDescriptionExtractor = (typeKey, nodeDef) => Object.values(nodeDef[typeKey]).map(interf => interf.description ?? "").join(" ")
@@ -17,7 +17,7 @@ const nodeSearchIndex = lunr(function () {
         boost: 0.3,
     })
 
-    nodeDefList.forEach(nodeDef => {
+    NodeDefinitions.asArray.forEach(nodeDef => {
         this.add(nodeDef)
     })
 })
@@ -25,7 +25,7 @@ const nodeSearchIndex = lunr(function () {
 export function searchNodes(query, tags = []) {
     try {
         return nodeSearchIndex.search(fixQuery(query))
-            .map(result => nodeDefs[result.ref])
+            .map(result => NodeDefinitions.asMap.get(result.ref))
             .filter(nodeDef => tags.every(tag => nodeDef.tags.includes(tag)))
     }
     catch (err) {
@@ -38,7 +38,7 @@ const tagSearchIndex = lunr(function () {
     this.ref("tag")
     this.field("tag")
 
-    const tags = [...new Set(nodeDefList.flatMap(def => def.tags))]
+    const tags = [...new Set(NodeDefinitions.asArray.flatMap(def => def.tags))]
     tags.forEach(tag => {
         this.add({ tag })
     })

@@ -27,6 +27,7 @@ export default createConfig({
     barrels: [
         {
             name: "common",
+            extension: "ts",
             template: commonTemplate,
         },
         {

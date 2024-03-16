@@ -1,11 +1,10 @@
 import { useLocalStorage } from "@mantine/hooks"
 import { Button, Card, Input, Kbd, Listbox, ListboxItem, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@nextui-org/react"
-import { useLocalStorageValue } from "@react-hookz/web"
 import { stringHash } from "@web/modules/util"
 import { useCreateActionNode } from "@web/modules/workflow-editor/graph/nodes"
 import { useEditorStore, useEditorStoreApi, useEditorStoreState } from "@web/modules/workflow-editor/store"
 import classNames from "classnames"
-import { object as nodeDefs } from "nodes/web"
+import { NodeDefinitions } from "packages/web"
 import { useMemo, useState } from "react"
 import { TbArrowBack, TbArrowForward, TbClipboardText, TbPinnedOff } from "react-icons/tb"
 import { useReactFlow } from "reactflow"
@@ -64,9 +63,9 @@ export default function ContextMenu() {
             >
                 <div className="flex flex-col items-stretch gap-unit-xs w-50 relative">
                     <Group className="justify-center absolute bottom-full left-1/2 mb-8 -translate-x-1/2 w-60 gap-2">
-                        <PinnedNode id="node-type:basic.text" onAdd={addNode} />
-                        <PinnedNode id="node-type:basic.number" onAdd={addNode} />
-                        <PinnedNode id="node-type:text.template" onAdd={addNode} />
+                        <PinnedNode id="https://nodes.workflow.dog/basic/text" onAdd={addNode} />
+                        <PinnedNode id="https://nodes.workflow.dog/basic/number" onAdd={addNode} />
+                        {/* <PinnedNode id="https://nodes.workflow.dog/text/template" onAdd={addNode} /> */}
                         {/* {pinned?.filter(id => id in nodeDefs).map((id, i) =>
                             <PinnedNode id={id} onAdd={addNode} key={i} />
                         )} */}
@@ -96,7 +95,7 @@ export default function ContextMenu() {
 
 function PinnedNode({ id, onAdd }) {
 
-    const definition = nodeDefs[id]
+    const definition = NodeDefinitions.asMap.get(id)
     const [unpinning, setUnpinning] = useState(false)
     // const toggleUnpinning = () => setUnpinning(!unpinning)
 

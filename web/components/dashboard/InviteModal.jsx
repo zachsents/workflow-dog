@@ -7,7 +7,6 @@ import { useDebouncedState } from "@web/modules/util"
 import { TbCheck, TbX } from "react-icons/tb"
 
 
-
 export default function InviteModal(props) {
 
     const [inviteeEmail, debouncedEmail, setInviteeEmail, isChanging] = useDebouncedState("", {

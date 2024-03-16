@@ -146,6 +146,11 @@ function SetTriggerModal({ onClose, ...props }) {
                                     trigger={resolveTrigger("basic", "manual")}
                                     onClick={() => setTrigger(resolveTriggerId("basic", "manual"))}
                                 />
+                                <TriggerCard
+                                    withWrapper
+                                    trigger={resolveTrigger("basic", "schedule")}
+                                    onClick={() => setTrigger(resolveTriggerId("basic", "schedule"))}
+                                />
                                 {/* <TriggerCard
                                     withWrapper
                                     trigger={triggerMap[TRIGGER_TYPE.ASYNC_URL]}

@@ -1,7 +1,7 @@
 /** @type {import("next").NextConfig} */
 module.exports = {
     reactStrictMode: true,
-    transpilePackages: ["triggers", "integrations", "nodes"],
+    transpilePackages: ["triggers", "integrations", "nodes", "packages"],
     // output: "export",
     productionBrowserSourceMaps: true,
 
@@ -24,7 +24,7 @@ module.exports = {
             {
                 source: "/",
                 destination: "/workflows",
-                permanent: true,
+                permanent: false,
             },
         ]
     },

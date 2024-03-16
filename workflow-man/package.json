@@ -9,7 +9,9 @@
         "morgan": "^1.10.0",
         "nodes": "workspace:*",
         "rxjs": "^7.8.1",
-        "triggers": "workspace:*"
+        "triggers": "workspace:*",
+        "shared": "workspace:*",
+        "packages": "workspace:*"
     },
     "devDependencies": {
         "@types/bun": "latest",

@@ -80,3 +80,24 @@ Web:
         ☐ Logical operators
         ✔ Switch @done (2/20/2024, 3:45:37 AM)
         ✔ Math operators @done (2/20/2024, 6:08:32 AM)
+
+
+    ☐ Check integration system that I wanted to fix for some reason
+        ☐ I think i wanted to remove the access token field and just make the fetching all happen based on what type the integration is'
+        ☐ Also need to check security of how i'm passing token
+    ☐ Add type labels to handles
+    ☐ Add adding handles to node
+    ☐ Add renaming handles to node
+    ☐ Make account selector bigger
+    ☐ Generally fix scale of everything on nodes
+    ☐ Add errors for no account selected
+    ☐ Implement node search modal
+    ☐ Implement gmail trigger
+    ☐ Add required integrations to trigger config
+    ☐ Make new workflows have trigger data nodes for every trigger input
+    ☐ Make URL triggers return JSON
+    ☐ Implement workflow outputs
+    ☐ Add variable nodes
+    ☐ Add node pinning
+    ☐ Add trigger setup/cleanup functions that get called in every scenario
+    ☐ Add dynamic types for things like packing/unpacking objects

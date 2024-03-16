@@ -1,0 +1,41 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "Node",
+        "jsx": "preserve",
+        "baseUrl": ".",
+        "paths": {
+            "@web/*": [
+                "./*"
+            ]
+        },
+        "esModuleInterop": true,
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "esnext"
+        ],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "strict": false,
+        "noEmit": true,
+        "incremental": true,
+        "module": "esnext",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "declaration": true,
+        "declarationMap": true,
+    },
+    "include": [
+        "next-env.d.ts",
+        "**/*.ts",
+        "**/*.tsx"
+    ],
+    "exclude": [
+        "node_modules",
+    ],
+    "references": [
+        {
+            "path": "../packages/"
+        }
+    ]
+}

@@ -1,4 +1,4 @@
-import Providers from "@web/components/Providers"
+// import Providers from "@web/components/Providers"
 import siteInfo from "@web/site-info.json"
 import "@web/styles/globals.css"
 import { enableMapSet } from "immer"
@@ -12,12 +12,12 @@ export default function MyApp({ Component, pageProps }) {
         <Head>
             <title key="title">{`${siteInfo.name} | ${siteInfo.description}`}</title>
         </Head>
-        <Providers>
-            {/* This wrapper makes the footer stick to the bottom of the page */}
-            <main className="light min-h-screen flex flex-col">
+        {/* <Providers> */}
+        {/* This wrapper makes the footer stick to the bottom of the page */}
+        {/* <main className="light min-h-screen flex flex-col">
                 <Component {...pageProps} />
-            </main>
-        </Providers>
+            </main> */}
+        {/* </Providers> */}
     </>)
 }
 

@@ -101,3 +101,7 @@ Web:
     ☐ Add node pinning
     ☐ Add trigger setup/cleanup functions that get called in every scenario
     ☐ Add dynamic types for things like packing/unpacking objects
+
+extra:
+    ☐ Add RPC for individual nodes to be able to make calls from the client to fetch data
+    ☐ Add error page that takes redirects for all errors and also reports them to the server

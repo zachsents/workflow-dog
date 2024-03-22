@@ -6,6 +6,9 @@
         "paths": {
             "@web/*": [
                 "./*"
+            ],
+            "@ui/*": [
+                "./components/ui/*"
             ]
         },
         "esModuleInterop": true,
@@ -22,16 +25,23 @@
         "module": "esnext",
         "resolveJsonModule": true,
         "isolatedModules": true,
-        "declaration": true,
-        "declarationMap": true,
+        // "declaration": true,
+        // "declarationMap": true,
+        "plugins": [
+            {
+                "name": "next"
+            }
+        ],
+        "strictNullChecks": true
     },
     "include": [
         "next-env.d.ts",
         "**/*.ts",
-        "**/*.tsx"
+        "**/*.tsx",
+        ".next/types/**/*.ts"
     ],
     "exclude": [
-        "node_modules",
+        "node_modules"
     ],
     "references": [
         {

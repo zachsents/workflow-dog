@@ -1,6 +1,6 @@
 import { Button, Divider, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Tab, Tabs, Textarea } from "@nextui-org/react"
 import { useDebouncedCallback, useDebouncedEffect } from "@react-hookz/web"
-import Group from "@web/components/layout/Group"
+import Group from "@web/_old_components/layout/Group"
 import { singular } from "@web/modules/grammar"
 import { useSetInputValue } from "@web/modules/workflow-editor/graph/interfaces"
 import { useDefinition, useNodeColors } from "@web/modules/workflow-editor/graph/nodes"

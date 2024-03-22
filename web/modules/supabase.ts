@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { deepCamelCase } from "./util"
 
 
-export const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_API_KEY)
+export const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 
 export function useSupabase() {

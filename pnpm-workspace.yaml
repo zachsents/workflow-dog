@@ -1,0 +1,5 @@
+packages:
+  - 'web'
+  - 'packages'
+  - 'workflow-man'
+  - 'shared'

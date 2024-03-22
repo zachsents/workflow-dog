@@ -19,6 +19,7 @@
         "module": "ESNext",
         "declaration": true,
         "declarationMap": true,
-        "composite": true
+        "composite": true,
+        "preserveSymlinks": true
     }
 }

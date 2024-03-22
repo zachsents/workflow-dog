@@ -1,5 +1,5 @@
 import { Button, Tooltip } from "@nextui-org/react"
-import Group from "@web/components/layout/Group"
+import Group from "@web/_old_components/layout/Group"
 import { useDefinition, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
 import { useEditorStoreApi } from "@web/modules/workflow-editor/store"
 import { TbInfoCircle } from "react-icons/tb"

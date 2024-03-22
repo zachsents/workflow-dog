@@ -29,7 +29,7 @@ async function handleScheduleChange(oldTrigger: ScheduleTrigger, newTrigger: Sch
         version: "v1beta1",
         resourcePath: `jobs/${safeId(id)}`,
         method: "DELETE",
-        accessToken: await getAccessToken
+        // accessToken: await getAccessToken
     }))
 
     const addPromises = jobsToAdd.map(async id => fetchGoogleApi({

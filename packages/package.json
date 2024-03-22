@@ -1,26 +1,25 @@
 {
-  "name": "packages",
-  "module": "index.ts",
-  "type": "module",
-  "scripts": {
-    "build": "bun _build.ts"
-  },
-  "dependencies": {
-    "shared": "workspace:*",
-    "zod": "^3.22.4"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/lodash": "^4.17.0",
-    "json-schema-to-typescript": "^13.1.2",
-    "lodash": "^4.17.21"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "optionalDependencies": {
-    "react-icons": "*",
-    "react": "*",
-    "@nextui-org/react": "*"
-  }
+    "name": "packages",
+    "module": "index.ts",
+    "type": "module",
+    "scripts": {
+        "build": "bun _build.ts"
+    },
+    "dependencies": {
+        "shared": "workspace:*",
+        "zod": "^3.22.4"
+    },
+    "devDependencies": {
+        "@types/lodash": "^4.17.0",
+        "@types/react": "^18.0.22",
+        "lodash": "^4.17.21"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "optionalDependencies": {
+        "@nextui-org/react": "*",
+        "react": "*",
+        "react-icons": "*"
+    }
 }

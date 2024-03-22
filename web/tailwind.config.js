@@ -1,88 +1,77 @@
-import { nextui } from "@nextui-org/react"
-import _ from "lodash"
-import colors from "tailwindcss/colors"
-
-
-const DEFAULT_SHADE = {
-    light: 600,
-    dark: 300,
-}
-
-
-/** @type {import("tailwindcss").Config} */
-export default {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+    darkMode: ["class"],
     content: [
-        "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-        "./components/**/*.{js,ts,jsx,tsx,mdx}",
-        "./modules/**/*.{js,ts,jsx,tsx,mdx}",
-        "../node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
-        "../nodes/**/*.{jsx,tsx,mdx}",
-        "../triggers/**/*.{jsx,tsx,mdx}",
+        './pages/**/*.{ts,tsx}',
+        './components/**/*.{ts,tsx}',
+        './app/**/*.{ts,tsx}',
+        './src/**/*.{ts,tsx}',
     ],
+    prefix: "",
     theme: {
-        extend: {},
-    },
-    plugins: [nextui({
-        themes: {
-            light: {
-                extend: "light",
-                colors: {
-                    primary: {
-                        ...colors.violet,
-                        DEFAULT: colors.violet[DEFAULT_SHADE.light],
-                    },
-                    secondary: {
-                        ...colors.amber,
-                        DEFAULT: colors.amber[DEFAULT_SHADE.light],
-                    },
-                    danger: {
-                        ...colors.red,
-                        DEFAULT: colors.red[DEFAULT_SHADE.light],
-                    },
-                    default: {
-                        ...colors.gray,
-                        DEFAULT: colors.gray[DEFAULT_SHADE.dark],
-                    },
+        container: {
+            center: true,
+            padding: "2rem",
+            screens: {
+                "2xl": "1400px",
+            },
+        },
+        extend: {
+            colors: {
+                border: "hsl(var(--border))",
+                input: "hsl(var(--input))",
+                ring: "hsl(var(--ring))",
+                background: "hsl(var(--background))",
+                foreground: "hsl(var(--foreground))",
+                primary: {
+                    DEFAULT: "hsl(var(--primary))",
+                    foreground: "hsl(var(--primary-foreground))",
+                },
+                secondary: {
+                    DEFAULT: "hsl(var(--secondary))",
+                    foreground: "hsl(var(--secondary-foreground))",
+                },
+                destructive: {
+                    DEFAULT: "hsl(var(--destructive))",
+                    foreground: "hsl(var(--destructive-foreground))",
+                },
+                muted: {
+                    DEFAULT: "hsl(var(--muted))",
+                    foreground: "hsl(var(--muted-foreground))",
+                },
+                accent: {
+                    DEFAULT: "hsl(var(--accent))",
+                    foreground: "hsl(var(--accent-foreground))",
+                },
+                popover: {
+                    DEFAULT: "hsl(var(--popover))",
+                    foreground: "hsl(var(--popover-foreground))",
+                },
+                card: {
+                    DEFAULT: "hsl(var(--card))",
+                    foreground: "hsl(var(--card-foreground))",
                 },
             },
-            dark: {
-                extend: "dark",
-                colors: {
-                    primary: {
-                        ...swapColors(colors.violet),
-                        DEFAULT: colors.violet[DEFAULT_SHADE.light],
-                    },
-                    secondary: {
-                        ...swapColors(colors.amber),
-                        DEFAULT: colors.amber[DEFAULT_SHADE.light],
-                    },
-                    danger: {
-                        ...swapColors(colors.red),
-                        DEFAULT: colors.red[DEFAULT_SHADE.light],
-                    },
-                    default: {
-                        ...swapColors(colors.gray),
-                        DEFAULT: colors.gray[DEFAULT_SHADE.dark],
-                    },
+            borderRadius: {
+                lg: "var(--radius)",
+                md: "calc(var(--radius) - 2px)",
+                sm: "calc(var(--radius) - 4px)",
+            },
+            keyframes: {
+                "accordion-down": {
+                    from: { height: "0" },
+                    to: { height: "var(--radix-accordion-content-height)" },
+                },
+                "accordion-up": {
+                    from: { height: "var(--radix-accordion-content-height)" },
+                    to: { height: "0" },
                 },
             },
-        }
-    })],
-    corePlugins: {
-        // preflight: false,
+            animation: {
+                "accordion-down": "accordion-down 0.2s ease-out",
+                "accordion-up": "accordion-up 0.2s ease-out",
+            },
+        },
     },
-    darkMode: "class",
-}
-
-
-/**
- * Swaps the order of shades in Tailwind color objects order for dark mode
- * @param {Record<string, any>} colors
- * @returns {Record<string, any>}
- */
-function swapColors(colors) {
-    return _.zipObject(
-        Object.keys(colors).reverse(),
-        Object.values(colors)
-    )
+    plugins: [require("tailwindcss-animate")],
 }

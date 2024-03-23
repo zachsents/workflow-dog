@@ -1,6 +1,6 @@
 "use server"
 
-import { supabaseServer } from "@web/lib/server/supabase"
+import { remapError, supabaseServer } from "@web/lib/server/supabase"
 import { generalSettingsSchema, type GeneralSettingsSchema } from "./schema"
 import { revalidatePath } from "next/cache"
 
@@ -16,22 +16,21 @@ export async function updateGeneralSettings(projectId: string, values: GeneralSe
         .select("name")
         .single()
 
-    if (query.error) {
-        if (query.error.code === "PGRST116")
-            return { error: { message: "You don't have permission." } }
-        return query
-    }
+    const error = remapError(query, {
+        "PGRST116": "You don't have permission."
+    })
+    if (error) return error
 
     console.debug(`Updated general settings for project "${projectId}"!`)
 
     // revalidatePath(`/projects/${projectId}/settings`)
     return {
         data: {
-            projectName: query.data.name,
+            projectName: query.data!.name,
         },
         store: {
             path: ["projects", projectId, "name"],
-            value: query.data.name,
+            value: query.data!.name,
         },
     }
 }
@@ -49,11 +48,10 @@ export async function changeEditorRole(projectId: string, memberId: string, isEd
         .select("roles")
         .single()
 
-    if (query.error) {
-        if (query.error.code === "PGRST116")
-            return { error: { message: "You don't have permission." } }
-        return query
-    }
+    const error = remapError(query, {
+        "PGRST116": "You don't have permission."
+    })
+    if (error) return error
 
     console.debug(`Changed role for member "${memberId}" in project "${projectId}"`)
 
@@ -61,7 +59,7 @@ export async function changeEditorRole(projectId: string, memberId: string, isEd
     return {
         store: {
             path: ["projects", projectId, "members", memberId, "isEditor"],
-            value: query.data.roles?.includes("editor") || false,
+            value: query.data!.roles?.includes("editor") || false,
         }
     }
 }
@@ -77,14 +75,29 @@ export async function removeMember(projectId: string, memberId: string) {
         .select("user_id")
         .single()
 
-    if (query.error) {
-        if (query.error.code === "PGRST116")
-            return { error: { message: "You don't have permission." } }
-        return query
-    }
+    const error = remapError(query, {
+        "PGRST116": "You don't have permission."
+    })
+    if (error) return error
 
     console.debug(`Removed member "${memberId}" from project "${projectId}"`)
 
     revalidatePath(`/projects/${projectId}/settings`)
+    return true
+}
+
+
+export async function inviteMember(projectId: string, email: string) {
+
+    const result = await supabaseServer().rpc("invite_user_to_team", {
+        _email: email,
+        _team_id: projectId,
+    })
+
+    const error = remapError(result, {
+        "42703": "User doesn't have an account."
+    })
+    if (error) return error
+
     return true
 }

@@ -109,3 +109,16 @@ export async function requireLogin() {
 
     redirect("/login")
 }
+
+
+export function remapError(result: any, messages: Record<string, string> = {}) {
+    if (!result.error)
+        return null
+
+    return {
+        error: {
+            ...result.error,
+            message: messages[result.error.code] || result.error.message,
+        }
+    }
+}

@@ -5,3 +5,10 @@ export const generalSettingsSchema = z.object({
 })
 
 export type GeneralSettingsSchema = z.infer<typeof generalSettingsSchema>
+
+
+export const inviteMemberSchema = z.object({
+    email: z.string().email(),
+})
+
+export type InviteMemberSchema = z.infer<typeof inviteMemberSchema>

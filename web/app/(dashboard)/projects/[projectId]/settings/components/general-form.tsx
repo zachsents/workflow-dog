@@ -13,55 +13,37 @@ import {
 } from "@ui/form"
 import { Input } from "@ui/input"
 import Loader from "@web/components/Loader"
+import { cn } from "@web/lib/utils"
 import type { DefaultValues } from "react-hook-form"
 import { useForm } from "react-hook-form"
 import { updateGeneralSettings } from "../actions"
 import { generalSettingsSchema, type GeneralSettingsSchema } from "../schema"
-import { useBooleanState } from "@web/lib/client/hooks"
-import { cn } from "@web/lib/utils"
-import { useState } from "react"
 
 
 export default function GeneralSettingsForm({
     projectId,
-    defaultValues: passedDefaultValues,
+    defaultValues,
 }: {
     projectId: string
     defaultValues: DefaultValues<GeneralSettingsSchema>
 }) {
     const updateSettings = updateGeneralSettings.bind(null, projectId)
-    const [defaultValues, setDefaultValues] = useState(passedDefaultValues)
 
     const form = useForm<GeneralSettingsSchema>({
         resolver: zodResolver(generalSettingsSchema),
         defaultValues,
     })
 
-    const [isTouched, touch, resetTouched] = useBooleanState()
-    const [isLoading, startLoading, stopLoading] = useBooleanState()
+    const { isDirty, isSubmitting } = form.formState
 
-    function onReset() {
-        form.reset(defaultValues)
-        resetTouched()
-    }
-
-    function onSubmit(values: GeneralSettingsSchema) {
-        startLoading()
-        updateSettings(values)
-            .then((values: GeneralSettingsSchema) => {
-                setDefaultValues(values)
-                form.reset(values)
-                resetTouched()
-            })
-            .catch(onReset)
-            .finally(stopLoading)
+    async function onSubmit(values: GeneralSettingsSchema) {
+        await updateSettings(values).then(form.reset)
     }
 
     return (
         <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                onInput={touch}
                 className="flex-v items-stretch gap-4"
             >
                 <FormField
@@ -79,18 +61,19 @@ export default function GeneralSettingsForm({
                             <FormMessage />
                         </FormItem>
                     )}
-                    disabled={isLoading}
+                    disabled={isSubmitting}
                 />
 
-                <div className={cn("self-end flex gap-2", isTouched ? "opacity-100" : "opacity-0")}>
+                <div className={cn("self-end flex gap-2", isDirty ? "opacity-100" : "opacity-0")}>
                     <Button
-                        variant="ghost" type="button" disabled={isLoading}
-                        onClick={onReset}
+                        type="reset" disabled={isSubmitting}
+                        variant="ghost"
+                        onClick={() => form.reset()}
                     >
                         Reset
                     </Button>
-                    <Button type="submit" disabled={isLoading}>
-                        {isLoading && <Loader mr />}
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting && <Loader mr />}
                         Save
                     </Button>
                 </div>

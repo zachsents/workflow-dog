@@ -1,8 +1,8 @@
 import { Card } from "@web/components/ui/card"
-import { TbPuzzle, TbSettings, TbUsers } from "react-icons/tb"
-import GeneralSettingsForm from "./components/general-form"
 import { supabaseServer } from "@web/lib/server/supabase"
 import { IconType } from "react-icons"
+import { TbPuzzle, TbSettings, TbUsers } from "react-icons/tb"
+import GeneralSettingsForm from "./components/general-form"
 
 
 export default async function SettingsPage({ params: { projectId } }) {
@@ -60,7 +60,6 @@ function SettingsSection({ children, title, icon: Icon }: SettingsSectionProps) 
                 <Icon className="text-muted-foreground" />
                 <h2>{title}</h2>
             </div>
-
             {children}
         </Card>
     )

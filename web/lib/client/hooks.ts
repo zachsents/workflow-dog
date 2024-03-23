@@ -23,13 +23,14 @@ export function useLocalState<T>(initialState: T, setter: (...args: any[]) => Pr
 }
 
 
-export function useLogEffect<T>(state: T, {
-    dependencyTransform,
-    prefix,
-}: {
+export function useLogEffect<T>(state: T, options: string | {
     dependencyTransform?: (state: T) => any
     prefix?: string
 } = {}) {
+    const { prefix, dependencyTransform = null } = typeof options === "string"
+        ? { prefix: options }
+        : options
+
     useEffect(() => {
         if (prefix)
             console.log(prefix, state)

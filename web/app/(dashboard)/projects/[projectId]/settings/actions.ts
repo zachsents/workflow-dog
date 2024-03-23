@@ -2,6 +2,7 @@
 
 import { supabaseServer } from "@web/lib/server/supabase"
 import { generalSettingsSchema, type GeneralSettingsSchema } from "./schema"
+import { revalidatePath } from "next/cache"
 
 export async function updateGeneralSettings(projectId: string, values: GeneralSettingsSchema) {
 
@@ -17,7 +18,8 @@ export async function updateGeneralSettings(projectId: string, values: GeneralSe
         .single()
         .throwOnError()
 
-    console.debug(`Updated general settins for project "${projectId}"!`)
+    console.debug(`Updated general settings for project "${projectId}"!`)
 
+    revalidatePath(`/projects/${projectId}`, "layout")
     return query.data
 }

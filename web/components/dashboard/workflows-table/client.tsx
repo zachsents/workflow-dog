@@ -6,7 +6,8 @@ import { Card } from "@ui/card"
 import { DataTable, type DataTableColumnDef } from "@ui/data-table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@ui/tooltip"
 import Loader from "@web/components/Loader"
-import { useLocalState } from "@web/lib/client/hooks"
+import { useAction } from "@web/lib/client/actions"
+import { useFromStoreList } from "@web/lib/queries/store"
 import type { Database, Json } from "@web/lib/types/supabase-db"
 import { cn } from "@web/lib/utils"
 import Link from "next/link"
@@ -46,8 +47,9 @@ const columns: DataTableColumnDef<Partial<Workflow>>[] = [
         header: "Status",
         sortable: true,
         cell: ({ row }) => {
-            const [isEnabled, setEnabled, isLoading] = useLocalState<boolean>(
-                row.getValue("is_enabled"),
+            const isEnabled = row.getValue("is_enabled") as boolean
+
+            const [setEnabled, { isPending }] = useAction(
                 setWorkflowIsEnabled.bind(null, row.id!)
             )
 
@@ -59,15 +61,15 @@ const columns: DataTableColumnDef<Partial<Workflow>>[] = [
                                 variant={isEnabled ? "default" : "secondary"}
                                 className={cn(
                                     isEnabled && "bg-green-500 hover:bg-green-700",
-                                    isLoading && "opacity-50 pointer-events-none cursor-not-allowed",
+                                    isPending && "opacity-50 pointer-events-none cursor-not-allowed",
                                 )}
                                 onClick={(ev) => {
                                     ev.stopPropagation()
                                     setEnabled(!isEnabled)
                                 }}
-                                aria-disabled={isLoading}
+                                aria-disabled={isPending}
                             >
-                                {isLoading && <Loader mr />}
+                                {isPending && <Loader mr />}
                                 {isEnabled ? "Enabled" : "Disabled"}
                             </Badge>
                         </TooltipTrigger>
@@ -100,10 +102,15 @@ const columns: DataTableColumnDef<Partial<Workflow>>[] = [
 ]
 
 export default function WorkflowsTableClient({
-    workflows
+    workflows: passedWorkflows
 }: {
     workflows: Partial<Workflow>[]
 }) {
+    const workflows = useFromStoreList(passedWorkflows.map(wf => ({
+        path: ["workflows", wf.id!],
+        initial: wf,
+    })))
+
     return (
         <Card className="shadow-lg">
             <DataTable

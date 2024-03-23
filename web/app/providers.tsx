@@ -1,11 +1,10 @@
 "use client"
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { QueryStoreProvider } from "@web/lib/queries/store"
 import { useState } from "react"
 
 export function Providers({ children }: { children: React.ReactNode }) {
-
-    // const router = useRouter()
 
     const [queryClient] = useState(
         () =>
@@ -22,9 +21,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
     return (
         <QueryClientProvider client={queryClient}>
-            {/* <NextUIProvider navigate={router.push}> */}
-            {children}
-            {/* </NextUIProvider> */}
+            <QueryStoreProvider>
+                {children}
+            </QueryStoreProvider>
         </QueryClientProvider>
     )
 }

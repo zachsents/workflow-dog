@@ -1,7 +1,7 @@
 "use client"
 
 import { useMutation } from "@tanstack/react-query"
-import { Button } from "@web/components/ui/button"
+import { Button } from "@ui/button"
 import { useErrorRedirect } from "@web/lib/client/router"
 import { useSupabaseBrowser } from "@web/lib/client/supabase"
 import { TbBrandGoogleFilled, TbLoader3 } from "react-icons/tb"

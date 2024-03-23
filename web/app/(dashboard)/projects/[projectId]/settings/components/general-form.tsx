@@ -18,6 +18,7 @@ import type { DefaultValues } from "react-hook-form"
 import { useForm } from "react-hook-form"
 import { updateGeneralSettings } from "../actions"
 import { generalSettingsSchema, type GeneralSettingsSchema } from "../schema"
+import { useAction } from "@web/lib/client/actions"
 
 
 export default function GeneralSettingsForm({
@@ -27,7 +28,10 @@ export default function GeneralSettingsForm({
     projectId: string
     defaultValues: DefaultValues<GeneralSettingsSchema>
 }) {
-    const updateSettings = updateGeneralSettings.bind(null, projectId)
+    const [updateSettings] = useAction(
+        updateGeneralSettings.bind(null, projectId),
+        { successToast: "Settings updated!" }
+    )
 
     const form = useForm<GeneralSettingsSchema>({
         resolver: zodResolver(generalSettingsSchema),
@@ -37,7 +41,8 @@ export default function GeneralSettingsForm({
     const { isDirty, isSubmitting } = form.formState
 
     async function onSubmit(values: GeneralSettingsSchema) {
-        await updateSettings(values).then(form.reset)
+        await updateSettings(values)
+            .then(result => form.reset(result.data))
     }
 
     return (

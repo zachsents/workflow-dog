@@ -15,5 +15,10 @@ export async function setWorkflowIsEnabled(workflowId: string, isEnabled: boolea
         .throwOnError() as any
 
     console.debug(`${isEnabled ? "Enabled" : "Disabled"} workflow! (ID: ${workflowId})`)
-    return is_enabled
+    return {
+        store: {
+            path: ["workflows", workflowId, "is_enabled"],
+            value: is_enabled,
+        }
+    }
 }

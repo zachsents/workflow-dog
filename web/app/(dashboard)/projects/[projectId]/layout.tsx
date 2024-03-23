@@ -6,6 +6,7 @@ import {
     BreadcrumbSeparator
 } from "@ui/breadcrumb"
 import { Skeleton } from "@ui/skeleton"
+import { FromStore } from "@web/lib/queries/store"
 import { supabaseServer } from "@web/lib/server/supabase"
 import Link from "next/link"
 import { Suspense } from "react"
@@ -54,5 +55,9 @@ async function ProjectName({ projectId }: { projectId: string }) {
         .single()
         .throwOnError()
 
-    return data?.name || "Unknown"
+    return <FromStore
+        path={["projects", projectId, "name"]}
+        initial={data?.name || "Unknown"}
+        pass
+    />
 }

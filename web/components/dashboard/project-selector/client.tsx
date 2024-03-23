@@ -14,7 +14,9 @@ import {
     PopoverTrigger,
 } from "@ui/popover"
 import Kbd from "@web/components/Kbd"
+import { useFromStore } from "@web/lib/queries/store"
 import { cn, useCurrentProjectId } from "@web/lib/utils"
+import _ from "lodash"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
@@ -22,10 +24,14 @@ import { TbCheck, TbChevronDown } from "react-icons/tb"
 
 
 export default function ProjectSelectorClient({
-    projects
+    projects: passedProjects
 }: {
     projects: { id: string, name: string }[]
 }) {
+    const projects = passedProjects.map(
+        project => useFromStore(["projects", project.id], project)
+    )
+
     const router = useRouter()
     const activeProjectId = useCurrentProjectId()
 

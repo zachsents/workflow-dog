@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import "@web/styles/globals.css"
 import { Providers } from "@web/app/providers"
+import { Toaster } from "@ui/toaster"
 
 export const metadata: Metadata = {
     title: "WorkflowDog",
@@ -18,6 +19,7 @@ export default function RootLayout({
                 <Providers>
                     {children}
                 </Providers>
+                <Toaster />
             </body>
         </html>
     )

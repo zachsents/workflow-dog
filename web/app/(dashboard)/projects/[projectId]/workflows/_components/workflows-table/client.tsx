@@ -1,5 +1,6 @@
 "use client"
 
+import { zodResolver } from "@hookform/resolvers/zod"
 import { Badge } from "@ui/badge"
 import { Button } from "@ui/button"
 import { Card } from "@ui/card"
@@ -11,8 +12,7 @@ import {
     DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+    DialogTitle
 } from "@ui/dialog"
 import {
     DropdownMenu,
@@ -20,24 +20,23 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@ui/dropdown-menu"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@ui/form"
+import { Input } from "@ui/input"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@ui/tooltip"
-import Loader from "@web/components/Loader"
+import { deleteWorkflow as deleteWorkflowAction, renameWorkflow as renameWorkflowAction, setWorkflowIsEnabled } from "@web/app/(dashboard)/actions"
+import Loader from "@web/components/loader"
 import { Portal } from "@web/components/portal"
 import { useAction } from "@web/lib/client/actions"
-import { useBooleanState, useDialogState } from "@web/lib/client/hooks"
+import { useDialogState } from "@web/lib/client/hooks"
 import { useFromStoreList } from "@web/lib/queries/store"
 import type { Database, Json } from "@web/lib/types/supabase-db"
 import { cn } from "@web/lib/utils"
 import Link from "next/link"
 import { TriggerDefinitions } from "packages/web"
-import { TbArrowRight, TbDots, TbPencil, TbTrash } from "react-icons/tb"
-import { deleteWorkflow as deleteWorkflowAction, renameWorkflow as renameWorkflowAction, setWorkflowIsEnabled } from "./actions"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@web/components/ui/form"
-import { Input } from "@web/components/ui/input"
-import { z } from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { TbArrowRight, TbDots, TbPencil, TbTrash } from "react-icons/tb"
+import { z } from "zod"
 
 
 type Workflow = Database["public"]["Tables"]["workflows"]["Row"] & {
@@ -154,14 +153,14 @@ const columns: DataTableColumnDef<Partial<Workflow>>[] = [
 
             async function onSubmit(values: z.infer<typeof renameSchema>) {
                 await renameWorkflow(values.workflowName)
-                    .then(({data}) => {
+                    .then(({ data }) => {
                         form.reset({ workflowName: data })
                         renameDialog.close()
                     })
             }
 
             useEffect(() => {
-                if(!renameDialog.isOpen) {
+                if (!renameDialog.isOpen) {
                     form.reset()
                 }
             }, [renameDialog.isOpen])

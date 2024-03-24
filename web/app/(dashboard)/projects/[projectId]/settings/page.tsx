@@ -2,9 +2,9 @@ import { Card } from "@ui/card"
 import { supabaseServer } from "@web/lib/server/supabase"
 import { IconType } from "react-icons"
 import { TbPuzzle, TbSettings, TbUsers } from "react-icons/tb"
-import GeneralSettingsForm from "./components/general-form"
-import InviteMember from "./components/invite-member"
-import MembersTable from "./components/members-table"
+import GeneralSettingsForm from "./_components/general-form"
+import InviteMember from "./_components/invite-member"
+import MembersTable from "./_components/members-table"
 
 
 export default async function SettingsPage({ params: { projectId } }) {

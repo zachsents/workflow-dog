@@ -4,7 +4,7 @@ import Logo from "@web/public/logo.svg"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { TbArrowLeft } from "react-icons/tb"
-import { GoogleSignIn } from "./google-signin"
+import { GoogleSignIn } from "./_components/google-signin"
 
 
 export default async function LoginPage() {

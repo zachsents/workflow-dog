@@ -3,6 +3,12 @@
 import { remapError, supabaseServer } from "@web/lib/server/supabase"
 import { revalidatePath } from "next/cache"
 
+
+/**
+ * Server Action: Set Workflow Enabled State
+ * ---
+ * Sets the enabled state of a workflow using a boolean value.
+ */
 export async function setWorkflowIsEnabled(workflowId: string, isEnabled: boolean) {
     console.debug(`${isEnabled ? "Enabling" : "Disabling"} workflow... (ID: ${workflowId})`)
 
@@ -28,6 +34,11 @@ export async function setWorkflowIsEnabled(workflowId: string, isEnabled: boolea
 }
 
 
+/**
+ * Server Action: Delete Workflow
+ * ---
+ * Deletes a workflow.
+ */
 export async function deleteWorkflow(workflowId: string) {
     console.debug(`Deleting workflow... (ID: ${workflowId})`)
 
@@ -49,6 +60,11 @@ export async function deleteWorkflow(workflowId: string) {
 }
 
 
+/**
+ * Server Action: Rename Workflow
+ * ---
+ * Renames a workflow. Returns the new name to help with form hook reset.
+ */
 export async function renameWorkflow(workflowId: string, name: string) {
     console.debug(`Renaming workflow... (ID: ${workflowId})`)
 

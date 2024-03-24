@@ -18,8 +18,8 @@ import {
     FormLabel,
     FormMessage
 } from "@ui/form"
-import Loader from "@web/components/Loader"
-import { Input } from "@web/components/ui/input"
+import Loader from "@web/components/loader"
+import { Input } from "@ui/input"
 import { useAction } from "@web/lib/client/actions"
 import { useBooleanState } from "@web/lib/client/hooks"
 import { useCurrentProjectId } from "@web/lib/utils"

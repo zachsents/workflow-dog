@@ -1,5 +1,5 @@
 import { Button } from "@ui/button"
-import WorkflowsTable from "@web/components/dashboard/workflows-table"
+import WorkflowsTable from "./_components/workflows-table"
 import { TbPlus } from "react-icons/tb"
 
 

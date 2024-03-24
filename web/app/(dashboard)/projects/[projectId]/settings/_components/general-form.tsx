@@ -12,7 +12,7 @@ import {
     FormMessage,
 } from "@ui/form"
 import { Input } from "@ui/input"
-import Loader from "@web/components/Loader"
+import Loader from "@web/components/loader"
 import { cn } from "@web/lib/utils"
 import type { DefaultValues } from "react-hook-form"
 import { useForm } from "react-hook-form"

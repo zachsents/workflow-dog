@@ -1,8 +1,7 @@
-import { Suspense } from "react"
-import ProjectSelectorClient from "./client"
 import { Button } from "@ui/button"
 import { supabaseServer } from "@web/lib/server/supabase"
-import { FromStore } from "@web/lib/queries/store"
+import { Suspense } from "react"
+import ProjectSelectorClient from "./client"
 
 
 export default async function ProjectSelector() {

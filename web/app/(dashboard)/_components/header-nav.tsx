@@ -4,9 +4,8 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 import { useCurrentProjectId } from "@web/lib/utils"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import Kbd from "../Kbd"
 import { useHotkeys } from "react-hotkeys-hook"
-import { useState } from "react"
+import Kbd from "@web/components/kbd"
 
 
 export default function DashboardHeaderNav() {

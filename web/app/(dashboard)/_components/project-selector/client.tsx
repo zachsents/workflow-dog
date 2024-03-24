@@ -13,7 +13,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@ui/popover"
-import Kbd from "@web/components/Kbd"
+import Kbd from "@web/components/kbd"
 import { useFromStore } from "@web/lib/queries/store"
 import { cn, useCurrentProjectId } from "@web/lib/utils"
 import _ from "lodash"

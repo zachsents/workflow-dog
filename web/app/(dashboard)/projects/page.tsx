@@ -1,5 +1,5 @@
 import { Button } from "@ui/button"
-import ProjectCard from "@web/components/dashboard/project-card"
+import ProjectCard from "./_components/project-card"
 import { supabaseServer } from "@web/lib/server/supabase"
 import { TbPlus } from "react-icons/tb"
 

@@ -1,5 +1,5 @@
-import DashboardHeader from "@web/components/dashboard/header"
 import { requireLogin } from "@web/lib/server/supabase"
+import DashboardHeader from "./_components/header"
 
 
 export default async function DashboardLayout({

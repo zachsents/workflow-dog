@@ -4,6 +4,12 @@ import { remapError, supabaseServer } from "@web/lib/server/supabase"
 import { generalSettingsSchema, type GeneralSettingsSchema } from "./schema"
 import { revalidatePath } from "next/cache"
 
+
+/**
+ * Server Action: Update General Settings
+ * ---
+ * Updates the general settings of a project. Right now, that only includes the project name.
+ */
 export async function updateGeneralSettings(projectId: string, values: GeneralSettingsSchema) {
     const parsedValues = await generalSettingsSchema.parseAsync(values)
 
@@ -36,6 +42,11 @@ export async function updateGeneralSettings(projectId: string, values: GeneralSe
 }
 
 
+/**
+ * Server Action: Change Editor Role
+ * ---
+ * Changes the role of a member in a project. It uses a simple boolean to determine if the user should be an editor or not.
+ */
 export async function changeEditorRole(projectId: string, memberId: string, isEditor: boolean) {
 
     const query = await supabaseServer()
@@ -55,7 +66,6 @@ export async function changeEditorRole(projectId: string, memberId: string, isEd
 
     console.debug(`Changed role for member "${memberId}" in project "${projectId}"`)
 
-    // revalidatePath(`/projects/${projectId}/settings`)
     return {
         store: {
             path: ["projects", projectId, "members", memberId, "isEditor"],
@@ -65,6 +75,11 @@ export async function changeEditorRole(projectId: string, memberId: string, isEd
 }
 
 
+/**
+ * Server Action: Remove Member
+ * ---
+ * Removes a member from a project.
+ */
 export async function removeMember(projectId: string, memberId: string) {
 
     const query = await supabaseServer()
@@ -87,6 +102,13 @@ export async function removeMember(projectId: string, memberId: string) {
 }
 
 
+/**
+ * Server Action: Invite Member
+ * ---
+ * Invites a member to a project. Currently relies on RPC to database function, but will eventually the logic will be moved here. It's literally just a HTTP request to Loops, which will eventually be replaced by a webhook workflow.
+ * 
+ * TODO: Move the logic to this function.
+ */
 export async function inviteMember(projectId: string, email: string) {
 
     const result = await supabaseServer().rpc("invite_user_to_team", {

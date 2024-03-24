@@ -101,7 +101,10 @@ body {
 
 @layer components {
     .debug {
-        @apply outline outline-red-500;
+        @apply outline-red-500 outline-dashed;
+    }
+    .debug-div {
+        @apply w-4 aspect-square outline-red-500 outline-dashed bg-red-200;
     }
 
     .flex-v {

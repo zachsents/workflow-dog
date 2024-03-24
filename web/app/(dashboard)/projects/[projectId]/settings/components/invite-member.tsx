@@ -13,21 +13,20 @@ import {
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@ui/form"
+import Loader from "@web/components/Loader"
 import { Input } from "@web/components/ui/input"
+import { useAction } from "@web/lib/client/actions"
+import { useBooleanState } from "@web/lib/client/hooks"
+import { useCurrentProjectId } from "@web/lib/utils"
 import { useForm } from "react-hook-form"
 import { TbUserPlus } from "react-icons/tb"
-import { InviteMemberSchema, inviteMemberSchema } from "../schema"
-import Loader from "@web/components/Loader"
-import { useAction } from "@web/lib/client/actions"
-import { useCurrentProjectId } from "@web/lib/utils"
 import { inviteMember as inviteMemberAction } from "../actions"
-import { useBooleanState } from "@web/lib/client/hooks"
+import { InviteMemberSchema, inviteMemberSchema } from "../schema"
 
 
 export default function InviteMember() {

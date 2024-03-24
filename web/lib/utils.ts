@@ -15,3 +15,6 @@ export function useCurrentProjectId() {
 }
 
 
+export type OnEventKeys<Element extends keyof JSX.IntrinsicElements = "div"> = {
+    [K in keyof JSX.IntrinsicElements[Element]]: K extends `on${string}` ? K : never
+}[keyof JSX.IntrinsicElements[Element]]

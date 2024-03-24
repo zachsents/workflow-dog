@@ -7,6 +7,13 @@ export function useBooleanState(initialState = false) {
     return [state, setTrue, setFalse, setState] as const
 }
 
+export function useDialogState(initialState?: boolean) {
+    const [isOpen, open, close, setOpen] = useBooleanState(initialState)
+    return {
+        isOpen, open, close, setOpen,
+        dialogProps: { open: isOpen, onOpenChange: setOpen },
+    }
+}
 
 export function useLocalState<T>(initialState: T, setter: (...args: any[]) => Promise<T>) {
     const [localState, setLocalState] = useState(initialState)

@@ -9,8 +9,9 @@ import {
     DropdownMenuTrigger
 } from "@ui/dropdown-menu"
 import { useAction } from "@web/lib/client/actions"
-import { useFromStore, useFromStoreList, useQueryStore } from "@web/lib/queries/store"
-import { cn, useCurrentProjectId } from "@web/lib/utils"
+import { useCurrentProjectId } from "@web/lib/client/hooks"
+import { useFromStoreList } from "@web/lib/queries/store"
+import { cn } from "@web/lib/utils"
 import { TbCheck, TbDots, TbPencil, TbPencilOff, TbUserMinus } from "react-icons/tb"
 import { changeEditorRole, removeMember } from "../../actions"
 

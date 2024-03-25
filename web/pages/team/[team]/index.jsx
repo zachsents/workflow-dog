@@ -5,7 +5,7 @@ import InviteModal from "@web/components/dashboard/InviteModal"
 import TeamUserActions from "@web/components/dashboard/TeamUserActions"
 import Group from "@web/components/layout/Group"
 import { useUser } from "@web/modules/auth"
-import { useDatabaseMutation } from "@web/modules/db"
+import { useSupabaseMutation } from "@web/modules/db"
 import { plural } from "@web/modules/grammar"
 import { useIntegrationAccountsForTeam } from "@web/modules/integrations"
 import { useQueryParam } from "@web/modules/router"
@@ -87,7 +87,7 @@ function GeneralSection() {
     const [currentName, setName] = useState()
     const syncNames = useSyncToState(team?.name, setName)
 
-    const updateName = useDatabaseMutation(
+    const updateName = useSupabaseMutation(
         (supa) => {
             if (!currentName.trim())
                 throw new Error("Team name cannot be empty")

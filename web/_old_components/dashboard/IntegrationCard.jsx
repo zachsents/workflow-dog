@@ -1,6 +1,6 @@
 import { Button, Card, CardBody, Code, Divider, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ScrollShadow, Skeleton, useDisclosure } from "@nextui-org/react"
 import Group from "@web/components/layout/Group"
-import { useDatabaseMutation } from "@web/modules/db"
+import { useSupabaseMutation } from "@web/modules/db"
 import { useIntegrationAccount } from "@web/modules/integrations"
 import { useQueryParam } from "@web/modules/router"
 import { useTeamRoles } from "@web/modules/teams"
@@ -18,7 +18,7 @@ export default function IntegrationCard({ id }) {
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
-    const disconnectIntegration = useDatabaseMutation(
+    const disconnectIntegration = useSupabaseMutation(
         supa => supa
             .from("integration_accounts_teams")
             .delete()

@@ -1,7 +1,7 @@
 "use client"
 
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from "@ui/navigation-menu"
-import { useCurrentProjectId } from "@web/lib/utils"
+import { useCurrentProjectId } from "@web/lib/client/hooks"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useHotkeys } from "react-hotkeys-hook"

@@ -2,7 +2,7 @@ import { AvatarGroup, Button, Dropdown, DropdownItem, DropdownMenu, DropdownSect
 import { useIntervalEffect } from "@react-hookz/web"
 import { useQuery } from "@tanstack/react-query"
 import { useUser } from "@web/modules/auth"
-import { useDatabaseMutation } from "@web/modules/db"
+import { useSupabaseMutation } from "@web/modules/db"
 import { supabase } from "@web/modules/supabase"
 import { deepCamelCase, useSyncToState } from "@web/modules/util"
 import { useEditorSettings } from "@web/modules/workflow-editor/settings"
@@ -26,7 +26,7 @@ export default function EditHeader() {
     const nameInputRef = useRef()
     const [nameInputWidth, setNameInputWidth] = useState(0)
 
-    const updateName = useDatabaseMutation(
+    const updateName = useSupabaseMutation(
         (supa) => supa.from("workflows").update({ name: tempName }).eq("id", workflow?.id),
         {
             enabled: !!workflow,

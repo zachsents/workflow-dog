@@ -1,13 +1,13 @@
 import { UseMutationOptions, useMutation, useQuery } from "@tanstack/react-query"
-import type { Camel, Workflow, WorkflowRun } from "shared/types"
+import { useCurrentWorkflowId } from "@web/lib/client/hooks"
+import { useSupabaseBrowser } from "@web/lib/client/supabase"
+import "client-only"
+import { useSearchParams } from "next/navigation"
+import { toast } from "sonner"
 import { useUser } from "./auth"
-import { useRealtimeQuery } from "./db"
-import { useNotifications } from "./notifications"
+import { useInvalidateOnDatabaseChange } from "./db"
 import { useQueryParam } from "./router"
-import { supabase } from "./supabase"
-import { deepCamelCase } from "./util"
 import { useEditorStore, useEditorStoreApi } from "./workflow-editor/store"
-
 
 
 export function useWorkflowIdFromUrl(skip?: string | undefined) {
@@ -16,49 +16,29 @@ export function useWorkflowIdFromUrl(skip?: string | undefined) {
 }
 
 
-export function useWorkflowsForTeam(teamId: string | undefined, selectKeys = ["*"]) {
-
-    const [teamIdParam] = useQueryParam("team")
-    teamId ??= teamIdParam
-
+export function useWorkflow(workflowId = useCurrentWorkflowId()) {
+    const supabase = useSupabaseBrowser()
     return useQuery({
-        queryFn: async () => {
-            const { data } = await supabase
-                .from("workflows")
-                .select(selectKeys.join(","))
-                .eq("team_id", teamId)
-                .throwOnError()
-            return deepCamelCase(data) as Camel<Workflow>[]
-        },
-        queryKey: ["workflowsForTeam", teamId, selectKeys],
-        enabled: !!teamId,
-    })
-}
-
-
-export function useWorkflow(workflowId?: string, selectKeys = ["*"]) {
-
-    workflowId = useWorkflowIdFromUrl(workflowId)
-
-    return useQuery({
-        queryFn: async () => {
-            const { data } = await supabase
-                .from("workflows")
-                .select(selectKeys.join(","))
-                .eq("id", workflowId)
-                .limit(1)
-                .single()
-                .throwOnError()
-            return deepCamelCase(data) as Camel<Workflow>
-        },
-        queryKey: ["workflow", workflowId, selectKeys],
+        queryFn: async () => supabase
+            .from("workflows")
+            .select("*")
+            .eq("id", workflowId!)
+            .single()
+            .throwOnError()
+            .then(q => q.data),
+        queryKey: ["workflow", workflowId],
         enabled: !!workflowId,
     })
 }
 
 
+interface CreateWorkflowOptions {
+    name: string
+    trigger: string
+}
+
 /**
- * TO DO: change to API endpoint so we can:
+ * TODO: change to API endpoint so we can:
  * - create associated version, trigger, etc.
  * - do property validation w/ something like zod/joi
  * 
@@ -67,14 +47,16 @@ export function useWorkflow(workflowId?: string, selectKeys = ["*"]) {
 export function useCreateWorkflow() {
 
     const { data: user } = useUser()
-    const [teamId] = useQueryParam("team")
+    const teamId = useSearchParams()?.get("team")
+
+    const supabase = useSupabaseBrowser()
 
     return useMutation({
-        mutationFn: async ({ name, trigger }: { name: string, trigger: string }) => {
-            if (!user?.id || !teamId)
-                return console.warn("User or team not set")
+        mutationFn: async ({ name, trigger }: CreateWorkflowOptions) => {
+            if (!user?.id) return void console.warn("User not set")
+            if (!teamId) return void console.warn("Team not set")
 
-            const { data } = await supabase
+            return supabase
                 .from("workflows")
                 .insert({
                     name,
@@ -85,102 +67,93 @@ export function useCreateWorkflow() {
                 .select("id")
                 .single()
                 .throwOnError()
-            return data as { id: string }
-        }
+                .then(q => q.data)
+        },
     })
 }
 
 
-
-
-
-export function useWorkflowRuns(workflowId?: string, selectKeys = ["*"]) {
-
-    workflowId = useWorkflowIdFromUrl(workflowId)
-
+export function useWorkflowRuns(workflowId = useCurrentWorkflowId()) {
+    const supabase = useSupabaseBrowser()
     return useQuery({
-        queryFn: async () => {
-            const { data } = await supabase
-                .from("workflow_runs")
-                .select(selectKeys.join(","))
-                .eq("workflow_id", workflowId)
-                .order("created_at", { ascending: false })
-                .limit(50)
-                .throwOnError()
-            return deepCamelCase(data) as Camel<WorkflowRun>[]
-        },
-        queryKey: ["workflow-runs", workflowId, selectKeys],
+        queryFn: async () => supabase
+            .from("workflow_runs")
+            .select("*")
+            .eq("workflow_id", workflowId!)
+            .order("created_at", { ascending: false })
+            .limit(50)
+            .throwOnError()
+            .then(q => q.data),
+        queryKey: ["workflow-runs", workflowId],
         enabled: !!workflowId,
     })
 }
 
 
-export function useWorkflowRunsRealtime(workflowId?: string, selectKeys = ["*"]) {
+export function useWorkflowRunsRealtime(workflowId = useCurrentWorkflowId()) {
+    const supabase = useSupabaseBrowser()
 
-    workflowId = useWorkflowIdFromUrl(workflowId)
-
-    return useRealtimeQuery({
+    useInvalidateOnDatabaseChange({
+        event: "*",
         schema: "public",
         table: "workflow_runs",
-        event: "*",
         filter: `workflow_id=eq.${workflowId}`,
-    }, {
-        queryFn: async () => {
-            const { data } = await supabase
-                .from("workflow_runs")
-                .select(selectKeys.join(","))
-                .eq("workflow_id", workflowId)
-                .order("created_at", { ascending: false })
-                .limit(50)
-                .throwOnError()
-            return deepCamelCase(data) as Camel<WorkflowRun>[]
-        },
-        queryKey: ["realtime", "workflow-runs", workflowId, selectKeys],
+    }, ["workflow-runs", workflowId])
+
+    return useQuery({
+        queryFn: async () => supabase
+            .from("workflow_runs")
+            .select("*")
+            .eq("workflow_id", workflowId!)
+            .order("created_at", { ascending: false })
+            .limit(50)
+            .throwOnError()
+            .then(q => q.data),
+        queryKey: ["workflow-runs", workflowId],
         enabled: !!workflowId,
     })
 }
 
 
-export function useWorkflowRun(runId: string, selectKeys = ["*"]) {
+export function useWorkflowRun(runId: string) {
+    const supabase = useSupabaseBrowser()
     return useQuery({
-        queryFn: async () => {
-            const { data } = await supabase
-                .from("workflow_runs")
-                .select(selectKeys.join(","))
-                .eq("id", runId)
-                .single()
-                .throwOnError()
-            return deepCamelCase(data, { excludeDashedKeys: true, excludeColonKeys: true }) as Camel<WorkflowRun>
-        },
-        queryKey: ["workflow-run", runId, selectKeys],
+        queryFn: async () => supabase
+            .from("workflow_runs")
+            .select("*")
+            .eq("id", runId)
+            .single()
+            .throwOnError()
+            .then(q => q.data),
+        queryKey: ["workflow-run", runId],
         enabled: !!runId,
     })
 }
 
 
 export function useSelectedWorkflowRun() {
-    const selectedRunId = useEditorStore(s => s.selectedRunId) as string
-    return useWorkflowRun(selectedRunId)
+    const selectedRunId = useEditorStore(s => s.selectedRunId)
+    return useWorkflowRun(selectedRunId!)
 }
 
 
-export function useRunWorkflowMutation(workflowId?: string, {
+interface UseRunWorkflowMutationOptions extends UseMutationOptions {
+    subscribe?: boolean
+    sendNotification?: boolean
+    selectRun?: boolean
+}
+
+export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
     subscribe = false,
     sendNotification = true,
     selectRun = true,
     ...options
-}: {
-    subscribe?: boolean
-    sendNotification?: boolean
-    selectRun?: boolean
-} & UseMutationOptions = {}) {
+}: UseRunWorkflowMutationOptions = {}) {
 
-    workflowId = useWorkflowIdFromUrl(workflowId)
-    const { notify } = useNotifications()
     const editorStore = useEditorStoreApi()
 
     return useMutation({
-        mutationFn: async (body) => {
+        mutationFn: async (body: any) => {
             const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflowId}/run`)
 
             if (subscribe)
@@ -195,12 +168,15 @@ export function useRunWorkflowMutation(workflowId?: string, {
             if (selectRun)
                 editorStore.setState({ selectedRunId: run.id })
 
-            if (sendNotification)
-                notify({
-                    title: `Run #${run.count} finished!`,
-                    message: `${Object.keys(run.state.outputs).length} outputs, ${run.error_count} errors`,
-                    classNames: { icon: run.has_errors ? "bg-danger-500" : "bg-success-500" }
+            if (sendNotification) {
+                const sendNotification: (typeof toast.success) = run.has_errors
+                    ? toast.success.bind(toast)
+                    : toast.warning.bind(toast)
+
+                sendNotification(`Run #${run.count} started!`, {
+                    description: `${Object.keys(run.state.outputs).length} outputs, ${run.error_count} errors`,
                 })
+            }
         },
         ...options,
     })

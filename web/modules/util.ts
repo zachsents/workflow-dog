@@ -17,10 +17,9 @@ export function uniqueId(prefixOrOptions: string | {
         return uniqueId({ prefix: prefixOrOptions })
 
     const { prefix, colon = true, length = 10 } = prefixOrOptions
+    const genId = customAlphabet(alphanumeric, length)
 
-    const gen = customAlphabet(alphanumeric, length)
-
-    return prefix ? `${prefix}${colon ? ":" : ""}${gen()}` : gen()
+    return prefix ? `${prefix}${colon ? ":" : ""}${genId()}` : genId()
 }
 
 

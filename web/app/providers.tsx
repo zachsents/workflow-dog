@@ -1,6 +1,7 @@
 "use client"
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { SupabaseSetup } from "@web/lib/client/supabase"
 import { QueryStoreProvider } from "@web/lib/queries/store"
 import { useState } from "react"
 
@@ -24,6 +25,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <QueryStoreProvider>
                 {children}
             </QueryStoreProvider>
+            <SupabaseSetup />
         </QueryClientProvider>
     )
 }

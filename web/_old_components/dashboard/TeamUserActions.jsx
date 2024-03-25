@@ -1,6 +1,6 @@
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/react"
 import { useMutation } from "@tanstack/react-query"
-import { useDatabaseMutation } from "@web/modules/db"
+import { useSupabaseMutation } from "@web/modules/db"
 import { useQueryParam } from "@web/modules/router"
 import { isEditor, useInviteToTeam, useTeamRoles } from "@web/modules/teams"
 import { TbDots, TbMailCancel, TbPencil, TbPencilOff, TbRefresh, TbUserMinus } from "react-icons/tb"
@@ -20,7 +20,7 @@ function MemberActions({ id: memberId, roles }) {
 
     const thisMemberIsEditor = isEditor(roles)
 
-    const updateRoles = useDatabaseMutation(
+    const updateRoles = useSupabaseMutation(
         (supa, toEditor) => supa
             .from("users_teams")
             .update({
@@ -38,7 +38,7 @@ function MemberActions({ id: memberId, roles }) {
         }
     )
 
-    const removeFromTeam = useDatabaseMutation(
+    const removeFromTeam = useSupabaseMutation(
         supa => supa
             .from("users_teams")
             .delete()
@@ -105,7 +105,7 @@ function InviteeActions({ id: memberId, email }) {
     const [teamId] = useQueryParam("team")
     const { data: roleData } = useTeamRoles()
 
-    const cancelInvitation = useDatabaseMutation(
+    const cancelInvitation = useSupabaseMutation(
         supa => supa
             .from("team_invitations")
             .delete()

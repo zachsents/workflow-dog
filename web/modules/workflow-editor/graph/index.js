@@ -1,5 +1,5 @@
 import { useDebouncedEffect, useDebouncedState } from "@react-hookz/web"
-import { useDatabaseMutation } from "@web/modules/db"
+import { useSupabaseMutation } from "@web/modules/db"
 import { useMountDelay } from "@web/modules/util"
 import { useWorkflow } from "@web/modules/workflows"
 import _ from "lodash"
@@ -25,7 +25,7 @@ export function useGraphSaving() {
     const convertedGraph = useMemo(() => convertGraphForRemote(debouncedRawGraph), [debouncedRawGraph])
     const convertedGraphStr = useMemo(() => JSON.stringify(convertedGraph), [convertedGraph])
 
-    const updateGraph = useDatabaseMutation(
+    const updateGraph = useSupabaseMutation(
         (supa) => supa.from("workflows").update({ graph: convertedGraph }).eq("id", workflow?.id),
         {
             enabled: !!workflow,

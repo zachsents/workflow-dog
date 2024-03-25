@@ -1,14 +1,13 @@
+import type { Session, User } from "@supabase/supabase-js"
 import { UseQueryResult, useQuery } from "@tanstack/react-query"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import type { User, Session } from "@supabase/supabase-js"
-import { Camel } from "shared/types"
 
 
 /**
  * Returns the current user wrapped in a query result.
  */
-export function useUser(): UseQueryResult<Camel<User>> {
+export function useUser(): UseQueryResult<User> {
     return useQuery({
         queryKey: ["currentUser"],
         enabled: false,
@@ -19,7 +18,7 @@ export function useUser(): UseQueryResult<Camel<User>> {
 /**
  * Returns the current session wrapped in a query result.
  */
-export function useSession(): UseQueryResult<Camel<Session>> {
+export function useSession(): UseQueryResult<Session> {
     return useQuery({
         queryKey: ["currentSession"],
         enabled: false,

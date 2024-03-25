@@ -1,5 +1,5 @@
 import { Chip, Kbd, Tooltip } from "@nextui-org/react"
-import { useDatabaseMutation } from "@web/modules/db"
+import { useSupabaseMutation } from "@web/modules/db"
 import { useTeamRoles } from "@web/modules/teams"
 import { useHotkey } from "@web/modules/util"
 import { useWorkflow, useWorkflowIdFromUrl } from "@web/modules/workflows"
@@ -13,7 +13,7 @@ export default function WorkflowStatusChip({ workflowId, withKeyboardShortcut = 
     const { data: workflow } = useWorkflow(workflowId)
     const isEnabled = workflow?.isEnabled
 
-    const toggleEnabled = useDatabaseMutation(
+    const toggleEnabled = useSupabaseMutation(
         supa => supa
             .from("workflows")
             .update({ is_enabled: !isEnabled })

@@ -1,29 +1,35 @@
 import { produce } from "immer"
 import _ from "lodash"
-import { type Context, type MutableRefObject, createContext, useCallback, useContext, useRef } from "react"
-import { type StoreApi, createStore, useStore } from "zustand"
+import { createContext, useCallback, useContext, useRef } from "react"
+import { createStore, useStore, type StoreApi } from "zustand"
 import { DotPath } from "../util"
 
 
+
 type EditorStore = {
-    selectedRunId?: string
+    selectedRunId?: string | null
     contextMenu: {
         position: { x: number, y: number } | null
     }
 }
 
-const EditorStoreContext: Context<StoreApi<EditorStore>> = createContext(null)
+type EditorStoreApi = StoreApi<EditorStore>
 
-export const EditorStoreProvider = ({ children }) => {
-    const storeRef: MutableRefObject<StoreApi<EditorStore>> = useRef()
+const EditorStoreContext = createContext<EditorStoreApi | null>(null)
+
+export function EditorStoreProvider({ children }: { children: any }) {
+    const storeRef = useRef<EditorStoreApi | null>(null)
+
     if (!storeRef.current) {
         storeRef.current = createStore(() => ({
+            selectedRunId: null,
             contextMenu: {
                 // isOpen: false,
                 position: null,
             },
         }))
     }
+
     return (
         <EditorStoreContext.Provider value={storeRef.current}>
             {children}
@@ -35,15 +41,14 @@ export const EditorStoreProvider = ({ children }) => {
 export function useEditorStoreApi() {
     const storeApi = useContext(EditorStoreContext)
 
-    if (!storeApi) {
+    if (!storeApi)
         throw new Error("Missing StoreProvider")
-    }
 
     return storeApi
 }
 
 
-export function useEditorStore(selector: (state: EditorStore) => unknown) {
+export function useEditorStore<T>(selector: (state: EditorStore) => T) {
     return useStore(useEditorStoreApi(), selector)
 }
 
@@ -51,10 +56,11 @@ export function useEditorStore(selector: (state: EditorStore) => unknown) {
 export function useEditorStoreState(path: DotPath<EditorStore>, defaultValue?: any) {
     const editorStore = useEditorStoreApi()
 
-    const value = useEditorStore(s => _.get(s, path))
+    const value = useEditorStore(s => _.get(s, path!))
+    
     const setValue = useCallback((newValue: any) => {
         editorStore.setState(produce(draft => {
-            _.set(draft, path, newValue)
+            _.set(draft, path!, newValue)
         }))
     }, [editorStore, path])
 

@@ -19,7 +19,9 @@ export default function RootLayout({
                 <Providers>
                     {children}
                 </Providers>
-                <Toaster />
+                <Toaster toastOptions={{
+                    descriptionClassName: "text-muted-foreground",
+                }} />
             </body>
         </html>
     )

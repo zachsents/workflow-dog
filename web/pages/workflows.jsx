@@ -5,7 +5,7 @@ import CreateWorkflowButton from "@web/components/dashboard/CreateWorkflowButton
 import DashboardLayout from "@web/components/dashboard/DashboardLayout"
 import Group from "@web/components/layout/Group"
 import TriggerText from "@web/components/workflow-editor/TriggerText"
-import { useDatabaseMutation } from "@web/modules/db"
+import { useSupabaseMutation } from "@web/modules/db"
 import { plural } from "@web/modules/grammar"
 import { useModals } from "@web/modules/modals"
 import { useQueryParam } from "@web/modules/router"
@@ -65,7 +65,7 @@ function WorkflowCard({ id, highlightParts }) {
     const workflowQuery = useWorkflow(id)
     const { name, trigger, lastEditedAt } = workflowQuery.data || {}
 
-    const deleteWorkflow = useDatabaseMutation(
+    const deleteWorkflow = useSupabaseMutation(
         supa => supa
             .from("workflows")
             .delete()

@@ -4,7 +4,7 @@ import { useUser } from "./auth"
 import { useQueryParam } from "./router"
 import { supabase } from "./supabase"
 import { deepCamelCase } from "./util"
-import { useDatabaseMutation } from "./db"
+import { useSupabaseMutation } from "./db"
 
 
 export function useTeamsForUser(userId, selectKeys = ["*"]) {
@@ -129,7 +129,7 @@ export function useInviteToTeam(teamId, inviteeEmail, isValid) {
     const [teamIdParam] = useQueryParam("team")
     teamId ??= teamIdParam
 
-    return useDatabaseMutation(supa => supa.rpc("invite_user_to_team", {
+    return useSupabaseMutation(supa => supa.rpc("invite_user_to_team", {
         _email: inviteeEmail,
         _team_id: teamId,
     }), {

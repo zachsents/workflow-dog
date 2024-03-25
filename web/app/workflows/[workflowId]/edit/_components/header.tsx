@@ -26,75 +26,17 @@ import { TbArrowLeft, TbExternalLink, TbGridPattern, TbHeart, TbMap, TbMenu2 } f
 
 
 export default function EditWorkflowHeader() {
-
-    const { data: workflow } = useWorkflow()
-
-    const [tempName, setTempName] = useState(workflow?.name ?? "")
-    const resetName = () => void setTempName(workflow?.name ?? "")
-    useSyncToState(workflow?.name, setTempName)
-
-    const updateName = useSupabaseMutation(
-        (supabase) => supabase
-            .from("workflows")
-            .update({ name: tempName })
-            .eq("id", workflow?.id!),
-        {
-            enabled: !!workflow && tempName !== workflow.name,
-            invalidateKey: ["workflow", workflow?.id],
-        }
-    )
-
-    const nameInputRef = useRef<HTMLInputElement>(null)
-    const [nameInputWidth, setNameInputWidth] = useState(0)
-    useClickOutside(nameInputRef, () => void updateName.mutate(null))
-
     return (
         <div className="flex items-center justify-between flex-nowrap bg-slate-800 text-primary-foreground px-4 py-2">
             <div className="flex-1 flex items-center">
                 <HeaderMenu />
             </div>
 
-            {/* TODO: change to form with onSubmit for accessibility */}
-            <div
-                className="flex center relative gap-2"
-                style={{ width: nameInputWidth + 65 }}
-            >
-                <Input
-                    className="border-none hover:bg-white/10 focus:bg-white/75 focus:text-foreground"
-                    value={tempName}
-                    onChange={ev => setTempName(ev.currentTarget.value)}
-                    onFocus={ev => ev.currentTarget.select()}
-                    onKeyDown={ev => {
-                        switch (ev.key) {
-                            case "Enter": updateName.mutate(null)
-                                break
-                            case "Escape": resetName()
-                                break
-                            default: return
-                        }
-                        ev.preventDefault()
-                        ev.currentTarget.blur()
-                    }}
-                    ref={nameInputRef}
-                />
-                {updateName.isPending &&
-                    <Loader />}
-                <p
-                    className="absolute pointer-events-none opacity-0 text-sm"
-                    ref={el => {
-                        if (!el) return
-                        setNameInputWidth(el.offsetWidth)
-                    }}
-                >
-                    {tempName}
-                </p>
-            </div>
+            <EditableTitle />
 
             <div className="flex-1 flex justify-end">
                 <div className="flex items-center gap-6">
                     <WorkflowStatusBadge />
-
-                    {/* <WorkflowStatusChip withKeyboardShortcut /> */}
 
                     {/* TODO: Implement UsersOnline component with Supabase Realtime */}
                     {/* <UsersOnline /> */}
@@ -154,6 +96,73 @@ function HeaderMenu() {
             </DropdownMenuContent>
         </DropdownMenu>
     </>)
+}
+
+
+function EditableTitle() {
+
+    const { data: workflow } = useWorkflow()
+
+    const [tempName, setTempName] = useState(workflow?.name ?? "")
+    const resetName = () => void setTempName(workflow?.name ?? "")
+    useSyncToState(workflow?.name, setTempName)
+
+    const updateName = useSupabaseMutation(
+        (supabase) => supabase
+            .from("workflows")
+            .update({ name: tempName })
+            .eq("id", workflow?.id!),
+        {
+            enabled: !!workflow && tempName !== workflow.name,
+            invalidateKey: ["workflow", workflow?.id],
+        }
+    )
+
+    const nameInputRef = useRef<HTMLInputElement>(null)
+    const [nameInputWidth, setNameInputWidth] = useState(0)
+    useClickOutside(nameInputRef, () => void updateName.mutate(null))
+
+    /* TODO: change to form with onSubmit for accessibility */
+    return (
+        <div className="relative flex center gap-2">
+            <Input
+                className="border-none hover:bg-white/10 focus:bg-white/75 focus:text-foreground text-center"
+                style={{ width: nameInputWidth + 65 }}
+                value={tempName}
+                onChange={ev => setTempName(ev.currentTarget.value)}
+                onFocus={ev => ev.currentTarget.select()}
+                onKeyDown={ev => {
+                    switch (ev.key) {
+                        case "Enter": updateName.mutate(null)
+                            break
+                        case "Escape": resetName()
+                            break
+                        default: return
+                    }
+                    ev.preventDefault()
+                    ev.currentTarget.blur()
+                }}
+                ref={nameInputRef}
+            />
+
+            <Loader className={cn(
+                "shrink-0",
+                updateName.isPending
+                    ? "opacity-100"
+                    : "opacity-0 !animate-none"
+            )} />
+
+            <p
+                className="absolute pointer-events-none opacity-0 text-sm"
+                ref={el => {
+                    if (!el) return
+                    setNameInputWidth(el.offsetWidth)
+                }}
+            >
+                {tempName}
+            </p>
+        </div>
+    )
 }
 
 

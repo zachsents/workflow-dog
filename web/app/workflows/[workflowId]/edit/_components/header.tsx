@@ -27,7 +27,7 @@ import { TbArrowLeft, TbExternalLink, TbGridPattern, TbHeart, TbMap, TbMenu2 } f
 
 export default function EditWorkflowHeader() {
     return (
-        <div className="flex items-center justify-between flex-nowrap bg-slate-800 text-primary-foreground px-4 py-2">
+        <div className="flex center flex-nowrap bg-slate-800 text-primary-foreground px-4 py-2">
             <div className="flex-1 flex items-center">
                 <HeaderMenu />
             </div>
@@ -60,7 +60,11 @@ export default function EditWorkflowHeader() {
 
 function HeaderMenu() {
 
-    const { data: workflow } = useWorkflow()
+    const {
+        data: workflow,
+        isSuccess: hasWorkflowLoaded,
+    } = useWorkflow()
+
     const [settings, setSetting] = useEditorSettings()
 
     return (<>
@@ -71,7 +75,7 @@ function HeaderMenu() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild disabled={!hasWorkflowLoaded}>
                     <Link href={`/projects/${workflow?.team_id}/workflows`}>
                         <TbArrowLeft className="mr-2" />
                         Back to Workflows
@@ -168,7 +172,7 @@ function EditableTitle() {
 
 function WorkflowStatusBadge() {
 
-    const { data: workflow } = useWorkflow()
+    const { data: workflow, isSuccess: hasWorkflowLoaded } = useWorkflow()
     const isEnabled = workflow?.is_enabled || false
 
     const setEnabled = useSupabaseMutation(
@@ -193,6 +197,7 @@ function WorkflowStatusBadge() {
                         className={cn(
                             isEnabled && "bg-green-500 hover:bg-green-700",
                             isPending && "opacity-50 pointer-events-none cursor-not-allowed",
+                            !hasWorkflowLoaded && "text-transparent",
                         )}
                         onClick={() => void setEnabled.mutate(null)}
                         aria-disabled={isPending}

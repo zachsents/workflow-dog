@@ -5,6 +5,7 @@ import { useWorkflow } from "@web/modules/workflows"
 import _ from "lodash"
 import { useEffect, useMemo } from "react"
 import { useEdges, useNodes } from "reactflow"
+import { WorkflowGraph } from "../types"
 
 
 export function useGraphSaving() {
@@ -14,7 +15,7 @@ export function useGraphSaving() {
 
     const { data: workflow, isSuccess: isWorkflowLoaded } = useWorkflow()
 
-    const [debouncedRawGraph, onGraphChange] = useDebouncedState({ nodes, edges }, 250)
+    const [debouncedRawGraph, onGraphChange] = useDebouncedState<WorkflowGraph>({ nodes, edges }, 250)
     useEffect(() => {
         if (!isWorkflowLoaded)
             return
@@ -26,7 +27,10 @@ export function useGraphSaving() {
     const convertedGraphStr = useMemo(() => JSON.stringify(convertedGraph), [convertedGraph])
 
     const updateGraph = useSupabaseMutation(
-        (supa) => supa.from("workflows").update({ graph: convertedGraph }).eq("id", workflow?.id),
+        (supabase) => supabase
+            .from("workflows")
+            .update({ graph: convertedGraph as any })
+            .eq("id", workflow!.id),
         {
             enabled: !!workflow,
             // invalidateKey: ["workflow", workflow?.id],
@@ -47,20 +51,17 @@ export function useGraphSaving() {
             return console.debug("Graph is empty, not saving")
 
         console.debug("Saving graph...", convertedGraph)
-        updateGraph.mutateAsync().then(() => console.log("Graph saved"))
+        updateGraph.mutateAsync(null).then(() => console.log("Graph saved"))
     }, [convertedGraphStr], 1000)
 }
 
 
-export function convertGraphFromRemote(graph) {
+export function convertGraphFromRemote(graph: WorkflowGraph) {
     return graph
 }
 
 
-/**
- * @param {{ nodes: import("reactflow").Node[], edges: import("reactflow").Edge[] }} graph
- */
-export function convertGraphForRemote(graph) {
+export function convertGraphForRemote(graph: WorkflowGraph) {
     return {
         nodes: graph.nodes.map(n => _.omit(n, "selected")),
         edges: graph.edges.map(e => _.omit(e, "selected")),

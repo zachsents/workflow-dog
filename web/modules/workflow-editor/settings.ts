@@ -6,11 +6,13 @@ import _ from "lodash"
 type EditorSettings = {
     showGrid: boolean
     showMinimap: boolean
+    verticalLayout: boolean
 }
 
 const defaultSettings: EditorSettings = {
     showGrid: false,
     showMinimap: false,
+    verticalLayout: false,
 }
 
 export function useEditorSettings() {

@@ -2,21 +2,31 @@ import { useDebouncedEffect } from "@react-hookz/web"
 import { useCallback, useReducer } from "react"
 
 
-/**
- * @param {*} value
- * @param {function} setValue
- * @param {object} options
- * @param {number} [options.historyLimit=10]
- * @param {number} [options.debounce=0]
- * @param {function} [options.equality=(a, b) => a === b]
- */
-export function useUndoRedo(value, setValue, {
+type HistoryState<T = unknown> = {
+    past: T[],
+    future: T[],
+    present: T,
+}
+
+type HistoryAction<T = unknown> = {
+    type: "set"
+    value: T
+} | {
+    type: "undo" | "redo"
+}
+
+
+export function useUndoRedo<T>(value: T, setValue: (newValue: T) => void, {
     historyLimit = 15,
     debounce = 0,
     equality = (a, b) => a === b,
+}: {
+    historyLimit?: number,
+    debounce?: number,
+    equality?: (a: T, b: T) => boolean,
 } = {}) {
 
-    const [history, dispatch] = useReducer((state, action) => {
+    const [history, dispatch] = useReducer((state: HistoryState<T>, action: HistoryAction<T>) => {
 
         const canUndo = state.past.length > 0
         const canRedo = state.future.length > 0
@@ -52,7 +62,7 @@ export function useUndoRedo(value, setValue, {
         past: [],
         future: [],
         present: value,
-    })
+    } satisfies HistoryState<T>)
 
     useDebouncedEffect(() => {
         dispatch({
@@ -64,5 +74,5 @@ export function useUndoRedo(value, setValue, {
     const undo = useCallback(() => dispatch({ type: "undo" }), [])
     const redo = useCallback(() => dispatch({ type: "redo" }), [])
 
-    return [history.present, undo, redo]
+    return [history.present, undo, redo] as const
 }

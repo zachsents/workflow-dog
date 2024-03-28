@@ -1,9 +1,9 @@
-import { Textarea } from "@nextui-org/react"
 import { useNodeProperty, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
 import { type RefObject, useEffect, useRef, useState } from "react"
 import { TbAbc } from "react-icons/tb"
 import { WebNodeDefinition } from "@types"
 import type shared from "./shared"
+import { Textarea } from "@web/components/ui/textarea"
 
 
 export default {
@@ -16,11 +16,9 @@ export default {
             bullet: true,
         }
     },
-    renderNode: () => {
+    renderBody: () => {
         const inputRef: RefObject<HTMLTextAreaElement> = useRef()
-
         const selected = useNodePropertyValue(undefined, "selected")
-
         useEffect(() => {
             if (selected)
                 inputRef.current?.focus()
@@ -29,41 +27,32 @@ export default {
         const [value, setValue] = useNodeProperty(undefined, "data.state.value", {
             debounce: 200,
         })
+        const [textLength, setTextLength] = useState(value?.length ?? 0)
 
-        const [textLength, setTextLength] = useState(0)
+
+        console.log(Math.min(12, Math.max(1, Math.ceil(textLength / 28))))
 
         return (
-            <div className="relative">
-                <Textarea
-                    defaultValue={value ?? ""}
-                    onValueChange={val => {
-                        setValue(val)
-                        setTextLength(val.length)
-                    }}
-                    minRows={1}
-                    maxRows={12}
-                    size="sm" variant="bordered" radius="sm"
-                    className="nodrag my-unit-sm"
-                    classNames={{
-                        input: "text-tiny min-w-[13ch] max-w-[28ch] w-[calc(var(--chars)*1ch+1rem)]",
-                        inputWrapper: "bg-white",
-                    }}
-                    style={{
-                        "--chars": textLength,
-                    } as any}
-                    placeholder="Type something..."
-                    ref={inputRef}
-                    onCopy={ev => {
-                        ev.stopPropagation()
-                    }}
-                    onPaste={ev => {
-                        ev.stopPropagation()
-                    }}
-                />
-                <p className="absolute bottom-full text-tiny text-default-500 left-2">
-                    Text
-                </p>
-            </div>
+            <Textarea
+                defaultValue={value ?? ""}
+                onChange={ev => {
+                    setValue(ev.currentTarget.value)
+                    setTextLength(ev.currentTarget.value.length)
+                }}
+                className="nodrag nopan min-w-[13ch] max-w-[28ch] resize-none shadow-none"
+                style={{
+                    width: `calc(${Math.min(28, Math.max(12, textLength))}ch + 1rem)`,
+                    height: `calc(${Math.min(12, Math.max(0, Math.ceil(textLength / 28)))}em + 2em)`,
+                    // "--rows": Math.min(12, Math.max(1, Math.ceil(textLength / 28))),
+                }}
+                placeholder="Type something..."
+                ref={inputRef}
+
+                onCopy={ev => void ev.stopPropagation()}
+                onPaste={ev => void ev.stopPropagation()}
+                onWheel={ev => void ev.stopPropagation()}
+                onScroll={ev => void ev.stopPropagation()}
+            />
         )
     },
 } satisfies WebNodeDefinition<typeof shared>

@@ -1,13 +1,13 @@
 import { useIsMounted, useWindowSize } from "@react-hookz/web"
 import { useBooleanState } from "@web/lib/client/hooks"
 import type { OnEventKeys } from "@web/lib/utils"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 
 
 interface PortalProps {
     children: any
-    parent?: HTMLElement
+    parent?: HTMLElement | React.RefObject<HTMLElement>
     stopPropagation?: Array<OnEventKeys>
 }
 
@@ -67,7 +67,7 @@ export function Portal({ children, parent, stopPropagation = [] }: PortalProps) 
                     >
                         {children}
                     </div>,
-                    parent ?? document.body
+                    (parent instanceof HTMLElement ? parent : parent?.current) ?? document.body
                 )}
         </div>
     )

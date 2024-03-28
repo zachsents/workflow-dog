@@ -1,11 +1,11 @@
-import { useHotkey } from "@web/modules/util"
+import { useHotkeys } from "react-hotkeys-hook"
 import { applyEdgeChanges, applyNodeChanges, useReactFlow } from "reactflow"
 
 
 export function useSelectAll() {
     const rf = useReactFlow()
 
-    useHotkey("mod+a", () => {
+    useHotkeys("mod+a", () => {
         const nodes = rf.getNodes()
         const edges = rf.getEdges()
         rf.setNodes(applyNodeChanges(nodes.map(node => ({
@@ -20,6 +20,5 @@ export function useSelectAll() {
         })), edges))
     }, {
         preventDefault: true,
-        preventInInputs: true,
-    })
+    }, [rf])
 }

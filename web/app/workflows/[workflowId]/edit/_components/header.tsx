@@ -1,6 +1,7 @@
 "use client"
 
 import { useClickOutside } from "@react-hookz/web"
+import { Badge } from "@ui/badge"
 import { Button } from "@ui/button"
 import {
     DropdownMenu,
@@ -12,9 +13,8 @@ import {
     DropdownMenuTrigger,
 } from "@ui/dropdown-menu"
 import { Input } from "@ui/input"
-import Loader from "@web/components/loader"
-import { Badge } from "@ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@ui/tooltip"
+import Loader from "@web/components/loader"
 import { cn } from "@web/lib/utils"
 import { useSupabaseMutation } from "@web/modules/db"
 import { useSyncToState } from "@web/modules/util"
@@ -22,37 +22,39 @@ import { useEditorSettings } from "@web/modules/workflow-editor/settings"
 import { useWorkflow } from "@web/modules/workflows"
 import Link from "next/link"
 import { useRef, useState } from "react"
-import { TbArrowLeft, TbExternalLink, TbGridPattern, TbHeart, TbMap, TbMenu2 } from "react-icons/tb"
+import { TbArrowLeft, TbGridPattern, TbLayoutList, TbMap, TbMenu2 } from "react-icons/tb"
 
 
 export default function EditWorkflowHeader() {
+
+    const { isSuccess: hasWorkflowLoaded } = useWorkflow()
+
     return (
-        <div className="flex center flex-nowrap bg-slate-800 text-primary-foreground px-4 py-2">
-            <div className="flex-1 flex items-center">
-                <HeaderMenu />
-            </div>
+        <div
+            className={cn(
+                "absolute top-0 left-1/2 -translate-x-1/2 z-50 flex center flex-nowrap gap-10 text-primary-foreground bg-slate-800 px-4 py-1 rounded-b-lg shadow-lg transition-transform",
+                !hasWorkflowLoaded && "-translate-y-full"
+            )}
+        >
+            <HeaderMenu />
 
             <EditableTitle />
 
-            <div className="flex-1 flex justify-end">
-                <div className="flex items-center gap-6">
-                    <WorkflowStatusBadge />
+            <WorkflowStatusBadge />
 
-                    {/* TODO: Implement UsersOnline component with Supabase Realtime */}
-                    {/* <UsersOnline /> */}
+            {/* TODO: Implement UsersOnline component with Supabase Realtime */}
+            {/* <UsersOnline /> */}
 
-                    <Button size="sm" variant="secondary" asChild>
-                        <a
-                            href="https://google.com" target="_blank"
-                            className="group flex center gap-2 hover:scale-105 transition-transform"
-                        >
-                            <TbHeart className="group-hover:scale-150 group-hover:fill-red-500 transition" />
-                            Leave Feedback
-                            <TbExternalLink />
-                        </a>
-                    </Button>
-                </div>
-            </div>
+            {/* <Button size="sm" variant="secondary" asChild>
+                <a
+                    href="https://google.com" target="_blank"
+                    className="group flex center gap-2 hover:scale-105 transition-transform"
+                >
+                    <TbHeart className="group-hover:scale-150 group-hover:fill-red-500 transition" />
+                    Leave Feedback
+                    <TbExternalLink />
+                </a>
+            </Button> */}
         </div>
     )
 }
@@ -74,7 +76,7 @@ function HeaderMenu() {
                     <TbMenu2 />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
+            <DropdownMenuContent align="center">
                 <DropdownMenuItem asChild disabled={!hasWorkflowLoaded}>
                     <Link href={`/projects/${workflow?.team_id}/workflows`}>
                         <TbArrowLeft className="mr-2" />
@@ -96,6 +98,13 @@ function HeaderMenu() {
                 >
                     <TbMap className="mr-2" />
                     Show Minimap
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                    checked={settings?.verticalLayout || false}
+                    onCheckedChange={checked => void setSetting("verticalLayout", checked)}
+                >
+                    <TbLayoutList className="mr-2" />
+                    Vertical Node Layout
                 </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
         </DropdownMenu>
@@ -128,9 +137,9 @@ function EditableTitle() {
 
     /* TODO: change to form with onSubmit for accessibility */
     return (
-        <div className="relative flex center gap-2">
+        <div className="relative">
             <Input
-                className="border-none hover:bg-white/10 focus:bg-white/75 focus:text-foreground text-center"
+                className="border-none hover:bg-white/10 focus:bg-white/75 focus:text-foreground text-center max-w-xl text-ellipsis focus:text-clip"
                 style={{ width: nameInputWidth + 65 }}
                 value={tempName}
                 onChange={ev => setTempName(ev.currentTarget.value)}
@@ -149,12 +158,12 @@ function EditableTitle() {
                 ref={nameInputRef}
             />
 
-            <Loader className={cn(
-                "shrink-0",
-                updateName.isPending
-                    ? "opacity-100"
-                    : "opacity-0 !animate-none"
-            )} />
+            <div className={cn(
+                "absolute top-1/2 left-full -translate-y-1/2 px-2",
+                updateName.isPending ? "opacity-100" : "opacity-0",
+            )}>
+                <Loader className={cn(!updateName.isPending && "!animate-none")} />
+            </div>
 
             <p
                 className="absolute pointer-events-none opacity-0 text-sm"

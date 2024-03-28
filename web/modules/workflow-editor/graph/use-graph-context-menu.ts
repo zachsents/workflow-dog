@@ -5,7 +5,7 @@ import { useEditorStoreApi } from "../store"
 export function useGraphContextMenu() {
     const editorStore = useEditorStoreApi()
 
-    const handler = useCallback(ev => {
+    const handler = useCallback((ev: React.MouseEvent<Element, MouseEvent>) => {
         ev.preventDefault()
         editorStore.setState({
             contextMenu: {

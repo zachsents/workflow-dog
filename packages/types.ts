@@ -21,6 +21,10 @@ export interface SharedNodeDefinitionInterface {
     type: keyof DataTypeMap
     group?: boolean
     named?: boolean
+
+    // TODO: implement these
+    groupMin?: number
+    groupMax?: number
 }
 
 export type ServerNodeDefinition<T extends SharedNodeDefinition> = {
@@ -57,14 +61,14 @@ type DataTypeByURI<URI extends keyof DataTypeMap> = DataTypeMap[URI]
 
 
 export type WebNodeDefinition<T extends SharedNodeDefinition> = {
-    icon: ComponentType
+    icon: JSX.ElementType
     color: string
     tags: string[]
     inputs: {
         [K in keyof T["inputs"]]: WebNodeDefinitionInterface
     }
     outputs: {
-        [K in keyof T["outputs"]]: WebNodeDefinitionInterface
+        [K in keyof T["outputs"]]: WebNodeDefinitionOutput
     }
     renderNode?: ComponentType<{ id: string }>
     renderBody?: ComponentType<{ id: string }>
@@ -73,6 +77,15 @@ export type WebNodeDefinition<T extends SharedNodeDefinition> = {
 export interface WebNodeDefinitionInterface {
     description?: string
     bullet?: boolean
+    recommendedNode?: {
+        definition: string
+        handle: string
+        data?: Record<string, any>
+    }
+}
+
+export interface WebNodeDefinitionOutput extends WebNodeDefinitionInterface {
+    selectable?: boolean
 }
 
 

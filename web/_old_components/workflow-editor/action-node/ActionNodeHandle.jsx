@@ -57,7 +57,7 @@ export default function ActionNodeHandle({ id, name, type, definition: passedDef
             x: handleRect.left + handleRect.width / 2,
             y: handleRect.top + handleRect.height / 2 - rf.getNode(nodeId).height / 2,
         })
-        newNodePos.x += isSource ? 200 : -500
+        newNodePos.x += isSource ? 200 : -300
 
         const { definition: newDef, ...newData } = definition.recommendedNode.data
 

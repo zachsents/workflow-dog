@@ -1,6 +1,7 @@
+import { useEventListener } from "@react-hookz/web"
 import "client-only"
 import { useParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 
 export function useCurrentProjectId() {
@@ -72,4 +73,32 @@ export function useLogEffect<T>(state: T, options: string | {
         else
             console.log(state)
     }, [dependencyTransform ? dependencyTransform(state) : state])
+}
+
+
+/**
+ * Simple hook to get hover state. In most cases, we should use CSS hover
+ * states, but this is useful for more complex interactions.
+ * 
+ * Uses a window listener with mousemove event because onMouseEnter and
+ * onMouseLeave events are not reliable.
+ */
+export function useHover<T extends Element>() {
+    const ref = useRef<T>(null)
+
+    const [isHovered, setHovered] = useState(false)
+
+    useEffect(() => {
+        const handler = (event: MouseEvent) => {
+            if (!ref.current)
+                return
+
+            setHovered(ref.current.contains(event.target as Node))
+        }
+
+        window.addEventListener("mousemove", handler)
+        return () => window.removeEventListener("mousemove", handler)
+    }, [])
+
+    return [ref, isHovered] as const
 }

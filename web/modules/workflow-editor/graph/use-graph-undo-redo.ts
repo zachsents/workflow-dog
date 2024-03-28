@@ -1,6 +1,6 @@
-import { useHotkey } from "@web/modules/util"
 import _ from "lodash"
 import { useEffect } from "react"
+import { useHotkeys } from "react-hotkeys-hook"
 import { useEdges, useNodes, useReactFlow } from "reactflow"
 import { useEditorStoreApi } from "../store"
 import { useUndoRedo } from "./use-undo-redo"
@@ -13,7 +13,9 @@ export function useGraphUndoRedo() {
     const nodes = useNodes()
     const edges = useEdges()
 
-    const [, undo, redo] = useUndoRedo({ nodes, edges }, ({ nodes, edges }) => {
+    const graph = { nodes, edges }
+
+    const [, undo, redo] = useUndoRedo<typeof graph>(graph, ({ nodes, edges }) => {
         rf.setNodes(nodes)
         rf.setEdges(edges)
     }, {
@@ -25,17 +27,13 @@ export function useGraphUndoRedo() {
         editorStore.setState({ undo, redo })
     }, [undo, redo, editorStore])
 
-    useHotkey("mod+z", undo, {
+    useHotkeys("mod+z", undo, {
         preventDefault: true,
-        preventInInputs: true,
-        callbackDependencies: [undo],
-    })
+    }, [undo])
 
-    useHotkey("mod+y", redo, {
+    useHotkeys("mod+y", redo, {
         preventDefault: true,
-        preventInInputs: true,
-        callbackDependencies: [redo],
-    })
+    }, [redo])
 
     return [undo, redo]
 }

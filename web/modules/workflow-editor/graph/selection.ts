@@ -1,34 +1,30 @@
 import { produce } from "immer"
 import _ from "lodash"
-import { useStore } from "reactflow"
+import { type ReactFlowInstance, useStore, Node, Edge } from "reactflow"
 
 
 
-export function getSelectedNodes(rf) {
+export function getSelectedNodes(rf: ReactFlowInstance) {
     return rf.getNodes().filter(n => n.selected)
 }
 
 
-export function getSelectedEdges(rf) {
+export function getSelectedEdges(rf: ReactFlowInstance) {
     return rf.getEdges().filter(n => n.selected)
 }
 
 
 export function useSelectedNodes() {
-    return useStore(s => s.getNodes().filter(n => n.selected), _.isEqual)
+    return useStore<Node[]>(s => s.getNodes().filter(n => n.selected), _.isEqual)
 }
 
 
 export function useSelectedEdges() {
-    return useStore(s => s.edges.filter(e => e.selected), _.isEqual)
+    return useStore<Edge[]>(s => s.edges.filter(e => e.selected), _.isEqual)
 }
 
 
-/**
- * @param {import("reactflow").ReactFlowInstance} rf
- * @param {import("reactflow").Node[]} nodes
- */
-export function selectConnectedEdges(rf, nodes) {
+export function selectConnectedEdges(rf: ReactFlowInstance, nodes: Node[]) {
     const nodeIds = nodes.map(n => n.id)
     rf.setEdges(produce(draft => {
         draft.forEach(e => e.selected = nodeIds.includes(e.source) && nodeIds.includes(e.target))
@@ -36,11 +32,7 @@ export function selectConnectedEdges(rf, nodes) {
 }
 
 
-/**
- * @param {import("reactflow").ReactFlowInstance} rf
- * @param {import("reactflow").Node[]} nodes
- */
-export function selectOutgoers(rf, nodes) {
+export function selectOutgoers(rf: ReactFlowInstance, nodes: Node[]) {
     const nodeIds = nodes.map(n => n.id)
     const outgoingEdges = rf.getEdges().filter(e => nodeIds.includes(e.source))
     const outgoingEdgeIds = outgoingEdges.map(e => e.id)
@@ -56,11 +48,7 @@ export function selectOutgoers(rf, nodes) {
 }
 
 
-/**
- * @param {import("reactflow").ReactFlowInstance} rf
- * @param {import("reactflow").Node[]} nodes
- */
-export function selectIncomers(rf, nodes) {
+export function selectIncomers(rf: ReactFlowInstance, nodes: Node[]) {
     const nodeIds = nodes.map(n => n.id)
     const incomingEdges = rf.getEdges().filter(e => nodeIds.includes(e.target))
     const incomingEdgeIds = incomingEdges.map(e => e.id)

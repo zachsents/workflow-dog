@@ -1,40 +1,42 @@
+import { uniqueId } from "@web/modules/util"
 import { produce } from "immer"
+import type { Edge, Node, ReactFlowInstance, XYPosition } from "reactflow"
 import { getNodesBounds } from "reactflow"
 import { PREFIX } from "shared/prefixes"
-import { uniqueId } from "../util"
+import { ActionNodeInput, ActionNodeOutput } from "../types"
 
 
+interface DuplicateElementsOptions {
+    /** Overrides the default offset */
+    xOffset?: number
+    /** Overrides the default offset */
+    yOffset?: number
+    /** Offset used on both axes if xOffset and yOffset are not specified */
+    offset?: number
+    /** Overrides offset */
+    position?: XYPosition
+}
 
+export function duplicateElements(
+    rf: ReactFlowInstance,
+    nodes?: Node[],
+    edges?: Edge[],
+    {
+        xOffset,
+        yOffset,
+        offset = 50,
+        position,
+    }: DuplicateElementsOptions = {}
+) {
 
-/**
- * @typedef {object} DuplicateElementsOptions
- * @property {number} xOffset Overrides the default offset
- * @property {number} yOffset Overrides the default offset
- * @property {number} offset Offset used on both axes if xOffset and yOffset are not specified
- * @property {object} position Overrides offset
- */
-
-
-/**
- * @param {import("reactflow").ReactFlowInstance} rf
- * @param {import("reactflow").Node[]} nodes
- * @param {import("reactflow").Edge[]} edges
- * @param {DuplicateElementsOptions} options
- */
-export function duplicateElements(rf, nodes, edges, {
-    xOffset,
-    yOffset,
-    offset = 50,
-    position,
-} = {}) {
-
-    const rect = getNodesBounds(nodes)
+    const rect = getNodesBounds(nodes ?? [])
     const positionOffsetX = position ? position.x - rect.x : 0
     const positionOffsetY = position ? position.y - rect.y : 0
 
-    const nodeIdMap = {}
-    const nodeInputIdMap = {}
-    const nodeOutputIdMap = {}
+    const nodeIdMap: Record<string, string> = {}
+    const nodeInputIdMap: Record<string, string> = {}
+    const nodeOutputIdMap: Record<string, string> = {}
+
     const newNodes = nodes?.map(n => {
         const newNode = structuredClone(n)
         newNode.id = uniqueId(PREFIX.NODE)
@@ -42,13 +44,13 @@ export function duplicateElements(rf, nodes, edges, {
         newNode.position.y += position ? positionOffsetY : (yOffset ?? offset)
         newNode.selected = true
 
-        newNode.data.inputs?.forEach(input => {
+        newNode.data.inputs?.forEach((input: ActionNodeInput) => {
             const newInputId = uniqueId(PREFIX.INPUT)
             nodeInputIdMap[input.id] = newInputId
             input.id = newInputId
         })
 
-        newNode.data.outputs?.forEach(output => {
+        newNode.data.outputs?.forEach((output: ActionNodeOutput) => {
             const newOutputId = uniqueId(PREFIX.OUTPUT)
             nodeOutputIdMap[output.id] = newOutputId
             output.id = newOutputId
@@ -59,20 +61,20 @@ export function duplicateElements(rf, nodes, edges, {
         return newNode
     }) ?? []
 
-    const newEdges = edges?.map(e => {
+    const newEdges = (edges?.map(e => {
         const newEdge = structuredClone(e)
         newEdge.id = uniqueId(PREFIX.EDGE)
         newEdge.source = nodeIdMap[e.source]
-        newEdge.sourceHandle = nodeOutputIdMap[e.sourceHandle] || e.sourceHandle
+        newEdge.sourceHandle = nodeOutputIdMap[e.sourceHandle!] || e.sourceHandle
         newEdge.target = nodeIdMap[e.target]
-        newEdge.targetHandle = nodeInputIdMap[e.targetHandle] || e.targetHandle
+        newEdge.targetHandle = nodeInputIdMap[e.targetHandle!] || e.targetHandle
         newEdge.selected = true
 
         if (!newEdge.source || !newEdge.target)
             return
 
         return newEdge
-    }).filter(Boolean) ?? []
+    }).filter(Boolean) ?? []) as Edge[]
 
     rf.setNodes(nodes => [
         ...nodes.map(n => produce(n, draft => {

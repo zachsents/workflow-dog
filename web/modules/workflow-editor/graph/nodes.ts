@@ -10,6 +10,7 @@ import { useNodeId, useReactFlow, useStore, useUpdateNodeInternals } from "react
 import { PREFIX } from "shared/prefixes"
 import type { Node } from "shared/types"
 import colors from "tailwindcss/colors"
+import { ActionNode } from "../types"
 
 
 export type NodeDotPath = DotPath<Node>
@@ -18,10 +19,9 @@ export type NodeDotPath = DotPath<Node>
 /**
  * Hook that provides the type definition of a node.
  */
-export function useDefinition(nodeId?: string) {
-    nodeId ??= useNodeId()
-    const definitionId = useStore(s => s.nodeInternals.get(nodeId)?.data?.definition)
-    return useMemo(() => NodeDefinitions.asMap.get(definitionId), [definitionId])
+export function useDefinition(nodeId = useNodeId()) {
+    const definitionId: string = useStore(s => s.nodeInternals.get(nodeId!)?.data?.definition)
+    return useMemo(() => NodeDefinitions.get(definitionId), [definitionId])
 }
 
 
@@ -43,30 +43,28 @@ export function setNodeProperty(rf: ReactFlowInstance, nodeId: string, path: Nod
 /**
  * Hook that provides the value of a node property.
  */
-export function useNodePropertyValue(nodeId: string | undefined, path: NodeDotPath) {
-    nodeId ??= useNodeId()
-    return useStore(s => _.get(s.nodeInternals.get(nodeId), path))
+export function useNodePropertyValue(nodeId = useNodeId(), path: NodeDotPath) {
+    return useStore(s => _.get(s.nodeInternals.get(nodeId!), path))
 }
 
 
 /**
  * Hook that provides a setter for a node property.
  */
-export function useSetNodeProperty(nodeId: string | undefined, path: NodeDotPath, {
+export function useSetNodeProperty(nodeId = useNodeId(), path: NodeDotPath, {
     debounce = 0,
 }: {
     debounce?: number
 } = {}) {
-    nodeId ??= useNodeId()
     const rf = useReactFlow()
-    return useDebouncedCallback(value => setNodeProperty(rf, nodeId, path, value), [nodeId, path, rf], debounce)
+    return useDebouncedCallback(value => setNodeProperty(rf, nodeId!, path, value), [nodeId, path, rf], debounce)
 }
 
 
 /**
  * Hook that provides the value of a node property and a setter.
  */
-export function useNodeProperty(nodeId: string | undefined, path: NodeDotPath, {
+export function useNodeProperty(nodeId = useNodeId(), path: NodeDotPath, {
     defaultValue,
     debounce = 0,
 }: {
@@ -106,13 +104,20 @@ export function useCreateActionNode() {
 
         if (!position) {
             const domNodeBounds = domNode?.getBoundingClientRect()
+
+            if (!domNodeBounds)
+                throw new Error("DOM node bounds not found")
+
             position = rf.screenToFlowPosition({
-                x: domNodeBounds.x + domNodeBounds.width / 2,
-                y: domNodeBounds.y + domNodeBounds.height / 2,
+                x: domNodeBounds!.x + domNodeBounds!.width / 2,
+                y: domNodeBounds!.y + domNodeBounds!.height / 2,
             })
         }
 
-        const definition = NodeDefinitions.asMap.get(definitionId)
+        const definition = NodeDefinitions.get(definitionId)
+
+        if (!definition)
+            throw new Error(`Definition ${definitionId} not found`)
 
         const createInput = (inputDefinitionId: string, inputDefinition: any, extra = {}) => ({
             id: uniqueId({ prefix: PREFIX.INPUT }),
@@ -126,7 +131,7 @@ export function useCreateActionNode() {
             definition: outputDefinitionId,
         })
 
-        const newNode = {
+        const newNode: ActionNode = {
             id: uniqueId({ prefix: PREFIX.NODE }),
             type: "action",
             position,
@@ -161,16 +166,20 @@ export function useCreateActionNode() {
             ..._.omit(params, ["sourceHandleType", "targetHandleType"]),
             ..."source" in params && {
                 target: newNode.id,
-                targetHandle: newNode.data.inputs.find(i => i.definition === params.targetHandleType).id,
+                targetHandle: newNode.data.inputs
+                    ?.find(i => i.definition === params.targetHandleType)
+                    ?.id,
             },
             ..."target" in params && {
                 source: newNode.id,
-                sourceHandle: newNode.data.outputs.find(o => o.definition === params.sourceHandleType).id,
+                sourceHandle: newNode.data.outputs
+                    ?.find(o => o.definition === params.sourceHandleType)
+                    ?.id,
             },
         }))
 
         if (newEdges.length > 0)
-            rf.addEdges(newEdges)
+            rf.addEdges(newEdges as Edge[])
 
         return newNode
     }
@@ -179,32 +188,30 @@ export function useCreateActionNode() {
 }
 
 
-export function useUpdateInternals(nodeId?: string) {
-    nodeId ??= useNodeId()
+export function useUpdateInternals(nodeId = useNodeId()) {
     const update = useUpdateNodeInternals()
-    return useCallback(() => update(nodeId), [nodeId, update])
+    return useCallback(() => update(nodeId!), [nodeId, update])
 }
 
 
-export function useUpdateInternalsWhenNecessary(nodeId?: string) {
-    nodeId ??= useNodeId()
-
+export function useUpdateInternalsWhenNecessary(nodeId = useNodeId()) {
     const updateInternals = useUpdateInternals(nodeId)
 
     const handlesHash = useStore(s => {
-        const node = s.nodeInternals.get(nodeId)
-        return stringHash([
+        const node = s.nodeInternals.get(nodeId!)
+
+        return node ? stringHash([
             node.data.inputs?.map((input: any) => _.pick(input, ["id", "hidden", "mode"])),
             node.data.outputs?.map((output: any) => _.pick(output, ["id", "hidden"])),
             node.data.modifier?.id,
-        ])
+        ]) : null
     })
 
     useEffect(() => {
         updateInternals()
     }, [handlesHash])
 
-    const selected = useStore(s => s.nodeInternals.get(nodeId)?.selected)
+    const selected = useStore(s => s.nodeInternals.get(nodeId!)?.selected)
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -219,9 +226,7 @@ export function useUpdateInternalsWhenNecessary(nodeId?: string) {
 
 
 
-export function useDisabled(nodeId?: string) {
-    nodeId ??= useNodeId()
-
+export function useDisabled(nodeId = useNodeId()) {
     const [disabled, setDisabled] = useNodeProperty(nodeId, "data.disabled", {
         defaultValue: false,
     }) as [boolean, (disabled: boolean) => void]
@@ -238,7 +243,7 @@ export function useDisabled(nodeId?: string) {
         return incomingNodeIds.some(id => findUpstreamDisabled(state, id))
     }
 
-    const isUpstreamDisabled = useStore(s => findUpstreamDisabled(s, nodeId))
+    const isUpstreamDisabled = useStore(s => findUpstreamDisabled(s, nodeId!))
 
     const message = disabled ?
         "This node is disabled." :
@@ -253,29 +258,50 @@ export function useDisabled(nodeId?: string) {
 type NodeColorMode = "json" | "css"
 
 
-export function useNodeColors(nodeId: string | undefined, mode: NodeColorMode = "json") {
+export function useNodeColors(nodeId = useNodeId(), mode: NodeColorMode = "json") {
     const definition = useDefinition(nodeId)
-    return useNodeDefinitionColors(definition?.id, mode)
+    return useNodeDefinitionColors(definition?.id!, mode)
 }
 
 
+
 export function useNodeDefinitionColors(definitionId: string, mode: NodeColorMode = "json") {
-    const definition = NodeDefinitions.asMap.get(definitionId)
+    return useMemo(() => {
+        const definition = NodeDefinitions.get(definitionId)
+        const baseColor = definition?.color || colors.slate[500]
 
-    const baseColor = definition?.color || colors.gray[500]
-    const darkColor = useMemo(() => Color(baseColor).lightness(definition.darkShade ?? 20).hex(), [baseColor, definition.darkShade])
-    const lightColor = useMemo(() => Color(baseColor).lightness(90).hex(), [baseColor])
+        const darkColor = Color(baseColor)
+            .lightness(20)
+            .hex()
 
-    switch (mode) {
-        case "css": return {
-            "--base-color": baseColor,
-            "--dark-color": darkColor,
-            "--light-color": lightColor,
+        const lightColor = Color(baseColor)
+            .lightness(90)
+            .hex()
+
+        switch (mode) {
+            case "css": return {
+                "--base-color": baseColor,
+                "--dark-color": darkColor,
+                "--light-color": lightColor,
+            }
+            case "json": return {
+                baseColor,
+                darkColor,
+                lightColor,
+            }
         }
-        case "json": return {
-            baseColor,
-            darkColor,
-            lightColor,
-        }
-    }
+    }, [definitionId, mode])
+}
+
+
+export function useIsHandleConnected(nodeId = useNodeId(), handleId: string) {
+    return useStore(s => s.edges.some(
+        edge => edge.source === nodeId && edge.sourceHandle === handleId
+            || edge.target === nodeId && edge.targetHandle === handleId
+    ))
+}
+
+
+export function useIsNodeSelected(nodeId = useNodeId()) {
+    return useStore(s => s.nodeInternals.get(nodeId!)?.selected) ?? false
 }

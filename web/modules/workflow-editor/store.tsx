@@ -3,14 +3,20 @@ import _ from "lodash"
 import { createContext, useCallback, useContext, useRef } from "react"
 import { createStore, useStore, type StoreApi } from "zustand"
 import { DotPath } from "../util"
+import { CopyHandler, PasteHandler } from "./graph/use-copy-paste"
 
 
 
 type EditorStore = {
     selectedRunId?: string | null
     contextMenu: {
+        isOpen: boolean
         position: { x: number, y: number } | null
     }
+    undo: () => void
+    redo: () => void
+    copy: CopyHandler
+    paste: PasteHandler
 }
 
 type EditorStoreApi = StoreApi<EditorStore>
@@ -24,9 +30,11 @@ export function EditorStoreProvider({ children }: { children: any }) {
         storeRef.current = createStore(() => ({
             selectedRunId: null,
             contextMenu: {
-                // isOpen: false,
+                isOpen: false,
                 position: null,
             },
+            undo: () => {},
+            redo: () => {},
         }))
     }
 
@@ -53,12 +61,12 @@ export function useEditorStore<T>(selector: (state: EditorStore) => T) {
 }
 
 
-export function useEditorStoreState(path: DotPath<EditorStore>, defaultValue?: any) {
+export function useEditorStoreState<T>(path: DotPath<EditorStore>, defaultValue?: T) {
     const editorStore = useEditorStoreApi()
 
-    const value = useEditorStore(s => _.get(s, path!))
+    const value = useEditorStore(s => _.get(s, path!)) as T
     
-    const setValue = useCallback((newValue: any) => {
+    const setValue = useCallback((newValue: T) => {
         editorStore.setState(produce(draft => {
             _.set(draft, path!, newValue)
         }))

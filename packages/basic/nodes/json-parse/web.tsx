@@ -10,11 +10,19 @@ export default {
     inputs: {
         text: {
             description: "The JSON text.",
+            recommendedNode: {
+                definition: "https://nodes.workflow.dog/basic/text",
+                handle: "text",
+            }
         }
     },
     outputs: {
         object: {
             description: "Parsed data object.",
+            recommendedNode: {
+                definition: "https://nodes.workflow.dog/basic/decompose-object",
+                handle: "object",
+            }
         }
     },
 } satisfies WebNodeDefinition<typeof shared>

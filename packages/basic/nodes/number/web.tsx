@@ -1,8 +1,9 @@
-import { Button, Input } from "@nextui-org/react"
 import { TbMinus, TbNumbers, TbPlus } from "react-icons/tb"
 import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
 import { WebNodeDefinition } from "@types"
 import type shared from "./shared"
+import { Input } from "@web/components/ui/input"
+import { Button } from "@web/components/ui/button"
 
 
 export default {
@@ -15,10 +16,9 @@ export default {
             bullet: true
         }
     },
-    renderNode: ({ id }) => {
+    renderBody: ({ id }) => {
 
         const [value, _setValue] = useNodeProperty(id, "data.state.value")
-
         const setValue = (newValue: string) => _setValue(newValue.replaceAll(/[^0-9.,-]/g, ""))
 
         const increment = () => {
@@ -34,42 +34,31 @@ export default {
         }
 
         return (
-            <div className="relative group">
-                <div className="flex justify-center items-stretch py-unit-xs gap-1">
-                    <div style={{
-                        width: `${Math.max((value?.toString().length || 0) + 1, 2)}ch`
-                    }}>
-                        <Input
-                            value={value ?? ""}
-                            onValueChange={setValue}
-                            size="sm" variant="bordered" radius="sm"
-                            placeholder="0"
-                            className="nodrag"
-                            classNames={{
-                                input: "text-center",
-                                inputWrapper: "p-0 h-auto nodrag",
-                            }}
-                        />
-                    </div>
-                    <div className="flex flex-col items-stretch gap-1">
-                        <Button
-                            size="sm" variant="flat" className="min-w-0 px-1 h-auto flex-1 nodrag text-default-500 rounded-sm opacity-50 group-hover:opacity-100 transition-opacity"
-                            onPress={increment}
-                        >
-                            <TbPlus />
-                        </Button>
-                        <Button
-                            size="sm" variant="flat" className="min-w-0 px-1 h-auto flex-1 nodrag text-default-500 rounded-sm opacity-50 group-hover:opacity-100 transition-opacity"
-                            onPress={decrement}
-                        >
-                            <TbMinus />
-                        </Button>
-                    </div>
-                </div>
+            <div className="self-stretch flex items-stretch gap-1">
+                <Input
+                    value={value ?? ""}
+                    onChange={ev => setValue(ev.currentTarget.value)}
+                    placeholder="0"
+                    className="nodrag nopan text-center shadow-none w-24"
+                />
 
-                <p className="absolute bottom-full text-tiny text-default-500 left-2">
-                    Number
-                </p>
+                <div
+                    className="shrink-0 flex-v items-stretch"
+                    onClick={ev => ev.stopPropagation()}
+                >
+                    <Button
+                        size="sm" variant="ghost" className="px-2 h-auto flex-1"
+                        onClick={increment}
+                    >
+                        <TbPlus />
+                    </Button>
+                    <Button
+                        size="sm" variant="ghost" className="px-2 h-auto flex-1"
+                        onClick={decrement}
+                    >
+                        <TbMinus />
+                    </Button>
+                </div>
             </div>
         )
     }

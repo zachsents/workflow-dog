@@ -1,0 +1,17 @@
+Handles:
+    ☐ Test run value viewer
+    ✔ @today Recommended node @done (3/28/2024, 4:15:16 AM)
+    ✘ Open context menu @cancelled (3/28/2024, 4:15:19 AM)
+    ✔ Property selector @done (3/28/2024, 4:28:27 AM)
+    ✔ Group adding/naming @done (3/28/2024, 1:41:59 PM)
+    ✔ don't render group if no inputs/outputs @done (3/28/2024, 1:42:03 PM)
+
+Nodes:
+    ✔ Custom render functions @done (3/28/2024, 2:35:26 PM)
+    ☐ Integration selector
+    ☐ API Key modal
+
+UI:
+    ☐ Node search
+    ☐ Trigger
+    ☐ Run viewer

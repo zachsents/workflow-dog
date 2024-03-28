@@ -1,7 +1,7 @@
-import { Switch } from "@nextui-org/react"
+import { WebNodeDefinition } from "@types"
+import { Switch } from "@web/components/ui/switch"
 import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
 import { TbCircuitSwitchOpen } from "react-icons/tb"
-import { WebNodeDefinition } from "@types"
 import type shared from "./shared"
 
 
@@ -11,24 +11,17 @@ export default {
     tags: ["Logic", "Basic"],
     inputs: {},
     outputs: {
-        enabled: {
-            bullet: true,
-        }
+        enabled: {}
     },
-    renderNode: () => {
+    renderBody: () => {
         const [value, setValue] = useNodeProperty(undefined, "data.state.value")
 
         return (
-            <div className="relative">
+            <div className="nodrag nopan" onClick={ev => ev.stopPropagation()}>
                 <Switch
-                    size="sm"
-                    isSelected={value || false}
-                    onValueChange={setValue}
-                    className="nodrag my-unit-sm"
+                    checked={value || false}
+                    onCheckedChange={setValue}
                 />
-                <p className="absolute bottom-full text-tiny text-default-500 left-2">
-                    Switch
-                </p>
             </div>
         )
     },

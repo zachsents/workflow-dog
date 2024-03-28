@@ -24,6 +24,7 @@ import { toPng } from "html-to-image"
 import Link from "next/link"
 import { useRef, useState } from "react"
 import { TbArrowLeft, TbGridPattern, TbLayoutList, TbMap, TbMenu2, TbPhoto } from "react-icons/tb"
+import colors from "tailwindcss/colors"
 
 
 export default function EditWorkflowHeader() {
@@ -71,17 +72,18 @@ function HeaderMenu() {
     const [settings, setSetting] = useEditorSettings()
 
     const downloadImage = () => {
-        toPng(document.getElementById("workflow-graph-editor")!, {
-            // width: bounds.width,
-            // height: bounds.height,
-        }).then(dataUrl => {
-            const a = document.createElement("a")
-            const fileName = (workflow?.name || "workflow")
-                .replaceAll(/[^\w\-]+/g, "_")
-            a.setAttribute("download", `${fileName}.png`)
-            a.setAttribute("href", dataUrl)
-            a.click()
-        })
+        setTimeout(() => {
+            toPng(document.querySelector("#workflow-graph-editor .react-flow__pane") as HTMLElement, {
+                backgroundColor: colors.slate[50],
+            }).then(dataUrl => {
+                const a = document.createElement("a")
+                const fileName = (workflow?.name || "workflow")
+                    .replaceAll(/[^\w\-]+/g, "_")
+                a.setAttribute("download", `${fileName}.png`)
+                a.setAttribute("href", dataUrl)
+                a.click()
+            })
+        }, 0)
     }
 
     return (<>

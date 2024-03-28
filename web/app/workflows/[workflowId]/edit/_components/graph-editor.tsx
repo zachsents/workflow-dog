@@ -16,7 +16,7 @@ import { useSelectAll } from "@web/modules/workflow-editor/graph/use-select-all"
 import { useEditorSettings } from "@web/modules/workflow-editor/settings"
 import { useEditorStore } from "@web/modules/workflow-editor/store"
 import { TbArrowBack, TbArrowForward } from "react-icons/tb"
-import ReactFlow, { Background, BackgroundVariant, ControlButton, Controls, Edge, MiniMap, Node, useEdgesState, useNodesState, type ControlButtonProps } from "reactflow"
+import ReactFlow, { Background, BackgroundVariant, ControlButton, Controls, Edge, MiniMap, Node, useEdgesState, useNodesState, type ControlButtonProps, Panel } from "reactflow"
 import "reactflow/dist/style.css"
 import colors from "tailwindcss/colors"
 import ContextMenu from "./context-menu"
@@ -24,6 +24,7 @@ import DataEdge from "./data-edge"
 import GhostBuster from "./ghost-buster"
 import NodeToolbar from "./node-toolbar"
 import ActionNode from "./action-node/action-node"
+import EditorToolbar from "./editor-toolbar"
 
 
 const nodeTypes = {
@@ -130,6 +131,10 @@ export default function WorkflowGraphEditor({
 
                 <NodeToolbar />
                 <ContextMenu />
+
+                <Panel position="bottom-center">
+                    <EditorToolbar />
+                </Panel>
             </ReactFlow>
             <GhostBuster />
             <GraphHooks />

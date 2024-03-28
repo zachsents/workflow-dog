@@ -20,9 +20,10 @@ import { useSupabaseMutation } from "@web/modules/db"
 import { useSyncToState } from "@web/modules/util"
 import { useEditorSettings } from "@web/modules/workflow-editor/settings"
 import { useWorkflow } from "@web/modules/workflows"
+import { toPng } from "html-to-image"
 import Link from "next/link"
 import { useRef, useState } from "react"
-import { TbArrowLeft, TbGridPattern, TbLayoutList, TbMap, TbMenu2 } from "react-icons/tb"
+import { TbArrowLeft, TbGridPattern, TbLayoutList, TbMap, TbMenu2, TbPhoto } from "react-icons/tb"
 
 
 export default function EditWorkflowHeader() {
@@ -69,6 +70,20 @@ function HeaderMenu() {
 
     const [settings, setSetting] = useEditorSettings()
 
+    const downloadImage = () => {
+        toPng(document.getElementById("workflow-graph-editor")!, {
+            // width: bounds.width,
+            // height: bounds.height,
+        }).then(dataUrl => {
+            const a = document.createElement("a")
+            const fileName = (workflow?.name || "workflow")
+                .replaceAll(/[^\w\-]+/g, "_")
+            a.setAttribute("download", `${fileName}.png`)
+            a.setAttribute("href", dataUrl)
+            a.click()
+        })
+    }
+
     return (<>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -82,6 +97,13 @@ function HeaderMenu() {
                         <TbArrowLeft className="mr-2" />
                         Back to Workflows
                     </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    disabled={!hasWorkflowLoaded}
+                    onSelect={downloadImage}
+                >
+                    <TbPhoto className="mr-2" />
+                    Export Image (PNG)
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Editor Settings</DropdownMenuLabel>

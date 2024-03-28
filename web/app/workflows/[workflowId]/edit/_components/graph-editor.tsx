@@ -96,6 +96,7 @@ export default function WorkflowGraphEditor({
                 // zoomOnDoubleClick
                 // zoomOnScroll={false}
 
+                id="workflow-graph-editor"
                 className="w-full h-full bg-slate-50"
 
                 onCopy={onCopy}

@@ -8,11 +8,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@ui/dialog"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@ui/popover"
 import { ScrollArea } from "@ui/scroll-area"
 import {
     Tooltip,
@@ -21,7 +16,7 @@ import {
     TooltipTrigger,
 } from "@ui/tooltip"
 import { Button, ButtonProps } from "@web/components/ui/button"
-import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@web/components/ui/command"
+import { Input } from "@web/components/ui/input"
 import { useDialogState } from "@web/lib/client/hooks"
 import { cn } from "@web/lib/utils"
 import { useCreateActionNode, useIsHandleConnected } from "@web/modules/workflow-editor/graph/nodes"
@@ -30,12 +25,10 @@ import { produce } from "immer"
 import type { WebNodeDefinitionOutput } from "packages/types"
 import { DataTypeDefinitions, NodeDefinitions } from "packages/web"
 import { useMemo, useRef, useState } from "react"
-import { createPortal } from "react-dom"
 import { TbActivity, TbPencil, TbSparkles, TbX } from "react-icons/tb"
 import { HandleType, Position, Handle as RFHandle, useNodeId, useReactFlow } from "reactflow"
 import util from "util"
 import PropertySelector from "./property-selector"
-import { Input } from "@web/components/ui/input"
 
 
 type Recommendation = {

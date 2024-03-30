@@ -25,6 +25,7 @@ import GhostBuster from "./ghost-buster"
 import NodeToolbar from "./node-toolbar"
 import ActionNode from "./action-node/action-node"
 import EditorToolbar from "./editor-toolbar"
+import TriggerControl from "./trigger-control"
 
 
 const nodeTypes = {
@@ -134,6 +135,10 @@ export default function WorkflowGraphEditor({
 
                 <Panel position="bottom-center">
                     <EditorToolbar />
+                </Panel>
+
+                <Panel position="top-left" className="!m-2">
+                    <TriggerControl />
                 </Panel>
             </ReactFlow>
             <GhostBuster />

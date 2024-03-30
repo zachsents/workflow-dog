@@ -19,9 +19,7 @@ export async function setWorkflowIsEnabled(workflowId: string, isEnabled: boolea
         .select("is_enabled")
         .single()
 
-    const error = remapError(query, {
-        "PGRST116": "You don't have permission."
-    })
+    const error = remapError(query)
     if (error) return error
 
     console.debug(`${isEnabled ? "Enabled" : "Disabled"} workflow! (ID: ${workflowId})`)
@@ -49,9 +47,7 @@ export async function deleteWorkflow(workflowId: string) {
         .select("id")
         .single()
 
-    const error = remapError(query, {
-        "PGRST116": "You don't have permission."
-    })
+    const error = remapError(query)
     if (error) return error
 
     console.debug(`Deleted workflow! (ID: ${workflowId})`)
@@ -75,9 +71,7 @@ export async function renameWorkflow(workflowId: string, name: string) {
         .select("name")
         .single()
 
-    const error = remapError(query, {
-        "PGRST116": "You don't have permission."
-    })
+    const error = remapError(query)
     if (error) return error
 
     console.debug(`Renamed workflow! (ID: ${workflowId})`)

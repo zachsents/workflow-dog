@@ -111,14 +111,23 @@ export async function requireLogin() {
 }
 
 
+const commonMessages = {
+    "PGRST116": "You don't have permission.",
+}
+
 export function remapError(result: any, messages: Record<string, string> = {}) {
     if (!result.error)
         return null
 
+    const message = {
+        ...commonMessages,
+        ...messages,
+    }[result.error.code] || result.error.message
+
     return {
         error: {
             ...result.error,
-            message: messages[result.error.code] || result.error.message,
+            message,
         }
     }
 }

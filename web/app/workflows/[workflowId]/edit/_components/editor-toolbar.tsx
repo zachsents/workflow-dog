@@ -115,7 +115,7 @@ export default function EditorToolbar() {
                 </PopoverAnchor>
                 <PopoverContent
                     side="top" align="center"
-                    className="p-1 w-[240px] shadow-md flex-v items-stretch gap-1"
+                    className="p-1 w-[240px] shadow-md flex flex-col-reverse items-stretch gap-1"
                     onOpenAutoFocus={ev => ev.preventDefault()}
                 >
                     {searchResults.map(result =>
@@ -128,7 +128,7 @@ export default function EditorToolbar() {
                 </PopoverContent>
             </Popover>
 
-            <TooltipProvider delayDuration={0}>
+            {/* <TooltipProvider delayDuration={0}>
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button size="icon" onClick={dialog.open}>
@@ -139,7 +139,7 @@ export default function EditorToolbar() {
                         <p>Explore more tasks</p>
                     </TooltipContent>
                 </Tooltip>
-            </TooltipProvider>
+            </TooltipProvider> */}
 
             <Dialog {...dialog.dialogProps}>
                 <DialogContent>

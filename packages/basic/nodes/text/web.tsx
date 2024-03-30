@@ -29,9 +29,6 @@ export default {
         })
         const [textLength, setTextLength] = useState(value?.length ?? 0)
 
-
-        console.log(Math.min(12, Math.max(1, Math.ceil(textLength / 28))))
-
         return (
             <Textarea
                 defaultValue={value ?? ""}

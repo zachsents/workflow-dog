@@ -59,7 +59,9 @@ const columns: DataTableColumnDef<Partial<Workflow>>[] = [
                 <div className="px-4 py-6">
                     <b>{name}</b>
                     <p className="text-muted-foreground">
-                        {TriggerDefinitions.get(triggerType)?.whenName || "Unknown trigger"}
+                        {triggerType
+                            ? (TriggerDefinitions.get(triggerType)?.whenName || "Unknown trigger")
+                            : "No trigger set"}
                     </p>
                 </div>
             )

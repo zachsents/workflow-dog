@@ -3,6 +3,7 @@ import type { Node, Workflow, WorkflowRunState } from "shared/types.js"
 import { ZodSchema, z } from "zod"
 import type { serverDataTypes } from "./_barrel-server-data-types"
 import type { serverTriggers } from "./_barrel-server-triggers"
+import type { IconType } from "react-icons/lib/iconBase"
 
 
 /* -------------------------------------------------------------------------- */
@@ -61,7 +62,7 @@ type DataTypeByURI<URI extends keyof DataTypeMap> = DataTypeMap[URI]
 
 
 export type WebNodeDefinition<T extends SharedNodeDefinition> = {
-    icon: JSX.ElementType
+    icon: IconType | ComponentType
     color: string
     tags: string[]
     inputs: {
@@ -70,7 +71,10 @@ export type WebNodeDefinition<T extends SharedNodeDefinition> = {
     outputs: {
         [K in keyof T["outputs"]]: WebNodeDefinitionOutput
     }
+
+    /** @deprecated Not implemented in new version */
     renderNode?: ComponentType<{ id: string }>
+
     renderBody?: ComponentType<{ id: string }>
 }
 
@@ -117,10 +121,14 @@ export type ServerTriggerDefinition<T extends SharedTriggerDefinition> = {
 }
 
 export type WebTriggerDefinition<T extends SharedTriggerDefinition> = {
-    icon: ComponentType
+    icon: IconType | ComponentType
     color: string
     tags: string[]
-    renderConfig?: ComponentType<{ workflowId: string, workflow: Workflow }>
+    renderConfig?: ComponentType<{
+        workflowId: string
+        workflow: Workflow
+        onClose: () => void
+    }>
 }
 
 
@@ -181,7 +189,7 @@ export type ServerServiceDefinition<T extends SharedServiceDefinition> = {
 }
 
 export type WebServiceDefinition<T extends SharedServiceDefinition> = {
-    icon: ComponentType
+    icon: IconType | ComponentType
     color: string
     transformScope: (scope: string) => string
 }
@@ -202,5 +210,5 @@ export type ServerDataTypeDefinition<T extends SharedDataTypeDefinition> = {
 }
 
 export type WebDataTypeDefinition<T extends SharedDataTypeDefinition> = {
-    icon: ComponentType
+    icon: IconType | ComponentType
 }

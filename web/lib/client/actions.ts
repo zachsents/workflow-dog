@@ -1,17 +1,20 @@
-import { useMutation } from "@tanstack/react-query"
+import { type QueryKey, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useQueryStoreApi } from "../queries/store"
 import { produce } from "immer"
 import _ from "lodash"
 
+
 interface UseActionOptions {
     showLoadingToast?: boolean
     successToast?: React.ReactNode | ((data: void) => React.ReactNode)
     showErrorToast?: boolean
+    invalidateKey?: QueryKey
 }
 
 export function useAction(action: (...args: any[]) => Promise<any>, options?: UseActionOptions) {
     const store = useQueryStoreApi()
+    const queryClient = useQueryClient()
 
     const mutation = useMutation({
         mutationFn: async (args: any[]) => {
@@ -31,6 +34,11 @@ export function useAction(action: (...args: any[]) => Promise<any>, options?: Us
                                 _.set(draft, result.store.path, result.store.value)
                         }))
                     }
+
+                    if (options?.invalidateKey)
+                        queryClient.invalidateQueries({
+                            queryKey: options.invalidateKey,
+                        })
 
                     return result
                 })

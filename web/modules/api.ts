@@ -28,7 +28,7 @@ export function useApiMutation(endpoint: string, {
                 headers: {
                     "Content-Type": "application/json",
                     ...authenticated && {
-                        "Authorization": `Bearer ${session.accessToken}`,
+                        "Authorization": `Bearer ${session?.access_token}`,
                     }
                 },
                 body: JSON.stringify(body),

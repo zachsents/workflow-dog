@@ -84,24 +84,16 @@ export function useOnConnect() {
 
         // TODO: Implement a function that checks if the types match
         const anyType = "https://data-types.workflow.dog/basic/any"
-        if (
-            sourceType?.id == targetType?.id
+        const areTypesCompatible = sourceType?.id == targetType?.id
             || sourceType?.id === anyType
             || targetType?.id === anyType
-        ) {
-            console.debug(`Connected ${sourceType?.name} to ${targetType?.name}`, sourceType, targetType)
-            connect()
-            return
-        }
 
-        console.debug(`Tried to connect ${sourceType?.name} with ${targetType?.name}`, sourceType, targetType)
+        connect(!areTypesCompatible)
+        console.debug(`Connected ${sourceType?.name} to ${targetType?.name}`, sourceType, targetType)
 
-        toast(`A ${sourceType?.name || "Unknown"} output can't be connected to a ${targetType?.name || "Unknown"} input.`, {
-            action: {
-                label: "Connect anyway",
-                onClick: () => void connect(true),
-            },
-        })
-
+        if (!areTypesCompatible)
+            toast(`You conneced a ${sourceType?.name || "Unknown"} output to a ${targetType?.name || "Unknown"} input.`, {
+                description: "Since the types don't match, this could lead to unexpected behavior."
+            })
     }, [])
 }

@@ -1,8 +1,11 @@
 "use client"
 
 import {
+    Cell,
     Column,
     ColumnDef,
+    Header,
+    Row,
     SortingState,
     TableOptions,
     flexRender,
@@ -20,105 +23,66 @@ import {
     TableRow,
 } from "@ui/table"
 import { cn } from "@web/lib/utils"
-import { useState } from "react"
+import React, { forwardRef, useState } from "react"
 import { TbCaretDownFilled, TbCaretUpDown, TbCaretUpFilled } from "react-icons/tb"
 import { Button, ButtonProps } from "./button"
 
 
-export type DataTableColumnDef<TData, TValue = unknown> = {
-    sortable?: boolean
-} & ColumnDef<TData, TValue>
-
-interface DataTableProps<TData, TValue> {
-    columns: DataTableColumnDef<TData, TValue>[]
+interface DataTableProps<TData, TValue> extends Omit<React.ComponentProps<typeof Table>, "children"> {
+    columns: ColumnDef<TData, TValue>[]
     data: TData[],
-    classNames?: {
-        wrapper?: string
-        row?: string
-        cell?: string
-    }
-    props?: {
-        row?: React.HTMLProps<HTMLTableRowElement>
-    }
     tableOptions?: Partial<TableOptions<TData>>
+    empty?: any
+    children?: (row: Row<unknown>) => React.ReactNode
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
-    classNames,
-    props,
     tableOptions,
+    empty = "No results.",
+    children = (row) => <DataTableRow row={row} key={row.id} />,
+    className,
+    ...props
 }: DataTableProps<TData, TValue>) {
-
-    const [sorting, setSorting] = useState<SortingState>([])
 
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
-        onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
-        state: {
-            sorting,
-        },
         ...tableOptions,
     })
 
     return (
-        <div className={cn("rounded-md border", classNames?.wrapper)}>
-            <Table>
+        <div className={cn("rounded-md border", className)}>
+            <Table {...props}>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => {
-
-                                const columnDef: DataTableColumnDef<TData, TValue> = header.column.columnDef
-
-                                return (
-                                    <TableHead key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : columnDef.sortable
-                                                ? <SortableHeader column={header.column}>
-                                                    {flexRender(
-                                                        columnDef.header,
-                                                        header.getContext()
-                                                    )}
-                                                </SortableHeader>
-                                                : flexRender(
-                                                    columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                    </TableHead>
-                                )
-                            })}
+                            {headerGroup.headers.map((header) =>
+                                <TableHead key={header.id}>
+                                    {header.isPlaceholder
+                                        ? null
+                                        : header.column.columnDef.enableSorting
+                                            ? <SortableHeader header={header} />
+                                            : flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                </TableHead>
+                            )}
                         </TableRow>
                     ))}
                 </TableHeader>
                 <TableBody>
-                    {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row) => (
-                            <TableRow
-                                key={row.id}
-                                data-state={row.getIsSelected() && "selected"}
-                                {...props?.row}
-                                className={classNames?.row}
-                            >
-                                {row.getVisibleCells().map((cell) => (
-                                    <TableCell className={classNames?.cell} key={cell.id}>
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        ))
-                    ) : (
+                    {table.getRowModel().rows?.length ?
+                        table.getRowModel().rows.map((row) => children(row)) :
                         <TableRow>
                             <TableCell colSpan={columns.length} className="h-24 text-center">
-                                No results.
+                                {empty}
                             </TableCell>
-                        </TableRow>
-                    )}
+                        </TableRow>}
                 </TableBody>
             </Table>
         </div>
@@ -126,30 +90,75 @@ export function DataTable<TData, TValue>({
 }
 
 
-interface SortableHeaderProps extends ButtonProps {
-    column: Column<any>
+interface DataTableCellProps extends React.ComponentProps<typeof TableCell> {
+    cell: Cell<unknown, unknown>
 }
 
-function SortableHeader({ children, column, ...props }: SortableHeaderProps) {
+export const DataTableCell = forwardRef<React.ElementRef<typeof TableCell>, DataTableCellProps>(({
+    cell,
+    children = flexRender(
+        cell.column.columnDef.cell,
+        cell.getContext()
+    ),
+    ...props
+}, ref) => {
+    return (
+        <TableCell
+            {...props}
+            ref={ref}
+        >
+            {children}
+        </TableCell>
+    )
+})
 
-    const sortDir = column.getIsSorted()
+
+interface DataTableRowProps extends Omit<React.ComponentProps<typeof TableRow>, "children"> {
+    row: Row<unknown>
+    children?: (cell: Cell<unknown, unknown>) => React.ReactNode
+}
+
+export const DataTableRow = forwardRef<React.ElementRef<typeof TableRow>, DataTableRowProps>(({
+    row,
+    children = (cell) => <DataTableCell cell={cell} key={cell.id} />,
+    ...props
+}, ref) => {
+    return (
+        <TableRow
+            data-state={row.getIsSelected() && "selected"}
+            {...props}
+            ref={ref}
+        >
+            {row.getVisibleCells().map((cell) => children(cell))}
+        </TableRow>
+    )
+})
+
+
+interface SortableHeaderProps<TData, TValue> extends ButtonProps {
+    header: Header<TData, TValue>
+}
+
+function SortableHeader<TData, TValue>({ header, ...props }: SortableHeaderProps<TData, TValue>) {
+
+    const sortDir = header.column.getIsSorted()
     const isSorted = !!sortDir
     const isSortedAsc = sortDir === "asc"
+
+    const Icon = isSorted
+        ? isSortedAsc
+            ? TbCaretUpFilled
+            : TbCaretDownFilled
+        : TbCaretUpDown
 
     return (
         <Button
             variant="ghost"
-            onClick={() => column.toggleSorting(isSortedAsc)}
+            onClick={() => header.column.toggleSorting(isSortedAsc)}
             {...props}
         >
-            {children}
-            <div className="ml-2">
-                {isSorted
-                    ? isSortedAsc
-                        ? <TbCaretUpFilled />
-                        : <TbCaretDownFilled />
-                    : <TbCaretUpDown />}
-            </div>
+            {flexRender(header.column.columnDef.header, header.getContext())}
+            <Icon className="ml-2" />
         </Button>
     )
 }

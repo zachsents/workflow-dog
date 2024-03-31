@@ -26,6 +26,7 @@ import NodeToolbar from "./node-toolbar"
 import ActionNode from "./action-node/action-node"
 import EditorToolbar from "./editor-toolbar"
 import TriggerControl from "./trigger-control"
+import RunControls from "./run-controls/run-controls"
 
 
 const nodeTypes = {
@@ -137,8 +138,12 @@ export default function WorkflowGraphEditor({
                     <EditorToolbar />
                 </Panel>
 
-                <Panel position="top-left" className="!m-2">
+                <Panel position="top-left" className="!m-2 !pointer-events-none">
                     <TriggerControl />
+                </Panel>
+
+                <Panel position="top-right" className="!m-2 !pointer-events-none">
+                    <RunControls />
                 </Panel>
             </ReactFlow>
             <GhostBuster />

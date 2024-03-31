@@ -5,12 +5,18 @@ import { useEffect, useRef, useState } from "react"
 
 
 export function useCurrentProjectId() {
-    return useParams()?.projectId
+    const params = useParams()
+    return Array.isArray(params?.projectId)
+        ? params.projectId[0]
+        : params?.projectId
 }
 
 
 export function useCurrentWorkflowId() {
-    return useParams()?.workflowId as string | undefined
+    const params = useParams()
+    return Array.isArray(params?.workflowId)
+        ? params.workflowId[0]
+        : params?.workflowId
 }
 
 

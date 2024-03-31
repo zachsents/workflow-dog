@@ -24,11 +24,6 @@ async function WorkflowsTableLoader({ projectId }: { projectId: string }) {
         .throwOnError()
 
     const workflows = query.data ?? []
-    workflows.forEach(wf => {
-        wf.created_at = new Date(wf.created_at!).toLocaleDateString(undefined, {
-            dateStyle: "medium",
-        })
-    })
 
     return (
         <WorkflowsTableClient workflows={workflows} />

@@ -1,4 +1,4 @@
-import { UseMutationOptions, useMutation, useQuery } from "@tanstack/react-query"
+import { type UseMutationOptions, useMutation, useQuery } from "@tanstack/react-query"
 import { useCurrentWorkflowId } from "@web/lib/client/hooks"
 import { useSupabaseBrowser } from "@web/lib/client/supabase"
 import "client-only"
@@ -152,7 +152,7 @@ export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
 
     const editorStore = useEditorStoreApi()
 
-    return useMutation({
+    return useMutation<any, any, any>({
         mutationFn: async (body: any) => {
             const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflowId}/run`)
 

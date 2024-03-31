@@ -1,7 +1,8 @@
 "use client"
 
+import { ColumnDef, Row } from "@tanstack/react-table"
 import { Button } from "@ui/button"
-import { DataTable, type DataTableColumnDef } from "@ui/data-table"
+import { DataTable } from "@ui/data-table"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -15,6 +16,7 @@ import { cn } from "@web/lib/utils"
 import { TbCheck, TbDots, TbPencil, TbPencilOff, TbUserMinus } from "react-icons/tb"
 import { changeEditorRole, removeMember } from "../../actions"
 
+
 type Member = {
     id: string
     email: string
@@ -23,99 +25,38 @@ type Member = {
     isYou: boolean
 }
 
-const columns: DataTableColumnDef<Partial<Member>>[] = [
+const columns: ColumnDef<Partial<Member>>[] = [
     {
-        id: "email",
-        accessorFn: (row) => ({ email: row.email, isYou: row.isYou }),
+        accessorKey: "email",
         header: "Email",
-        sortable: true,
-        cell: ({ row }) => {
-            const { email, isYou } = row.getValue("email") as {
-                email: string,
-                isYou: boolean
-            }
-            return (
-                <p className="px-4">
-                    <span>{email}</span>
-                    {isYou &&
-                        <span className="text-muted-foreground">{" "}(you)</span>}
-                </p>
-            )
-        }
+        enableSorting: true,
+        cell: ({ row }) =>
+            <p className="px-4">
+                <span>{row.getValue("email")}</span>
+                {row.original.isYou &&
+                    <span className="text-muted-foreground">{" "}(you)</span>}
+            </p>
     },
     {
         accessorKey: "isViewer",
         header: "Viewer",
-        sortable: true,
-        cell: ({ row }) => row.getValue("isViewer")
+        enableSorting: true,
+        cell: ({ getValue }) => getValue()
             ? <TbCheck className="mx-8" />
             : null,
     },
     {
         accessorKey: "isEditor",
         header: "Editor",
-        sortable: true,
-        cell: ({ row }) => row.getValue("isEditor")
+        enableSorting: true,
+        cell: ({ getValue }) => getValue()
             ? <TbCheck className="mx-8" />
             : null,
     },
     {
         id: "actions",
-        cell: ({ row }) => {
-            const projectId = useCurrentProjectId()
-            const { isYou } = row.getValue("email") as { isYou: boolean }
-
-            const [allowEditing] = useAction(
-                changeEditorRole.bind(null, projectId, row.id),
-                {
-                    showLoadingToast: true,
-                    showErrorToast: true,
-                    successToast: "Role changed!",
-                }
-            )
-
-            const [removeMemberAction] = useAction(
-                removeMember.bind(null, projectId, row.id),
-                {
-                    showLoadingToast: true,
-                    showErrorToast: true,
-                    successToast: "Removed member!",
-                }
-            )
-
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost" size="icon"
-                            disabled={isYou}
-                        >
-                            <TbDots className={cn(isYou && "opacity-0")} />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        {row.getValue("isEditor")
-                            ? <DropdownMenuItem onSelect={() => void allowEditing(false)}>
-                                <TbPencilOff className="mr-2" />
-                                Disallow editing
-                            </DropdownMenuItem>
-                            : <DropdownMenuItem onSelect={() => void allowEditing(true)}>
-                                <TbPencil className="mr-2" />
-                                Allow editing
-                            </DropdownMenuItem>}
-
-                        <DropdownMenuItem
-                            onSelect={() => removeMemberAction()}
-                            className="text-destructive"
-                        >
-                            <TbUserMinus className="mr-2" />
-                            Remove from team
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )
-        },
-    }
+        cell: ({ row }) => <ActionsMenu row={row} />,
+    },
 ]
 
 export default function MembersTableClient({
@@ -136,6 +77,63 @@ export default function MembersTableClient({
             tableOptions={{
                 getRowId: (row) => row.id!,
             }}
+            empty="No members."
         />
+    )
+}
+
+
+function ActionsMenu({ row }: { row: Row<Partial<Member>> }) {
+    const projectId = useCurrentProjectId()
+    const isYou = row.original.isYou
+
+    const [allowEditing] = useAction(
+        changeEditorRole.bind(null, projectId, row.id),
+        {
+            showLoadingToast: true,
+            showErrorToast: true,
+            successToast: "Role changed!",
+        }
+    )
+
+    const [removeMemberAction] = useAction(
+        removeMember.bind(null, projectId, row.id),
+        {
+            showLoadingToast: true,
+            showErrorToast: true,
+            successToast: "Removed member!",
+        }
+    )
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="ghost" size="icon"
+                    disabled={isYou}
+                >
+                    <TbDots className={cn(isYou && "opacity-0")} />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                {row.getValue("isEditor")
+                    ? <DropdownMenuItem onSelect={() => void allowEditing(false)}>
+                        <TbPencilOff className="mr-2" />
+                        Disallow editing
+                    </DropdownMenuItem>
+                    : <DropdownMenuItem onSelect={() => void allowEditing(true)}>
+                        <TbPencil className="mr-2" />
+                        Allow editing
+                    </DropdownMenuItem>}
+
+                <DropdownMenuItem
+                    onSelect={() => removeMemberAction()}
+                    className="text-destructive"
+                >
+                    <TbUserMinus className="mr-2" />
+                    Remove from team
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }

@@ -1,10 +1,11 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
+import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@ui/badge"
 import { Button } from "@ui/button"
 import { Card } from "@ui/card"
-import { DataTable, type DataTableColumnDef } from "@ui/data-table"
+import { DataTable, DataTableRow } from "@ui/data-table"
 import {
     Dialog,
     DialogClose,
@@ -43,24 +44,21 @@ type Workflow = Database["public"]["Tables"]["workflows"]["Row"] & {
     trigger_type: Json
 }
 
-const columns: DataTableColumnDef<Partial<Workflow>>[] = [
+const columns: ColumnDef<Partial<Workflow>>[] = [
     {
-        id: "info",
-        accessorFn: (row) => ({ name: row.name, triggerType: row.trigger_type }),
+        accessorKey: "name",
         header: "Name",
-        sortable: true,
-        cell: ({ row }) => {
-            const { name, triggerType } = row.getValue("info") as {
-                name: string
-                triggerType: string
-            }
-
+        enableSorting: true,
+        sortingFn: "alphanumeric",
+        cell: ({ row, getValue }) => {
+            const triggerType = row.original.trigger_type as string | undefined
             return (
                 <div className="px-4 py-6">
-                    <b>{name}</b>
+                    <b>{getValue() as any}</b>
                     <p className="text-muted-foreground">
                         {triggerType
-                            ? (TriggerDefinitions.get(triggerType)?.whenName || "Unknown trigger")
+                            ? (TriggerDefinitions.get(triggerType)?.whenName
+                                || "Unknown trigger")
                             : "No trigger set"}
                     </p>
                 </div>
@@ -70,9 +68,9 @@ const columns: DataTableColumnDef<Partial<Workflow>>[] = [
     {
         accessorKey: "is_enabled",
         header: "Status",
-        sortable: true,
-        cell: ({ row }) => {
-            const isEnabled = row.getValue("is_enabled") as boolean
+        enableSorting: true,
+        cell: ({ row, getValue }) => {
+            const isEnabled = getValue() as boolean
 
             const [setEnabled, { isPending }] = useAction(
                 setWorkflowIsEnabled.bind(null, row.id!)
@@ -106,22 +104,28 @@ const columns: DataTableColumnDef<Partial<Workflow>>[] = [
         }
     },
     {
-        accessorKey: "created_at",
+        id: "created_at",
+        accessorFn: row => new Date(row.created_at as any),
         header: "Created",
-        sortable: true,
+        enableSorting: true,
+        sortingFn: "datetime",
+        cell: ({ getValue }) => getValue<Date>().toLocaleDateString(undefined, {
+            dateStyle: "medium",
+        }),
     },
     {
         id: "edit",
-        cell: ({ row }) => <Button
-            variant="ghost"
-            className="workflow-edit-button opacity-0 group-hover/row:opacity-100"
-            asChild
-        >
-            <Link href={`/workflows/${row.id}/edit`}>
-                Edit
-                <TbArrowRight className="ml-2" />
-            </Link>
-        </Button>,
+        cell: ({ row }) =>
+            <Button
+                variant="ghost"
+                className="workflow-edit-button opacity-0 group-hover/row:opacity-100"
+                asChild
+            >
+                <Link href={`/workflows/${row.id}/edit`}>
+                    Edit
+                    <TbArrowRight className="ml-2" />
+                </Link>
+            </Button>,
     },
     {
         id: "actions",
@@ -147,7 +151,7 @@ const columns: DataTableColumnDef<Partial<Workflow>>[] = [
             const form = useForm<z.infer<typeof renameSchema>>({
                 resolver: zodResolver(renameSchema),
                 defaultValues: {
-                    workflowName: (row.getValue("info") as any).name
+                    workflowName: row.original.name!,
                 },
             })
 
@@ -286,28 +290,27 @@ export default function WorkflowsTableClient({
     })))
 
     return (
-        <Card className="shadow-lg">
+        <Card className="shadow-lg overflow-clip">
             <DataTable
+                className="border-none"
                 data={workflows} columns={columns}
-                classNames={{
-                    wrapper: "!border-none",
-                    cell: "py-0",
-                    row: "cursor-pointer group/row",
-                }}
-                props={{
-                    row: {
-                        role: "button",
-                        onClick: (ev) => {
-                            const btn: HTMLButtonElement = ev.currentTarget
-                                .querySelector(".workflow-edit-button")!
-                            btn.click()
-                        }
-                    }
-                }}
                 tableOptions={{
                     getRowId: (row) => row.id!,
                 }}
-            />
+            >
+                {(row) =>
+                    <DataTableRow
+                        row={row}
+                        className="cursor-pointer group/row [&_td]:py-0"
+                        role="button"
+                        onClick={ev => {
+                            const btn: HTMLButtonElement = ev.currentTarget
+                                .querySelector(".workflow-edit-button")!
+                            btn.click()
+                        }}
+                        key={row.id}
+                    />}
+            </DataTable>
         </Card>
     )
 }

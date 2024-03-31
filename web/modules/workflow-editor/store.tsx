@@ -35,6 +35,8 @@ export function EditorStoreProvider({ children }: { children: any }) {
             },
             undo: () => {},
             redo: () => {},
+            copy: () => {},
+            paste: () => {},
         }))
     }
 

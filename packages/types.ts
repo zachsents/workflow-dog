@@ -1,4 +1,4 @@
-import type { ComponentType } from "react"
+import type { ComponentProps, ComponentPropsWithoutRef, ComponentType } from "react"
 import type { Node, Workflow, WorkflowRunState } from "shared/types.js"
 import { ZodSchema, z } from "zod"
 import type { serverDataTypes } from "./_barrel-server-data-types"
@@ -107,6 +107,7 @@ export type SharedTriggerDefinition = {
 
 export interface SharedTriggerDefinitionInterface {
     name: string
+    description?: string
     type: keyof DataTypeMap
 }
 
@@ -211,4 +212,10 @@ export type ServerDataTypeDefinition<T extends SharedDataTypeDefinition> = {
 
 export type WebDataTypeDefinition<T extends SharedDataTypeDefinition> = {
     icon: IconType | ComponentType
+    manualInputComponent: ComponentType<DataTypeManualInputProps<T["schema"]>>
+}
+
+export interface DataTypeManualInputProps<T extends ZodSchema> extends Omit<ComponentPropsWithoutRef<"input">, "value" | "onChange"> {
+    value: z.infer<T>
+    onChange: (value: z.infer<T>) => void
 }

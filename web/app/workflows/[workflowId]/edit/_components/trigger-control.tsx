@@ -57,7 +57,7 @@ export default function TriggerControl() {
             <PopoverTrigger asChild>
                 <Button
                     variant="outline" size="sm"
-                    className="flex center gap-2 bg-white/80 backdrop-blur-sm shadow-lg"
+                    className="flex center gap-2 bg-white/80 backdrop-blur-sm shadow-lg pointer-events-auto"
                 >
                     <p className="text-muted-foreground font-normal mr-1">
                         Trigger:
@@ -92,19 +92,20 @@ export default function TriggerControl() {
 
                 <Separator />
 
-                <p className="font-bold">
-                    Configure Trigger
-                </p>
-
-                {triggerDefinition?.renderConfig ?
-                    <triggerDefinition.renderConfig
-                        workflowId={workflow?.id!}
-                        workflow={workflow as any}
-                        onClose={popover.close}
-                    /> :
-                    <p className="text-sm text-muted-foreground text-center">
-                        No configuration needed.
-                    </p>}
+                <div className="flex-v items-stretch gap-2 p-4">
+                    <p className="font-bold">
+                        Configure Trigger
+                    </p>
+                    {triggerDefinition?.renderConfig ?
+                        <triggerDefinition.renderConfig
+                            workflowId={workflow?.id!}
+                            workflow={workflow as any}
+                            onClose={popover.close}
+                        /> :
+                        <p className="text-sm text-muted-foreground text-center">
+                            No configuration needed.
+                        </p>}
+                </div>
             </PopoverContent>
         </Popover>
 

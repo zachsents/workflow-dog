@@ -24,7 +24,7 @@ import { useSelectedWorkflowRun } from "@web/modules/workflows"
 import { produce } from "immer"
 import type { WebNodeDefinitionOutput } from "packages/types"
 import { DataTypeDefinitions, NodeDefinitions } from "packages/web"
-import { useMemo, useRef, useState } from "react"
+import React, { forwardRef, useMemo, useRef, useState } from "react"
 import { TbActivity, TbPencil, TbSparkles, TbX } from "react-icons/tb"
 import { HandleType, Position, Handle as RFHandle, useNodeId, useReactFlow } from "reactflow"
 import util from "util"
@@ -291,8 +291,7 @@ function EditNamedHandleButton({
             <HandleButton
                 label={`Edit ${handleType}`}
                 onlyIcon variant="outline"
-                wrapTrigger={({ children }: any) =>
-                    <DialogTrigger asChild>{children}</DialogTrigger>}
+                wrapTrigger={WrapInDialogTrigger}
             >
                 <TbPencil />
             </HandleButton>
@@ -407,3 +406,8 @@ function isInput(handleType: FlexibleHandleType) {
 function isOutput(handleType: FlexibleHandleType) {
     return handleType === "output" || handleType === "source"
 }
+
+
+const WrapInDialogTrigger = forwardRef<React.ElementRef<typeof DialogTrigger>, React.ComponentProps<typeof DialogTrigger>>((props, ref) =>
+    <DialogTrigger asChild {...props} ref={ref} />
+)

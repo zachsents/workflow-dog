@@ -18,7 +18,7 @@ export function parent(resourcePath: string, includeLocation = true) {
     let path = `projects/${PROJECT}`
     if (includeLocation)
         path += `/locations/${LOCATION}`
-    return `${path}/${resourcePath}`
+    return resourcePath ? `${path}/${resourcePath}` : path
 }
 
 

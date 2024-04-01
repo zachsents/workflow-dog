@@ -2,24 +2,24 @@ import { produce } from "immer"
 import { useMemo, useState } from "react"
 
 
-/**
- * @template T
- * @param {object} options
- * @param {T} options.initial
- * @param {Record<keyof T, (value: T[keyof T], values: T) => string>} options.validate
- * @returns {FormHook<T>}
- */
-export function useForm({ initial = {}, validate = {} } = {}) {
+interface UseFormOptions<T> {
+    initial: T
+    validate?: Record<keyof T, (value: T[keyof T], values: T) => string>
+}
+
+export function useForm<T extends Record<string, any>>({ initial, validate }: UseFormOptions<T>) {
 
     const fields = useMemo(() => Object.keys(initial), [initial])
 
     const [values, setValues] = useState(initial)
-    const setValue = (key, value) => setValues(produce(values, draft => {
-        draft[key] = value
-    }))
+    function setValue<K extends keyof T>(key: K, value: T[K]) {
+        setValues(produce(values, (draft: any) => {
+            draft[key] = value
+        }))
+    }
 
     const errors = useMemo(
-        () => Object.fromEntries(fields.map(field => [field, validate[field]?.(values[field], values)])),
+        () => Object.fromEntries(fields.map(field => [field, validate?.[field]?.(values[field], values)])),
         [fields, values]
     )
 
@@ -79,37 +79,30 @@ export function useForm({ initial = {}, validate = {} } = {}) {
 }
 
 
-/**
- * @template T
- * @typedef {object} FormHook
- * @property {T} values
- * @property {(values: T) => void} setValues
- * @property {(key: keyof T, value: T[keyof T]) => void} setValue
- * @property {(key: keyof T, options: FormInputPropsOptions<T>) => FormInputProps<T[keyof T]>} inputProps
- * @property {Record<keyof T, string>} errors
- * @property {boolean} isValid
- * @property {Record<keyof T, boolean>} touched
- * @property {(handler: (values: T, ev: Event) => void) => (ev: Event) => void} submit
- * @property {(key?: keyof T) => void} reset
- */
+type FormHook<T> = {
+    values: T
+    setValues: (values: T) => void
+    setValue: (key: keyof T, value: T[keyof T]) => void
+    inputProps: (key: keyof T, options: FormInputPropsOptions<T>) => FormInputProps
+    errors: Record<keyof T, string>
+    isValid: boolean
+    touched: Record<keyof T, boolean>
+    submit: (handler: (values: T, ev: Event) => void) => (ev: Event) => void
+    reset: (key?: keyof T) => void
+}
+
+type FormInputPropsOptions<T> = {
+    required: boolean
+    defaultValue: T[keyof T]
+    valueKey: string
+    eventKey: string
+}
 
 
-/**
- * @template T
- * @typedef {object} FormInputPropsOptions
- * @property {boolean} required
- * @property {T[keyof T]} defaultValue
- * @property {string} valueKey
- * @property {string} eventKey
- */
-
-
-/**
- * @template T
- * @typedef {object} FormInputProps
- * @property {string} name
- * @property {boolean} required
- * @property {boolean} isRequired
- * @property {string} errorMessage
- * @property {boolean} isInvalid
- */
+type FormInputProps = {
+    name: string
+    required: boolean
+    isRequired: boolean
+    errorMessage: string
+    isInvalid: boolean
+}

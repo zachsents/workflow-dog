@@ -14,4 +14,19 @@ export default {
             />
         )
     },
+    renderPreview: ({ value }) => {
+        return (
+            <p className="line-clamp-2">
+                {value?.toString() ?? value}
+            </p>
+        )
+    },
+    shouldExpand: () => true,
+    renderExpanded: ({ value }) => {
+        return (
+            <p>
+                {value?.toString() ?? value}
+            </p>
+        )
+    },
 } satisfies WebDataTypeDefinition<typeof shared>

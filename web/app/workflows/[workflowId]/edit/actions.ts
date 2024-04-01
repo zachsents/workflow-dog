@@ -4,17 +4,16 @@ import { remapError, supabaseServer } from "@web/lib/server/supabase"
 import { createHash } from "crypto"
 import _ from "lodash"
 import { ServiceDefinitions, TriggerDefinitions } from "packages/server"
-import type { KeyConfig } from "packages/types"
+import type { KeyConfig, WorkflowTrigger } from "packages/types"
 import { z } from "zod"
 
 
-const triggerSchema = z.object({
-    type: z.enum(TriggerDefinitions.ids as [string, ...string[]]),
-    config: z.record(z.any()).optional(),
-})
-
-type TriggerSchema = z.infer<typeof triggerSchema>
-
+/**
+ * Server Action: Assign New Trigger
+ * ---
+ * Sets a new trigger for a workflow, cleaning up the old one
+ * and setting up the new one.
+ */
 export async function assignNewTrigger(workflowId: string, newTrigger: TriggerSchema) {
     const validation = triggerSchema.safeParse(newTrigger)
 
@@ -70,11 +69,91 @@ export async function assignNewTrigger(workflowId: string, newTrigger: TriggerSc
     return true
 }
 
+const triggerSchema = z.object({
+    type: z.enum(TriggerDefinitions.ids as [string, ...string[]]),
+    config: z.record(z.any()).optional(),
+})
 
-const defaultApiKeyAccountConfig: Partial<KeyConfig> = {
-    getDisplayName: (profile, token) => `${token.key.slice(0, 8)}... (${profile.email})`,
+type TriggerSchema = z.infer<typeof triggerSchema>
+
+
+/**
+ * Server Action: Update Trigger Config
+ * ---
+ * Updates the configuration of a trigger for a workflow.
+ */
+export async function updateTriggerConfig(workflowId: string, update: TriggerUpdateSchema) {
+    const validation = triggerUpdateSchema.safeParse(update)
+
+    if (!validation.success)
+        return { error: validation.error }
+
+    const supabase = supabaseServer()
+
+    const query = await supabase
+        .from("workflows")
+        .select("trigger")
+        .eq("id", workflowId)
+        .single()
+
+    let error = remapError(query)
+    if (error) return error
+
+    const oldTrigger = query.data?.trigger as WorkflowTrigger
+
+    const newTrigger = {
+        ...oldTrigger,
+        config: mergeObjectsOverwriteArrays(
+            oldTrigger.config,
+            validation.data.config
+        ),
+    } as WorkflowTrigger
+
+    const updateQuery = await supabase
+        .from("workflows")
+        .update({ trigger: newTrigger })
+        .eq("id", workflowId)
+        .select("id")
+        .single()
+
+    error = remapError(updateQuery)
+    if (error) return error
+
+    console.debug(`Updated fields (${Object.keys(validation.data)}) in trigger config for workflow (${workflowId})`)
+
+    const triggerDefinition = TriggerDefinitions.get(oldTrigger.type)
+
+    if (!triggerDefinition)
+        console.warn(`No trigger definition found for trigger type: ${oldTrigger.type}`)
+
+    await triggerDefinition?.onChange?.(
+        oldTrigger,
+        newTrigger,
+        workflowId
+    )
+
+    return true
 }
 
+const triggerUpdateSchema = z.object({
+    config: z.record(z.any()),
+})
+
+type TriggerUpdateSchema = z.infer<typeof triggerUpdateSchema>
+
+function mergeObjectsOverwriteArrays(a: any, b: any) {
+    return _.mergeWith({}, a, b, (objValue, srcValue) => {
+        if (Array.isArray(objValue) && Array.isArray(srcValue))
+            return srcValue
+    })
+}
+
+
+/**
+ * Server Action: Add API Key Account
+ * ---
+ * Adds an API key account and attaches it to a project.
+ */
 export async function addApiKeyAccount(projectId: string, serviceId: string, key: string) {
 
     const service = ServiceDefinitions.get(serviceId)
@@ -148,4 +227,6 @@ export async function addApiKeyAccount(projectId: string, serviceId: string, key
     }
 }
 
-
+const defaultApiKeyAccountConfig: Partial<KeyConfig> = {
+    getDisplayName: (profile, token) => `${token.key.slice(0, 8)}... (${profile.email})`,
+}

@@ -7,6 +7,7 @@ import {
     DialogHeader,
     DialogTitle
 } from "@ui/dialog"
+import { Badge } from "@web/components/ui/badge"
 import { Button } from "@web/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@web/components/ui/command"
 import { Dialog } from "@web/components/ui/dialog"
@@ -22,12 +23,12 @@ import _ from "lodash"
 import { TriggerDefinitions } from "packages/web"
 import React, { forwardRef, useMemo, useState } from "react"
 import { TbChevronDown, TbPlus, TbX } from "react-icons/tb"
-import { assignNewTrigger as assignNewTriggerAction } from "../actions"
-import { Badge } from "@web/components/ui/badge"
+import { assignNewTrigger as assignNewTriggerAction, updateTriggerConfig as updateTriggerConfigAction } from "../actions"
 
 
 export default function TriggerControl() {
 
+    const workflowId = useCurrentWorkflowId()
     const { data: workflow, isSuccess: hasWorkflowLoaded } = useWorkflow()
 
     const trigger = workflow?.trigger as any
@@ -36,6 +37,16 @@ export default function TriggerControl() {
 
     const popover = useDialogState()
     const dialog = useDialogState()
+
+    const [updateConfig, updateMutation] = useAction(
+        updateTriggerConfigAction.bind(null, workflowId),
+        {
+            showLoadingToast: true,
+            showErrorToast: true,
+            successToast: "Trigger updated!",
+            invalidateKey: ["workflow", workflowId],
+        }
+    )
 
     if (!hasWorkflowLoaded) return (
         <Skeleton className="w-64 h-6" />
@@ -72,7 +83,7 @@ export default function TriggerControl() {
             </PopoverTrigger>
             <PopoverContent
                 align="start"
-                className="p-2 w-[24rem] flex-v items-stretch gap-2 shadow-lg"
+                className="p-2 w-[24rem] max-h-[40rem] overflow-y-scroll flex-v items-stretch gap-2 shadow-lg"
             >
                 <div className="flex justify-between items-center">
                     <Button
@@ -92,7 +103,7 @@ export default function TriggerControl() {
 
                 <Separator />
 
-                <div className="flex-v items-stretch gap-2 p-4">
+                <div className="flex-v items-stretch gap-2 p-2">
                     <p className="font-bold">
                         Configure Trigger
                     </p>
@@ -100,6 +111,8 @@ export default function TriggerControl() {
                         <triggerDefinition.renderConfig
                             workflowId={workflow?.id!}
                             workflow={workflow as any}
+                            updateConfig={updateConfig}
+                            isUpdating={updateMutation.isPending}
                             onClose={popover.close}
                         /> :
                         <p className="text-sm text-muted-foreground text-center">

@@ -120,7 +120,7 @@ const commonMessages = {
     "PGRST116": "You don't have permission.",
 }
 
-interface RemapErrorReturn {
+export interface RemapErrorReturn {
     error: {
         message: string
         [key: string]: any

@@ -143,6 +143,8 @@ export type WebTriggerDefinition<T extends SharedTriggerDefinition> = {
     renderConfig?: ComponentType<{
         workflowId: string
         workflow: Workflow
+        updateConfig: (config: Record<string, any>) => Promise<void>
+        isUpdating: boolean
         onClose: () => void
     }>
 }

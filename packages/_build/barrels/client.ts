@@ -37,6 +37,7 @@ import basic_data_types_boolean_shared from "../../basic/data-types/boolean/shar
 import basic_data_types_boolean_client from "../../basic/data-types/boolean/client"
 import basic_data_types_any_shared from "../../basic/data-types/any/shared"
 import basic_data_types_any_client from "../../basic/data-types/any/client"
+import type { SharedNodeDefinition, WebNodeDefinition, SharedTriggerDefinition, WebTriggerDefinition, SharedServiceDefinition, WebServiceDefinition, SharedDataTypeDefinition, WebDataTypeDefinition } from "@types"
 
 export const NodeDefinitions = createExport({
     "https://nodes.workflow.dog/basic/trigger-input": _.merge({},
@@ -84,7 +85,7 @@ export const NodeDefinitions = createExport({
         basic_nodes_and_client,
         { id: "https://nodes.workflow.dog/basic/and" }    
     ),
-})
+} as Record<string, SharedNodeDefinition & WebNodeDefinition<any> & { id: string }>)
 
 export const TriggerDefinitions = createExport({
     "https://triggers.workflow.dog/basic/schedule": _.merge({},
@@ -97,7 +98,7 @@ export const TriggerDefinitions = createExport({
         basic_triggers_manual_client,
         { id: "https://triggers.workflow.dog/basic/manual" }    
     ),
-})
+} as Record<string, SharedTriggerDefinition & WebTriggerDefinition<any> & { id: string }>)
 
 export const ServiceDefinitions = createExport({
     "https://services.workflow.dog/openai/openai": _.merge({},
@@ -110,7 +111,7 @@ export const ServiceDefinitions = createExport({
         google_services_google_oauth_client,
         { id: "https://services.workflow.dog/google/google-oauth" }    
     ),
-})
+} as Record<string, SharedServiceDefinition & WebServiceDefinition<any> & { id: string }>)
 
 export const DataTypeDefinitions = createExport({
     "https://data-types.workflow.dog/basic/string": _.merge({},
@@ -138,4 +139,4 @@ export const DataTypeDefinitions = createExport({
         basic_data_types_any_client,
         { id: "https://data-types.workflow.dog/basic/any" }    
     ),
-})
+} as Record<string, SharedDataTypeDefinition & WebDataTypeDefinition<any> & { id: string }>)

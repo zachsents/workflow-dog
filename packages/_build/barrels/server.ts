@@ -11,10 +11,11 @@ import openai_services_openai_server from "../../openai/services/openai/server"
 import google_services_google_oauth_shared from "../../google/services/google-oauth/shared"
 import google_services_google_oauth_server from "../../google/services/google-oauth/server"
 
+import type { SharedTriggerDefinition, ServerTriggerDefinition, SharedServiceDefinition, ServerServiceDefinition } from "@types"
 
 export const NodeDefinitions = createExport({
 
-})
+} as Record<string, any & { id: string }>)
 
 export const TriggerDefinitions = createExport({
     "https://triggers.workflow.dog/basic/schedule": _.merge({},
@@ -27,7 +28,7 @@ export const TriggerDefinitions = createExport({
         basic_triggers_manual_server,
         { id: "https://triggers.workflow.dog/basic/manual" }    
     ),
-})
+} as Record<string, SharedTriggerDefinition & ServerTriggerDefinition<any> & { id: string }>)
 
 export const ServiceDefinitions = createExport({
     "https://services.workflow.dog/openai/openai": _.merge({},
@@ -40,8 +41,8 @@ export const ServiceDefinitions = createExport({
         google_services_google_oauth_server,
         { id: "https://services.workflow.dog/google/google-oauth" }    
     ),
-})
+} as Record<string, SharedServiceDefinition & ServerServiceDefinition<any> & { id: string }>)
 
 export const DataTypeDefinitions = createExport({
 
-})
+} as Record<string, any & { id: string }>)

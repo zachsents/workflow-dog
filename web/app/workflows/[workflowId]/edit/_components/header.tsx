@@ -153,7 +153,7 @@ function EditableTitle() {
         (supabase) => supabase
             .from("workflows")
             .update({ name: tempName })
-            .eq("id", workflow?.id!),
+            .eq("id", workflow?.id!) as any,
         {
             enabled: !!workflow && tempName !== workflow.name,
             invalidateKey: ["workflow", workflow?.id],
@@ -217,7 +217,7 @@ function WorkflowStatusBadge() {
         (supabase) => supabase
             .from("workflows")
             .update({ is_enabled: !isEnabled })
-            .eq("id", workflow?.id!),
+            .eq("id", workflow?.id!) as any,
         {
             enabled: !!workflow,
             invalidateKey: ["workflow", workflow?.id],

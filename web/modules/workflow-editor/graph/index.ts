@@ -30,7 +30,7 @@ export function useGraphSaving() {
         (supabase) => supabase
             .from("workflows")
             .update({ graph: convertedGraph as any })
-            .eq("id", workflow!.id),
+            .eq("id", workflow!.id) as any,
         {
             enabled: !!workflow,
             // invalidateKey: ["workflow", workflow?.id],

@@ -1,4 +1,4 @@
-import type { ServerNodeDefinition } from "@types"
+import type { ExecutionNodeDefinition } from "@types"
 import type shared from "./shared.js"
 
 
@@ -11,4 +11,4 @@ export default {
 
         return { number: parsed }
     },
-} satisfies ServerNodeDefinition<typeof shared>
+} satisfies ExecutionNodeDefinition<typeof shared>

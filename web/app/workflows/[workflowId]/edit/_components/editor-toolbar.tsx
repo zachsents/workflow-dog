@@ -9,7 +9,7 @@ import { Popover, PopoverAnchor, PopoverContent } from "@web/components/ui/popov
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import { useDialogState, useLogEffect } from "@web/lib/client/hooks"
 import { useCreateActionNode, useNodeDefinitionColors } from "@web/modules/workflow-editor/graph/nodes"
-import { NodeDefinitions } from "packages/web"
+import { NodeDefinitions } from "packages/client"
 import { useMemo, useRef, useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import { TbChevronsUp } from "react-icons/tb"

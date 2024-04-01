@@ -22,7 +22,7 @@ import { useCreateActionNode, useIsHandleConnected } from "@web/modules/workflow
 import { useSelectedWorkflowRun } from "@web/modules/workflows"
 import { produce } from "immer"
 import type { WebNodeDefinitionOutput } from "packages/types"
-import { DataTypeDefinitions, NodeDefinitions } from "packages/web"
+import { DataTypeDefinitions, NodeDefinitions } from "packages/client"
 import React, { forwardRef, useMemo, useRef, useState } from "react"
 import { TbPencil, TbSparkles, TbX } from "react-icons/tb"
 import { HandleType, Position, Handle as RFHandle, useNodeId, useReactFlow } from "reactflow"

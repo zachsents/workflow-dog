@@ -1,9 +1,7 @@
-import type { ComponentProps, ComponentPropsWithoutRef, ComponentType } from "react"
-import type { Node, Workflow, WorkflowRunState } from "shared/types.js"
-import { ZodSchema, z } from "zod"
-import type { serverDataTypes } from "./_barrel-server-data-types"
-import type { serverTriggers } from "./_barrel-server-triggers"
+import type { ComponentType } from "react"
 import type { IconType } from "react-icons/lib/iconBase"
+import type { Node, Workflow, WorkflowRunState } from "shared/types"
+import { ZodSchema, z } from "zod"
 
 
 /* -------------------------------------------------------------------------- */
@@ -38,7 +36,7 @@ export interface SharedNodeDefinitionInterface {
     groupMax?: number
 }
 
-export type ServerNodeDefinition<T extends SharedNodeDefinition> = {
+export type ExecutionNodeDefinition<T extends SharedNodeDefinition> = {
     action: (inputs: {
         [K in keyof T["inputs"]]: InterfaceValue<T, "inputs", K>
     }, info: {
@@ -66,7 +64,8 @@ type InterfaceValue<
 
 
 type DataTypeMap = {
-    [K in keyof typeof serverDataTypes]: z.infer<typeof serverDataTypes[K]["schema"]>
+    // [K in keyof typeof serverDataTypes]: z.infer<typeof serverDataTypes[K]["schema"]>
+    // forget about this for now
 }
 type DataTypeByURI<URI extends keyof DataTypeMap> = DataTypeMap[URI]
 
@@ -127,7 +126,7 @@ export interface SharedTriggerDefinitionInterface {
 }
 
 export type WorkflowTrigger = {
-    type: keyof typeof serverTriggers
+    type: string
     config: Record<string, any>
 }
 
@@ -222,10 +221,6 @@ export type SharedDataTypeDefinition = {
     name: string
     description: string
     schema: ZodSchema
-}
-
-export type ServerDataTypeDefinition<T extends SharedDataTypeDefinition> = {
-
 }
 
 export type WebDataTypeDefinition<T extends SharedDataTypeDefinition> = {

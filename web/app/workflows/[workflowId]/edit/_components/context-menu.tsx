@@ -16,7 +16,7 @@ import { cn } from "@web/lib/utils"
 import { stringHash } from "@web/modules/util"
 import { useCreateActionNode } from "@web/modules/workflow-editor/graph/nodes"
 import { useEditorStore, useEditorStoreState } from "@web/modules/workflow-editor/store"
-import { NodeDefinitions } from "packages/web"
+import { NodeDefinitions } from "packages/client"
 import { useMemo } from "react"
 import { useReactFlow } from "reactflow"
 

@@ -7,7 +7,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@web/components/ui/input"
 import { useRunWorkflowMutation, useWorkflow } from "@web/modules/workflows"
 import _ from "lodash"
-import { DataTypeDefinitions, TriggerDefinitions } from "packages/web"
+import { DataTypeDefinitions, TriggerDefinitions } from "packages/client"
 import { useForm } from "react-hook-form"
 import { TbPlayerPlay, TbX } from "react-icons/tb"
 import { z } from "zod"

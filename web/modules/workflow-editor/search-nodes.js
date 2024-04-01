@@ -1,5 +1,5 @@
 import lunr from "lunr"
-import { NodeDefinitions } from "packages/web"
+import { NodeDefinitions } from "packages/client"
 
 
 const interfaceDescriptionExtractor = (typeKey, nodeDef) => Object.values(nodeDef[typeKey]).map(interf => interf.description ?? "").join(" ")

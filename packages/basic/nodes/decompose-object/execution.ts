@@ -1,4 +1,4 @@
-import type { ServerNodeDefinition } from "@types"
+import type { ExecutionNodeDefinition } from "@types"
 import type shared from "./shared.js"
 
 
@@ -12,4 +12,4 @@ export default {
             properties: Object.fromEntries(keys.map(key => [key, object[key]]))
         }
     },
-} satisfies ServerNodeDefinition<typeof shared>
+} satisfies ExecutionNodeDefinition<typeof shared>

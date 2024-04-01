@@ -1,4 +1,4 @@
-import type { ServerNodeDefinition } from "@types"
+import type { ExecutionNodeDefinition } from "@types"
 import type shared from "./shared.js"
 
 
@@ -8,4 +8,4 @@ export default {
             text: JSON.stringify(object, null, 4)
         }
     },
-} satisfies ServerNodeDefinition<typeof shared>
+} satisfies ExecutionNodeDefinition<typeof shared>

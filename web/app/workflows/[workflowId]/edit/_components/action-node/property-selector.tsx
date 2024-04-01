@@ -19,7 +19,7 @@ import {
     TooltipProvider,
     TooltipTrigger
 } from "@ui/tooltip"
-import { DataTypeDefinitions } from "packages/web"
+import { DataTypeDefinitions } from "packages/client"
 import { TbChevronDown } from "react-icons/tb"
 
 

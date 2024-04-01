@@ -1,6 +1,6 @@
 import { uniqueId } from "@web/modules/util"
 import { object as modifierDefs } from "@web/modules/workflow-editor/modifiers"
-import { DataTypeDefinitions, NodeDefinitions } from "packages/web"
+import { DataTypeDefinitions, NodeDefinitions } from "packages/client"
 import { useCallback } from "react"
 import { Edge, OnConnect, useReactFlow } from "reactflow"
 import { PREFIX } from "shared/prefixes"

@@ -1,7 +1,7 @@
 import { useDebouncedValue } from "@mantine/hooks"
 import { Listbox, ListboxItem } from "@nextui-org/react"
 import { searchNodes } from "@web/modules/workflow-editor/search-nodes"
-import { NodeDefinitions } from "packages/web"
+import { NodeDefinitions } from "packages/client"
 import { useMemo } from "react"
 
 

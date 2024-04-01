@@ -59,6 +59,9 @@ importers:
       '@types/react':
         specifier: '*'
         version: 18.2.73
+      glob:
+        specifier: ^10.3.12
+        version: 10.3.12
       react:
         specifier: '*'
         version: 18.2.0

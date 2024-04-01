@@ -1,4 +1,4 @@
-import type { ServerNodeDefinition } from "@types"
+import type { ExecutionNodeDefinition } from "@types"
 import type shared from "./shared.js"
 
 
@@ -14,4 +14,4 @@ export default {
             throw new Error("Invalid JSON text.")
         }
     },
-} satisfies ServerNodeDefinition<typeof shared>
+} satisfies ExecutionNodeDefinition<typeof shared>

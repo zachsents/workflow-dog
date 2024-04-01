@@ -1,7 +1,7 @@
 import { Autocomplete, AutocompleteItem, Button, Card, Input, Kbd, Modal, ModalBody, ModalContent, ModalHeader, Tooltip, useDisclosure } from "@nextui-org/react"
 import { useHotkey } from "@web/modules/util"
 import { useCreateActionNode } from "@web/modules/workflow-editor/graph/nodes"
-import { NodeDefinitions } from "packages/web"
+import { NodeDefinitions } from "packages/client"
 import { useRef } from "react"
 import { TbMapSearch, TbSearch } from "react-icons/tb"
 

@@ -14,7 +14,7 @@ import { cn } from "@web/lib/utils"
 import { useAvailableIntegrationAccounts } from "@web/modules/integrations"
 import { useIsNodeSelected, useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
 import { useWorkflow } from "@web/modules/workflows"
-import { ServiceDefinitions } from "packages/web"
+import { ServiceDefinitions } from "packages/client"
 import { TbDots, TbExternalLink, TbPlugConnected, TbRefresh, TbSettings } from "react-icons/tb"
 import APIKeyDialog from "./api-key-dialog"
 

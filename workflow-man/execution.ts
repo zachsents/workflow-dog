@@ -1,4 +1,4 @@
-import { NodeDefinitions } from "packages/server.js"
+import { NodeDefinitions } from "packages/execution.js"
 import type { Node, Workflow, WorkflowRun, WorkflowRunState } from "shared/types.js"
 import { fetchIntegrationToken } from "./db.js"
 

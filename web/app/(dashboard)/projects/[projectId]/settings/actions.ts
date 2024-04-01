@@ -123,3 +123,22 @@ export async function inviteMember(projectId: string, email: string) {
 
     return true
 }
+
+
+export async function deleteProject(projectId: string) {
+
+    const query = await supabaseServer()
+        .from("teams")
+        .delete()
+        .eq("id", projectId)
+        .select("id")
+        .single()
+
+    const error = remapError(query)
+    if (error) return error
+
+    console.debug(`Deleted project "${projectId}"`)
+
+    return true
+}
+

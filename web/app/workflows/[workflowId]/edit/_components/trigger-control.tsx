@@ -21,9 +21,10 @@ import { useWorkflow } from "@web/modules/workflows"
 import Fuse from "fuse.js"
 import _ from "lodash"
 import { TriggerDefinitions } from "packages/client"
-import React, { forwardRef, useMemo, useState } from "react"
+import React, { forwardRef, useEffect, useMemo, useState } from "react"
 import { TbChevronDown, TbPlus, TbX } from "react-icons/tb"
 import { assignNewTrigger as assignNewTriggerAction, updateTriggerConfig as updateTriggerConfigAction } from "../actions"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 
 export default function TriggerControl() {
@@ -48,79 +49,79 @@ export default function TriggerControl() {
         }
     )
 
+    useSelectTriggerParam(dialog.open)
+
     if (!hasWorkflowLoaded) return (
         <Skeleton className="w-64 h-6" />
     )
 
-    if (!hasTrigger) return (
-        <Button
-            variant="ghost"
-            onClick={dialog.open}
-            className="pointer-events-auto"
-        >
-            <TbPlus />
-            Add Trigger
-        </Button>
-    )
-
     return (<>
-        <Popover {...popover.dialogProps}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="outline" size="sm"
-                    className="flex center gap-2 bg-white/80 backdrop-blur-sm shadow-lg pointer-events-auto"
-                >
-                    <p className="text-muted-foreground font-normal mr-1">
-                        Trigger:
-                    </p>
-                    {triggerDefinition?.icon &&
-                        <triggerDefinition.icon />}
-                    <p>
-                        {triggerDefinition?.whenName || triggerDefinition?.name || "Unknown trigger"}
-                    </p>
-                    <TbChevronDown />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent
-                align="start"
-                className="p-2 w-[24rem] max-h-[40rem] overflow-y-scroll flex-v items-stretch gap-2 shadow-lg"
-            >
-                <div className="flex justify-between items-center">
+        {hasTrigger ?
+            <Popover {...popover.dialogProps}>
+                <PopoverTrigger asChild>
                     <Button
-                        variant="ghost" size="sm"
-                        onClick={() => {
-                            dialog.open()
-                            popover.close()
-                        }}
+                        variant="outline" size="sm"
+                        className="flex center gap-2 bg-white/80 backdrop-blur-sm shadow-lg pointer-events-auto"
                     >
-                        Change Trigger
+                        <p className="text-muted-foreground font-normal mr-1">
+                            Trigger:
+                        </p>
+                        {triggerDefinition?.icon &&
+                            <triggerDefinition.icon />}
+                        <p>
+                            {triggerDefinition?.whenName || triggerDefinition?.name || "Unknown trigger"}
+                        </p>
+                        <TbChevronDown />
                     </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                    align="start"
+                    className="p-2 w-[24rem] max-h-[40rem] overflow-y-scroll flex-v items-stretch gap-2 shadow-lg"
+                >
+                    <div className="flex justify-between items-center">
+                        <Button
+                            variant="ghost" size="sm"
+                            onClick={() => {
+                                dialog.open()
+                                popover.close()
+                            }}
+                        >
+                            Change Trigger
+                        </Button>
 
-                    <Button variant="ghost" size="sm" onClick={popover.close}>
-                        <TbX />
-                    </Button>
-                </div>
+                        <Button variant="ghost" size="sm" onClick={popover.close}>
+                            <TbX />
+                        </Button>
+                    </div>
 
-                <Separator />
+                    <Separator />
 
-                <div className="flex-v items-stretch gap-2 p-2">
-                    <p className="font-bold">
-                        Configure Trigger
-                    </p>
-                    {triggerDefinition?.renderConfig ?
-                        <triggerDefinition.renderConfig
-                            workflowId={workflow?.id!}
-                            workflow={workflow as any}
-                            updateConfig={updateConfig}
-                            isUpdating={updateMutation.isPending}
-                            onClose={popover.close}
-                        /> :
-                        <p className="text-sm text-muted-foreground text-center">
-                            No configuration needed.
-                        </p>}
-                </div>
-            </PopoverContent>
-        </Popover>
+                    <div className="flex-v items-stretch gap-2 p-2">
+                        <p className="font-bold">
+                            Configure Trigger
+                        </p>
+                        {triggerDefinition?.renderConfig ?
+                            <triggerDefinition.renderConfig
+                                workflowId={workflow?.id!}
+                                workflow={workflow as any}
+                                updateConfig={updateConfig}
+                                isUpdating={updateMutation.isPending}
+                                onClose={popover.close}
+                            /> :
+                            <p className="text-sm text-muted-foreground text-center">
+                                No configuration needed.
+                            </p>}
+                    </div>
+                </PopoverContent>
+            </Popover> :
+            <Button
+                variant="default" size="sm"
+                onClick={dialog.open}
+                className="pointer-events-auto shadow-lg"
+            >
+                <TbPlus className="mr-2" />
+                Add Trigger
+            </Button>}
 
         <TriggerDialog {...dialog.dialogProps} />
     </>)
@@ -277,3 +278,16 @@ const TriggerSearchResultItem = forwardRef<React.ElementRef<typeof CommandItem>,
             </Badge>}
     </CommandItem>
 )
+
+
+function useSelectTriggerParam(openDialog: () => void) {
+    const router = useRouter()
+    const pathname = usePathname()
+    const shouldSelectTrigger = useSearchParams().has("select_trigger")
+    useEffect(() => {
+        if (shouldSelectTrigger) {
+            router.replace(pathname)
+            openDialog()
+        }
+    }, [shouldSelectTrigger])
+}

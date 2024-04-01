@@ -1,6 +1,5 @@
-import { Button } from "@ui/button"
+import CreateWorkflow from "./_components/create-workflow"
 import WorkflowsTable from "./_components/workflows-table"
-import { TbPlus } from "react-icons/tb"
 
 
 export default function WorkflowsPage({
@@ -14,10 +13,7 @@ export default function WorkflowsPage({
                 Workflows
             </h1>
 
-            <Button>
-                <TbPlus className="mr-2" />
-                Create Workflow
-            </Button>
+            <CreateWorkflow />
         </div>
 
         <WorkflowsTable projectId={projectId} />

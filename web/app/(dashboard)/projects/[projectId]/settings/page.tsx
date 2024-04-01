@@ -5,6 +5,8 @@ import { TbPuzzle, TbSettings, TbUsers } from "react-icons/tb"
 import GeneralSettingsForm from "./_components/general-form"
 import InviteMember from "./_components/invite-member"
 import MembersTable from "./_components/members-table"
+import DeleteProject from "./_components/delete-project"
+import { Separator } from "@web/components/ui/separator"
 
 
 export default async function SettingsPage({ params: { projectId } }) {
@@ -31,6 +33,15 @@ export default async function SettingsPage({ params: { projectId } }) {
                     projectName: query.data?.name || "",
                 }}
             />
+
+            <Separator />
+
+            <div className="flex-v items-start gap-4">
+                <p className="font-bold">
+                    Danger Zone
+                </p>
+                <DeleteProject />
+            </div>
         </SettingsSection>
 
         <SettingsSection

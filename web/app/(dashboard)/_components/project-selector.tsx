@@ -14,58 +14,51 @@ import {
     PopoverTrigger,
 } from "@ui/popover"
 import Kbd from "@web/components/kbd"
-import { useFromStore } from "@web/lib/queries/store"
+import { useCurrentProjectId, useDialogState } from "@web/lib/client/hooks"
 import { cn } from "@web/lib/utils"
-import { useCurrentProjectId } from "@web/lib/client/hooks"
-import _ from "lodash"
+import { useProjectsForUser } from "@web/modules/projects"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import { TbCheck, TbChevronDown } from "react-icons/tb"
 
 
-export default function ProjectSelectorClient({
-    projects: passedProjects
-}: {
-    projects: { id: string, name: string }[]
-}) {
-    const projects = passedProjects.map(
-        project => useFromStore(["projects", project.id], project)
-    )
+export default function ProjectSelector() {
 
-    const router = useRouter()
+    const { data: projects } = useProjectsForUser()
+
+    const popover = useDialogState()
+
     const activeProjectId = useCurrentProjectId()
-
-    const [open, setOpen] = useState(false)
-
-    const goToProject = (id: string) => {
-        if (id !== activeProjectId)
-            router.push(`/projects/${id}`)
-        setOpen(false)
+    const router = useRouter()
+    const goToProject = (projectId: string) => () => {
+        if (activeProjectId !== projectId)
+            router.push(`/projects/${projectId}`)
+        popover.close()
     }
 
-    useHotkeys("p", (ev) => {
-        ev.preventDefault()
-        setOpen(true)
-    }, [setOpen])
+    useHotkeys("p", popover.open, {
+        preventDefault: true,
+    }, [])
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover {...popover.dialogProps}>
             <PopoverTrigger asChild>
                 <Button
                     variant="outline"
                     role="combobox"
-                    aria-expanded={open}
+                    aria-expanded={popover.isOpen}
                     className={cn(
                         "w-[220px] justify-between",
                         !activeProjectId && "text-muted-foreground"
                     )}
                 >
-                    {activeProjectId
-                        ? projects.find((project) => project.id === activeProjectId)?.name
-                        : "Select project..."}
+                    <span>
+                        {activeProjectId
+                            ? projects?.find((project) => project.id === activeProjectId)?.name
+                            : "Select project..."}
+                    </span>
 
-                    <div className="flex items-center gap-2 shrink-0 text-sm text-muted-foreground">
+                    <div className="flex center gap-2 shrink-0 text-sm text-muted-foreground">
                         <Kbd>P</Kbd>
                         <TbChevronDown />
                     </div>
@@ -76,11 +69,11 @@ export default function ProjectSelectorClient({
                     <CommandInput placeholder="Search project..." />
                     <CommandList>
                         <CommandEmpty>No project found.</CommandEmpty>
-                        {projects.map(project => (
+                        {projects?.map(project => (
                             <CommandItem
                                 key={project.id}
-                                value={project.id}
-                                onSelect={currentValue => goToProject(currentValue)}
+                                value={project.name}
+                                onSelect={goToProject(project.id)}
                             >
                                 <TbCheck
                                     className={cn(

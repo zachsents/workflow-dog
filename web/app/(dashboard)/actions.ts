@@ -1,6 +1,7 @@
 "use server"
 
 import { remapError, supabaseServer } from "@web/lib/server/supabase"
+import { supabaseServerAdmin } from "@web/lib/server/supabase-admin"
 import { revalidatePath } from "next/cache"
 import { TriggerDefinitions } from "packages/server"
 
@@ -29,6 +30,39 @@ export async function setWorkflowIsEnabled(workflowId: string, isEnabled: boolea
             path: ["workflows", workflowId, "is_enabled"],
             value: query.data!.is_enabled,
         }
+    }
+}
+
+
+/**
+ * Server Action: Create Workflow
+ * ---
+ * Creates a new workflow.
+ */
+export async function createWorkflow(projectId: string, name: string) {
+    console.debug(`Creating workflow...`)
+
+    const supabase = supabaseServer()
+    const userId = await supabase.auth.getUser().then(u => u.data.user?.id)
+
+    const query = await supabase
+        .from("workflows")
+        .insert({
+            name,
+            team_id: projectId,
+            is_enabled: false,
+            creator: userId,
+        })
+        .select("id")
+        .single()
+
+    const error = remapError(query)
+    if (error) return error
+
+    console.debug(`Created workflow! (ID: ${query.data!.id})`)
+    revalidatePath(`/projects/[projectId]/workflows`, "page")
+    return {
+        id: query.data!.id,
     }
 }
 
@@ -88,5 +122,43 @@ export async function renameWorkflow(workflowId: string, name: string) {
             path: ["workflows", workflowId, "name"],
             value: query.data!.name,
         }
+    }
+}
+
+
+export async function createProject(name: string) {
+
+    const supabase = supabaseServer()
+    const userId = await supabase.auth.getUser().then(u => u.data.user?.id)
+
+    const insertQuery = await supabase
+        .from("teams")
+        .insert({
+            name,
+            creator: userId,
+            is_personal: false,
+        })
+        .select("id")
+        .single()
+
+    let error = remapError(insertQuery)
+    if (error) return error
+
+    const supabaseAdmin = await supabaseServerAdmin()
+
+    const joinQuery = await supabaseAdmin
+        .from("users_teams")
+        .insert({
+            team_id: insertQuery.data!.id,
+            user_id: userId!,
+            roles: ["editor", "viewer"],
+        })
+
+    error = remapError(joinQuery)
+    if (error) return error
+
+    revalidatePath("/projects", "layout")
+    return {
+        id: insertQuery.data!.id,
     }
 }

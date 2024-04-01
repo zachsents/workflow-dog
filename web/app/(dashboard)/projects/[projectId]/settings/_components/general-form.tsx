@@ -30,7 +30,10 @@ export default function GeneralSettingsForm({
 }) {
     const [updateSettings] = useAction(
         updateGeneralSettings.bind(null, projectId),
-        { successToast: "Settings updated!" }
+        {
+            successToast: "Settings updated!",
+            showErrorToast: true,
+        }
     )
 
     const form = useForm<GeneralSettingsSchema>({

@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
         || req.nextUrl.searchParams.get("teamId")
 
     redirect(projectId
-        ? `/${projectId}/workflows`
+        ? `/projects/${projectId}/workflows`
         : "/projects"
     )
 }

@@ -1,10 +1,14 @@
 "use client"
 
+import Loader from "@web/components/loader"
 import { EditorStoreProvider, useEditorStore } from "@web/modules/workflow-editor/store"
 import { useWorkflow } from "@web/modules/workflows"
 import { ReactFlowProvider } from "reactflow"
-import Loader from "@web/components/loader"
 import WorkflowGraphEditor from "./graph-editor"
+import EditWorkflowHeader from "./header"
+import CurrentRunHeader from "./run-controls/current-run-header"
+import CurrentRunGraph from "./run-controls/current-run-graph"
+import { cn } from "@web/lib/utils"
 
 
 export default function EditorRenderer() {
@@ -40,20 +44,17 @@ function ViewSwitcher() {
     return (
         <>
             <ReactFlowProvider>
-                <WorkflowGraphEditor initialGraph={workflow!.graph as any} />
-                {/* <WorkflowGraphEditor initialGraph={{
-                    nodes: [
-                        { id: '1', data: { label: 'Input Node' }, position: { x: 250, y: 50 } },
-                        { id: '2', data: { label: 'Output Node' }, position: { x: 250, y: 250 } },
-
-                    ],
-                    edges: [],
-                }} /> */}
+                <EditWorkflowHeader />
+                <WorkflowGraphEditor
+                    initialGraph={workflow!.graph as any}
+                    className={cn(hasSelectedRun && "hidden")}
+                />
             </ReactFlowProvider>
 
             {hasSelectedRun &&
                 <ReactFlowProvider key={selectedRunId}>
-                    {/* <RunGraphView /> */}
+                    <CurrentRunHeader />
+                    <CurrentRunGraph />
                 </ReactFlowProvider>}
         </>
     )

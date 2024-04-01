@@ -15,6 +15,16 @@ export type SharedNodeDefinition = {
     description: string
     inputs: Record<string, SharedNodeDefinitionInterface>
     outputs: Record<string, SharedNodeDefinitionInterface>
+
+    requiredService?: NodeServiceRequirement
+
+    /** 
+     * Marked as WIP for now
+     * 
+     * Each entry in the outer array represents a requirement. If an array is
+     * provided as a requirement, the entries in the inner array are OR'd together.
+     */
+    WIP_requiredServices?: (NodeServiceRequirement | NodeServiceRequirement[])[]
 }
 
 export interface SharedNodeDefinitionInterface {
@@ -76,6 +86,11 @@ export type WebNodeDefinition<T extends SharedNodeDefinition> = {
     renderNode?: ComponentType<{ id: string }>
 
     renderBody?: ComponentType<{ id: string }>
+}
+
+export type NodeServiceRequirement = {
+    id: string
+    scopes?: (string | string[])[]
 }
 
 export interface WebNodeDefinitionInterface {
@@ -166,7 +181,7 @@ export interface OAuth2Config {
 
 export interface KeyConfig {
     profileUrl: string
-    getDisplayName: (profile: any, token: any) => string
+    getDisplayName?: (profile: any, token: any) => string
 }
 
 export interface UserPassConfig {
@@ -192,7 +207,8 @@ export type ServerServiceDefinition<T extends SharedServiceDefinition> = {
 export type WebServiceDefinition<T extends SharedServiceDefinition> = {
     icon: IconType | ComponentType
     color: string
-    transformScope: (scope: string) => string
+    transformScope?: (scope: string) => string
+    generateKeyUrl?: string
 }
 
 

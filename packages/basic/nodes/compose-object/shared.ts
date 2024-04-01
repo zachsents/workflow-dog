@@ -16,5 +16,5 @@ export default {
             name: "Object",
             type: "https://data-types.workflow.dog/basic/object",
         },
-    }
+    },
 } satisfies SharedNodeDefinition

@@ -19,23 +19,25 @@ import { cn } from "@web/lib/utils"
 import { useSupabaseMutation } from "@web/modules/db"
 import { useSyncToState } from "@web/modules/util"
 import { useEditorSettings } from "@web/modules/workflow-editor/settings"
+import { useEditorStore } from "@web/modules/workflow-editor/store"
 import { useWorkflow } from "@web/modules/workflows"
 import { toPng } from "html-to-image"
 import Link from "next/link"
 import { useRef, useState } from "react"
-import { TbArrowLeft, TbGridPattern, TbLayoutList, TbMap, TbMenu2, TbPhoto } from "react-icons/tb"
+import { TbArrowLeft, TbExternalLink, TbGridPattern, TbHeart, TbLayoutList, TbMap, TbMenu2, TbPhoto } from "react-icons/tb"
 import colors from "tailwindcss/colors"
 
 
 export default function EditWorkflowHeader() {
 
+    const hasSelectedRun = useEditorStore(s => !!s.selectedRunId)
     const { isSuccess: hasWorkflowLoaded } = useWorkflow()
 
     return (
         <div
             className={cn(
-                "absolute top-0 left-1/2 -translate-x-1/2 z-50 flex center flex-nowrap gap-10 text-primary-foreground bg-slate-800 px-4 py-1 rounded-b-lg shadow-lg transition-transform",
-                !hasWorkflowLoaded && "-translate-y-full"
+                "absolute top-0 left-1/2 -translate-x-1/2 z-50 flex center flex-nowrap gap-10 text-primary-foreground bg-slate-800 px-4 py-1 rounded-b-lg shadow-lg transition",
+                (!hasWorkflowLoaded || hasSelectedRun) && "-translate-y-[110%] shadow-none",
             )}
         >
             <HeaderMenu />
@@ -46,17 +48,6 @@ export default function EditWorkflowHeader() {
 
             {/* TODO: Implement UsersOnline component with Supabase Realtime */}
             {/* <UsersOnline /> */}
-
-            {/* <Button size="sm" variant="secondary" asChild>
-                <a
-                    href="https://google.com" target="_blank"
-                    className="group flex center gap-2 hover:scale-105 transition-transform"
-                >
-                    <TbHeart className="group-hover:scale-150 group-hover:fill-red-500 transition" />
-                    Leave Feedback
-                    <TbExternalLink />
-                </a>
-            </Button> */}
         </div>
     )
 }
@@ -100,11 +91,25 @@ function HeaderMenu() {
                         Back to Workflows
                     </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <a
+                        href="/feedback" target="_blank"
+                        className="group flex between gap-2"
+                    >
+                        <div className="flex center gap-2">
+                            <TbHeart className="group-hover:scale-125 group-hover:fill-red-500 transition" />
+                            Leave Feedback
+                        </div>
+                        <TbExternalLink />
+                    </a>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Workflow</DropdownMenuLabel>
                 <DropdownMenuItem
                     disabled={!hasWorkflowLoaded}
                     onSelect={downloadImage}
                 >
-                    <TbPhoto className="mr-2" />
+                    <TbPhoto className="mr-2 hover:fill-blue-300" />
                     Export Image (PNG)
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

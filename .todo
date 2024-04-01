@@ -54,16 +54,16 @@ Web:
         ✔ Add interface for searching and adding nodes @done (2/17/2024, 10:53:49 PM)
         ✔ Make text nodes autosize @done (2/15/2024, 9:40:41 PM)
         ✔ minify number nodes @done (2/15/2024, 9:58:57 PM)
-        ☐ Add renaming + adding for group handles
+        ✔ Add renaming + adding for group handles @done (3/31/2024, 10:46:40 PM)
         ✔ Set up homepage redirect @done (2/15/2024, 4:48:46 PM)
         ☐ Add node comments
         ☐ Looping groups
         ✔ Add custom domain to cloud run containers @done (2/18/2024, 10:19:52 AM)
         ☐ Re-add node pinning
-        ☐ Graph saving bug
+        ✔ Graph saving bug @done (3/31/2024, 10:46:48 PM)
         ✔ Investigate duplicate input ID bug @done (2/18/2024, 4:34:26 PM)
         ✔ Investigate text node bug error from screenshot @done (2/19/2024, 3:21:47 PM)
-        ☐ Type labels on edges
+        ✔ Type labels on edges @done (3/31/2024, 10:46:52 PM)
         ☐ Make workflow fetching realtime
 
     Dev Ops:
@@ -85,11 +85,11 @@ Web:
     ☐ Check integration system that I wanted to fix for some reason
         ☐ I think i wanted to remove the access token field and just make the fetching all happen based on what type the integration is'
         ☐ Also need to check security of how i'm passing token
-    ☐ Add type labels to handles
-    ☐ Add adding handles to node
-    ☐ Add renaming handles to node
-    ☐ Make account selector bigger
-    ☐ Generally fix scale of everything on nodes
+    ✔ Add type labels to handles @done (3/31/2024, 10:47:09 PM)
+    ✔ Add adding handles to node @done (3/31/2024, 10:47:11 PM)
+    ✔ Add renaming handles to node @done (3/31/2024, 10:47:12 PM)
+    ✔ Make account selector bigger @done (3/31/2024, 10:47:14 PM)
+    ✔ Generally fix scale of everything on nodes @done (3/31/2024, 10:47:15 PM)
     ☐ Add errors for no account selected
     ☐ Implement node search modal
     ☐ Implement gmail trigger

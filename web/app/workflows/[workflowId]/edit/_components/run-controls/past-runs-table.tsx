@@ -87,7 +87,7 @@ const createColumns = (onClose: () => void): ColumnDef<Partial<WorkflowRun>>[] =
 
             const runMutation = useRunWorkflowMutation(workflowId, {
                 subscribe: true,
-                // mutationKey: ["rerun", row.id],
+                mutationKey: ["rerun", row.id],
             })
             const rerun = () => runMutation.mutateAsync({
                 copyTriggerDataFrom: row.id

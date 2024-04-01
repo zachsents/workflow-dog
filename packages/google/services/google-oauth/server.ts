@@ -18,6 +18,7 @@ export default {
         profileUrl: "https://oauth2.googleapis.com/tokeninfo",
         getDisplayName: (profile) => profile.email,
         getServiceUserId: (profile) => profile.sub,
+        includeRedirectUriInTokenRequest: true,
     },
     authUsage: {
         method: "bearer"

@@ -6,6 +6,11 @@ import { NextResponse, type NextRequest } from "next/server"
 import "server-only"
 
 
+/*
+    Apparently this file should only use edge runtime stuff
+*/
+
+
 export function supabaseServer() {
     const cookieStore = cookies()
 
@@ -115,14 +120,24 @@ const commonMessages = {
     "PGRST116": "You don't have permission.",
 }
 
-export function remapError(result: any, messages: Record<string, string> = {}) {
+interface RemapErrorReturn {
+    error: {
+        message: string
+        [key: string]: any
+    }
+}
+
+export function remapError(result: any, messages: Record<string, string | false> = {}): RemapErrorReturn | null {
     if (!result.error)
         return null
 
     const message = {
         ...commonMessages,
         ...messages,
-    }[result.error.code] || result.error.message
+    }[result.error.code] ?? result.error.message
+
+    if (message === false)
+        return null
 
     return {
         error: {

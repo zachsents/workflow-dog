@@ -56,7 +56,10 @@ interface SettingsSectionProps {
 
 function SettingsSection({ children, title, icon: Icon, rightSection }: SettingsSectionProps) {
     return (
-        <Card className="flex-v items-stretch gap-4 p-6 mb-6 shadow-md has-[:focus]:shadow-lg transition-shadow">
+        <Card
+            id={title.toLowerCase().replaceAll(" ", "-")}
+            className="flex-v items-stretch gap-4 p-6 mb-6 shadow-md has-[:focus]:shadow-lg transition-shadow"
+        >
             <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-xl font-bold">
                     <Icon className="text-muted-foreground" />

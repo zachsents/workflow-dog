@@ -1,11 +1,9 @@
 import type { ServerTriggerDefinition, WorkflowTrigger } from "@types"
 import type shared from "./shared.js"
-import isEqual from "lodash.isequal"
-import { fetchGoogleApi } from "shared/google.js"
 
 
 export default {
-    onChange: handleScheduleChange,
+    // onChange: handleScheduleChange,
 } satisfies ServerTriggerDefinition<typeof shared>
 
 

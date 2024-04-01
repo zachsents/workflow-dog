@@ -114,6 +114,10 @@ body {
     .center {
         @apply items-center justify-center;
     }
+
+    .between {
+        @apply items-center justify-between;
+    }
 }
 
 

@@ -7,6 +7,7 @@ import {
     TooltipTrigger,
 } from "@ui/tooltip"
 import Kbd from "@web/components/kbd"
+import { cn } from "@web/lib/utils"
 import { useGraphSaving } from "@web/modules/workflow-editor/graph"
 import { useGraphCopyPaste } from "@web/modules/workflow-editor/graph/use-copy-paste"
 import { useGraphContextMenu } from "@web/modules/workflow-editor/graph/use-graph-context-menu"
@@ -15,18 +16,19 @@ import { useOnConnect } from "@web/modules/workflow-editor/graph/use-on-connect"
 import { useSelectAll } from "@web/modules/workflow-editor/graph/use-select-all"
 import { useEditorSettings } from "@web/modules/workflow-editor/settings"
 import { useEditorStore } from "@web/modules/workflow-editor/store"
+import React from "react"
 import { TbArrowBack, TbArrowForward } from "react-icons/tb"
-import ReactFlow, { Background, BackgroundVariant, ControlButton, Controls, Edge, MiniMap, Node, useEdgesState, useNodesState, type ControlButtonProps, Panel } from "reactflow"
+import ReactFlow, { Background, BackgroundVariant, ControlButton, Controls, Edge, MiniMap, Node, Panel, useEdgesState, useNodesState, type ControlButtonProps } from "reactflow"
 import "reactflow/dist/style.css"
 import colors from "tailwindcss/colors"
+import ActionNode from "./action-node/action-node"
 import ContextMenu from "./context-menu"
 import DataEdge from "./data-edge"
+import EditorToolbar from "./editor-toolbar"
 import GhostBuster from "./ghost-buster"
 import NodeToolbar from "./node-toolbar"
-import ActionNode from "./action-node/action-node"
-import EditorToolbar from "./editor-toolbar"
-import TriggerControl from "./trigger-control"
 import RunControls from "./run-controls/run-controls"
+import TriggerControl from "./trigger-control"
 
 
 const nodeTypes = {
@@ -45,12 +47,13 @@ const snapGrid: [number, number] = [25, 25]
 const graphDeleteKeys = ["Delete", "Backspace"]
 
 
-interface WorkflowGraphEditorProps {
+interface WorkflowGraphEditorProps extends React.ComponentProps<typeof ReactFlow> {
     initialGraph: { nodes: Node[], edges: Edge[] }
 }
 
 export default function WorkflowGraphEditor({
     initialGraph,
+    ...props
 }: WorkflowGraphEditorProps) {
 
     const [nodes, , onNodesChange] = useNodesState(initialGraph.nodes)
@@ -65,6 +68,8 @@ export default function WorkflowGraphEditor({
     return (
         <>
             <ReactFlow
+                {...props}
+
                 nodes={nodes}
                 edges={edges}
                 onNodesChange={onNodesChange}
@@ -100,7 +105,7 @@ export default function WorkflowGraphEditor({
                 // zoomOnScroll={false}
 
                 id="workflow-graph-editor"
-                className="w-full h-full bg-slate-50"
+                className={cn("w-full h-full bg-slate-50", props.className)}
 
                 onCopy={onCopy}
                 onPaste={() => onPaste()}
@@ -134,7 +139,7 @@ export default function WorkflowGraphEditor({
                 <NodeToolbar />
                 <ContextMenu />
 
-                <Panel position="bottom-center">
+                <Panel position="bottom-center" className="!pointer-events-none">
                     <EditorToolbar />
                 </Panel>
 

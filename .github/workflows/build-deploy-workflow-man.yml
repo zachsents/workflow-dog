@@ -8,6 +8,7 @@ on:
       - packages/**
       - shared/**
       - .github/build-deploy-workflow-man.yml
+      - pnpm-lock.yaml
 
 env:
   PROJECT_ID: workflow-dog # Google Cloud project id

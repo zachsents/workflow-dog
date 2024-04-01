@@ -5,7 +5,7 @@ COPY . /wfd
 ENV NODE_ENV=production
 
 WORKDIR /wfd/workflow-man
-RUN bun install --frozen-lockfile
+RUN bun install --no-save
 RUN bun run build
 
 FROM node:20-slim AS runtime

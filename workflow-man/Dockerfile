@@ -1,11 +1,11 @@
-FROM oven/bun:1.0.25 AS builder
+FROM oven/bun:latest AS builder
 
 COPY . /wfd
 
 ENV NODE_ENV=production
 
 WORKDIR /wfd/workflow-man
-RUN bun install --no-save
+RUN bun install --frozen-lockfile
 RUN bun run build
 
 FROM node:20-slim AS runtime

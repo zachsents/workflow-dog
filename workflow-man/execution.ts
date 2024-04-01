@@ -20,14 +20,17 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
         console.debug("Running node", node.id, `(${node.data.definition})`)
 
         const definition = NodeDefinitions.get(node.data.definition)
-        runState.outputs[node.id] ??= {}
+        runState.outputs![node.id] ??= {}
 
         const token = node.data.serviceAccount ?
             await fetchIntegrationToken(node.data.serviceAccount) :
             undefined
 
         const callAction = async () => {
-            return definition.action(inputValues, {
+            if (!definition)
+                throw new Error(`Node definition not found: ${node.data.definition}`)
+
+            return definition?.action(inputValues, {
                 node,
                 triggerData,
                 runState,
@@ -45,7 +48,9 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
                 return outputs
             })
             .catch((err: Error) => {
-                runState.errors[node.id] = err.message
+                runState.errors![node.id] = err.message
+
+                console.debug(`Error in node ${node.id}:`, err.message)
 
                 if (node.data.controlModifiers?.error) {
                     normalizedOutputs["control-output:error"] = err.message
@@ -53,10 +58,10 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
             })
 
         Object.entries(actionOutputs || {}).forEach(([outputDefId, outputValue]) => {
-            const outputDefinition = definition.outputs[outputDefId]
+            const outputDefinition = definition?.outputs[outputDefId]
 
             // regular output: any
-            if (!outputDefinition.group) {
+            if (!outputDefinition?.group) {
                 const outputId = node.data.outputs.find(output => output.definition === outputDefId)!.id
                 normalizedOutputs[outputId] = outputValue
                 return
@@ -64,7 +69,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
             // named group output: { [name: string]: any }
             if (outputDefinition.named) {
-                Object.entries(outputValue).forEach(([name, value]) => {
+                Object.entries(outputValue || {}).forEach(([name, value]) => {
                     const outputId = node.data.outputs.find(output => output.definition === outputDefId && output.name === name)!.id
                     normalizedOutputs[outputId] = value
                 })
@@ -74,15 +79,15 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
             // unnamed group output: any[]
             node.data.outputs
                 .filter(output => output.definition === outputDefId)
-                .forEach((output, i) => normalizedOutputs[output.id] = outputValue[i])
+                .forEach((output, i) => normalizedOutputs[output.id] = outputValue?.[i])
         })
 
         await Promise.all(Object.entries(normalizedOutputs).map(async ([outputId, outputValue]) => {
-            runState.outputs[node.id][outputId] = outputValue
+            runState.outputs![node.id][outputId] = outputValue
 
             await Promise.all(edges.filter(edge => edge.source === node.id && edge.sourceHandle === outputId)
                 .map(edge => checkIfNodeCanRun(edge.target).catch(err => {
-                    runState.errors[edge.target] = err.message
+                    runState.errors![edge.target] = err.message
                 })))
         }))
     }
@@ -95,7 +100,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
         const getAttachedEdge = (handle: string) => edges.find(edge => edge.target === nodeId && edge.targetHandle === handle)
 
-        const getEdgeOutputValue = (attachedEdge: { source: string, sourceHandle: string }) => runState.outputs[attachedEdge.source]?.[attachedEdge.sourceHandle]
+        const getEdgeOutputValue = (attachedEdge: { source: string, sourceHandle: string }) => runState.outputs![attachedEdge.source]?.[attachedEdge.sourceHandle]
 
         const allInputsAvailable = [
             ...node.data.inputs,
@@ -126,7 +131,10 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
             if (!attachedEdge)
                 return acc
 
-            const definition = NodeDefinitions.get(node.data.definition).inputs[input.definition]
+            const definition = NodeDefinitions.get(node.data.definition)?.inputs[input.definition]
+            if (!definition)
+                throw new Error(`Input definition not found: ${input.definition}`)
+
             const value = getEdgeOutputValue(attachedEdge)
 
             if (!definition.group) {

@@ -11,7 +11,7 @@ import { PREFIX } from "shared/prefixes"
 import ActionNodeHandle from "./handle"
 
 
-export default function HandleRenderer({ type }: { type: "input" | "output" }) {
+export default function HandleRenderer({ type }: { type: "input" | "output" }): React.JSX.Element {
 
     const rf = useReactFlow()
     const nodeId = useNodeId()

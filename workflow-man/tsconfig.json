@@ -1,0 +1,20 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "composite": true
+    },
+    "include": [
+        "**/*.ts",
+        "**/*.tsx",
+        "service-account.json"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ],
+    "references": [
+        {
+            "path": "../packages"
+        }
+    ]
+}

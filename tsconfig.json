@@ -43,6 +43,9 @@
         },
         {
             "path": "./web"
+        },
+        {
+            "path": "./workflow-man"
         }
     ]
 }

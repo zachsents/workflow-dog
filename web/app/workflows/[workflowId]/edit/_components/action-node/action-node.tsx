@@ -21,8 +21,8 @@ export default function ActionNode({ id, selected }: NodeProps): React.JSX.Eleme
 
     const [settings] = useEditorSettings()
 
-    const hasInputs = useStore(s => s.nodeInternals.get(id)?.data?.inputs?.length > 0)
-    const hasOutputs = useStore(s => s.nodeInternals.get(id)?.data?.outputs?.length > 0)
+    const hasInputs = Object.keys(definition?.inputs || {}).length > 0
+    const hasOutputs = Object.keys(definition?.outputs || {}).length > 0
 
     return definition ?
         <div

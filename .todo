@@ -80,7 +80,7 @@ extra:
 
 
 tonight:
-    ☐ Convert workflow-man
+    ✔ Convert workflow-man @done (4/1/2024, 3:53:11 AM)
     ☐ Add trigger updating server action
     ☐ Add workflow creation
     ☐ Make server action for workflow delete that cleans up triggers

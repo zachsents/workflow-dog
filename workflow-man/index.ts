@@ -58,11 +58,11 @@ app.post("/workflow-runs/:runId/execute", async (req, res) => {
     })
 
     const runState = await runWorkflow(run, workflow)
-
+    
     await updateRun(req.params.runId, {
         status: "completed",
-        error_count: Object.keys(runState.errors).length,
-        has_errors: Object.keys(runState.errors).length > 0,
+        error_count: Object.keys(runState.errors || {}).length,
+        has_errors: Object.keys(runState.errors || {}).length > 0,
         finished_at: new Date().toISOString(),
         state: { ...runState, graph: workflow.graph },
     })

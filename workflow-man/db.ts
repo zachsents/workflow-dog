@@ -1,9 +1,9 @@
-import { createClient } from "@supabase/supabase-js"
+import { type SupabaseClient, createClient } from "@supabase/supabase-js"
 import { getSecret } from "./secrets.js"
 
 
 const serviceKey = await getSecret("SUPABASE_SERVICE_KEY")
-export const client = createClient(process.env.SUPABASE_URL as string, serviceKey)
+export const client: SupabaseClient<any, "public", any> = createClient(process.env.SUPABASE_URL as string, serviceKey)
 
 
 export async function updateRun(runId: string, data: any) {

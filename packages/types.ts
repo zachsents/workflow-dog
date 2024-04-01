@@ -229,6 +229,9 @@ export type ServerDataTypeDefinition<T extends SharedDataTypeDefinition> = {
 export type WebDataTypeDefinition<T extends SharedDataTypeDefinition> = {
     icon: IconType | ComponentType
     manualInputComponent: ComponentType<DataTypeManualInputProps<T["schema"]>>
+    renderPreview: ComponentType<{ value: z.infer<T["schema"]> }>
+    shouldExpand?: (value: z.infer<T["schema"]>) => boolean
+    renderExpanded?: ComponentType<{ value: z.infer<T["schema"]> }>
 }
 
 export interface DataTypeManualInputProps<T extends ZodSchema> {

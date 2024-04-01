@@ -15,4 +15,13 @@ export default {
             />
         )
     },
+    renderPreview: ({ value }) => {
+        const formatted = new Intl.NumberFormat().format(value)
+        return (
+            <p className="font-bold">
+                {formatted}
+            </p>
+        )
+    },
+    shouldExpand: () => false,
 } satisfies WebDataTypeDefinition<typeof shared>

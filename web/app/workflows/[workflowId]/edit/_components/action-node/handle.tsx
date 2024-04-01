@@ -8,7 +8,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@ui/dialog"
-import { ScrollArea } from "@ui/scroll-area"
 import {
     Tooltip,
     TooltipContent,
@@ -25,9 +24,8 @@ import { produce } from "immer"
 import type { WebNodeDefinitionOutput } from "packages/types"
 import { DataTypeDefinitions, NodeDefinitions } from "packages/web"
 import React, { forwardRef, useMemo, useRef, useState } from "react"
-import { TbActivity, TbPencil, TbSparkles, TbX } from "react-icons/tb"
+import { TbPencil, TbSparkles, TbX } from "react-icons/tb"
 import { HandleType, Position, Handle as RFHandle, useNodeId, useReactFlow } from "reactflow"
-import util from "util"
 import PropertySelector from "./property-selector"
 
 
@@ -67,7 +65,7 @@ export default function ActionNodeHandle({
         || (definition.named ? "<none>" : definition?.name)
         || <>&nbsp;</>
 
-    const { data: selectedRun } = useSelectedWorkflowRun()
+    const { data: selectedRun, isSuccess: hasSelectedRun } = useSelectedWorkflowRun()
     const [hasRunValue, runValue] = useMemo(() => {
         const runState = selectedRun?.state as any
         const handleValues = runState?.outputs?.[nodeId!] ?? {}
@@ -99,65 +97,42 @@ export default function ActionNodeHandle({
                     </p>
                 </div>
 
-                {selectedRun && isInput(type) && hasRunValue &&
-                    <div className="absolute top-1/2 -translate-y-1/2 nodrag left-full translate-x-2">
-                        <TooltipProvider delayDuration={0}>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button size="icon" className="rounded-full">
-                                        <TbActivity />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent className="flex flex-col items-stretch gap-unit-xs max-w-[20rem]">
-                                    <p className="text-xs text-default-500 text-center">
-                                        Output From Selected Run
-                                    </p>
-                                    <ScrollArea className="h-[30rem] w-full rounded-md border p-4">
-                                        {typeof runValue === "string" ?
-                                            <p className="line-clamp-4">
-                                                {runValue}
-                                            </p> :
-                                            <pre>
-                                                {util.inspect(runValue)}
-                                            </pre>}
-                                    </ScrollArea>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    </div>}
+                {selectedRun && isOutput(type) && hasRunValue &&
+                    <ValueDisplay runValue={runValue} dataTypeId={definition.type} />}
             </RFHandle>
 
-            <div
-                className={cn(
-                    "absolute top-1/2 -translate-y-1/2 h-full flex center gap-1 nodrag nopan transition-opacity opacity-0 group-hover/handle:opacity-100 pointer-events-none group-hover/handle:pointer-events-auto",
-                    isInput(type)
-                        ? "right-full pr-1 pl-4"
-                        : "left-full pl-0.5 pr-4",
-                )}
-                onClick={ev => ev.stopPropagation()}
-            >
-                {definition.named &&
-                    <EditNamedHandleButton
-                        handleId={id}
-                        handleType={type}
-                        handleName={name!}
-                        dataTypeId={definition.type}
-                    />}
-                {definition.group &&
-                    <DeleteGroupHandleButton handleId={id} handleType={type} />}
+            {!hasSelectedRun &&
+                <div
+                    className={cn(
+                        "absolute top-1/2 -translate-y-1/2 h-full flex center gap-1 nodrag nopan transition-opacity opacity-0 group-hover/handle:opacity-100 pointer-events-none group-hover/handle:pointer-events-auto",
+                        isInput(type)
+                            ? "right-full pr-1 pl-4"
+                            : "left-full pl-0.5 pr-4",
+                    )}
+                    onClick={ev => ev.stopPropagation()}
+                >
+                    {definition.named &&
+                        <EditNamedHandleButton
+                            handleId={id}
+                            handleType={type}
+                            handleName={name!}
+                            dataTypeId={definition.type}
+                        />}
+                    {definition.group &&
+                        <DeleteGroupHandleButton handleId={id} handleType={type} />}
 
-                {!isConnected && isOutput(type) &&
-                    (definition as WebNodeDefinitionOutput).selectable &&
-                    <PropertySelector dataTypeId={definition.type} />}
+                    {!isConnected && isOutput(type) &&
+                        (definition as WebNodeDefinitionOutput).selectable &&
+                        <PropertySelector dataTypeId={definition.type} />}
 
-                {!isConnected && definition?.recommendedNode &&
-                    <RecommendedNodeButton
-                        handleId={id}
-                        handleRef={ref}
-                        handleType={type}
-                        recommendation={definition.recommendedNode}
-                    />}
-            </div>
+                    {!isConnected && definition?.recommendedNode &&
+                        <RecommendedNodeButton
+                            handleId={id}
+                            handleRef={ref}
+                            handleType={type}
+                            recommendation={definition.recommendedNode}
+                        />}
+                </div>}
         </div >
     )
 }
@@ -411,3 +386,69 @@ function isOutput(handleType: FlexibleHandleType) {
 const WrapInDialogTrigger = forwardRef<React.ElementRef<typeof DialogTrigger>, React.ComponentProps<typeof DialogTrigger>>((props, ref) =>
     <DialogTrigger asChild {...props} ref={ref} />
 )
+
+
+function ValueDisplay({ runValue, dataTypeId }: { runValue: any, dataTypeId: string }) {
+
+    const dataType = DataTypeDefinitions.get(dataTypeId)
+
+    const shouldExpand = dataType?.shouldExpand?.(runValue) || false
+
+    const dialog = useDialogState()
+
+    return (
+        <div
+            className="absolute top-1/2 -translate-y-1/2 nodrag left-full translate-x-2"
+        >
+            <TooltipProvider delayDuration={0}>
+                <Tooltip open>
+                    <TooltipTrigger asChild>
+                        {/* <Button
+                            size="icon" className="rounded-full w-7 h-7"
+                            onClick={() => {
+                                if (shouldExpand)
+                                    dialog.open()
+                            }}
+                        >
+                            <TbActivity />
+                        </Button> */}
+                        <div />
+                    </TooltipTrigger>
+                    <TooltipContent
+                        side="right" avoidCollisions={false}
+                        className={cn(
+                            "max-w-[12rem] max-h-[12rem] transition-opacity",
+                            shouldExpand ? "cursor-pointer hover:opacity-90" : "cursor-default",
+                        )}
+                        onClick={() => {
+                            if (shouldExpand)
+                                dialog.open()
+                        }}
+                    >
+                        {dataType?.renderPreview &&
+                            <dataType.renderPreview value={runValue} />}
+
+                        {shouldExpand &&
+                            <p className="text-muted-foreground">
+                                Click to expand
+                            </p>}
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+
+            {shouldExpand &&
+                <Dialog {...dialog.dialogProps}>
+                    <DialogContent className="max-h-[56rem] overflow-y-scroll">
+                        <DialogHeader>
+                            <DialogTitle>
+                                Value from selected run
+                            </DialogTitle>
+                        </DialogHeader>
+
+                        {dataType?.renderExpanded &&
+                            <dataType.renderExpanded value={runValue} />}
+                    </DialogContent>
+                </Dialog>}
+        </div>
+    )
+}

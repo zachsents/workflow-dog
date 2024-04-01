@@ -1,5 +1,5 @@
 import { getAuth, parent } from "@web/lib/server/google"
-import { supabaseServer } from "@web/lib/server/supabase"
+import { supabaseServerAdmin } from "@web/lib/server/supabase-admin"
 import { google } from "googleapis"
 import { NextResponse } from "next/server"
 import { z } from "zod"
@@ -16,7 +16,7 @@ export async function POST(
     req: Request,
     { params: { workflowId } }: { params: { workflowId: string } }
 ) {
-    const supabase = supabaseServer()
+    const supabase = await supabaseServerAdmin()
 
     /*
      * Get the count so we can increment it. Should technically be done in a transaction

@@ -5,7 +5,7 @@ import { cn } from "@web/lib/utils"
 import { useDefinition, useNodeColors, useUpdateInternalsWhenNecessary } from "@web/modules/workflow-editor/graph/nodes"
 import { useEditorSettings } from "@web/modules/workflow-editor/settings"
 import { NodeProps, useStore } from "reactflow"
-import DisabledWrapper from "./disabled-wrapper"
+import NotesWrapper from "./notes-wrapper"
 import HandleRenderer from "./handle-renderer"
 import ModifierWrapper from "./modifier-wrapper"
 import SelectionWrapper from "./selection-wrapper"
@@ -29,7 +29,7 @@ export default function ActionNode({ id, selected }: NodeProps) {
             className="relative group/node"
             style={nodeColors as any}
         >
-            <DisabledWrapper>
+            <NotesWrapper>
                 <SelectionWrapper selected={selected}>
                     <ModifierWrapper>
                         <Card className={cn(
@@ -61,7 +61,7 @@ export default function ActionNode({ id, selected }: NodeProps) {
                     {definition?.requiredService &&
                         <ServiceAccountSelector />}
                 </SelectionWrapper>
-            </DisabledWrapper>
+            </NotesWrapper>
         </div> :
         <Card className="p-4">
             Unknown Node

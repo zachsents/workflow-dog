@@ -1,11 +1,11 @@
-FROM oven/bun:latest AS builder
+FROM oven/bun:alpine AS builder
 
 COPY . /wfd
 
 ENV NODE_ENV=production
 
 WORKDIR /wfd/workflow-man
-RUN bun install --no-save
+RUN bun install
 RUN bun run build
 
 FROM node:20-slim AS runtime

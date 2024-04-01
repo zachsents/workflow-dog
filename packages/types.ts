@@ -231,7 +231,8 @@ export type WebDataTypeDefinition<T extends SharedDataTypeDefinition> = {
     manualInputComponent: ComponentType<DataTypeManualInputProps<T["schema"]>>
 }
 
-export interface DataTypeManualInputProps<T extends ZodSchema> extends Omit<ComponentPropsWithoutRef<"input">, "value" | "onChange"> {
+export interface DataTypeManualInputProps<T extends ZodSchema> {
     value: z.infer<T>
     onChange: (value: z.infer<T>) => void
+    [key: string]: any
 }

@@ -11,14 +11,13 @@
     },
     "devDependencies": {
         "@types/lodash": "^4.17.0",
-        "@types/react": "^18.0.22",
+        "@types/react": "*",
         "lodash": "^4.17.21"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"
     },
     "optionalDependencies": {
-        "@nextui-org/react": "*",
         "react": "*",
         "react-icons": "*"
     }

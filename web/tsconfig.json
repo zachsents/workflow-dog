@@ -1,51 +1,36 @@
 {
+    "extends": "../tsconfig.json",
     "compilerOptions": {
-        "moduleResolution": "Node",
-        "jsx": "preserve",
-        "baseUrl": ".",
-        "paths": {
-            "@web/*": [
-                "./*"
-            ],
-            "@ui/*": [
-                "./components/ui/*"
-            ]
-        },
-        "esModuleInterop": true,
+        "composite": true,
         "lib": [
             "dom",
             "dom.iterable",
             "esnext"
         ],
-        "allowJs": true,
-        "skipLibCheck": true,
-        "strict": false,
-        "noEmit": true,
+        // "noEmit": true,
         "incremental": true,
-        "module": "esnext",
-        "resolveJsonModule": true,
         "isolatedModules": true,
-        // "declaration": true,
-        // "declarationMap": true,
         "plugins": [
             {
                 "name": "next"
             }
         ],
-        "strictNullChecks": true
+        "strictNullChecks": true,
+        "noEmit": false
     },
     "include": [
-        "next-env.d.ts",
         "**/*.ts",
         "**/*.tsx",
+        "next-env.d.ts",
         ".next/types/**/*.ts"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "_old_components"
     ],
     "references": [
         {
-            "path": "../packages/"
+            "path": "../packages"
         }
     ]
 }

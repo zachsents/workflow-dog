@@ -9,7 +9,7 @@ export default {
         return (
             <div className="block px-2">
                 <Switch
-                    {...props}
+                    {...props as any}
                     checked={value || false}
                     onCheckedChange={onChange}
                 />

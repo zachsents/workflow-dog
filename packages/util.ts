@@ -24,7 +24,7 @@ export function createExport<T>(obj: Record<string, T>): {
         asMap: map,
         ids: Object.keys(obj),
         resolveId,
-        resolve: (...args: string[]) => map.get(resolveId(...args)),
+        resolve: (...args: string[]) => map.get(resolveId(...args)!),
         safeName: (id: string) => id.split("/").slice(-2).join("_"),
         get: (id: string) => map.get(id),
     }

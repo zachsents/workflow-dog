@@ -3,6 +3,7 @@ import { getSecret } from "@web/lib/server/google"
 import { errorResponse } from "@web/lib/server/router"
 import type { Database } from "@web/lib/types/supabase-db"
 import _ from "lodash"
+import { NextResponse } from "next/server"
 import { ServiceDefinitions } from "packages/server"
 import type { OAuth2Config } from "packages/types"
 import "server-only"
@@ -81,10 +82,10 @@ export async function getTokenForOAuth2Account(account: any, requesterClient: Su
 
     // If the token is not expired, return it. Includes a 2 minute buffer.
     if (new Date(token.expires_at) > new Date(Date.now() + 120 * 1000))
-        return {
+        return NextResponse.json({
             access_token: token.access_token,
             refreshed: false,
-        }
+        })
 
     if (!refresh_token)
         return errorResponse("No refresh token available. You might need to revoke access to WorkflowDog through the service's settings and then try connecting again.", 401)
@@ -128,10 +129,10 @@ export async function getTokenForOAuth2Account(account: any, requesterClient: Su
             .eq("id", account.id)
             .throwOnError()
 
-        return {
+        return NextResponse.json({
             access_token: newToken.access_token,
             refreshed: true,
-        }
+        })
     }
     catch (err) {
         console.error(err)

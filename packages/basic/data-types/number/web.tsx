@@ -5,10 +5,10 @@ import { Input } from "@web/components/ui/input"
 
 export default {
     icon: TbNumbers,
-    manualInputComponent: props => {
+    manualInputComponent: ({ ...props }) => {
         return (
             <Input
-                {...props}
+                {...props as any}
                 type="number"
                 placeholder="Enter a number..."
                 value={props.value || ""}

@@ -17,7 +17,7 @@ export default {
         }
     },
     renderBody: () => {
-        const inputRef: RefObject<HTMLTextAreaElement> = useRef()
+        const inputRef = useRef<HTMLTextAreaElement>(null)
         const selected = useNodePropertyValue(undefined, "selected")
         useEffect(() => {
             if (selected)

@@ -6,7 +6,7 @@ import { cn } from "@web/lib/utils"
 
 export default {
     icon: TbAbc,
-    manualInputComponent: props => {
+    manualInputComponent: (props: any) => {
         return (
             <Textarea
                 placeholder="Enter text..."

@@ -1,7 +1,7 @@
 import _ from "lodash"
 import { customAlphabet } from "nanoid"
 import { alphanumeric } from "nanoid-dictionary"
-import { useCallback, useEffect, useMemo, useRef, useState, type DependencyList } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Subject, debounceTime, tap } from "rxjs"
 
 
@@ -53,13 +53,6 @@ export function deepCamelCase<T extends object>(obj: T, options: {
     }
 
     return obj
-}
-
-
-export function useSyncedRef<T>(value: T) {
-    const ref = useRef(value)
-    ref.current = value
-    return ref
 }
 
 
@@ -149,73 +142,6 @@ export function useMountDelay(delay: number = 1000, {
 
     return mounted
 }
-
-
-/**
- * @param hotkey e.g. "ctrl+b"
- */
-export function useHotkey(hotkey: string, callback: (ev: KeyboardEvent) => void, {
-    target = window,
-    event = "keydown",
-    eventOptions = {},
-    preventDefault = false,
-    callbackDependencies = [],
-    qualifier,
-    preventInInputs = false,
-}: {
-    target?: HTMLElement | Window
-    event?: string
-    eventOptions?: object
-    preventDefault?: boolean
-    callbackDependencies?: DependencyList
-    qualifier?: (event: KeyboardEvent) => boolean
-    preventInInputs?: boolean
-} = {}) {
-
-    const wrappedCallback = useCallback(callback, callbackDependencies)
-
-    const [modifierKeys, key] = useMemo(() => {
-        const keys = hotkey.toLowerCase().split(/[+\s]+/g)
-        return [keys, keys.pop()]
-    }, [hotkey])
-
-    useEffect(() => {
-        const handler = (ev: KeyboardEvent) => {
-            const modifiersSatisfied = Object.entries(modifiers)
-                .every(([modKey, modFn]) => modifierKeys.includes(modKey) === modFn(ev))
-
-            if (!modifiersSatisfied)
-                return
-
-            if (ev.key.toLowerCase() !== key)
-                return
-
-            if (typeof qualifier === "function" && !qualifier(ev))
-                return
-
-            if (preventInInputs && blacklistedTags.includes(document.activeElement.tagName))
-                return
-
-            if (preventDefault)
-                ev.preventDefault()
-
-            wrappedCallback(ev)
-        }
-
-        target.addEventListener(event, handler, eventOptions)
-        return () => target.removeEventListener(event, handler)
-    }, [modifiers, key, wrappedCallback, target, event, JSON.stringify(eventOptions), preventDefault])
-}
-
-
-const modifiers: Record<"mod" | "shift" | "alt", (ev: KeyboardEvent) => boolean> = {
-    mod: ev => ev.ctrlKey || ev.metaKey,
-    shift: ev => ev.shiftKey,
-    alt: ev => ev.altKey,
-}
-
-const blacklistedTags = ["INPUT", "TEXTAREA", "SELECT"]
-
 
 
 /**

@@ -1,9 +1,48 @@
 {
     "compilerOptions": {
         "target": "ESNext",
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
+        "module": "ESNext",
+        "moduleResolution": "Node",
         "allowSyntheticDefaultImports": true,
-        "resolveJsonModule": true
-    }
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "composite": true,
+        // this causes problems
+        // "preserveSymlinks": true,
+        "allowJs": true,
+        "jsx": "preserve",
+        "strict": false,
+        "strictNullChecks": true,
+        "skipLibCheck": true,
+        "baseUrl": ".",
+        "paths": {
+            "@web/*": [
+                "./web/*"
+            ],
+            "@types": [
+                "./packages/types.js"
+            ],
+            "@ui/*": [
+                "./web/components/ui/*"
+            ]
+        }
+    },
+    "include": [
+        "**/*.ts",
+        "**/*.tsx",
+    ],
+    "exclude": [
+        "node_modules",
+        "integrations",
+        "nodes",
+        "triggers"
+    ],
+    "references": [
+        {
+            "path": "./packages"
+        },
+        {
+            "path": "./web"
+        }
+    ]
 }

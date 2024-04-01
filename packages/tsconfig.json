@@ -1,25 +1,18 @@
 {
+    "extends": "../tsconfig.json",
     "compilerOptions": {
-        "moduleResolution": "Node",
-        "jsx": "react-jsx",
-        "baseUrl": ".",
-        "paths": {
-            "@web/*": [
-                "../web/*"
-            ],
-            "@types": [
-                "./types.js"
-            ],
-            "@/*": [
-                "./*"
-            ]
-        },
-        "esModuleInterop": true,
-        "target": "ESNext",
-        "module": "ESNext",
-        "declaration": true,
-        "declarationMap": true,
-        "composite": true,
-        "preserveSymlinks": true
-    }
+        "composite": true
+    },
+    "include": [
+        "**/*.ts",
+        "**/*.tsx"
+    ],
+    // "exclude": [
+    //     "node_modules"
+    // ],
+    "references": [
+        {
+            "path": "../web"
+        }
+    ]
 }

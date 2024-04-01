@@ -6,7 +6,7 @@ import { cn } from "@web/lib/utils"
 
 export default {
     icon: TbTriangleSquareCircle,
-    manualInputComponent: ({ value, ...props }) => {
+    manualInputComponent: ({ value, ...props }: any) => {
         // TODO: add intermediate value for converting between object
         // and string representations. maybe do the conversion on blur
         // or just make it one-way

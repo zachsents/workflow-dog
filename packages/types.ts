@@ -27,7 +27,8 @@ export type SharedNodeDefinition = {
 
 export interface SharedNodeDefinitionInterface {
     name: string
-    type: keyof DataTypeMap
+    // type: keyof DataTypeMap
+    type: string
     group?: boolean
     named?: boolean
 
@@ -38,36 +39,38 @@ export interface SharedNodeDefinitionInterface {
 
 export type ExecutionNodeDefinition<T extends SharedNodeDefinition> = {
     action: (inputs: {
-        [K in keyof T["inputs"]]: InterfaceValue<T, "inputs", K>
+        // [K in keyof T["inputs"]]: InterfaceValue<T, "inputs", K>
+        [K in keyof T["inputs"]]: any
     }, info: {
         node: Node
         triggerData: Record<string, any>
         runState: WorkflowRunState
         token?: string
     }) => {
-            [K in keyof T["outputs"]]: InterfaceValue<T, "outputs", K>
+            // [K in keyof T["outputs"]]: InterfaceValue<T, "outputs", K>
+            [K in keyof T["outputs"]]: any
         }
 }
 
-type InterfaceValue<
-    T extends SharedNodeDefinition,
-    IK extends "inputs" | "outputs",
-    K extends keyof T[IK]
-> = T[IK][K] extends SharedNodeDefinitionInterface
-    ? T[IK][K]["group"] extends true
-    ? T[IK][K]["named"] extends true
-    ? Record<string, DataTypeByURI<T[IK][K]["type"]>>
-    : DataTypeByURI<T[IK][K]["type"]>[]
-    : DataTypeByURI<T[IK][K]["type"]>
-    : never
+// type InterfaceValue<
+//     T extends SharedNodeDefinition,
+//     IK extends "inputs" | "outputs",
+//     K extends keyof T[IK]
+// > = T[IK][K] extends SharedNodeDefinitionInterface
+//     ? T[IK][K]["group"] extends true
+//     ? T[IK][K]["named"] extends true
+//     ? Record<string, DataTypeByURI<T[IK][K]["type"]>>
+//     : DataTypeByURI<T[IK][K]["type"]>[]
+//     : DataTypeByURI<T[IK][K]["type"]>
+//     : never
 
 
 
-type DataTypeMap = {
-    // [K in keyof typeof serverDataTypes]: z.infer<typeof serverDataTypes[K]["schema"]>
-    // forget about this for now
-}
-type DataTypeByURI<URI extends keyof DataTypeMap> = DataTypeMap[URI]
+// type DataTypeMap = {
+//     // [K in keyof typeof serverDataTypes]: z.infer<typeof serverDataTypes[K]["schema"]>
+//     // forget about this for now
+// }
+// type DataTypeByURI<URI extends keyof DataTypeMap> = DataTypeMap[URI]
 
 
 export type WebNodeDefinition<T extends SharedNodeDefinition> = {
@@ -122,7 +125,8 @@ export type SharedTriggerDefinition = {
 export interface SharedTriggerDefinitionInterface {
     name: string
     description?: string
-    type: keyof DataTypeMap
+    // type: keyof DataTypeMap
+    type: string
 }
 
 export type WorkflowTrigger = {

@@ -83,9 +83,9 @@ tonight:
     ✔ Convert workflow-man @done (4/1/2024, 3:53:11 AM)
     ✔ Make it show outputs @done (4/1/2024, 5:35:27 AM)
     ✔ Add trigger updating server action @done (4/1/2024, 8:55:49 AM)
-    ☐ Add workflow creation
+    ✔ Add workflow creation @done (4/1/2024, 3:26:41 PM)
     ✔ Make server action for workflow delete that cleans up triggers @done (4/1/2024, 9:20:25 AM)
     ☐ Add integrations to trigger configs
     ☐ Add integration display in settings
     ☐ Make better manual input components
-    ☐ Change team name in db function
+    ✔ Change team name in db function @done (4/1/2024, 3:27:16 PM)

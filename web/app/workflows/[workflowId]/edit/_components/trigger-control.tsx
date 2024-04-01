@@ -20,11 +20,11 @@ import { plural } from "@web/modules/grammar"
 import { useWorkflow } from "@web/modules/workflows"
 import Fuse from "fuse.js"
 import _ from "lodash"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { TriggerDefinitions } from "packages/client"
 import React, { forwardRef, useEffect, useMemo, useState } from "react"
 import { TbChevronDown, TbPlus, TbX } from "react-icons/tb"
 import { assignNewTrigger as assignNewTriggerAction, updateTriggerConfig as updateTriggerConfigAction } from "../actions"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 
 export default function TriggerControl() {

@@ -35,7 +35,7 @@ function RunManually() {
     const popover = useDialogState()
     return (
         <Popover {...popover.dialogProps}>
-            <PopoverTrigger>
+            <PopoverTrigger asChild>
                 <Button
                     size="sm"
                     className="pointer-events-auto flex center gap-2 shadow-lg"
@@ -53,13 +53,10 @@ function RunManually() {
 
 
 function PastRuns() {
-
-    const { data: runs } = useWorkflowRunsRealtime()
     const popover = useDialogState()
-    
     return (
         <Popover {...popover.dialogProps}>
-            <PopoverTrigger>
+            <PopoverTrigger asChild>
                 <Button
                     size="sm" variant="outline"
                     className="pointer-events-auto flex center gap-2 bg-white/80 backdrop-blur-sm shadow-lg"
@@ -71,10 +68,6 @@ function PastRuns() {
             </PopoverTrigger>
             <PopoverContent align="end" className="w-auto max-h-[36rem] p-0 overflow-y-auto shadow-lg z-[60]">
                 <PastRunsTable onClose={popover.close} />
-                {runs?.length === 0 &&
-                    <p className="text-muted-foreground text-sm text-center p-8">
-                        No runs yet
-                    </p>}
             </PopoverContent>
         </Popover>
     )

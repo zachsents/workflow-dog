@@ -12,7 +12,7 @@ import SelectionWrapper from "./selection-wrapper"
 import ServiceAccountSelector from "./service-account-selector"
 
 
-export default function ActionNode({ id, selected }: NodeProps) {
+export default function ActionNode({ id, selected }: NodeProps): React.JSX.Element {
 
     const definition = useDefinition()
     const nodeColors = useNodeColors(undefined, "css")

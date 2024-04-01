@@ -82,7 +82,7 @@ extra:
 tonight:
     ✔ Convert workflow-man @done (4/1/2024, 3:53:11 AM)
     ✔ Make it show outputs @done (4/1/2024, 5:35:27 AM)
-    ☐ Add trigger updating server action
+    ✔ Add trigger updating server action @done (4/1/2024, 8:55:49 AM)
     ☐ Add workflow creation
     ☐ Make server action for workflow delete that cleans up triggers
     ☐ Add integrations to trigger configs

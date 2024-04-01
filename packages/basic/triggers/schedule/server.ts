@@ -2,7 +2,7 @@ import type { ServerTriggerDefinition, WorkflowTrigger } from "@types"
 import type shared from "./shared.js"
 import _ from "lodash"
 import { google } from "googleapis"
-import { getAuth, parent } from "@web/lib/server/google"
+import { getAuth, parent } from "@pkg/server-util/google"
 
 
 export default {

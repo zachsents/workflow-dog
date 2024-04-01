@@ -24,6 +24,9 @@
             ],
             "@ui/*": [
                 "./web/components/ui/*"
+            ],
+            "@pkg/*": [
+                "./packages/*"
             ]
         }
     },

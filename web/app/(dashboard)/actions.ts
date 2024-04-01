@@ -2,6 +2,7 @@
 
 import { remapError, supabaseServer } from "@web/lib/server/supabase"
 import { revalidatePath } from "next/cache"
+import { TriggerDefinitions } from "packages/server"
 
 
 /**
@@ -44,11 +45,17 @@ export async function deleteWorkflow(workflowId: string) {
         .from("workflows")
         .delete()
         .eq("id", workflowId)
-        .select("id")
+        .select("id, trigger")
         .single()
 
     const error = remapError(query)
     if (error) return error
+
+    const oldTrigger = query.data?.trigger as any
+    if (oldTrigger?.type) {
+        await TriggerDefinitions.get(oldTrigger.type)
+            ?.onChange?.(oldTrigger, null, workflowId)
+    }
 
     console.debug(`Deleted workflow! (ID: ${workflowId})`)
     revalidatePath(`/projects/[projectId]/workflows`, "page")

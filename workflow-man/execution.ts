@@ -19,11 +19,11 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
         console.debug("Running node", node.id, `(${node.data.definition})`)
 
-        const definition = NodeDefinitions.asMap.get(node.data.definition)
+        const definition = NodeDefinitions.get(node.data.definition)
         runState.outputs[node.id] ??= {}
 
-        const token = node.data.integrationAccount ?
-            await fetchIntegrationToken(node.data.integrationAccount) :
+        const token = node.data.serviceAccount ?
+            await fetchIntegrationToken(node.data.serviceAccount) :
             undefined
 
         const callAction = async () => {
@@ -126,7 +126,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
             if (!attachedEdge)
                 return acc
 
-            const definition = NodeDefinitions.asMap.get(node.data.definition).inputs[input.definition]
+            const definition = NodeDefinitions.get(node.data.definition).inputs[input.definition]
             const value = getEdgeOutputValue(attachedEdge)
 
             if (!definition.group) {

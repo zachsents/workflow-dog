@@ -17,5 +17,11 @@
     "engines": {
         "node": ">=18",
         "pnpm": ">=8"
-    }
+    },
+    "workspaces": [
+        "workflow-man",
+        "packages",
+        "shared",
+        "web"
+    ]
 }

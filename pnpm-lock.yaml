@@ -308,15 +308,18 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.39.3
         version: 2.39.8
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.5
       express:
         specifier: ^4.18.2
         version: 4.18.3
+      google-auth-library:
+        specifier: ^9.7.0
+        version: 9.7.0
       morgan:
         specifier: ^1.10.0
         version: 1.10.0
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
       shared:
         specifier: workspace:*
         version: link:../shared
@@ -324,9 +327,6 @@ importers:
         specifier: ^5.0.0
         version: 5.4.2
     devDependencies:
-      '@types/bun':
-        specifier: latest
-        version: 1.0.8
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
@@ -6693,6 +6693,11 @@ packages:
       no-case: 3.0.4
       tslib: 2.6.2
     dev: true
+
+  /dotenv@16.4.5:
+    resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
+    engines: {node: '>=12'}
+    dev: false
 
   /eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}

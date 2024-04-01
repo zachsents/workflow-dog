@@ -30,7 +30,7 @@ export type Node = {
             finished?: boolean
             error?: boolean
         }
-        integrationAccount?: string
+        serviceAccount?: string
     }
 }
 

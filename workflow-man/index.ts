@@ -1,8 +1,9 @@
+import "dotenv/config"
 import express from "express"
 import morgan from "morgan"
 import { client, updateRun } from "./db.js"
-import type { WorkflowRun } from "./execution.js"
 import { runWorkflow } from "./execution.js"
+import { WorkflowRun } from "shared/types.js"
 
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8081

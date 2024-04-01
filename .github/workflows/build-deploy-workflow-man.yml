@@ -5,9 +5,8 @@ on:
     branches: ["main"]
     paths:
       - workflow-man/**
-      - integrations/**
-      - nodes/**
-      - triggers/**
+      - packages/**
+      - shared/**
       - .github/build-deploy-workflow-man.yml
 
 env:

@@ -1,49 +1,21 @@
 Web:
     Integration Server:
-        ✔ Add brand icons to frontend @done (2/6/2024, 1:22:49 AM)
-        ✔ Double-check token retrieval/refresh @done (2/6/2024, 2:37:11 AM)
-        ✔ Add support for API keys @done (2/6/2024, 9:15:21 PM)
         ☐ Make nonexistent accounts be unselected
 
     Execution:
-        ✔ Set up workflowman that receives workflow runs from the queue and executes them @done (2/7/2024, 6:56:51 PM)
-        ✔ Set up taskqueue that points to workflow-man @done (2/12/2024, 12:00:53 AM)
-        ✔ Make triggerman that receives trigger requests and queues tasks @done (2/13/2024, 12:20:31 AM)
-        ✘ Catch errors for things like invalid triggers, invalid worklow IDs, etc. @cancelled (2/13/2024, 4:33:54 AM)
-        ✔ Catch errors @done (2/7/2024, 5:51:40 PM)
-        ✔ Do named outputs @done (2/7/2024, 2:24:33 AM)
-        ✔ Add modifiers support to execution engine @done (2/18/2024, 2:37:13 PM)
-        ✔ Make execution honor disabled nodes @done (2/15/2024, 6:26:06 PM)
-        ✘ Add info messages to nodes @cancelled (2/18/2024, 10:09:53 AM)
         ☐ Check security of how i'm passing integration tokens to the execution engine
 
     Running UI:
-        ✔ Set up run manually panel @done (2/13/2024, 9:38:41 PM)
-        ✔ Make manual runner subscribe @done (2/14/2024, 12:59:33 AM)
         ☐ Make JSON builder component
 
     Run Viewer UI: 
-        ✔ Design run viewer panel @done (2/13/2024, 9:38:44 PM)
-        ✘ Port old run viewer to new frontend @cancelled (2/13/2024, 9:38:51 PM)
-        ✔ Add most recent run to run viewer UI @done (2/15/2024, 6:55:25 PM)
-        ✔ Set up zustand store @done (2/13/2024, 11:45:56 PM)
-        ✔ Add re-run button @done (2/14/2024, 2:20:49 AM)
-        ✔ Add run duration @done (2/14/2024, 1:08:45 AM)
-        ✔ Add scroll shadow @done (2/14/2024, 1:08:50 AM)
-        ✔ Add error tooltips @done (2/14/2024, 2:40:07 AM)
-        ✔ Make run list realtime @done (2/14/2024, 11:16:37 AM)
-        ✔ Make run viewer load previous version of run if it's not the most recent @done (2/15/2024, 5:34:25 PM)
-        ✔ Make a spot for workflow errors @done (2/15/2024, 5:34:28 PM)
         ☐ Design object/json viewer
         ☐ Make dates consider scheduled time and add status icon
         ☐ Add scroll shadow to data viewer tooltip
         ☐ Add hidden property that doesnt show up in the UI or influence count
 
     Triggers:
-        ✔ Combine URL and webhook triggers @done (2/14/2024, 11:34:06 AM)
         ☐ Add gmail trigger endpoint/infra
-        ✘ Catch errors for invalid triggers @cancelled (2/18/2024, 7:18:56 PM)
-        ✔ Add configuration for triggers @done (2/20/2024, 12:22:00 AM)
         ☐ Change URL trigger to always return JSON
         ☐ Allow custom values in trigger data node
         ✘ Change trigger cleanup to use a database webhook since there are so many times it needs to happen: trigger change, trigger config update, workflow delete, etc. @cancelled (2/20/2024, 2:34:43 AM)
@@ -105,3 +77,12 @@ Web:
 extra:
     ☐ Add RPC for individual nodes to be able to make calls from the client to fetch data
     ☐ Add error page that takes redirects for all errors and also reports them to the server
+
+
+tonight:
+    ☐ Convert workflow-man
+    ☐ Add trigger updating server action
+    ☐ Add workflow creation
+    ☐ Make server action for workflow delete that cleans up triggers
+    ☐ Add integrations to trigger configs
+    ☐ Add integration display in settings

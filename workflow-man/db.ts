@@ -26,5 +26,5 @@ export async function fetchIntegrationToken(accountId: string) {
         return res.json()
     })
 
-    return response?.access_token
+    return response
 }

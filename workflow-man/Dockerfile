@@ -8,11 +8,11 @@ ENV NODE_ENV=production
 RUN bun install --cwd workflow-man
 RUN bun run --cwd workflow-man build
 
-FROM oven/bun AS runtime
+FROM node:20-slim AS runtime
 
 WORKDIR /workflow-man
 COPY --from=builder /wfd/workflow-man/build .
 
 EXPOSE 8081
 
-ENTRYPOINT ["bun", "run", "index.js" ]
+ENTRYPOINT ["node", "index.js" ]

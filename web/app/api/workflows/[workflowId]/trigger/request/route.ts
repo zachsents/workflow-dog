@@ -18,7 +18,7 @@ async function all(req: NextRequest, {
         .single()
 
     let error = remapError(triggerQuery)
-    if (error) return error
+    if (error) return NextResponse.json(error, { status: 500 })
 
     const { triggerType, triggerConfig } = triggerQuery.data!
 

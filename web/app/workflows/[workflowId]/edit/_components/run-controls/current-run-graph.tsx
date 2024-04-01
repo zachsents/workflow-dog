@@ -13,20 +13,29 @@ export default function CurrentRunGraph() {
     const { data: run, isLoading } = useSelectedWorkflowRun()
 
     const runState = run?.state as any
+    const hasGraph = !!runState?.graph
 
     return (
         <div className="w-full h-full bg-slate-50">
-            {runState?.graph ?
+            {hasGraph ?
                 <GraphRenderer
-                    nodes={runState.graph.nodes}
-                    edges={runState.graph.edges}
+                    nodes={runState?.graph?.nodes || []}
+                    edges={runState?.graph?.edges || []}
                 /> :
-                <div className="w-full h-full flex center">
+                <div className="w-full h-full relative flex center">
                     {isLoading ?
                         <Loader /> :
                         <p className="text-muted-foreground">
                             Nothing here 🫢
                         </p>}
+
+                    <Panel position="bottom-center" className="!pointer-events-none">
+                        <RunViewerToolbar />
+                    </Panel>
+
+                    <Panel position="top-right" className="!m-2 !pointer-events-none">
+                        <RunControls />
+                    </Panel>
                 </div>}
         </div>
     )

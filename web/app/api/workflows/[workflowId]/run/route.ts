@@ -29,7 +29,6 @@ export async function POST(
         .order("created_at", { ascending: false })
         .limit(1)
         .single()
-        .throwOnError()
 
     const count = data?.count || 0
 

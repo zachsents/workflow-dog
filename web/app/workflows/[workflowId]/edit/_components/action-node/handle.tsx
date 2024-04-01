@@ -256,6 +256,7 @@ function EditNamedHandleButton({
 
     const [propertyName, setPropertyName] = useState(handleName)
 
+    // I don't thik this works how i originally thought 
     const dataType = DataTypeDefinitions.get(dataTypeId)
     const properties = Object.keys((dataType?.schema as any).shape ?? {})
 

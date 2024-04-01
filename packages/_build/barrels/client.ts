@@ -21,6 +21,8 @@ import basic_nodes_and_shared from "../../basic/nodes/and/shared"
 import basic_nodes_and_client from "../../basic/nodes/and/client"
 import basic_triggers_schedule_shared from "../../basic/triggers/schedule/shared"
 import basic_triggers_schedule_client from "../../basic/triggers/schedule/client"
+import basic_triggers_request_shared from "../../basic/triggers/request/shared"
+import basic_triggers_request_client from "../../basic/triggers/request/client"
 import basic_triggers_manual_shared from "../../basic/triggers/manual/shared"
 import basic_triggers_manual_client from "../../basic/triggers/manual/client"
 import openai_services_openai_shared from "../../openai/services/openai/shared"
@@ -92,6 +94,11 @@ export const TriggerDefinitions = createExport({
         basic_triggers_schedule_shared,
         basic_triggers_schedule_client,
         { id: "https://triggers.workflow.dog/basic/schedule" }    
+    ),
+    "https://triggers.workflow.dog/basic/request": _.merge({},
+        basic_triggers_request_shared,
+        basic_triggers_request_client,
+        { id: "https://triggers.workflow.dog/basic/request" }    
     ),
     "https://triggers.workflow.dog/basic/manual": _.merge({},
         basic_triggers_manual_shared,

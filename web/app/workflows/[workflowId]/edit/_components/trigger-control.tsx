@@ -104,7 +104,7 @@ export default function TriggerControl() {
                             <triggerDefinition.renderConfig
                                 workflowId={workflow?.id!}
                                 workflow={workflow as any}
-                                updateConfig={updateConfig}
+                                updateConfig={config => updateConfig({ config })}
                                 isUpdating={updateMutation.isPending}
                                 onClose={popover.close}
                             /> :

@@ -37,9 +37,7 @@ export default {
             console.time(debugMessage)
 
             updateConfig({
-                config: {
-                    intervals: intervals.map(cleanInterval),
-                }
+                intervals: intervals.map(cleanInterval),
             }).then(() => {
                 onClose?.()
                 console.timeEnd(debugMessage)

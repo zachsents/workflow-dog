@@ -1,4 +1,3 @@
-import { useEventListener } from "@react-hookz/web"
 import "client-only"
 import { useParams } from "next/navigation"
 import { useEffect, useRef, useState } from "react"

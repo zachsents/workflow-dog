@@ -15,7 +15,7 @@ export default function RunViewerToolbar() {
     const { data: run, isLoading } = useSelectedWorkflowRun()
     const runState = run?.state as any
 
-    const runMutation = useRunWorkflowMutation(run?.workflow_id, {
+    const runMutation = useRunWorkflowMutation(run?.workflow_id || "", {
         subscribe: true,
         mutationKey: ["rerun", run?.id],
     })

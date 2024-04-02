@@ -16,6 +16,9 @@ export async function updateRun(runId: string, data: any) {
 
 
 export async function fetchIntegrationToken(accountId: string) {
+
+    console.log("Fetching token:", `${process.env.API_SERVER_URL}/accounts/${accountId}/token`)
+
     const response = await fetch(`${process.env.API_SERVER_URL}/accounts/${accountId}/token`, {
         headers: {
             Authorization: `Bearer ${serviceKey}`
@@ -25,6 +28,8 @@ export async function fetchIntegrationToken(accountId: string) {
             throw new Error(res.statusText)
         return res.json()
     })
+
+    console.log("Token response:", response)
 
     return response
 }

@@ -87,5 +87,24 @@ tonight:
     ✔ Make server action for workflow delete that cleans up triggers @done (4/1/2024, 9:20:25 AM)
     ☐ Add integrations to trigger configs
     ☐ Add integration display in settings
-    ☐ Make better manual input components
+    ☐ Make better manual input components that actually work
     ✔ Change team name in db function @done (4/1/2024, 3:27:16 PM)
+
+services:
+    ☐ convert existing
+    ☐ gmail
+    ☐ close
+    ☐ openai
+    ☐ text
+        ☐ uppercase
+        ☐ lowercase
+        ☐ title case
+
+little:
+    ✔ key prop bug in renderPreview @done (4/1/2024, 6:53:48 PM)
+    ✔ make manual run inputs optional @done (4/1/2024, 6:53:41 PM)
+    ✔ make manual run form a little wider @done (4/1/2024, 6:56:36 PM)
+    ✔ hide manual run button when disabled @done (4/1/2024, 7:01:20 PM)
+    ✔ reverse row order of edit handle buttons @done (4/1/2024, 7:02:37 PM)
+    ☐ fix bug where sometimes new runs don't load in. something isn't getting invalidated
+    ✔ hide edge delete buttons when run is selected @done (4/1/2024, 7:06:00 PM)

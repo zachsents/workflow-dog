@@ -5,7 +5,7 @@ import { Button } from "@web/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@web/components/ui/popover"
 import { useDialogState } from "@web/lib/client/hooks"
 import { useEditorStore, useEditorStoreState } from "@web/modules/workflow-editor/store"
-import { useSelectedWorkflowRun, useWorkflowRunsRealtime } from "@web/modules/workflows"
+import { useSelectedWorkflowRun, useWorkflow, useWorkflowRunsRealtime } from "@web/modules/workflows"
 import { TbChevronDown, TbClockPlay, TbPlayerPlay, TbX } from "react-icons/tb"
 import PastRunsTable from "./past-runs-table"
 import RunManuallyForm from "./run-manually-form"
@@ -32,6 +32,9 @@ export default function RunControls() {
 
 
 function RunManually() {
+    const {data: workflow} = useWorkflow()
+    const isEnabled = workflow?.is_enabled ?? false
+
     const popover = useDialogState()
     return (
         <Popover {...popover.dialogProps}>
@@ -39,6 +42,7 @@ function RunManually() {
                 <Button
                     size="sm"
                     className="pointer-events-auto flex center gap-2 shadow-lg"
+                    disabled={!isEnabled}
                 >
                     <TbPlayerPlay />
                     Run Manually

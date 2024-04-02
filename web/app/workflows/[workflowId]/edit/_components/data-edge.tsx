@@ -3,6 +3,7 @@
 import { Button } from "@web/components/ui/button"
 import { useHover } from "@web/lib/client/hooks"
 import { cn } from "@web/lib/utils"
+import { useEditorStore } from "@web/modules/workflow-editor/store"
 import { TbX } from "react-icons/tb"
 import { BaseEdge, EdgeLabelRenderer, EdgeProps, getBezierPath, useReactFlow } from "reactflow"
 
@@ -38,6 +39,8 @@ export default function DataEdge({
 
     const showLabel = isGroupHovered || isLabelHovered || selected
 
+    const hasSelectedRun = useEditorStore(s => !!s.selectedRunId)
+
     return (<>
         <g ref={groupRef}>
             {/* Background Path */}
@@ -68,38 +71,39 @@ export default function DataEdge({
                 />
             </g>
         </g>
-        <EdgeLabelRenderer>
-            <div
-                // z-index of 1000 is required to make sure the label is above the edge
-                className="group absolute -translate-x-1/2 -translate-y-1/2 flex center pointer-events-auto z-[1000]"
-                style={{
-                    top: labelY,
-                    left: labelX,
-                }}
-                ref={labelRef}
-            >
-                <div className={cn(
-                    "transition-opacity",
-                    showLabel ? "opacity-100" : "opacity-0",
-                )}>
-                    <Button
-                        variant="destructive" size="icon"
-                        className="scale-75 group-hover:scale-100 transition-transform rounded-full"
-                        onClick={ev => {
-                            ev.stopPropagation()
-                            rf.setEdges(edges => edges.filter(edge => edge.id !== id))
-                        }}
-                    >
-                        <TbX />
-                    </Button>
+        {!hasSelectedRun &&
+            <EdgeLabelRenderer>
+                <div
+                    // z-index of 1000 is required to make sure the label is above the edge
+                    className="group absolute -translate-x-1/2 -translate-y-1/2 flex center pointer-events-auto z-[1000]"
+                    style={{
+                        top: labelY,
+                        left: labelX,
+                    }}
+                    ref={labelRef}
+                >
+                    <div className={cn(
+                        "transition-opacity",
+                        showLabel ? "opacity-100" : "opacity-0",
+                    )}>
+                        <Button
+                            variant="destructive" size="icon"
+                            className="scale-75 group-hover:scale-100 transition-transform rounded-full"
+                            onClick={ev => {
+                                ev.stopPropagation()
+                                rf.setEdges(edges => edges.filter(edge => edge.id !== id))
+                            }}
+                        >
+                            <TbX />
+                        </Button>
 
-                    {/* {data.forced &&
+                        {/* {data.forced &&
                         <Card className="absolute bottom-full left-1/2 -translate-x-1/2 text-[0.4rem] font-bold text-center flex center px-1 rounded-sm pointer-events-none">
                             Forced
                         </Card>} */}
+                    </div>
                 </div>
-            </div>
-        </EdgeLabelRenderer>
+            </EdgeLabelRenderer>}
     </>)
 }
 

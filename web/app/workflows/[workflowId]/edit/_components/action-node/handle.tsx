@@ -106,8 +106,8 @@ export default function ActionNodeHandle({
                     className={cn(
                         "absolute top-1/2 -translate-y-1/2 h-full flex center gap-1 nodrag nopan transition-opacity opacity-0 group-hover/handle:opacity-100 pointer-events-none group-hover/handle:pointer-events-auto",
                         isInput(type)
-                            ? "right-full pr-1 pl-4"
-                            : "left-full pl-0.5 pr-4",
+                            ? "right-full pr-1 pl-4 flex-row-reverse"
+                            : "left-full pl-0.5 pr-4 flex-row",
                     )}
                     onClick={ev => ev.stopPropagation()}
                 >

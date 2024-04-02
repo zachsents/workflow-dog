@@ -24,7 +24,7 @@ export default {
         return (
             <p className="line-clamp-2">
                 {Object.keys(value).slice(0, 3).map(key =>
-                    <span className="flex center gap-1">
+                    <span className="flex center gap-1" key={key}>
                         <span>{key}</span>
                         <TbArrowRight />
                         <span>...</span>

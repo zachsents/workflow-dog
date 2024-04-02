@@ -19,7 +19,7 @@ export default {
     renderPreview: ({ value }) => {
         return (
             <p className="line-clamp-2">
-                {value}
+                {value || <span className="text-muted-foreground">&lt;no text&gt;</span>}
             </p>
         )
     },
@@ -27,7 +27,7 @@ export default {
     renderExpanded: ({ value }) => {
         return (
             <p>
-                {value}
+                {value || <span className="text-muted-foreground">&lt;no text&gt;</span>}
             </p>
         )
     },

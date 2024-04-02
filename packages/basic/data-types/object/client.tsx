@@ -3,6 +3,7 @@ import type shared from "./shared"
 import { TbArrowRight, TbTriangleSquareCircle } from "react-icons/tb"
 import { Textarea } from "@web/components/ui/textarea"
 import { cn } from "@web/lib/utils"
+import stringifyObject from "stringify-object"
 
 export default {
     icon: TbTriangleSquareCircle,
@@ -37,7 +38,9 @@ export default {
     renderExpanded: ({ value }) => {
         return (
             <pre>
-                {JSON.stringify(value, null, 2)}
+                {stringifyObject(value, {
+                    indent: "  ",
+                })}
             </pre>
         )
     },

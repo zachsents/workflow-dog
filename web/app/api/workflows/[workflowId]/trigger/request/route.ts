@@ -53,7 +53,7 @@ async function all(req: NextRequest, {
     })
 
     if (!waitUntilFinished) {
-        return new Response("", { status: 204 })
+        return new Response("👍", { status: 202 })
     }
 
     const { status, headers, body } = response.state?.workflowOutputs ?? {}

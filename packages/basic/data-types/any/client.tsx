@@ -1,7 +1,8 @@
 import type { WebDataTypeDefinition } from "@types"
+import { Input } from "@web/components/ui/input"
 import { TbBraces } from "react-icons/tb"
 import type shared from "./shared"
-import { Input } from "@web/components/ui/input"
+import stringifyObject from "stringify-object"
 
 export default {
     icon: TbBraces,
@@ -17,7 +18,9 @@ export default {
     renderPreview: ({ value }) => {
         return (
             <p className="line-clamp-2">
-                {value?.toString() ?? value}
+                {stringifyObject(value, {
+                    indent: "  ",
+                })}
             </p>
         )
     },
@@ -25,7 +28,9 @@ export default {
     renderExpanded: ({ value }) => {
         return (
             <p>
-                {value?.toString() ?? value}
+                {stringifyObject(value, {
+                    indent: "  ",
+                })}
             </p>
         )
     },

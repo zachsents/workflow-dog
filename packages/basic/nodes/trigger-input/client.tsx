@@ -1,4 +1,16 @@
+import { DataTypeDefinitions, TriggerDefinitions } from "@pkg/client"
 import { WebNodeDefinition } from "@types"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@ui/select"
+import { cn } from "@web/lib/utils"
+import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
+import { useWorkflow } from "@web/modules/workflows"
+import { useEffect } from "react"
 import { TbPlayerSkipForward } from "react-icons/tb"
 import type shared from "./shared"
 
@@ -11,48 +23,42 @@ export default {
     outputs: {
         value: {}
     },
-    // renderBody: () => {
-    //     const { data: workflow } = useWorkflow()
-    //     const triggerDef = triggerMap[workflow?.trigger?.type]
+    renderBody: () => {
+        const { data: workflow, isSuccess: hasWorkflowLoaded } = useWorkflow()
+        const triggerDefinition = TriggerDefinitions.get((workflow?.trigger as any)?.type)
 
-    //     const triggerInputs = Object.entries(triggerDef?.inputs ?? {})
-    //         .map(([key, value]: [string, any]) => ({
-    //             id: key,
-    //             label: value.name,
-    //             type: value.type,
-    //         }))
+        const [triggerInput, setTriggerInput] = useNodeProperty(undefined, "data.state.input")
 
-    //     const [triggerInput, setTriggerInput] = useNodeProperty(undefined, "data.state.input")
-    //     const { selectedKeys, onSelectionChange } = useControlledSelectedKeys(triggerInput, setTriggerInput)
+        const triggerInputIds = Object.keys(triggerDefinition?.inputs ?? {})
 
-    //     useEffect(() => {
-    //         if (triggerInputs.length > 0 && triggerInput && !triggerInputs.find(i => i.id === triggerInput))
-    //             setTriggerInput(triggerInputs[0].id)
-    //     }, [JSON.stringify(triggerInputs), triggerInput])
+        useEffect(() => {
+            if (hasWorkflowLoaded && triggerInput && !triggerInputIds.includes(triggerInput))
+                setTriggerInput(null)
+        }, [triggerDefinition?.id, triggerInput, hasWorkflowLoaded])
 
-    //     return (
-    //         <Select
-    //             selectedKeys={selectedKeys}
-    //             onSelectionChange={onSelectionChange}
-    //             selectionMode="single"
-    //             size="sm"
-    //             label="Input" labelPlacement="outside"
-    //             placeholder="Pick one..."
-    //             classNames={{
-    //                 mainWrapper: "min-w-[12rem]"
-    //             }}
-    //             items={triggerInputs ?? []}
-    //             isLoading={!workflow}
-    //         >
-    //             {item =>
-    //                 <SelectItem key={item.id} value={item.id} textValue={item.label}>
-    //                     <div className="gap-unit-sm">
-    //                         <p>{item.label}</p>
-    //                         {item.type &&
-    //                             <p className="text-default-500 text-xs">{typeMap[item.type]?.name || "Any"}</p>}
-    //                     </div>
-    //                 </SelectItem>}
-    //         </Select>
-    //     )
-    // },
+        const entries = Object.entries(triggerDefinition?.inputs ?? {})
+
+        return (
+            <Select onValueChange={setTriggerInput} defaultValue={triggerInput || undefined}>
+                <SelectTrigger className={cn(
+                    "min-w-[180px]",
+                    triggerInput && "[&>span]:flex [&>span]:between [&>span]:gap-2",
+                )}>
+                    <SelectValue placeholder="Pick one..." />
+                </SelectTrigger>
+                <SelectContent>
+                    {entries.length > 0
+                        ? entries.map(([inputId, inputDefinition]) =>
+                            <SelectItem value={inputId} key={inputId}>
+                                <div className="w-full">{inputDefinition.name}</div>
+                                <div className="text-muted-foreground">
+                                    {DataTypeDefinitions.get(inputDefinition.type)?.name}
+                                </div>
+                            </SelectItem>
+                        )
+                        : <SelectItem disabled value="empty">No inputs available</SelectItem>}
+                </SelectContent>
+            </Select>
+        )
+    },
 } satisfies WebNodeDefinition<typeof shared>

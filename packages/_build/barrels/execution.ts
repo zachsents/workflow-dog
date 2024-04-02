@@ -57,6 +57,8 @@ import basic_nodes_trigger_input_shared from "../../basic/nodes/trigger-input/sh
 import basic_nodes_trigger_input_execution from "../../basic/nodes/trigger-input/execution"
 import basic_nodes_text_shared from "../../basic/nodes/text/shared"
 import basic_nodes_text_execution from "../../basic/nodes/text/execution"
+import basic_nodes_template_shared from "../../basic/nodes/template/shared"
+import basic_nodes_template_execution from "../../basic/nodes/template/execution"
 import basic_nodes_switch_shared from "../../basic/nodes/switch/shared"
 import basic_nodes_switch_execution from "../../basic/nodes/switch/execution"
 import basic_nodes_or_shared from "../../basic/nodes/or/shared"
@@ -228,6 +230,11 @@ export const NodeDefinitions = createExport({
         basic_nodes_text_shared,
         basic_nodes_text_execution,
         { id: "https://nodes.workflow.dog/basic/text" }    
+    ),
+    "https://nodes.workflow.dog/basic/template": _.merge({},
+        basic_nodes_template_shared,
+        basic_nodes_template_execution,
+        { id: "https://nodes.workflow.dog/basic/template" }    
     ),
     "https://nodes.workflow.dog/basic/switch": _.merge({},
         basic_nodes_switch_shared,

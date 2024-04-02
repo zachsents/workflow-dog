@@ -45,6 +45,8 @@ import math_nodes_add_shared from "../../math/nodes/add/shared"
 import math_nodes_add_execution from "../../math/nodes/add/execution"
 import math_nodes_absolute_shared from "../../math/nodes/absolute/shared"
 import math_nodes_absolute_execution from "../../math/nodes/absolute/execution"
+import closecrm_nodes_get_lead_by_id_shared from "../../closecrm/nodes/get-lead-by-id/shared"
+import closecrm_nodes_get_lead_by_id_execution from "../../closecrm/nodes/get-lead-by-id/execution"
 import basic_nodes_xor_shared from "../../basic/nodes/xor/shared"
 import basic_nodes_xor_execution from "../../basic/nodes/xor/execution"
 import basic_nodes_trigger_input_shared from "../../basic/nodes/trigger-input/shared"
@@ -192,6 +194,11 @@ export const NodeDefinitions = createExport({
         math_nodes_absolute_shared,
         math_nodes_absolute_execution,
         { id: "https://nodes.workflow.dog/math/absolute" }    
+    ),
+    "https://nodes.workflow.dog/closecrm/get-lead-by-id": _.merge({},
+        closecrm_nodes_get_lead_by_id_shared,
+        closecrm_nodes_get_lead_by_id_execution,
+        { id: "https://nodes.workflow.dog/closecrm/get-lead-by-id" }    
     ),
     "https://nodes.workflow.dog/basic/xor": _.merge({},
         basic_nodes_xor_shared,

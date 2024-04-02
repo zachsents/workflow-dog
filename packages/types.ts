@@ -45,11 +45,14 @@ export type ExecutionNodeDefinition<T extends SharedNodeDefinition> = {
         node: Node
         triggerData: Record<string, any>
         runState: WorkflowRunState
-        token?: string
+        token?: any
     }) => {
-            // [K in keyof T["outputs"]]: InterfaceValue<T, "outputs", K>
-            [K in keyof T["outputs"]]: any
-        }
+        // [K in keyof T["outputs"]]: InterfaceValue<T, "outputs", K>
+        [K in keyof T["outputs"]]: any
+    } | Promise<{
+        // [K in keyof T["outputs"]]: InterfaceValue<T, "outputs", K>
+        [K in keyof T["outputs"]]: any
+    }>
 }
 
 // type InterfaceValue<

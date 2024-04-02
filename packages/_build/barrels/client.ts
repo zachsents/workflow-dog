@@ -45,6 +45,8 @@ import math_nodes_add_shared from "../../math/nodes/add/shared"
 import math_nodes_add_client from "../../math/nodes/add/client"
 import math_nodes_absolute_shared from "../../math/nodes/absolute/shared"
 import math_nodes_absolute_client from "../../math/nodes/absolute/client"
+import closecrm_nodes_get_lead_by_id_shared from "../../closecrm/nodes/get-lead-by-id/shared"
+import closecrm_nodes_get_lead_by_id_client from "../../closecrm/nodes/get-lead-by-id/client"
 import basic_nodes_xor_shared from "../../basic/nodes/xor/shared"
 import basic_nodes_xor_client from "../../basic/nodes/xor/client"
 import basic_nodes_trigger_input_shared from "../../basic/nodes/trigger-input/shared"
@@ -87,6 +89,10 @@ import openai_services_openai_shared from "../../openai/services/openai/shared"
 import openai_services_openai_client from "../../openai/services/openai/client"
 import google_services_google_oauth_shared from "../../google/services/google-oauth/shared"
 import google_services_google_oauth_client from "../../google/services/google-oauth/client"
+import closecrm_services_close_shared from "../../closecrm/services/close/shared"
+import closecrm_services_close_client from "../../closecrm/services/close/client"
+import closecrm_data_types_lead_shared from "../../closecrm/data-types/lead/shared"
+import closecrm_data_types_lead_client from "../../closecrm/data-types/lead/client"
 import basic_data_types_string_shared from "../../basic/data-types/string/shared"
 import basic_data_types_string_client from "../../basic/data-types/string/client"
 import basic_data_types_object_shared from "../../basic/data-types/object/shared"
@@ -212,6 +218,11 @@ export const NodeDefinitions = createExport({
         math_nodes_absolute_client,
         { id: "https://nodes.workflow.dog/math/absolute" }    
     ),
+    "https://nodes.workflow.dog/closecrm/get-lead-by-id": _.merge({},
+        closecrm_nodes_get_lead_by_id_shared,
+        closecrm_nodes_get_lead_by_id_client,
+        { id: "https://nodes.workflow.dog/closecrm/get-lead-by-id" }    
+    ),
     "https://nodes.workflow.dog/basic/xor": _.merge({},
         basic_nodes_xor_shared,
         basic_nodes_xor_client,
@@ -323,9 +334,19 @@ export const ServiceDefinitions = createExport({
         google_services_google_oauth_client,
         { id: "https://services.workflow.dog/google/google-oauth" }    
     ),
+    "https://services.workflow.dog/closecrm/close": _.merge({},
+        closecrm_services_close_shared,
+        closecrm_services_close_client,
+        { id: "https://services.workflow.dog/closecrm/close" }    
+    ),
 } as Record<string, SharedServiceDefinition & WebServiceDefinition<any> & { id: string }>)
 
 export const DataTypeDefinitions = createExport({
+    "https://data-types.workflow.dog/closecrm/lead": _.merge({},
+        closecrm_data_types_lead_shared,
+        closecrm_data_types_lead_client,
+        { id: "https://data-types.workflow.dog/closecrm/lead" }    
+    ),
     "https://data-types.workflow.dog/basic/string": _.merge({},
         basic_data_types_string_shared,
         basic_data_types_string_client,

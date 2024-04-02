@@ -12,6 +12,8 @@ import openai_services_openai_shared from "../../openai/services/openai/shared"
 import openai_services_openai_server from "../../openai/services/openai/server"
 import google_services_google_oauth_shared from "../../google/services/google-oauth/shared"
 import google_services_google_oauth_server from "../../google/services/google-oauth/server"
+import closecrm_services_close_shared from "../../closecrm/services/close/shared"
+import closecrm_services_close_server from "../../closecrm/services/close/server"
 
 import type { SharedTriggerDefinition, ServerTriggerDefinition, SharedServiceDefinition, ServerServiceDefinition } from "@types"
 
@@ -47,6 +49,11 @@ export const ServiceDefinitions = createExport({
         google_services_google_oauth_shared,
         google_services_google_oauth_server,
         { id: "https://services.workflow.dog/google/google-oauth" }    
+    ),
+    "https://services.workflow.dog/closecrm/close": _.merge({},
+        closecrm_services_close_shared,
+        closecrm_services_close_server,
+        { id: "https://services.workflow.dog/closecrm/close" }    
     ),
 } as Record<string, SharedServiceDefinition & ServerServiceDefinition<any> & { id: string }>)
 

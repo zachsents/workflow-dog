@@ -2,7 +2,6 @@ import type { WebServiceDefinition } from "@types"
 import OpenAIIcon from "../../openai.svg"
 import type shared from "./shared"
 
-
 export default {
     icon: OpenAIIcon,
     color: "#000000",

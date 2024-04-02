@@ -1,7 +1,7 @@
 import type { SharedServiceDefinition } from "@types"
 
 export default {
-    name: "OpenAI",
+    name: "CloseCRM",
     authAcquisition: {
         method: "key"
     }

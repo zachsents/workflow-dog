@@ -3,9 +3,9 @@ import type shared from "./shared"
 
 export default {
     authAcquisition: {
-        profileUrl: "https://api.openai.com/v1/me",
+        profileUrl: "https://api.close.com/api/v1/me/",
     },
     authUsage: {
-        method: "bearer"
+        method: "basic"
     },
 } satisfies ServerServiceDefinition<typeof shared>

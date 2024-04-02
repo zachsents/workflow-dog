@@ -83,6 +83,24 @@ export function useNodeProperty(nodeId = useNodeId(), path: NodeDotPath, {
 }
 
 
+export function createInput(inputDefinitionId: string, extra = {}) {
+    return {
+        id: uniqueId({ prefix: PREFIX.INPUT }),
+        definition: inputDefinitionId,
+        // mode: inputDefinition.defaultMode || "handle",
+        ...extra,
+    }
+}
+
+export function createOutput(outputDefinitionId: string, extra = {}) {
+    return {
+        id: uniqueId({ prefix: PREFIX.OUTPUT }),
+        definition: outputDefinitionId,
+        ...extra,
+    }
+}
+
+
 export function useCreateActionNode() {
 
     const rf = useReactFlow()
@@ -94,12 +112,16 @@ export function useCreateActionNode() {
         data = {},
         addToGraph = true,
         connect = [],
+        addInputs,
+        addOutputs,
     }: {
         definition: string
         position?: { x: number, y: number }
         data?: object
         addToGraph?: boolean
         connect?: Partial<Edge & { sourceHandleType: string, targetHandleType: string }>[]
+        addInputs?: { inputDefinitionId: string, extra?: any }[]
+        addOutputs?: { outputDefinitionId: string, extra?: any }[]
     }) => {
 
         if (!position) {
@@ -119,43 +141,47 @@ export function useCreateActionNode() {
         if (!definition)
             throw new Error(`Definition ${definitionId} not found`)
 
-        const createInput = (inputDefinitionId: string, inputDefinition: any, extra = {}) => ({
-            id: uniqueId({ prefix: PREFIX.INPUT }),
-            definition: inputDefinitionId,
-            mode: inputDefinition.defaultMode || "handle",
-            ...extra,
-        })
-
-        const createOutput = (outputDefinitionId: string) => ({
-            id: uniqueId({ prefix: PREFIX.OUTPUT }),
-            definition: outputDefinitionId,
-        })
-
         const newNode: ActionNode = {
             id: uniqueId({ prefix: PREFIX.NODE }),
             type: "action",
             position,
             data: _.merge({
                 definition: definitionId,
-                inputs: Object.entries(definition.inputs).flatMap(([id, input]: [string, any]) => {
-                    if (input.group)
-                        return Array(input.groupMin ?? 0)
-                            .fill(null)
-                            .map(() => createInput(id, input, {
-                                name: `New ${input.name}`
-                            }))
+                inputs: Object.entries(definition.inputs)
+                    .flatMap(([id, input]: [string, any]) => {
+                        if (input.group)
+                            return Array(input.groupMin ?? 0)
+                                .fill(null)
+                                .map(() => createInput(id, {
+                                    name: `New ${input.name}`
+                                }))
 
-                    return createInput(id, input)
-                }),
-                outputs: Object.entries(definition.outputs).flatMap(([id, output]: [string, any]) => {
-                    if (output.group)
-                        return Array(output.groupMin ?? 0)
-                            .fill(null)
-                            .map(() => createOutput(id))
+                        return createInput(id)
+                    }),
+                outputs: Object.entries(definition.outputs)
+                    .flatMap(([id, output]: [string, any]) => {
+                        if (output.group)
+                            return Array(output.groupMin ?? 0)
+                                .fill(null)
+                                .map(() => createOutput(id, {
+                                    name: `New ${output.name}`
+                                }))
 
-                    return createOutput(id)
-                }),
+                        return createOutput(id)
+                    }),
             }, data),
+        }
+
+        if (addInputs) {
+            newNode.data.inputs!.push(
+                ...addInputs.map(({ inputDefinitionId, extra }) => createInput(inputDefinitionId, extra))
+            )
+        }
+
+        if (addOutputs) {
+            newNode.data.outputs!.push(
+                ...addOutputs.map(({ outputDefinitionId, extra }) => createOutput(outputDefinitionId, extra))
+            )
         }
 
         if (addToGraph)

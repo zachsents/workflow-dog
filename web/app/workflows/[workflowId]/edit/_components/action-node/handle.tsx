@@ -73,6 +73,7 @@ export default function ActionNodeHandle({
     }, [selectedRun, nodeId, id])
 
     const dataType = DataTypeDefinitions.get(definition.type)
+    const isDataTypeSelectable = (dataType?.schema as any)?.shape != null
 
     return (
         <div className="relative group/handle" ref={ref}>
@@ -121,9 +122,10 @@ export default function ActionNodeHandle({
                     {definition.group &&
                         <DeleteGroupHandleButton handleId={id} handleType={type} />}
 
-                    {!isConnected && isOutput(type) &&
-                        (definition as WebNodeDefinitionOutput).selectable &&
-                        <PropertySelector dataTypeId={definition.type} />}
+                    {isOutput(type) &&
+                        // (definition as WebNodeDefinitionOutput).selectable &&
+                        isDataTypeSelectable &&
+                        <PropertySelector handleId={id} dataTypeId={definition.type} />}
 
                     {!isConnected && definition?.recommendedNode &&
                         <RecommendedNodeButton

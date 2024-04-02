@@ -14,7 +14,7 @@ export default {
                 content: message,
             }],
         }, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token.access_token}` },
         })
 
         return {

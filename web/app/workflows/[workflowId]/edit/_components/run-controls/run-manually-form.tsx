@@ -26,10 +26,9 @@ export default function RunManuallyForm({ onClose }: RunManuallyFormProps) {
         subscribe: true,
     })
 
-
     const schema = z.object(_.mapValues(
         triggerDefinition?.inputs || {},
-        inputDef => DataTypeDefinitions.get(inputDef.type)?.schema || z.any()
+        inputDef => DataTypeDefinitions.get(inputDef.type)?.schema.optional() || z.any().optional()
     ))
 
     const form = useForm<z.infer<typeof schema>>({

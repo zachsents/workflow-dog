@@ -44,7 +44,7 @@ function RunManually() {
                     Run Manually
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto max-h-[36rem] overflow-y-auto p-2">
+            <PopoverContent className="w-[28rem] max-h-[40rem] overflow-y-auto p-3 mx-2">
                 <RunManuallyForm onClose={popover.close} />
             </PopoverContent>
         </Popover>
@@ -66,7 +66,7 @@ function PastRuns() {
                     <TbChevronDown />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-auto max-h-[36rem] p-0 overflow-y-auto shadow-lg z-[60]">
+            <PopoverContent align="end" className="w-auto max-h-[40rem] p-0 overflow-y-auto shadow-lg z-[60]">
                 <PastRunsTable onClose={popover.close} />
             </PopoverContent>
         </Popover>

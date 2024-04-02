@@ -1,6 +1,8 @@
 import _ from "lodash"
 import { createExport } from "../util"
 
+import openai_nodes_prompt_chatgpt_shared from "../../openai/nodes/prompt-chatgpt/shared"
+import openai_nodes_prompt_chatgpt_client from "../../openai/nodes/prompt-chatgpt/client"
 import math_nodes_tan_shared from "../../math/nodes/tan/shared"
 import math_nodes_tan_client from "../../math/nodes/tan/client"
 import math_nodes_sum_shared from "../../math/nodes/sum/shared"
@@ -45,6 +47,8 @@ import math_nodes_add_shared from "../../math/nodes/add/shared"
 import math_nodes_add_client from "../../math/nodes/add/client"
 import math_nodes_absolute_shared from "../../math/nodes/absolute/shared"
 import math_nodes_absolute_client from "../../math/nodes/absolute/client"
+import closecrm_nodes_list_leads_shared from "../../closecrm/nodes/list-leads/shared"
+import closecrm_nodes_list_leads_client from "../../closecrm/nodes/list-leads/client"
 import closecrm_nodes_get_lead_by_id_shared from "../../closecrm/nodes/get-lead-by-id/shared"
 import closecrm_nodes_get_lead_by_id_client from "../../closecrm/nodes/get-lead-by-id/client"
 import basic_nodes_xor_shared from "../../basic/nodes/xor/shared"
@@ -108,6 +112,11 @@ import basic_data_types_any_client from "../../basic/data-types/any/client"
 import type { SharedNodeDefinition, WebNodeDefinition, SharedTriggerDefinition, WebTriggerDefinition, SharedServiceDefinition, WebServiceDefinition, SharedDataTypeDefinition, WebDataTypeDefinition } from "@types"
 
 export const NodeDefinitions = createExport({
+    "https://nodes.workflow.dog/openai/prompt-chatgpt": _.merge({},
+        openai_nodes_prompt_chatgpt_shared,
+        openai_nodes_prompt_chatgpt_client,
+        { id: "https://nodes.workflow.dog/openai/prompt-chatgpt" }    
+    ),
     "https://nodes.workflow.dog/math/tan": _.merge({},
         math_nodes_tan_shared,
         math_nodes_tan_client,
@@ -217,6 +226,11 @@ export const NodeDefinitions = createExport({
         math_nodes_absolute_shared,
         math_nodes_absolute_client,
         { id: "https://nodes.workflow.dog/math/absolute" }    
+    ),
+    "https://nodes.workflow.dog/closecrm/list-leads": _.merge({},
+        closecrm_nodes_list_leads_shared,
+        closecrm_nodes_list_leads_client,
+        { id: "https://nodes.workflow.dog/closecrm/list-leads" }    
     ),
     "https://nodes.workflow.dog/closecrm/get-lead-by-id": _.merge({},
         closecrm_nodes_get_lead_by_id_shared,

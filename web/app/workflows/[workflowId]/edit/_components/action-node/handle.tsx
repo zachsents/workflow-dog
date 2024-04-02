@@ -441,7 +441,7 @@ function ValueDisplay({ runValue, dataTypeId }: { runValue: any, dataTypeId: str
 
             {shouldExpand &&
                 <Dialog {...dialog.dialogProps}>
-                    <DialogContent className="max-h-[56rem] overflow-y-scroll">
+                    <DialogContent className="max-h-[calc(100vh-6rem)] overflow-scroll !w-auto min-w-[32rem] max-w-[calc(100vw-10rem)]">
                         <DialogHeader>
                             <DialogTitle>
                                 Value from selected run

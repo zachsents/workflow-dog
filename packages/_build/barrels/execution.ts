@@ -1,6 +1,8 @@
 import _ from "lodash"
 import { createExport } from "../util"
 
+import openai_nodes_prompt_chatgpt_shared from "../../openai/nodes/prompt-chatgpt/shared"
+import openai_nodes_prompt_chatgpt_execution from "../../openai/nodes/prompt-chatgpt/execution"
 import math_nodes_tan_shared from "../../math/nodes/tan/shared"
 import math_nodes_tan_execution from "../../math/nodes/tan/execution"
 import math_nodes_sum_shared from "../../math/nodes/sum/shared"
@@ -45,6 +47,8 @@ import math_nodes_add_shared from "../../math/nodes/add/shared"
 import math_nodes_add_execution from "../../math/nodes/add/execution"
 import math_nodes_absolute_shared from "../../math/nodes/absolute/shared"
 import math_nodes_absolute_execution from "../../math/nodes/absolute/execution"
+import closecrm_nodes_list_leads_shared from "../../closecrm/nodes/list-leads/shared"
+import closecrm_nodes_list_leads_execution from "../../closecrm/nodes/list-leads/execution"
 import closecrm_nodes_get_lead_by_id_shared from "../../closecrm/nodes/get-lead-by-id/shared"
 import closecrm_nodes_get_lead_by_id_execution from "../../closecrm/nodes/get-lead-by-id/execution"
 import basic_nodes_xor_shared from "../../basic/nodes/xor/shared"
@@ -85,6 +89,11 @@ import basic_nodes_and_execution from "../../basic/nodes/and/execution"
 import type { SharedNodeDefinition, ExecutionNodeDefinition } from "@types"
 
 export const NodeDefinitions = createExport({
+    "https://nodes.workflow.dog/openai/prompt-chatgpt": _.merge({},
+        openai_nodes_prompt_chatgpt_shared,
+        openai_nodes_prompt_chatgpt_execution,
+        { id: "https://nodes.workflow.dog/openai/prompt-chatgpt" }    
+    ),
     "https://nodes.workflow.dog/math/tan": _.merge({},
         math_nodes_tan_shared,
         math_nodes_tan_execution,
@@ -194,6 +203,11 @@ export const NodeDefinitions = createExport({
         math_nodes_absolute_shared,
         math_nodes_absolute_execution,
         { id: "https://nodes.workflow.dog/math/absolute" }    
+    ),
+    "https://nodes.workflow.dog/closecrm/list-leads": _.merge({},
+        closecrm_nodes_list_leads_shared,
+        closecrm_nodes_list_leads_execution,
+        { id: "https://nodes.workflow.dog/closecrm/list-leads" }    
     ),
     "https://nodes.workflow.dog/closecrm/get-lead-by-id": _.merge({},
         closecrm_nodes_get_lead_by_id_shared,

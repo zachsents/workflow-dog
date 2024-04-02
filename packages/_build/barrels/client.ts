@@ -47,6 +47,8 @@ import math_nodes_add_shared from "../../math/nodes/add/shared"
 import math_nodes_add_client from "../../math/nodes/add/client"
 import math_nodes_absolute_shared from "../../math/nodes/absolute/shared"
 import math_nodes_absolute_client from "../../math/nodes/absolute/client"
+import google_nodes_gmail_send_email_shared from "../../google/nodes/gmail-send-email/shared"
+import google_nodes_gmail_send_email_client from "../../google/nodes/gmail-send-email/client"
 import closecrm_nodes_list_leads_shared from "../../closecrm/nodes/list-leads/shared"
 import closecrm_nodes_list_leads_client from "../../closecrm/nodes/list-leads/client"
 import closecrm_nodes_get_lead_by_id_shared from "../../closecrm/nodes/get-lead-by-id/shared"
@@ -228,6 +230,11 @@ export const NodeDefinitions = createExport({
         math_nodes_absolute_shared,
         math_nodes_absolute_client,
         { id: "https://nodes.workflow.dog/math/absolute" }    
+    ),
+    "https://nodes.workflow.dog/google/gmail-send-email": _.merge({},
+        google_nodes_gmail_send_email_shared,
+        google_nodes_gmail_send_email_client,
+        { id: "https://nodes.workflow.dog/google/gmail-send-email" }    
     ),
     "https://nodes.workflow.dog/closecrm/list-leads": _.merge({},
         closecrm_nodes_list_leads_shared,

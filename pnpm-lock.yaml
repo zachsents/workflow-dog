@@ -45,6 +45,9 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      mimetext:
+        specifier: ^3.0.24
+        version: 3.0.24
       node-fetch:
         specifier: ^3.3.2
         version: 3.3.2
@@ -339,6 +342,12 @@ importers:
       google-auth-library:
         specifier: ^9.7.0
         version: 9.7.0
+      googleapis:
+        specifier: ^134.0.0
+        version: 134.0.0
+      mimetext:
+        specifier: ^3.0.24
+        version: 3.0.24
       morgan:
         specifier: ^1.10.0
         version: 1.10.0
@@ -8213,6 +8222,10 @@ packages:
     resolution: {integrity: sha512-gFqAIbuKyyso/3G2qhiO2OM6shY6EPP/R0+mkDbyspxKazh8BXDC5FiFsUjlczgdNz/vfra0da2y+aHrusLG/Q==}
     hasBin: true
 
+  /js-base64@3.7.7:
+    resolution: {integrity: sha512-7rCnleh0z2CkXhH67J8K1Ytz0b2Y+yxTPL+/KOJoa20hfnVQ/3/T6W/KflYI4bRHRagNeXeU2bkNGI3v1oS/lw==}
+    dev: false
+
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
@@ -8478,6 +8491,15 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
     dev: true
+
+  /mimetext@3.0.24:
+    resolution: {integrity: sha512-UdG1KVfcxeEfo6el91lzFG2WLLTm8DxSK/rosxx5H2Pjla50+DSsjTgr9BRAfAkbQWaxvzcaTO+bHK5ZrdKdfA==}
+    dependencies:
+      '@babel/runtime': 7.24.1
+      '@babel/runtime-corejs3': 7.24.1
+      js-base64: 3.7.7
+      mime-types: 2.1.35
+    dev: false
 
   /minimatch@3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}

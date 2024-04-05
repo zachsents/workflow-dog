@@ -1,11 +1,11 @@
-import { type UseMutationOptions, useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient, type UseMutationOptions } from "@tanstack/react-query"
 import { useCurrentWorkflowId } from "@web/lib/client/hooks"
 import { useSupabaseBrowser } from "@web/lib/client/supabase"
 import "client-only"
 import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { useUser } from "./auth"
-import { useInvalidateOnDatabaseChange } from "./db"
+import { useOnDatabaseChange } from "./db"
 import { useQueryParam } from "./router"
 import { useEditorStore, useEditorStoreApi } from "./workflow-editor/store"
 
@@ -90,16 +90,27 @@ export function useWorkflowRuns(workflowId = useCurrentWorkflowId()) {
 }
 
 
-export function useWorkflowRunsRealtime(workflowId = useCurrentWorkflowId()) {
-    const supabase = useSupabaseBrowser()
-
-    useInvalidateOnDatabaseChange({
+export function useInvalidateWorkflowRuns(workflowId = useCurrentWorkflowId()) {
+    const queryClient = useQueryClient()
+    return useOnDatabaseChange({
         event: "*",
         schema: "public",
         table: "workflow_runs",
         filter: `workflow_id=eq.${workflowId}`,
-    }, ["workflow-runs", workflowId])
+    }, (newRow, oldRow) => {
+        queryClient.invalidateQueries({ queryKey: ["workflow-runs", workflowId] })
+        queryClient.invalidateQueries({ queryKey: ["workflow-run", newRow.id || oldRow.id] })
+    })
+}
 
+
+/**
+ * @deprecated
+ * Being phased out in favor of separate useWorkflowRuns and useInvalidateWorkflowRuns
+ * so we can invalidate globally but use the query in each needed component
+ */
+export function useWorkflowRunsRealtime(workflowId = useCurrentWorkflowId()) {
+    const supabase = useSupabaseBrowser()
     return useQuery({
         queryFn: async () => supabase
             .from("workflow_runs")
@@ -144,20 +155,18 @@ interface UseRunWorkflowMutationOptions extends UseMutationOptions {
 }
 
 export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
-    subscribe = false,
+    subscribe = true,
     sendNotification = true,
     selectRun = true,
     ...options
 }: UseRunWorkflowMutationOptions = {}) {
 
+    const supabase = useSupabaseBrowser()
     const editorStore = useEditorStoreApi()
 
     return useMutation<any, any, any>({
         mutationFn: async (body: any) => {
             const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflowId}/run`)
-
-            if (subscribe)
-                url.searchParams.set("subscribe", "true")
 
             const run = await fetch(url.toString(), {
                 method: "POST",
@@ -165,18 +174,36 @@ export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
                 body: JSON.stringify(body)
             }).then(res => res.ok ? res.json() : Promise.reject(res.text()))
 
+            const finishPromise = new Promise((resolve, reject) => {
+                const channel = supabase
+                    .channel(`workflow_run-${run.id}-changes`)
+                    .on("postgres_changes", {
+                        event: "UPDATE",
+                        schema: "public",
+                        table: "workflow_runs",
+                        filter: `id=eq.${run.id}`,
+                    }, (payload) => {
+                        if (!["completed", "failed"].includes(payload.new.status))
+                            return
+
+                        if (payload.errors?.length > 0)
+                            reject(payload.errors)
+
+                        channel.unsubscribe()
+                        resolve(payload.new)
+                    })
+                    .subscribe()
+            })
+
+            toast.promise(finishPromise, {
+                loading: `Running #${run.count}...`,
+                success: (finishedRun: any) => `${Object.keys(finishedRun.state.outputs).length} outputs, ${finishedRun.error_count} errors`,
+                error: err => err,
+                dismissible: true,
+            })
+
             if (selectRun)
-                editorStore.setState({ selectedRunId: run.id })
-
-            if (sendNotification) {
-                const sendNotification: (typeof toast.success) = run.has_errors
-                    ? toast.warning.bind(toast)
-                    : toast.success.bind(toast)
-
-                sendNotification(`Run #${run.count} started!`, {
-                    description: `${Object.keys(run.state.outputs).length} outputs, ${run.error_count} errors`,
-                })
-            }
+                finishPromise.then(() => editorStore.setState({ selectedRunId: run.id }))
         },
         ...options,
     })

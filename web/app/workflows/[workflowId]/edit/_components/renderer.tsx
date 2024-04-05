@@ -2,7 +2,7 @@
 
 import Loader from "@web/components/loader"
 import { EditorStoreProvider, useEditorStore } from "@web/modules/workflow-editor/store"
-import { useWorkflow } from "@web/modules/workflows"
+import { useInvalidateWorkflowRuns, useWorkflow } from "@web/modules/workflows"
 import { ReactFlowProvider } from "reactflow"
 import WorkflowGraphEditor from "./graph-editor"
 import EditWorkflowHeader from "./header"
@@ -14,6 +14,8 @@ import { cn } from "@web/lib/utils"
 export default function EditorRenderer() {
 
     const { isSuccess } = useWorkflow()
+
+    useInvalidateWorkflowRuns()
 
     return isSuccess ?
         <div className="flex-1 relative">

@@ -1,5 +1,5 @@
 import { RealtimePostgresChangesFilter } from "@supabase/supabase-js"
-import { useMutation, useQueryClient, type QueryKey, type UseMutationOptions, MutationFunction } from "@tanstack/react-query"
+import { useMutation, useQueryClient, type QueryKey, type UseMutationOptions } from "@tanstack/react-query"
 import { useSupabaseBrowser } from "@web/lib/client/supabase"
 import { TypedSupabaseClient } from "@web/lib/types/supabase"
 import "client-only"
@@ -68,28 +68,23 @@ export function useSupabaseMutation(queryCreator: SupabaseMutationQueryCreator, 
 
 type RealtimePostresEventType = "*" | "INSERT" | "UPDATE" | "DELETE"
 
-export function useInvalidateOnDatabaseChange<T extends RealtimePostresEventType>(
+export function useOnDatabaseChange<T extends RealtimePostresEventType>(
     postgresFilterOptions: RealtimePostgresChangesFilter<T>,
-    invalidateKey: QueryKey,
+    callback: (newRow: Record<string, any>, oldRow: Record<string, any>) => void,
 ) {
-    const queryClient = useQueryClient()
     const supabase = useSupabaseBrowser()
 
     useEffect(() => {
         const channel = supabase
             .channel("realtime-db-query")
             // seems like there's a bug in the types
-            .on("postgres_changes" as any, postgresFilterOptions, () => {
-                console.debug("Realtime query invalidated", invalidateKey)
-                queryClient.invalidateQueries({
-                    queryKey: invalidateKey,
-                })
+            .on("postgres_changes" as any, postgresFilterOptions, (payload) => {
+                callback(payload.new, payload.old)
             })
             .subscribe()
 
         return () => void channel.unsubscribe()
     }, [
         JSON.stringify(postgresFilterOptions),
-        JSON.stringify(invalidateKey)
     ])
 }

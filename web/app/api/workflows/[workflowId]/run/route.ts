@@ -98,7 +98,10 @@ export async function POST(
     }
 
     if (!(new URL(req.url).searchParams.has("subscribe"))) {
-        return NextResponse.json({ id: newRunId }, { status: 201 })
+        return NextResponse.json({
+            id: newRunId,
+            count: count + 1,
+        }, { status: 201 })
     }
 
     const finishedRun = await new Promise((resolve, reject) => {

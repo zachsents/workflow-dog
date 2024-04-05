@@ -16,7 +16,6 @@ export default function RunViewerToolbar() {
     const runState = run?.state as any
 
     const runMutation = useRunWorkflowMutation(run?.workflow_id || "", {
-        subscribe: true,
         mutationKey: ["rerun", run?.id],
     })
     const rerun = () => runMutation.mutate({

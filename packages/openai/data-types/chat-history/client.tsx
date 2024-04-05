@@ -14,19 +14,21 @@ export default createClientDataTypeDefinition(shared, {
     },
     renderExpanded: ({ value }) => {
         return (
-            <table className="">
-                {value.map((message, i) =>
-                    <tr className="[&>td]:py-2" key={i}>
-                        <td className="text-muted-foreground pr-4 w-[0%] capitalize ">
-                            <p className="bg-slate-50 border rounded-md text-center px-2 text-sm">
-                                {message.role}
-                            </p>
-                        </td>
-                        <td>
-                            {message.content}
-                        </td>
-                    </tr>
-                )}
+            <table>
+                <tbody>
+                    {value.map((message, i) =>
+                        <tr className="[&>td]:py-2" key={i}>
+                            <td className="text-muted-foreground pr-4 w-[0%] capitalize ">
+                                <p className="bg-slate-50 border rounded-md text-center px-2 text-sm">
+                                    {message.role}
+                                </p>
+                            </td>
+                            <td>
+                                {message.content}
+                            </td>
+                        </tr>
+                    )}
+                </tbody>
             </table>
         )
     },

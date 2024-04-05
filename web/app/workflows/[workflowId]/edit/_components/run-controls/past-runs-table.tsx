@@ -9,7 +9,7 @@ import { useCurrentWorkflowId } from "@web/lib/client/hooks"
 import { Database } from "@web/lib/types/supabase-db"
 import { cn } from "@web/lib/utils"
 import { useEditorStoreState } from "@web/modules/workflow-editor/store"
-import { useRunWorkflowMutation, useWorkflowRunsRealtime } from "@web/modules/workflows"
+import { useRunWorkflowMutation, useWorkflowRuns } from "@web/modules/workflows"
 import { TbEye, TbRotateClockwise2 } from "react-icons/tb"
 import StatusIcon from "./status-icon"
 
@@ -86,7 +86,6 @@ const createColumns = (onClose: () => void): ColumnDef<Partial<WorkflowRun>>[] =
             const workflowId = useCurrentWorkflowId()
 
             const runMutation = useRunWorkflowMutation(workflowId, {
-                subscribe: true,
                 mutationKey: ["rerun", row.id],
             })
             const rerun = () => runMutation.mutateAsync({
@@ -127,7 +126,7 @@ interface PastRunsTableProps {
 
 export default function PastRunsTable({ onClose }: PastRunsTableProps) {
 
-    const { data: runs } = useWorkflowRunsRealtime(undefined)
+    const { data: runs } = useWorkflowRuns()
 
     const [selectedRunId, setSelectedRunId] = useEditorStoreState<string | null>("selectedRunId")
 

@@ -22,9 +22,7 @@ export default function RunManuallyForm({ onClose }: RunManuallyFormProps) {
     const { data: workflow } = useWorkflow()
     const triggerDefinition = TriggerDefinitions.get((workflow?.trigger as any)?.type)
 
-    const submitMutation = useRunWorkflowMutation(undefined, {
-        subscribe: true,
-    })
+    const submitMutation = useRunWorkflowMutation()
 
     const schema = z.object(_.mapValues(
         triggerDefinition?.inputs || {},
@@ -92,6 +90,7 @@ export default function RunManuallyForm({ onClose }: RunManuallyFormProps) {
                                         </FormItem>
                                     )}
                                     disabled={isSubmitting}
+                                    key={inputId}
                                 />
                             )
                         })}

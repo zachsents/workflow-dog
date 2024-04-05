@@ -5,7 +5,7 @@ import { Button } from "@web/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@web/components/ui/popover"
 import { useDialogState } from "@web/lib/client/hooks"
 import { useEditorStore, useEditorStoreState } from "@web/modules/workflow-editor/store"
-import { useSelectedWorkflowRun, useWorkflow, useWorkflowRunsRealtime } from "@web/modules/workflows"
+import { useSelectedWorkflowRun, useWorkflow, useWorkflowRuns } from "@web/modules/workflows"
 import { TbChevronDown, TbClockPlay, TbPlayerPlay, TbX } from "react-icons/tb"
 import PastRunsTable from "./past-runs-table"
 import RunManuallyForm from "./run-manually-form"
@@ -32,7 +32,7 @@ export default function RunControls() {
 
 
 function RunManually() {
-    const {data: workflow} = useWorkflow()
+    const { data: workflow } = useWorkflow()
     const isEnabled = workflow?.is_enabled ?? false
 
     const popover = useDialogState()
@@ -80,7 +80,7 @@ function PastRuns() {
 
 function MostRecentRun() {
 
-    const { data: runs } = useWorkflowRunsRealtime(undefined)
+    const { data: runs } = useWorkflowRuns(undefined)
     const mostRecentRun = runs?.[0]
 
     const [, setSelectedRunId] = useEditorStoreState<string | null>("selectedRunId")

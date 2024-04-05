@@ -69,23 +69,33 @@ export async function POST(
 
     const newRunId = insertRunQuery.data?.id
 
-    await google.cloudtasks({
-        version: "v2",
-        auth: getAuth(),
-    }).projects.locations.queues.tasks.create({
-        parent: parent("queues/workflow-runs"),
-        requestBody: {
-            task: {
-                name: parent(`queues/workflow-runs/tasks/${newRunId}`),
-                httpRequest: {
-                    url: `${process.env.WORKFLOW_MAN_URL}/workflow-runs/${newRunId}/execute`,
-                },
-                ...reqBody.scheduledFor && {
-                    scheduleTime: new Date(reqBody.scheduledFor).toISOString(),
+    console.debug(`Sending run (${newRunId}) to`, process.env.WORKFLOW_MAN_URL)
+
+    if (process.env.NODE_ENV === "development") {
+        fetch(`${process.env.WORKFLOW_MAN_URL}/workflow-runs/${newRunId}/execute`, {
+            method: "POST"
+        })
+    }
+
+    if (process.env.NODE_ENV === "production") {
+        await google.cloudtasks({
+            version: "v2",
+            auth: getAuth(),
+        }).projects.locations.queues.tasks.create({
+            parent: parent("queues/workflow-runs"),
+            requestBody: {
+                task: {
+                    name: parent(`queues/workflow-runs/tasks/${newRunId}`),
+                    httpRequest: {
+                        url: `${process.env.WORKFLOW_MAN_URL}/workflow-runs/${newRunId}/execute`,
+                    },
+                    ...reqBody.scheduledFor && {
+                        scheduleTime: new Date(reqBody.scheduledFor).toISOString(),
+                    },
                 },
             },
-        },
-    })
+        })
+    }
 
     if (!(new URL(req.url).searchParams.has("subscribe"))) {
         return NextResponse.json({ id: newRunId }, { status: 201 })

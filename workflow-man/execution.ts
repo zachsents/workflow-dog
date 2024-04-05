@@ -22,19 +22,20 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
         const definition = NodeDefinitions.get(node.data.definition)
         runState.outputs![node.id] ??= {}
 
-        const token = node.data.serviceAccount ?
-            await fetchIntegrationToken(node.data.serviceAccount) :
-            undefined
-
         const callAction = async () => {
             if (!definition)
                 throw new Error(`Node definition not found: ${node.data.definition}`)
+
+            if (definition.requiredService && !node.data.serviceAccount)
+                throw new Error(`Must link a service account`)
 
             return definition?.action(inputValues, {
                 node,
                 triggerData,
                 runState,
-                token,
+                token: node.data.serviceAccount
+                    ? await fetchIntegrationToken(node.data.serviceAccount)
+                    : {},
             })
         }
 
@@ -57,29 +58,26 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
                 }
             })
 
-        Object.entries(actionOutputs || {}).forEach(([outputDefId, outputValue]) => {
-            const outputDefinition = definition?.outputs[outputDefId]
+        Object.entries(actionOutputs || {}).forEach(([outputDefinitionId, rawOutputValue]) => {
+            const outputDefinition = definition?.outputs[outputDefinitionId]
 
-            // regular output: any
-            if (!outputDefinition?.group) {
-                const outputId = node.data.outputs.find(output => output.definition === outputDefId)!.id
-                normalizedOutputs[outputId] = outputValue
+            if (!outputDefinition) {
+                console.warn(`Node (${node.id}) returned output that doesn't have a matching definition (Output key: ${outputDefinitionId})`)
                 return
             }
 
-            // named group output: { [name: string]: any }
-            if (outputDefinition.named) {
-                Object.entries(outputValue || {}).forEach(([name, value]) => {
-                    const outputId = node.data.outputs.find(output => output.definition === outputDefId && output.name === name)!.id
-                    normalizedOutputs[outputId] = value
-                })
-                return
-            }
-
-            // unnamed group output: any[]
             node.data.outputs
-                .filter(output => output.definition === outputDefId)
-                .forEach((output, i) => normalizedOutputs[output.id] = outputValue?.[i])
+                .filter(output => output.definition === outputDefinitionId)
+                .forEach((output, i) => {
+                    normalizedOutputs[output.id] = outputDefinition.group
+                        ? outputDefinition.named
+                            // named group: use name as object key
+                            ? rawOutputValue?.[output.name || ""]
+                            // unnamed group: use index as array key
+                            : rawOutputValue?.[i]
+                        // single output: use raw value
+                        : rawOutputValue
+                })
         })
 
         await Promise.all(Object.entries(normalizedOutputs).map(async ([outputId, outputValue]) => {
@@ -87,6 +85,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
             await Promise.all(edges.filter(edge => edge.source === node.id && edge.sourceHandle === outputId)
                 .map(edge => checkIfNodeCanRun(edge.target).catch(err => {
+                    console.error(err)
                     runState.errors![edge.target] = err.message
                 })))
         }))

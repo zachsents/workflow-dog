@@ -1,8 +1,8 @@
-import type { WebNodeDefinition } from "@types"
+import { createClientNodeDefinition } from "@pkg/types"
 import { TbSquareRoot } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbSquareRoot,
     color: "#1f2937",
     tags: ["Math"],
@@ -12,4 +12,4 @@ export default {
     outputs: {
         sqrt: {},
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

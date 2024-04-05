@@ -1,4 +1,4 @@
-import type { WebNodeDefinition } from "@types"
+import { createClientNodeDefinition } from "@pkg/types"
 import { cn } from "@web/lib/utils"
 import type React from "react"
 import { TbEqual } from "react-icons/tb"
@@ -11,7 +11,7 @@ const AbsIcon = (props: React.ComponentPropsWithoutRef<typeof TbEqual>) =>
         className={cn("rotate-90", props.className)}
     />
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: AbsIcon,
     color: "#1f2937",
     tags: ["Math"],
@@ -21,4 +21,4 @@ export default {
     outputs: {
         absolute: {},
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

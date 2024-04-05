@@ -1,6 +1,6 @@
-import type { SharedNodeDefinition } from "@types"
+import { createSharedNodeDefinition } from "@pkg/types"
 
-export default {
+export default createSharedNodeDefinition({
     name: "Not",
     description: "Negate a value",
     inputs: {
@@ -15,4 +15,4 @@ export default {
             type: "https://data-types.workflow.dog/basic/boolean",
         },
     }
-} satisfies SharedNodeDefinition
+})

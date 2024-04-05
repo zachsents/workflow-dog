@@ -1,10 +1,10 @@
-import type { WebServiceDefinition } from "@types"
+import { createClientServiceDefinition } from "@pkg/types"
 import GoogleIcon from "../../google.svg"
-import type shared from "./shared"
+import shared from "./shared"
 
 
-export default {
+export default createClientServiceDefinition(shared, {
     icon: GoogleIcon,
     color: "#3b82f6",
     transformScope: scope => scope.match(/(?<=\/)[^/\s]+$/)?.[0] || scope,
-} satisfies WebServiceDefinition<typeof shared>
+})

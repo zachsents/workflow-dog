@@ -1,7 +1,7 @@
-import type { SharedTriggerDefinition } from "@types"
+import { createSharedTriggerDefinition } from "@pkg/types"
 
 
-export default {
+export default createSharedTriggerDefinition({
     name: "Manual",
     whenName: "When triggered manually",
     description: "Triggered manually.",
@@ -17,4 +17,4 @@ export default {
             type: "https://data-types.workflow.dog/basic/any",
         }
     },
-} satisfies SharedTriggerDefinition
+})

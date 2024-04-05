@@ -1,6 +1,6 @@
-import type { SharedNodeDefinition } from "@types"
+import { createSharedNodeDefinition } from "@pkg/types"
 
-export default {
+export default createSharedNodeDefinition({
     name: "Number",
     description: "A simple number node",
     inputs: {},
@@ -10,4 +10,4 @@ export default {
             type: "https://data-types.workflow.dog/basic/number",
         },
     }
-} satisfies SharedNodeDefinition
+})

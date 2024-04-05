@@ -1,8 +1,8 @@
-import { WebNodeDefinition } from "@types"
+import { createClientNodeDefinition } from "@pkg/types"
 import { TbDivide } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbDivide,
     color: "#1f2937",
     tags: ["Math"],
@@ -14,4 +14,4 @@ export default {
         quotient: {},
         remainder: {},
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

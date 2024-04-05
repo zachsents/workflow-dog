@@ -1,8 +1,8 @@
-import type { ExecutionNodeDefinition } from "@types"
+import { createExecutionNodeDefinition } from "@pkg/types"
 import axios from "axios"
-import type shared from "./shared.js"
+import shared from "./shared"
 
-export default {
+export default createExecutionNodeDefinition(shared, {
     action: async ({ message }, { node, token }) => {
         if (!message)
             throw new Error("No message provided")
@@ -21,4 +21,4 @@ export default {
             response: data.choices[0].message.content,
         }
     },
-} satisfies ExecutionNodeDefinition<typeof shared>
+})

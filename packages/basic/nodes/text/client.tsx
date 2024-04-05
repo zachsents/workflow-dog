@@ -1,12 +1,12 @@
 import { useNodeProperty, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
 import { type RefObject, useEffect, useRef, useState } from "react"
 import { TbAbc } from "react-icons/tb"
-import { WebNodeDefinition } from "@types"
-import type shared from "./shared"
+import { createClientNodeDefinition } from "@pkg/types"
+import shared from "./shared"
 import { Textarea } from "@web/components/ui/textarea"
 
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbAbc,
     color: "#1f2937",
     tags: ["Text", "Basic"],
@@ -52,4 +52,4 @@ export default {
             />
         )
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

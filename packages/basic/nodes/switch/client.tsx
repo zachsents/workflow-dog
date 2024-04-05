@@ -1,11 +1,11 @@
-import { WebNodeDefinition } from "@types"
+import { createClientNodeDefinition } from "@pkg/types"
 import { Switch } from "@web/components/ui/switch"
 import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
 import { TbCircuitSwitchOpen } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbCircuitSwitchOpen,
     color: "#1f2937",
     tags: ["Logic", "Basic"],
@@ -25,4 +25,4 @@ export default {
             </div>
         )
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

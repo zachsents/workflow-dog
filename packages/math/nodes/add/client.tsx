@@ -1,9 +1,9 @@
 import { TbPlus } from "react-icons/tb"
-import type shared from "./shared"
-import { WebNodeDefinition } from "@types"
+import shared from "./shared"
+import { createClientNodeDefinition } from "@pkg/types"
 
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbPlus,
     color: "#1f2937",
     tags: ["Math"],
@@ -13,4 +13,4 @@ export default {
     outputs: {
         sum: {},
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

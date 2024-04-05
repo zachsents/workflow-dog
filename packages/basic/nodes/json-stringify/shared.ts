@@ -1,6 +1,6 @@
-import type { SharedNodeDefinition } from "@types"
+import { createSharedNodeDefinition } from "@pkg/types"
 
-export default {
+export default createSharedNodeDefinition({
     name: "Convert to JSON Text",
     description: "Converts a data object into JSON text.",
     inputs: {
@@ -15,4 +15,4 @@ export default {
             type: "https://data-types.workflow.dog/basic/string",
         },
     }
-} satisfies SharedNodeDefinition
+})

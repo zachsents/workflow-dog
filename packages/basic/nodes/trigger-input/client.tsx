@@ -1,5 +1,5 @@
 import { DataTypeDefinitions, TriggerDefinitions } from "@pkg/client"
-import { WebNodeDefinition } from "@types"
+import { createClientNodeDefinition } from "@pkg/types"
 import {
     Select,
     SelectContent,
@@ -12,10 +12,10 @@ import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
 import { useWorkflow } from "@web/modules/workflows"
 import { useEffect } from "react"
 import { TbPlayerSkipForward } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbPlayerSkipForward,
     color: "#1f2937",
     tags: ["Trigger", "Basic"],
@@ -61,4 +61,4 @@ export default {
             </Select>
         )
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

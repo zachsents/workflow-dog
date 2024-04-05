@@ -1,10 +1,10 @@
-import type { WebDataTypeDefinition } from "@types"
+import { createClientDataTypeDefinition } from "@pkg/types"
 import { Input } from "@web/components/ui/input"
 import { TbBraces } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 import stringifyObject from "stringify-object"
 
-export default {
+export default createClientDataTypeDefinition(shared, {
     icon: TbBraces,
     manualInputComponent: props => {
         return (
@@ -34,4 +34,4 @@ export default {
             </p>
         )
     },
-} satisfies WebDataTypeDefinition<typeof shared>
+})

@@ -1,8 +1,8 @@
-import type { WebNodeDefinition } from "@types"
+import { createClientNodeDefinition } from "@pkg/types"
 import { TbLogicXor } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbLogicXor,
     color: "#1f2937",
     tags: ["Logic", "Basic"],
@@ -12,4 +12,4 @@ export default {
     outputs: {
         result: {},
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

@@ -1,7 +1,7 @@
-import type { SharedTriggerDefinition } from "@types"
+import { createSharedTriggerDefinition } from "@pkg/types"
 
 
-export default {
+export default createSharedTriggerDefinition({
     name: "URL Request",
     whenName: "When a URL is visited",
     description: "Triggered when someone or something requests your workflow's URL. This is useful for creating webhooks.",
@@ -37,4 +37,4 @@ export default {
             type: "https://data-types.workflow.dog/basic/string",
         },
     },
-} satisfies SharedTriggerDefinition
+})

@@ -1,8 +1,8 @@
-import type { WebNodeDefinition } from "@types"
+import { createClientNodeDefinition } from "@pkg/types"
 import { TbLineDashed } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbLineDashed,
     color: "#1f2937",
     tags: ["Logic", "Basic"],
@@ -13,4 +13,4 @@ export default {
     outputs: {
         item: {},
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

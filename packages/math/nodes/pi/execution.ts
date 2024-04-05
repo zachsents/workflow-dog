@@ -1,8 +1,8 @@
-import type { ExecutionNodeDefinition } from "@types"
-import type shared from "./shared.js"
+import { createExecutionNodeDefinition } from "@pkg/types"
+import shared from "./shared"
 
-export default {
+export default createExecutionNodeDefinition(shared, {
     action: () => {
         return { pi: Math.PI }
     },
-} satisfies ExecutionNodeDefinition<typeof shared>
+})

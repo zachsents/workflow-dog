@@ -1,11 +1,11 @@
-import type { WebDataTypeDefinition } from "@types"
+import { createClientDataTypeDefinition } from "@pkg/types"
 import { Textarea } from "@web/components/ui/textarea"
 import { cn } from "@web/lib/utils"
 import { TbBracketsContain } from "react-icons/tb"
 import stringifyObject from "stringify-object"
-import type shared from "./shared"
+import shared from "./shared"
 
-export default {
+export default createClientDataTypeDefinition(shared, {
     icon: TbBracketsContain,
     manualInputComponent: ({ value, ...props }: any) => {
         // TODO: add intermediate value for converting between object
@@ -38,4 +38,4 @@ export default {
             </pre>
         )
     },
-} satisfies WebDataTypeDefinition<typeof shared>
+})

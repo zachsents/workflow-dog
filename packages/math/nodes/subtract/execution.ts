@@ -1,9 +1,9 @@
-import type { ExecutionNodeDefinition } from "@types"
-import type shared from "./shared.js"
+import { createExecutionNodeDefinition } from "@pkg/types"
+import shared from "./shared"
 
-export default {
+export default createExecutionNodeDefinition(shared, {
     action: ({ minuend, subtrahend }) => {
         const difference = minuend - subtrahend
         return { difference }
     },
-} satisfies ExecutionNodeDefinition<typeof shared>
+})

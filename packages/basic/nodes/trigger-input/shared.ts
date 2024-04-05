@@ -1,6 +1,6 @@
-import type { SharedNodeDefinition } from "@types"
+import { createSharedNodeDefinition } from "@pkg/types"
 
-export default {
+export default createSharedNodeDefinition({
     name: "Use Data From Trigger",
     description: "Uses an input from the trigger.",
     inputs: {},
@@ -10,4 +10,4 @@ export default {
             type: "https://data-types.workflow.dog/basic/any",
         },
     },
-} satisfies SharedNodeDefinition
+})

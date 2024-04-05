@@ -1,29 +1,28 @@
-import { glob } from "glob"
 import fs from "fs/promises"
-import path from "path"
+import { glob } from "glob"
 
 const originalTemplate = await fs.readFile("_build/template.ts", "utf-8")
 
 
 await buildMultiple([
-    { folder: "nodes", specialFile: "client.tsx", type: "SharedNodeDefinition & WebNodeDefinition<any>" },
-    { folder: "triggers", specialFile: "client.tsx", type: "SharedTriggerDefinition & WebTriggerDefinition<any>" },
-    { folder: "services", specialFile: "client.tsx", type: "SharedServiceDefinition & WebServiceDefinition<any>" },
-    { folder: "data-types", specialFile: "client.tsx", type: "SharedDataTypeDefinition & WebDataTypeDefinition<any>" },
+    { folder: "nodes", specialFile: "client.tsx" },
+    { folder: "triggers", specialFile: "client.tsx" },
+    { folder: "services", specialFile: "client.tsx" },
+    { folder: "data-types", specialFile: "client.tsx" },
 ]).then(barrel => fs.writeFile("_build/barrels/client.ts", barrel))
 
 await buildMultiple([
-    { folder: "nodes", specialFile: "server.ts", type: "any" },
-    { folder: "triggers", specialFile: "server.ts", type: "SharedTriggerDefinition & ServerTriggerDefinition<any>" },
-    { folder: "services", specialFile: "server.ts", type: "SharedServiceDefinition & ServerServiceDefinition<any>" },
-    { folder: "data-types", specialFile: "server.ts", type: "any" },
+    { folder: "nodes", specialFile: "server.ts" },
+    { folder: "triggers", specialFile: "server.ts" },
+    { folder: "services", specialFile: "server.ts" },
+    { folder: "data-types", specialFile: "server.ts" },
 ]).then(barrel => fs.writeFile("_build/barrels/server.ts", barrel))
 
 await buildMultiple([
-    { folder: "nodes", specialFile: "execution.ts", type: "SharedNodeDefinition & ExecutionNodeDefinition<any>" },
-    { folder: "triggers", specialFile: "execution.ts", type: "any" },
-    { folder: "services", specialFile: "execution.ts", type: "any" },
-    { folder: "data-types", specialFile: "execution.ts", type: "any" },
+    { folder: "nodes", specialFile: "execution.ts" },
+    { folder: "triggers", specialFile: "execution.ts" },
+    { folder: "services", specialFile: "execution.ts" },
+    { folder: "data-types", specialFile: "execution.ts" },
 ]).then(barrel => fs.writeFile("_build/barrels/execution.ts", barrel))
 
 
@@ -32,62 +31,39 @@ async function build({
     specialFile,
     idPrefix = folder,
     template,
-    type,
 }) {
-    const folderPaths = await glob(`*/${folder}/*`)
+    const filePaths = await glob(`*/${folder}/*/${specialFile}`)
 
-    const collection = await Promise.all(
-        folderPaths.map(async folderPath => {
-            const sharedPath = path.join(folderPath, "shared.ts")
-            const specialPath = path.join(folderPath, specialFile)
+    const collection = filePaths.map(filePath => {
+        const importName = importNameFromPath(filePath)
+        const importPath = importPathFromPath(filePath)
 
-            const specialExists = await fs.stat(specialPath)
-                .then(() => true)
-                .catch(() => false)
+        const importLine = `import ${importName} from "${importPath}"`
 
-            if (!specialExists)
-                return
+        const segments = filePath.split("/")
+        const id = `https://${idPrefix}.workflow.dog/${segments[0]}/${segments[2]}`
 
-            const sharedImportName = importNameFromPath(sharedPath)
-            const specialImportName = importNameFromPath(specialPath)
-
-            const sharedImportPath = importPathFromPath(sharedPath)
-            const specialImportPath = importPathFromPath(specialPath)
-
-            const importLines = `
-import ${sharedImportName} from "${sharedImportPath}"
-import ${specialImportName} from "${specialImportPath}"`.trim()
-
-            const segments = folderPath.split("/")
-
-            const id = `https://${idPrefix}.workflow.dog/${segments[0]}/${segments[2]}`
-
-            const exportLines = "    " + `
-    "${id}": _.merge({},
-        ${sharedImportName},
-        ${specialImportName},
-        { id: "${id}" }    
+        const exportLine = "    " + `
+"${id}": _.merge(
+        { id: "${id}" },    
+        ${importName},
     ),`.trim()
 
-            return {
-                id,
-                importLines,
-                exportLines,
-            }
-        })
-    ).then(arr => arr.filter(Boolean))
+        return {
+            id,
+            importLine,
+            exportLine,
+        }
+    })
 
     console.log(`[${folder}/${specialFile}]`, collection.length, "items")
 
     return template.replace(
         `// ${folder} IMPORTS`,
-        collection.map(c => c.importLines).join("\n")
+        collection.map(c => c.importLine).join("\n")
     ).replace(
         `    // ${folder} EXPORTS`,
-        collection.map(c => c.exportLines).join("\n")
-    ).replace(
-        `/* ${folder} TYPE */`,
-        ` as Record<string, ${type} & { id: string }>`
+        collection.map(c => c.exportLine).join("\n")
     )
 }
 
@@ -96,17 +72,6 @@ async function buildMultiple(payloads) {
     for (let payload of payloads) {
         result = await build({ ...payload, template: result })
     }
-
-    const types = payloads
-        .flatMap(p => p.type?.match(/[A-Z]\w+/g))
-        .filter(Boolean)
-        .join(", ")
-
-    result = result.replace(
-        "// TYPE IMPORT",
-        `import type { ${types} } from "@types"`
-    )
-
     return result
 }
 

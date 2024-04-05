@@ -1,6 +1,6 @@
-import type { SharedNodeDefinition } from "@types"
+import { createSharedNodeDefinition } from "@pkg/types"
 
-export default {
+export default createSharedNodeDefinition({
     name: "Get Lead by ID",
     description: "Retrieves a lead by its ID.",
     inputs: {
@@ -18,4 +18,4 @@ export default {
     requiredService: {
         id: "https://services.workflow.dog/closecrm/close",
     },
-} satisfies SharedNodeDefinition
+})

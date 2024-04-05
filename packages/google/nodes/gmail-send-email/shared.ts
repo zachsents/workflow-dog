@@ -1,6 +1,6 @@
-import type { SharedNodeDefinition } from "@types"
+import { createSharedNodeDefinition } from "@pkg/types"
 
-export default {
+export default createSharedNodeDefinition({
     name: "Send Email",
     description: "Send an email from your Gmail account.",
     inputs: {
@@ -22,4 +22,4 @@ export default {
         id: "https://services.workflow.dog/google/google-oauth",
         scopes: ["https://www.googleapis.com/auth/gmail.send"],
     },
-} satisfies SharedNodeDefinition
+})

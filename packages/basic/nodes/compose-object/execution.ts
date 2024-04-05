@@ -1,9 +1,9 @@
-import type { ExecutionNodeDefinition } from "@types"
-import type shared from "./shared.js"
+import { createExecutionNodeDefinition } from "@pkg/types"
+import shared from "./shared"
 import _ from "lodash"
 
 
-export default {
+export default createExecutionNodeDefinition(shared, {
     action: ({ properties }) => {
         return {
             object: Object.entries(properties).reduce((acc, [key, value]) => {
@@ -13,4 +13,4 @@ export default {
             }, {})
         }
     },
-} satisfies ExecutionNodeDefinition<typeof shared>
+})

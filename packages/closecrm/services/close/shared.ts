@@ -1,8 +1,8 @@
-import type { SharedServiceDefinition } from "@types"
+import { createSharedServiceDefinition } from "@pkg/types"
 
-export default {
+export default createSharedServiceDefinition({
     name: "CloseCRM",
     authAcquisition: {
         method: "key"
     }
-} satisfies SharedServiceDefinition
+})

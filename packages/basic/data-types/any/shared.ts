@@ -1,9 +1,9 @@
-import type { SharedDataTypeDefinition } from "@types"
+import { createSharedDataTypeDefinition } from "@pkg/types"
 import { z } from "zod"
 
 
-export default {
+export default createSharedDataTypeDefinition({
     name: "Any",
     description: "Any data type",
     schema: z.any(),
-} satisfies SharedDataTypeDefinition
+})

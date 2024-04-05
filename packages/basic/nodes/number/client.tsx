@@ -1,12 +1,12 @@
 import { TbMinus, TbNumbers, TbPlus } from "react-icons/tb"
 import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
-import { WebNodeDefinition } from "@types"
-import type shared from "./shared"
+import { createClientNodeDefinition } from "@pkg/types"
+import shared from "./shared"
 import { Input } from "@web/components/ui/input"
 import { Button } from "@web/components/ui/button"
 
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbNumbers,
     color: "#1f2937",
     tags: ["Math", "Basic"],
@@ -62,7 +62,7 @@ export default {
             </div>
         )
     }
-} satisfies WebNodeDefinition<typeof shared>
+})
 
 
 function parseNumber(str?: string) {

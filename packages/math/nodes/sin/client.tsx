@@ -1,4 +1,4 @@
-import type { WebNodeDefinition } from "@types"
+import { createClientNodeDefinition } from "@pkg/types"
 import {
     Select,
     SelectContent,
@@ -8,10 +8,10 @@ import {
 } from "@ui/select"
 import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
 import { TbWaveSine } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbWaveSine,
     color: "#1f2937",
     tags: ["Math"],
@@ -42,4 +42,4 @@ export default {
             </Select>
         )
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

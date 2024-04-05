@@ -1,8 +1,8 @@
-import type { WebNodeDefinition } from "@types"
-import type shared from "./shared"
+import { createClientNodeDefinition } from "@pkg/types"
+import shared from "./shared"
 import { TbMathPi } from "react-icons/tb"
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbMathPi,
     color: "#1f2937",
     tags: ["Math"],
@@ -10,4 +10,4 @@ export default {
     outputs: {
         pi: {},
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

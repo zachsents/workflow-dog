@@ -1,6 +1,6 @@
-import type { SharedNodeDefinition } from "@types"
+import { createSharedNodeDefinition } from "@pkg/types"
 
-export default {
+export default createSharedNodeDefinition({
     name: "Exponent",
     description: "Raises a number to the power of an exponent.",
     inputs: {
@@ -19,4 +19,4 @@ export default {
             type: "https://data-types.workflow.dog/basic/number",
         },
     },
-} satisfies SharedNodeDefinition
+})

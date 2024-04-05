@@ -13,7 +13,6 @@ import { TbExternalLink, TbPlus } from "react-icons/tb"
 import Group from "../../layout/Group"
 import ActionNodeHandle from "./ActionNodeHandle"
 import ActionNodeHeader from "./ActionNodeHeader"
-import { ConfigComponent } from "./ActionNodeModal"
 import ActionNodeShell from "./ActionNodeShell"
 import NodeModifierWrapper from "./NodeModifierWrapper"
 

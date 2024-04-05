@@ -1,13 +1,14 @@
-import type { ServerTriggerDefinition, WorkflowTrigger } from "@types"
-import type shared from "./shared.js"
+import type { WorkflowTrigger } from "@pkg/types"
+import { createServerTriggerDefinition } from "@pkg/types"
+import shared from "./shared"
 import _ from "lodash"
 import { google } from "googleapis"
 import { getAuth, parent } from "@web/lib/server/google"
 
 
-export default {
+export default createServerTriggerDefinition(shared, {
     onChange: handleScheduleChange,
-} satisfies ServerTriggerDefinition<typeof shared>
+})
 
 
 async function handleScheduleChange(oldTrigger: ScheduleTrigger, newTrigger: ScheduleTrigger, workflowId: string) {

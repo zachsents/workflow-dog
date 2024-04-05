@@ -1,6 +1,6 @@
-import type { SharedNodeDefinition } from "@types"
+import { createSharedNodeDefinition } from "@pkg/types"
 
-export default {
+export default createSharedNodeDefinition({
     name: "Logarithm",
     description: "Calculates the logarithm of a number to a specified base.",
     inputs: {
@@ -19,4 +19,4 @@ export default {
             type: "https://data-types.workflow.dog/basic/number",
         },
     },
-} satisfies SharedNodeDefinition
+})

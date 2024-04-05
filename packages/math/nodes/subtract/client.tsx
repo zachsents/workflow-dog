@@ -1,8 +1,8 @@
 import { TbMinus } from "react-icons/tb"
-import type { WebNodeDefinition } from "@types"
-import type shared from "./shared"
+import { createClientNodeDefinition } from "@pkg/types"
+import shared from "./shared"
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbMinus,
     color: "#1f2937",
     tags: ["Math"],
@@ -19,4 +19,4 @@ export default {
             description: "The result of the subtraction.",
         },
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

@@ -1,8 +1,8 @@
-import type { WebNodeDefinition } from "@types"
+import { createClientNodeDefinition } from "@pkg/types"
 import { TbBrandGmail } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbBrandGmail,
     color: "#ea4335",
     tags: ["Gmail", "Email"],
@@ -12,4 +12,4 @@ export default {
         message: {},
     },
     outputs: {},
-} satisfies WebNodeDefinition<typeof shared>
+})

@@ -1,13 +1,13 @@
 
-export function aOrAn(word) {
+export function aOrAn(word: string) {
     return "aeiou".includes(word[0]) ? "an" : "a"
 }
 
-export function plural(word, q) {
+export function plural(word: string, q: number) {
     return q === 1 ? word : word + "s"
 }
 
-export function singular(word) {
+export function singular(word: string) {
     if (word.endsWith("ies"))
         return word.slice(0, -3) + "y"
 
@@ -17,12 +17,8 @@ export function singular(word) {
     return word
 }
 
-/**
- * @param {Date} date
- * @param {boolean} [showDate=true]
- * @param {boolean} [showTime=true]
- */
-export function formatDate(date, showDate = true, showTime = true) {
+
+export function formatDate(date: Date, showDate = true, showTime = true) {
     return date?.toLocaleString(undefined, {
         dateStyle: showDate ? "short" : undefined,
         timeStyle: showTime ? "short" : undefined,
@@ -30,7 +26,7 @@ export function formatDate(date, showDate = true, showTime = true) {
 }
 
 
-export function durationSeconds(startDate, endDate, digits) {
+export function durationSeconds(startDate: Date, endDate: Date, digits?: number) {
     if (!(startDate instanceof Date && endDate instanceof Date))
         return
 

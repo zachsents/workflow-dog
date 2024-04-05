@@ -1,8 +1,8 @@
-import type { ServerServiceDefinition } from "@types"
-import type shared from "./shared"
+import { createServerServiceDefinition } from "@pkg/types"
+import shared from "./shared"
 
 
-export default {
+export default createServerServiceDefinition(shared, {
     authAcquisition: {
         authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
         tokenUrl: "https://oauth2.googleapis.com/token",
@@ -23,4 +23,4 @@ export default {
     authUsage: {
         method: "bearer"
     }
-} satisfies ServerServiceDefinition<typeof shared>
+})

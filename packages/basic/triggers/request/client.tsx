@@ -1,14 +1,14 @@
-import type { WebTriggerDefinition } from "@types"
+import { createClientTriggerDefinition } from "@pkg/types"
 import { Checkbox } from "@ui/checkbox"
 import { Button } from "@web/components/ui/button"
 import { Label } from "@web/components/ui/label"
 import { useEffect, useState } from "react"
 import { TbCopy, TbLink } from "react-icons/tb"
 import { toast } from "sonner"
-import type shared from "./shared"
+import shared from "./shared"
 
 
-export default {
+export default createClientTriggerDefinition(shared, {
     tags: ["Basic"],
     icon: TbLink,
     color: "#1f2937",
@@ -71,4 +71,4 @@ export default {
             </div>
         )
     }
-} satisfies WebTriggerDefinition<typeof shared>
+})

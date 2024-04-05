@@ -1,9 +1,9 @@
-import type { ServerTriggerDefinition } from "@types"
-import type shared from "./shared.js"
+import { createServerTriggerDefinition } from "@pkg/types"
+import shared from "./shared"
 
 
-export default {
+export default createServerTriggerDefinition(shared, {
     onChange: async () => {
         console.log("URL trigger ready")
     },
-} satisfies ServerTriggerDefinition<typeof shared>
+})

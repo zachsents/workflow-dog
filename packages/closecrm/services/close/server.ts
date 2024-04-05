@@ -1,11 +1,11 @@
-import type { ServerServiceDefinition } from "@types"
-import type shared from "./shared"
+import { createServerServiceDefinition } from "@pkg/types"
+import shared from "./shared"
 
-export default {
+export default createServerServiceDefinition(shared, {
     authAcquisition: {
         profileUrl: "https://api.close.com/api/v1/me/",
     },
     authUsage: {
         method: "basic"
     },
-} satisfies ServerServiceDefinition<typeof shared>
+})

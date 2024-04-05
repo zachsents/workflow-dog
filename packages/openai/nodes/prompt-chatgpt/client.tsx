@@ -1,8 +1,8 @@
-import type { WebNodeDefinition } from "@types"
+import { createClientNodeDefinition } from "@pkg/types"
 import { TbRobot } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbRobot,
     color: "#000000",
     tags: ["ChatGPT", "OpenAI", "AI"],
@@ -12,4 +12,4 @@ export default {
     outputs: {
         response: {},
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

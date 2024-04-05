@@ -1,8 +1,8 @@
 import { TbAmpersand } from "react-icons/tb"
-import type { WebNodeDefinition } from "@types"
-import type shared from "./shared"
+import { createClientNodeDefinition } from "@pkg/types"
+import shared from "./shared"
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbAmpersand,
     color: "#1f2937",
     tags: ["Logic", "Basic"],
@@ -12,4 +12,4 @@ export default {
     outputs: {
         result: {},
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

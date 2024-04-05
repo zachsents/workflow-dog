@@ -1,10 +1,10 @@
-import type { ExecutionNodeDefinition } from "@types"
+import { createExecutionNodeDefinition } from "@pkg/types"
 import { google } from "googleapis"
 import { createMimeMessage } from "mimetext"
-import type shared from "./shared.js"
+import shared from "./shared"
 
 
-export default {
+export default createExecutionNodeDefinition(shared, {
     action: async ({ to, message, subject }, { token }) => {
         if (!to)
             throw new Error("No recipient provided")
@@ -53,4 +53,4 @@ export default {
 
         return {}
     },
-} satisfies ExecutionNodeDefinition<typeof shared>
+})

@@ -1,8 +1,8 @@
-import type { SharedDataTypeDefinition } from "@types"
+import { createSharedDataTypeDefinition } from "@pkg/types"
 import { leadSchema } from "../../schemas"
 
-export default {
+export default createSharedDataTypeDefinition({
     name: "Lead",
     description: "A lead from CloseCRM.",
     schema: leadSchema,
-} satisfies SharedDataTypeDefinition
+})

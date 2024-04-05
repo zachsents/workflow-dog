@@ -1,7 +1,7 @@
-import type { ServerTriggerDefinition } from "@types"
-import type shared from "./shared.js"
+import { createServerTriggerDefinition } from "@pkg/types"
+import shared from "./shared"
 
 
-export default {
-   
-} satisfies ServerTriggerDefinition<typeof shared>
+export default createServerTriggerDefinition(shared, {
+
+})

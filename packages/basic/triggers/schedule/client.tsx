@@ -1,4 +1,4 @@
-import type { WebTriggerDefinition } from "@types"
+import { createClientTriggerDefinition } from "@pkg/types"
 import {
     Select,
     SelectContent,
@@ -21,10 +21,10 @@ import { produce } from "immer"
 import _ from "lodash"
 import React, { useEffect, useState } from "react"
 import { TbCheck, TbClock, TbPlus, TbX } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 
 
-export default {
+export default createClientTriggerDefinition(shared, {
     tags: ["Basic"],
     icon: TbClock,
     color: "#1f2937",
@@ -128,7 +128,7 @@ export default {
             </div>
         )
     },
-} satisfies WebTriggerDefinition<typeof shared>
+})
 
 
 interface IntervalProps extends Omit<React.ComponentProps<"div">, "onChange"> {

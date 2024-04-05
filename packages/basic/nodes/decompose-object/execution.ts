@@ -1,9 +1,9 @@
-import type { ExecutionNodeDefinition } from "@types"
-import type shared from "./shared.js"
+import { createExecutionNodeDefinition } from "@pkg/types"
+import shared from "./shared"
 import _ from "lodash"
 
 
-export default {
+export default createExecutionNodeDefinition(shared, {
     action: ({ object }, { node }) => {
         if (!object)
             throw new Error("Didn't receive an object")
@@ -16,4 +16,4 @@ export default {
             properties: Object.fromEntries(keys.map(key => [key, _.get(object, key)]))
         }
     },
-} satisfies ExecutionNodeDefinition<typeof shared>
+})

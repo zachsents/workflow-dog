@@ -1,8 +1,8 @@
-import type { WebNodeDefinition } from "@types"
+import { createClientNodeDefinition } from "@pkg/types"
 import { TbUser } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbUser,
     color: "#1463ff",
     tags: ["CloseCRM", "CRM", "Sales"],
@@ -12,4 +12,4 @@ export default {
     outputs: {
         lead: {},
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

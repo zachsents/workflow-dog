@@ -1,6 +1,6 @@
-import type { SharedNodeDefinition } from "@types"
+import { createSharedNodeDefinition } from "@pkg/types"
 
-export default {
+export default createSharedNodeDefinition({
     name: "Build List",
     description: "Composes a list from its items.",
     inputs: {
@@ -17,4 +17,4 @@ export default {
             type: "https://data-types.workflow.dog/basic/array",
         },
     },
-} satisfies SharedNodeDefinition
+})

@@ -1,12 +1,12 @@
-import type { WebDataTypeDefinition } from "@types"
+import { createClientDataTypeDefinition } from "@pkg/types"
 import { Textarea } from "@web/components/ui/textarea"
 import { cn } from "@web/lib/utils"
 import _ from "lodash"
 import { TbUser } from "react-icons/tb"
 import stringifyObject from "stringify-object"
-import type shared from "./shared"
+import shared from "./shared"
 
-export default {
+export default createClientDataTypeDefinition(shared, {
     icon: TbUser,
     manualInputComponent: ({ value, ...props }: any) => {
         return (
@@ -62,7 +62,7 @@ export default {
             </pre>
         )
     },
-} satisfies WebDataTypeDefinition<typeof shared>
+})
 
 
 

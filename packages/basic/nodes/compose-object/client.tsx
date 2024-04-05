@@ -1,9 +1,9 @@
 import { TbArrowsJoin } from "react-icons/tb"
-import { WebNodeDefinition } from "@types"
-import type shared from "./shared"
+import { createClientNodeDefinition } from "@pkg/types"
+import shared from "./shared"
 
 
-export default {
+export default createClientNodeDefinition(shared, {
     icon: TbArrowsJoin,
     color: "#1f2937",
     tags: ["Basic"],
@@ -17,4 +17,4 @@ export default {
             description: "The composed object.",
         }
     },
-} satisfies WebNodeDefinition<typeof shared>
+})

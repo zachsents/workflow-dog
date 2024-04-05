@@ -1,8 +1,8 @@
-import type { ExecutionNodeDefinition } from "@types"
-import type shared from "./shared.js"
+import { createExecutionNodeDefinition } from "@pkg/types"
+import shared from "./shared"
 
 
-export default {
+export default createExecutionNodeDefinition(shared, {
     action: (_, { node }) => {
         const parsed = parseFloat(node.data?.state?.value)
 
@@ -11,4 +11,4 @@ export default {
 
         return { number: parsed }
     },
-} satisfies ExecutionNodeDefinition<typeof shared>
+})

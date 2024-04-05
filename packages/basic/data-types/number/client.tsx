@@ -1,9 +1,9 @@
-import type { WebDataTypeDefinition } from "@types"
+import { createClientDataTypeDefinition } from "@pkg/types"
 import { TbNumbers } from "react-icons/tb"
-import type shared from "./shared"
+import shared from "./shared"
 import { Input } from "@web/components/ui/input"
 
-export default {
+export default createClientDataTypeDefinition(shared, {
     icon: TbNumbers,
     manualInputComponent: ({ ...props }) => {
         return (
@@ -24,4 +24,4 @@ export default {
         )
     },
     shouldExpand: () => false,
-} satisfies WebDataTypeDefinition<typeof shared>
+})

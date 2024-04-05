@@ -1,8 +1,8 @@
-import type { ExecutionNodeDefinition } from "@types"
+import { createExecutionNodeDefinition } from "@pkg/types"
 import axios from "axios"
-import type shared from "./shared.js"
+import shared from "./shared"
 
-export default {
+export default createExecutionNodeDefinition(shared, {
     action: async ({ leadId }, { token }) => {
         if (!leadId)
             throw new Error("No Lead ID provided")
@@ -16,4 +16,4 @@ export default {
 
         return { lead }
     },
-} satisfies ExecutionNodeDefinition<typeof shared>
+})

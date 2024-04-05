@@ -1,6 +1,6 @@
-import type { SharedNodeDefinition } from "@types"
+import { createSharedNodeDefinition } from "@pkg/types"
 
-export default {
+export default createSharedNodeDefinition({
     name: "Prompt ChatGPT",
     description: "Prompt ChatGPT with a message.",
     inputs: {
@@ -18,4 +18,4 @@ export default {
     requiredService: {
         id: "https://services.workflow.dog/openai/openai",
     },
-} satisfies SharedNodeDefinition
+})

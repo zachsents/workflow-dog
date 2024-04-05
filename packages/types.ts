@@ -1,18 +1,52 @@
+import _ from "lodash"
 import type { ComponentType } from "react"
 import type { IconType } from "react-icons/lib/iconBase"
 import type { Node, Workflow, WorkflowRunState } from "shared/types"
 import { ZodSchema, z } from "zod"
+import type { DataTypeDefinitions } from "./client"
+
+
+
+/* ----------------------------- Data Types Meta ---------------------------- */
+
+export type DataTypeId = keyof typeof DataTypeDefinitions["asObject"]
+
+export type BaseInterfaceValue<T extends SharedNodeDefinition, IK extends "inputs" | "outputs", K extends keyof T[IK]> = z.infer<typeof DataTypeDefinitions["asObject"][T[IK][K]["type"]]["schema"]>
+
+export type InterfaceValue<T extends SharedNodeDefinition, IK extends "inputs" | "outputs", K extends keyof T[IK]> =
+    T[IK][K]["group"] extends true
+    ? T[IK][K]["named"] extends true
+    ? Record<string, BaseInterfaceValue<T, IK, K>>
+    : BaseInterfaceValue<T, IK, K>[]
+    : BaseInterfaceValue<T, IK, K>
 
 
 /* -------------------------------------------------------------------------- */
 /*                                    Nodes                                   */
 /* -------------------------------------------------------------------------- */
 
-export type SharedNodeDefinition = {
+
+export interface SharedNodeDefinitionInterface {
+    name: string
+    type: DataTypeId
+    group?: boolean
+    named?: boolean
+
+    // TODO: implement these
+    groupMin?: number
+    groupMax?: number
+}
+
+export type NodeServiceRequirement = {
+    id: string
+    scopes?: (string | string[])[]
+}
+
+export interface SharedNodeDefinition<I extends Record<string, SharedNodeDefinitionInterface> = Record<string, SharedNodeDefinitionInterface>, O extends Record<string, SharedNodeDefinitionInterface> = Record<string, SharedNodeDefinitionInterface>> {
     name: string
     description: string
-    inputs: Record<string, SharedNodeDefinitionInterface>
-    outputs: Record<string, SharedNodeDefinitionInterface>
+    inputs: I
+    outputs: O
 
     requiredService?: NodeServiceRequirement
 
@@ -25,80 +59,22 @@ export type SharedNodeDefinition = {
     WIP_requiredServices?: (NodeServiceRequirement | NodeServiceRequirement[])[]
 }
 
-export interface SharedNodeDefinitionInterface {
-    name: string
-    // type: keyof DataTypeMap
-    type: string
-    group?: boolean
-    named?: boolean
-
-    // TODO: implement these
-    groupMin?: number
-    groupMax?: number
-}
-
-export type ExecutionNodeDefinition<T extends SharedNodeDefinition> = {
+export interface ExecutionNodeDefinition<T extends SharedNodeDefinition> {
     action: (inputs: {
-        // [K in keyof T["inputs"]]: InterfaceValue<T, "inputs", K>
-        [K in keyof T["inputs"]]: any
+        [K in keyof T["inputs"]]: InterfaceValue<T, "inputs", K>
     }, info: {
         node: Node
         triggerData: Record<string, any>
         runState: WorkflowRunState
-        token?: any
+        token?: { access_token?: string, key?: string }
     }) => {
-        // [K in keyof T["outputs"]]: InterfaceValue<T, "outputs", K>
-        [K in keyof T["outputs"]]: any
+        [K in keyof T["outputs"]]: InterfaceValue<T, "outputs", K>
     } | Promise<{
-        // [K in keyof T["outputs"]]: InterfaceValue<T, "outputs", K>
-        [K in keyof T["outputs"]]: any
+        [K in keyof T["outputs"]]: InterfaceValue<T, "outputs", K>
     }>
 }
 
-// type InterfaceValue<
-//     T extends SharedNodeDefinition,
-//     IK extends "inputs" | "outputs",
-//     K extends keyof T[IK]
-// > = T[IK][K] extends SharedNodeDefinitionInterface
-//     ? T[IK][K]["group"] extends true
-//     ? T[IK][K]["named"] extends true
-//     ? Record<string, DataTypeByURI<T[IK][K]["type"]>>
-//     : DataTypeByURI<T[IK][K]["type"]>[]
-//     : DataTypeByURI<T[IK][K]["type"]>
-//     : never
-
-
-
-// type DataTypeMap = {
-//     // [K in keyof typeof serverDataTypes]: z.infer<typeof serverDataTypes[K]["schema"]>
-//     // forget about this for now
-// }
-// type DataTypeByURI<URI extends keyof DataTypeMap> = DataTypeMap[URI]
-
-
-export type WebNodeDefinition<T extends SharedNodeDefinition> = {
-    icon: IconType | ComponentType
-    color: string
-    tags: string[]
-    inputs: {
-        [K in keyof T["inputs"]]: WebNodeDefinitionInterface
-    }
-    outputs: {
-        [K in keyof T["outputs"]]: WebNodeDefinitionOutput
-    }
-
-    /** @deprecated Not implemented in new version */
-    renderNode?: ComponentType<{ id: string }>
-
-    renderBody?: ComponentType<{ id: string }>
-}
-
-export type NodeServiceRequirement = {
-    id: string
-    scopes?: (string | string[])[]
-}
-
-export interface WebNodeDefinitionInterface {
+export interface ClientNodeDefinitionInterface {
     description?: string
     bullet?: boolean
     recommendedNode?: {
@@ -108,9 +84,39 @@ export interface WebNodeDefinitionInterface {
     }
 }
 
-export interface WebNodeDefinitionOutput extends WebNodeDefinitionInterface {
+export interface ClientNodeDefinitionOutput extends ClientNodeDefinitionInterface {
     selectable?: boolean
 }
+
+export type ClientNodeDefinition<T extends SharedNodeDefinition> = {
+    icon: IconType | ComponentType
+    color: string
+    tags: string[]
+    inputs: {
+        [K in keyof T["inputs"]]: ClientNodeDefinitionInterface
+    }
+    outputs: {
+        [K in keyof T["outputs"]]: ClientNodeDefinitionOutput
+    }
+
+    /** @deprecated Not implemented in new version */
+    renderNode?: ComponentType<{ id: string }>
+
+    renderBody?: ComponentType<{ id: string }>
+}
+
+export function createSharedNodeDefinition<T extends SharedNodeDefinition>(def: T): SharedNodeDefinition<T["inputs"], T["outputs"]> {
+    return def
+}
+
+export function createExecutionNodeDefinition<T extends SharedNodeDefinition>(sharedDef: T, def: ExecutionNodeDefinition<T>) {
+    return _.merge({}, sharedDef, def)
+}
+
+export function createClientNodeDefinition<T extends SharedNodeDefinition>(sharedDef: T, def: ClientNodeDefinition<T>) {
+    return _.merge({}, sharedDef, def)
+}
+
 
 
 /* -------------------------------------------------------------------------- */
@@ -128,8 +134,7 @@ export type SharedTriggerDefinition = {
 export interface SharedTriggerDefinitionInterface {
     name: string
     description?: string
-    // type: keyof DataTypeMap
-    type: string
+    type: DataTypeId
 }
 
 export type WorkflowTrigger = {
@@ -137,12 +142,12 @@ export type WorkflowTrigger = {
     config: Record<string, any>
 }
 
-export type ServerTriggerDefinition<T extends SharedTriggerDefinition> = {
+export type ServerTriggerDefinition = {
     /** Called when this trigger is modified, created, or removed */
     onChange?: (oldTrigger: WorkflowTrigger | null, newTrigger: WorkflowTrigger | null, workflowId: string) => Promise<void>
 }
 
-export type WebTriggerDefinition<T extends SharedTriggerDefinition> = {
+export type ClientTriggerDefinition = {
     icon: IconType | ComponentType
     color: string
     tags: string[]
@@ -155,20 +160,29 @@ export type WebTriggerDefinition<T extends SharedTriggerDefinition> = {
     }>
 }
 
+export function createSharedTriggerDefinition(def: SharedTriggerDefinition) {
+    return def
+}
+
+export function createServerTriggerDefinition(sharedDef: SharedTriggerDefinition, def: ServerTriggerDefinition) {
+    return _.merge({}, sharedDef, def)
+}
+
+export function createClientTriggerDefinition(sharedDef: SharedTriggerDefinition, def: ClientTriggerDefinition) {
+    return _.merge({}, sharedDef, def)
+}
+
 
 /* -------------------------------------------------------------------------- */
 /*                                  Services                                  */
 /* -------------------------------------------------------------------------- */
 
-
-
 export type ServiceAuthAcquisitionMethod = "oauth2" | "key" | "user-pass"
 
-
-export type SharedServiceDefinition = {
+export type SharedServiceDefinition<M extends ServiceAuthAcquisitionMethod = ServiceAuthAcquisitionMethod> = {
     name: string
     authAcquisition: {
-        method: ServiceAuthAcquisitionMethod
+        method: M
     }
 }
 
@@ -212,11 +226,23 @@ export type ServerServiceDefinition<T extends SharedServiceDefinition> = {
     }
 }
 
-export type WebServiceDefinition<T extends SharedServiceDefinition> = {
+export type ClientServiceDefinition<T extends SharedServiceDefinition> = {
     icon: IconType | ComponentType
     color: string
     transformScope?: (scope: string) => string
-    generateKeyUrl?: string
+    generateKeyUrl?: T["authAcquisition"]["method"] extends "key" ? string : never
+}
+
+export function createSharedServiceDefinition<T extends SharedServiceDefinition>(def: T): SharedServiceDefinition<T["authAcquisition"]["method"]> {
+    return def
+}
+
+export function createServerServiceDefinition<T extends SharedServiceDefinition>(sharedDef: T, def: ServerServiceDefinition<T>) {
+    return _.merge({}, sharedDef, def)
+}
+
+export function createClientServiceDefinition<T extends SharedServiceDefinition>(sharedDef: T, def: ClientServiceDefinition<T>) {
+    return _.merge({}, sharedDef, def)
 }
 
 
@@ -224,13 +250,13 @@ export type WebServiceDefinition<T extends SharedServiceDefinition> = {
 /*                                 Data Types                                 */
 /* -------------------------------------------------------------------------- */
 
-export type SharedDataTypeDefinition = {
+export type SharedDataTypeDefinition<Z extends ZodSchema = ZodSchema> = {
     name: string
     description: string
-    schema: ZodSchema
+    schema: Z
 }
 
-export type WebDataTypeDefinition<T extends SharedDataTypeDefinition> = {
+export type ClientDataTypeDefinition<T extends SharedDataTypeDefinition> = {
     icon: IconType | ComponentType
     manualInputComponent: ComponentType<DataTypeManualInputProps<T["schema"]>>
     renderPreview: ComponentType<{ value: z.infer<T["schema"]> }>
@@ -242,4 +268,12 @@ export interface DataTypeManualInputProps<T extends ZodSchema> {
     value: z.infer<T>
     onChange: (value: z.infer<T>) => void
     [key: string]: any
+}
+
+export function createSharedDataTypeDefinition<T extends SharedDataTypeDefinition>(def: T): SharedDataTypeDefinition<T["schema"]> {
+    return def
+}
+
+export function createClientDataTypeDefinition<T extends SharedDataTypeDefinition>(sharedDef: T, def: ClientDataTypeDefinition<T>) {
+    return _.merge({}, sharedDef, def)
 }

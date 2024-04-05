@@ -1,6 +1,6 @@
-import type { SharedNodeDefinition } from "@types"
+import { createSharedNodeDefinition } from "@pkg/types"
 
-export default {
+export default createSharedNodeDefinition({
     name: "Unpack Object",
     description: "Decomposes an object into its properties.",
     inputs: {
@@ -17,4 +17,4 @@ export default {
             named: true,
         },
     }
-} satisfies SharedNodeDefinition
+})

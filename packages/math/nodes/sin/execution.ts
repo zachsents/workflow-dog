@@ -1,8 +1,8 @@
-import type { ExecutionNodeDefinition } from "@types"
-import type shared from "./shared.js"
+import { createExecutionNodeDefinition } from "@pkg/types"
+import shared from "./shared"
 
 
-export default {
+export default createExecutionNodeDefinition(shared, {
     action: ({ angle }, { node }) => {
         const convertedAngle = node.data.state?.angleMode === "degrees" ?
             angle * (Math.PI / 180) :
@@ -10,4 +10,4 @@ export default {
 
         return { sine: Math.sin(convertedAngle) }
     },
-} satisfies ExecutionNodeDefinition<typeof shared>
+})

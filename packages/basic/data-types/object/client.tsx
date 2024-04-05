@@ -1,11 +1,11 @@
-import type { WebDataTypeDefinition } from "@types"
-import type shared from "./shared"
+import { createClientDataTypeDefinition } from "@pkg/types"
+import shared from "./shared"
 import { TbArrowRight, TbTriangleSquareCircle } from "react-icons/tb"
 import { Textarea } from "@web/components/ui/textarea"
 import { cn } from "@web/lib/utils"
 import stringifyObject from "stringify-object"
 
-export default {
+export default createClientDataTypeDefinition(shared, {
     icon: TbTriangleSquareCircle,
     manualInputComponent: ({ value, ...props }: any) => {
         // TODO: add intermediate value for converting between object
@@ -44,4 +44,4 @@ export default {
             </pre>
         )
     },
-} satisfies WebDataTypeDefinition<typeof shared>
+})

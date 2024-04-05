@@ -19,9 +19,6 @@
             "@web/*": [
                 "./web/*"
             ],
-            "@types": [
-                "./packages/types.js"
-            ],
             "@ui/*": [
                 "./web/components/ui/*"
             ],

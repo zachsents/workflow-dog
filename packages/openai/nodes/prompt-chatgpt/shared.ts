@@ -7,12 +7,20 @@ export default createSharedNodeDefinition({
         message: {
             name: "Message",
             type: "https://data-types.workflow.dog/basic/string",
-        }
+        },
+        historyIn: {
+            name: "History",
+            type: "https://data-types.workflow.dog/basic/array",
+        },
     },
     outputs: {
         response: {
             name: "Response",
             type: "https://data-types.workflow.dog/basic/string",
+        },
+        historyOut: {
+            name: "History",
+            type: "https://data-types.workflow.dog/basic/array",
         },
     },
     requiredService: {

@@ -1,23 +1,10 @@
 import _ from "lodash"
-import { createExport } from "../util"
+import { createExport } from "@pkg/_build/util"
+// IMPORTS
 
-// nodes IMPORTS
-// triggers IMPORTS
-// services IMPORTS
-// data-types IMPORTS
 
-export const NodeDefinitions = createExport({
-    // nodes EXPORTS
-})
+const _definitions = {
+    // EXPORTS
+}
 
-export const TriggerDefinitions = createExport({
-    // triggers EXPORTS
-})
-
-export const ServiceDefinitions = createExport({
-    // services EXPORTS
-})
-
-export const DataTypeDefinitions = createExport({
-    // data-types EXPORTS
-})
+export const Definitions = createExport</* GENERIC TYPE */, typeof _definitions>(_definitions)

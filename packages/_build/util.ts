@@ -1,6 +1,6 @@
 
 
-export function createExport<T extends Record<string, object>>(obj: T) {
+export function createExport<G extends object, T extends Record<string, G>>(obj: T) {
 
     const ids = Object.keys(obj) as (keyof T)[]
 
@@ -9,17 +9,17 @@ export function createExport<T extends Record<string, object>>(obj: T) {
         return ids.find(k => k.toString().endsWith(path))
     }
 
-    const map = new Map(Object.entries(obj)) as Map<keyof T, T[keyof T]>
+    const map = new Map(Object.entries(obj))
 
     return {
         asObject: obj,
-        asArray: Object.values(obj) as T[keyof T][],
+        asArray: Object.values(obj),
         asMap: map,
         ids,
         resolveId,
-        resolve: (...args: string[]) => obj[resolveId(...args)!],
-        safeName: (id: keyof T) =>  id.toString().split("/").slice(-2).join("_"),
-        get: (id: keyof T) => map.get(id),
+        resolve: (...args: string[]): G => obj[resolveId(...args)!],
+        safeName: (id: string) => id.split("/").slice(-2).join("_"),
+        get: (id: string): G | undefined => map.get(id),
     } as const
 }
 

@@ -17,4 +17,4 @@ export default createSharedNodeDefinition({
             type: "https://data-types.workflow.dog/basic/number",
         },
     },
-}) as SharedNodeDefinition
+})

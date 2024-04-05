@@ -7,9 +7,16 @@ export default createClientNodeDefinition(shared, {
     color: "#000000",
     tags: ["ChatGPT", "OpenAI", "AI"],
     inputs: {
-        message: {},
+        message: {
+            recommendedNode: {
+                definition: "https://nodes.workflow.dog/basic/template",
+                handle: "result",
+            }
+        },
+        historyIn: {},
     },
     outputs: {
         response: {},
+        historyOut: {},
     },
 })

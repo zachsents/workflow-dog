@@ -51,13 +51,13 @@ const columns: ColumnDef<Partial<Workflow>>[] = [
         enableSorting: true,
         sortingFn: "alphanumeric",
         cell: ({ row, getValue }) => {
-            const triggerType = row.original.trigger_type as string | undefined
+            const triggerType = row.original.trigger_type
             return (
                 <div className="px-4 py-6">
                     <b>{getValue() as any}</b>
                     <p className="text-muted-foreground">
                         {triggerType
-                            ? (TriggerDefinitions.get(triggerType)?.whenName
+                            ? (TriggerDefinitions.get(triggerType as string)?.whenName
                                 || "Unknown trigger")
                             : "No trigger set"}
                     </p>

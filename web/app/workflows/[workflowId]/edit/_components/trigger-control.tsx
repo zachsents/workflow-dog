@@ -132,7 +132,7 @@ const suggestedTriggerIds = [
     "basic/manual",
     "basic/schedule",
     "basic/request",
-].map(id => TriggerDefinitions.resolveId(id))
+].map(id => TriggerDefinitions.resolveId(id)).filter(Boolean) as string[]
 
 const [suggestedTriggers, otherTriggers] = _.partition(
     TriggerDefinitions.asArray,

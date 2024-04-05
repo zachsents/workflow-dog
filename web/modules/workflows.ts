@@ -170,8 +170,8 @@ export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
 
             if (sendNotification) {
                 const sendNotification: (typeof toast.success) = run.has_errors
-                    ? toast.success.bind(toast)
-                    : toast.warning.bind(toast)
+                    ? toast.warning.bind(toast)
+                    : toast.success.bind(toast)
 
                 sendNotification(`Run #${run.count} started!`, {
                     description: `${Object.keys(run.state.outputs).length} outputs, ${run.error_count} errors`,

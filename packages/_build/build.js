@@ -3,76 +3,45 @@ import { glob } from "glob"
 
 const originalTemplate = await fs.readFile("_build/template.ts", "utf-8")
 
-
-await buildMultiple([
-    { folder: "nodes", specialFile: "client.tsx" },
-    { folder: "triggers", specialFile: "client.tsx" },
-    { folder: "services", specialFile: "client.tsx" },
-    { folder: "data-types", specialFile: "client.tsx" },
-]).then(barrel => fs.writeFile("_build/barrels/client.ts", barrel))
-
-await buildMultiple([
-    { folder: "nodes", specialFile: "server.ts" },
-    { folder: "triggers", specialFile: "server.ts" },
-    { folder: "services", specialFile: "server.ts" },
-    { folder: "data-types", specialFile: "server.ts" },
-]).then(barrel => fs.writeFile("_build/barrels/server.ts", barrel))
-
-await buildMultiple([
-    { folder: "nodes", specialFile: "execution.ts" },
-    { folder: "triggers", specialFile: "execution.ts" },
-    { folder: "services", specialFile: "execution.ts" },
-    { folder: "data-types", specialFile: "execution.ts" },
-]).then(barrel => fs.writeFile("_build/barrels/execution.ts", barrel))
+await Promise.all([
+    build({ folder: "nodes", specialFile: "client.tsx", genericType: "MergedClientNodeDefinition" }),
+    build({ folder: "nodes", specialFile: "execution.ts", genericType: "MergedExecutionNodeDefinition" }),
+    build({ folder: "triggers", specialFile: "client.tsx", genericType: "MergedClientTriggerDefinition" }),
+    build({ folder: "triggers", specialFile: "server.ts", genericType: "MergedServerTriggerDefinition" }),
+    build({ folder: "services", specialFile: "client.tsx", genericType: "MergedClientServiceDefinition" }),
+    build({ folder: "services", specialFile: "server.ts", genericType: "MergedServerServiceDefinition" }),
+    build({ folder: "data-types", specialFile: "client.tsx", genericType: "MergedClientDataTypeDefinition" }),
+])
 
 
 async function build({
     folder,
     specialFile,
     idPrefix = folder,
-    template,
+    genericType,
 }) {
     const filePaths = await glob(`*/${folder}/*/${specialFile}`)
+    const specialFileBaseName = specialFile.split(".")[0]
 
-    const collection = filePaths.map(filePath => {
+    let barrelContents = filePaths.reduce((result, filePath) => {
         const importName = importNameFromPath(filePath)
-        const importPath = importPathFromPath(filePath)
-
-        const importLine = `import ${importName} from "${importPath}"`
+        const importLine = `import ${importName} from "${importPathFromPath(filePath)}"`
+        result = splice(result, "// IMPORTS", importLine)
 
         const segments = filePath.split("/")
         const id = `https://${idPrefix}.workflow.dog/${segments[0]}/${segments[2]}`
+        const exportLine = `    "${id}": _.merge({ id: "${id}" }, ${importName}),`
+        result = splice(result, "// EXPORTS", exportLine)
 
-        const exportLine = "    " + `
-"${id}": _.merge(
-        { id: "${id}" },    
-        ${importName},
-    ),`.trim()
+        return result
+    }, originalTemplate)
 
-        return {
-            id,
-            importLine,
-            exportLine,
-        }
-    })
+    barrelContents = splice(barrelContents, "// IMPORTS", `import type { ${genericType} } from "@pkg/types"`)
+        .replace("/* GENERIC TYPE */", genericType)
 
-    console.log(`[${folder}/${specialFile}]`, collection.length, "items")
+    console.log(`[${folder}/${specialFileBaseName}]`, filePaths.length, "items")
 
-    return template.replace(
-        `// ${folder} IMPORTS`,
-        collection.map(c => c.importLine).join("\n")
-    ).replace(
-        `    // ${folder} EXPORTS`,
-        collection.map(c => c.exportLine).join("\n")
-    )
-}
-
-async function buildMultiple(payloads) {
-    let result = originalTemplate
-    for (let payload of payloads) {
-        result = await build({ ...payload, template: result })
-    }
-    return result
+    await fs.writeFile(`_build/barrels/${idPrefix}_${specialFileBaseName}.ts`, barrelContents)
 }
 
 function importNameFromPath(p) {
@@ -85,4 +54,9 @@ function importPathFromPath(p) {
     return "../../" + p
         .split(".").slice(0, -1).join(".")
         .replaceAll(/\\/g, "/")
+}
+
+function splice(str, searchTerm, content) {
+    const index = str.indexOf(searchTerm) + searchTerm.length
+    return str.slice(0, index) + "\n" + content + str.slice(index)
 }

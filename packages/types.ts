@@ -7,7 +7,7 @@ import type { DataTypeDefinitions } from "./client"
 
 
 
-/* ----------------------------- Data Types Meta ---------------------------- */
+/* ----------------------------- Meta Types ---------------------------- */
 
 export type DataTypeId = keyof typeof DataTypeDefinitions["asObject"]
 
@@ -117,6 +117,8 @@ export function createClientNodeDefinition<T extends SharedNodeDefinition>(share
     return _.merge({}, sharedDef, def)
 }
 
+export type MergedExecutionNodeDefinition = SharedNodeDefinition & ExecutionNodeDefinition<SharedNodeDefinition> & { id: string }
+export type MergedClientNodeDefinition = SharedNodeDefinition & ClientNodeDefinition<SharedNodeDefinition> & { id: string }
 
 
 /* -------------------------------------------------------------------------- */
@@ -171,6 +173,9 @@ export function createServerTriggerDefinition(sharedDef: SharedTriggerDefinition
 export function createClientTriggerDefinition(sharedDef: SharedTriggerDefinition, def: ClientTriggerDefinition) {
     return _.merge({}, sharedDef, def)
 }
+
+export type MergedClientTriggerDefinition = SharedTriggerDefinition & ClientTriggerDefinition & { id: string }
+export type MergedServerTriggerDefinition = SharedTriggerDefinition & ServerTriggerDefinition & { id: string }
 
 
 /* -------------------------------------------------------------------------- */
@@ -230,7 +235,8 @@ export type ClientServiceDefinition<T extends SharedServiceDefinition> = {
     icon: IconType | ComponentType
     color: string
     transformScope?: (scope: string) => string
-    generateKeyUrl?: T["authAcquisition"]["method"] extends "key" ? string : never
+    // generateKeyUrl?: T["authAcquisition"]["method"] extends "key" ? string : never
+    generateKeyUrl?: string
 }
 
 export function createSharedServiceDefinition<T extends SharedServiceDefinition>(def: T): SharedServiceDefinition<T["authAcquisition"]["method"]> {
@@ -244,6 +250,9 @@ export function createServerServiceDefinition<T extends SharedServiceDefinition>
 export function createClientServiceDefinition<T extends SharedServiceDefinition>(sharedDef: T, def: ClientServiceDefinition<T>) {
     return _.merge({}, sharedDef, def)
 }
+
+export type MergedServerServiceDefinition = SharedServiceDefinition & ServerServiceDefinition<SharedServiceDefinition> & { id: string }
+export type MergedClientServiceDefinition = SharedServiceDefinition & ClientServiceDefinition<SharedServiceDefinition> & { id: string }
 
 
 /* -------------------------------------------------------------------------- */
@@ -277,3 +286,5 @@ export function createSharedDataTypeDefinition<T extends SharedDataTypeDefinitio
 export function createClientDataTypeDefinition<T extends SharedDataTypeDefinition>(sharedDef: T, def: ClientDataTypeDefinition<T>) {
     return _.merge({}, sharedDef, def)
 }
+
+export type MergedClientDataTypeDefinition = SharedDataTypeDefinition & ClientDataTypeDefinition<SharedDataTypeDefinition> & { id: string }

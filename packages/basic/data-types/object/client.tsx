@@ -34,7 +34,6 @@ export default createClientDataTypeDefinition(shared, {
             </p>
         )
     },
-    shouldExpand: () => true,
     renderExpanded: ({ value }) => {
         return (
             <pre>

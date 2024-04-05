@@ -267,9 +267,8 @@ export type SharedDataTypeDefinition<Z extends ZodSchema = ZodSchema> = {
 
 export type ClientDataTypeDefinition<T extends SharedDataTypeDefinition> = {
     icon: IconType | ComponentType
-    manualInputComponent: ComponentType<DataTypeManualInputProps<T["schema"]>>
+    manualInputComponent?: ComponentType<DataTypeManualInputProps<T["schema"]>>
     renderPreview: ComponentType<{ value: z.infer<T["schema"]> }>
-    shouldExpand?: (value: z.infer<T["schema"]>) => boolean
     renderExpanded?: ComponentType<{ value: z.infer<T["schema"]> }>
 }
 

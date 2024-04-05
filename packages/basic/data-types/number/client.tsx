@@ -23,5 +23,4 @@ export default createClientDataTypeDefinition(shared, {
             </p>
         )
     },
-    shouldExpand: () => false,
 })

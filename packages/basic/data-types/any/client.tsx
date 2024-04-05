@@ -17,16 +17,6 @@ export default createClientDataTypeDefinition(shared, {
     },
     renderPreview: ({ value }) => {
         return (
-            <p className="line-clamp-2">
-                {stringifyObject(value, {
-                    indent: "  ",
-                })}
-            </p>
-        )
-    },
-    shouldExpand: () => true,
-    renderExpanded: ({ value }) => {
-        return (
             <p>
                 {stringifyObject(value, {
                     indent: "  ",

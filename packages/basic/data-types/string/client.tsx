@@ -18,14 +18,6 @@ export default createClientDataTypeDefinition(shared, {
     },
     renderPreview: ({ value }) => {
         return (
-            <p className="line-clamp-2">
-                {value || <span className="text-muted-foreground">&lt;no text&gt;</span>}
-            </p>
-        )
-    },
-    shouldExpand: (value) => value.length > 100,
-    renderExpanded: ({ value }) => {
-        return (
             <p>
                 {value || <span className="text-muted-foreground">&lt;no text&gt;</span>}
             </p>

@@ -10,7 +10,7 @@ export default createSharedNodeDefinition({
         },
         historyIn: {
             name: "History",
-            type: "https://data-types.workflow.dog/basic/array",
+            type: "https://data-types.workflow.dog/openai/chat-history",
         },
     },
     outputs: {
@@ -20,7 +20,7 @@ export default createSharedNodeDefinition({
         },
         historyOut: {
             name: "History",
-            type: "https://data-types.workflow.dog/basic/array",
+            type: "https://data-types.workflow.dog/openai/chat-history",
         },
     },
     requiredService: {

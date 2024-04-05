@@ -23,12 +23,11 @@ export default createClientDataTypeDefinition(shared, {
     },
     renderPreview: ({ value }) => {
         return (
-            <p className="line-clamp-2">
+            <p>
                 {value.length > 0 ? "List [...]" : "Empty List"}
             </p>
         )
     },
-    shouldExpand: () => true,
     renderExpanded: ({ value }) => {
         return (
             <pre>

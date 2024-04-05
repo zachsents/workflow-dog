@@ -394,8 +394,6 @@ function ValueDisplay({ runValue, dataTypeId }: { runValue: any, dataTypeId: str
 
     const dataType = DataTypeDefinitions.get(dataTypeId)
 
-    const shouldExpand = dataType?.shouldExpand?.(runValue) || false
-
     const dialog = useDialogState()
 
     return (
@@ -405,52 +403,38 @@ function ValueDisplay({ runValue, dataTypeId }: { runValue: any, dataTypeId: str
             <TooltipProvider delayDuration={0}>
                 <Tooltip open>
                     <TooltipTrigger asChild>
-                        {/* <Button
-                            size="icon" className="rounded-full w-7 h-7"
-                            onClick={() => {
-                                if (shouldExpand)
-                                    dialog.open()
-                            }}
-                        >
-                            <TbActivity />
-                        </Button> */}
                         <div />
                     </TooltipTrigger>
                     <TooltipContent
                         side="right" avoidCollisions={false}
                         className={cn(
-                            "max-w-[12rem] max-h-[12rem] transition-opacity",
-                            shouldExpand ? "cursor-pointer hover:opacity-90" : "cursor-default",
+                            "max-w-[12rem] max-h-[12rem] [&>p]:truncate transition-opacity cursor-pointer hover:opacity-90",
                         )}
-                        onClick={() => {
-                            if (shouldExpand)
-                                dialog.open()
-                        }}
+                        onClick={dialog.open}
                     >
                         {dataType?.renderPreview &&
                             <dataType.renderPreview value={runValue} />}
-
-                        {shouldExpand &&
-                            <p className="text-muted-foreground">
-                                Click to expand
-                            </p>}
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
 
-            {shouldExpand &&
-                <Dialog {...dialog.dialogProps}>
-                    <DialogContent className="max-h-[calc(100vh-6rem)] overflow-scroll !w-auto min-w-[32rem] max-w-[calc(100vw-10rem)]">
-                        <DialogHeader>
-                            <DialogTitle>
-                                Value from selected run
-                            </DialogTitle>
-                        </DialogHeader>
+            <Dialog {...dialog.dialogProps}>
+                <DialogContent className="max-h-[calc(100vh-6rem)] overflow-scroll !w-auto min-w-[32rem] max-w-[calc(100vw-10rem)]">
+                    <DialogHeader>
+                        <DialogTitle>
+                            Value from selected run
+                        </DialogTitle>
+                    </DialogHeader>
 
-                        {dataType?.renderExpanded &&
-                            <dataType.renderExpanded value={runValue} />}
-                    </DialogContent>
-                </Dialog>}
+                    {dataType?.renderExpanded
+                        ? <dataType.renderExpanded value={runValue} />
+                        : dataType?.renderPreview
+                            ? <dataType.renderPreview value={runValue} />
+                            : <p>
+                                {runValue}
+                            </p>}
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

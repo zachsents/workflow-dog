@@ -8,13 +8,12 @@
         "**/*.tsx",
         "service-account.json"
     ],
-    "exclude": [
-        "node_modules",
-        "dist"
-    ],
     "references": [
         {
             "path": "../packages"
+        },
+        {
+            "path": "../shared"
         }
     ]
 }

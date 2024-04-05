@@ -1,5 +1,5 @@
 import { GoogleAuth } from "google-auth-library"
-import { project_id as projectId } from "./service-account.json"
+import { project_id as projectId } from "../service-account.json"
 
 
 const auth = new GoogleAuth({

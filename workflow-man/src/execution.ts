@@ -1,6 +1,6 @@
-import { NodeDefinitions } from "packages/execution.js"
-import type { Node, Workflow, WorkflowRun, WorkflowRunState } from "shared/types.js"
-import { fetchIntegrationToken } from "./db.js"
+import { NodeDefinitions } from "packages/execution"
+import type { Node, Workflow, WorkflowRun, WorkflowRunState } from "shared/types"
+import { fetchIntegrationToken } from "./db"
 
 
 export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {

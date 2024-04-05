@@ -1,5 +1,5 @@
 import { type SupabaseClient, createClient } from "@supabase/supabase-js"
-import { getSecret } from "./secrets.js"
+import { getSecret } from "./secrets"
 
 
 const serviceKey = await getSecret("SUPABASE_SERVICE_KEY")

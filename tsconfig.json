@@ -35,17 +35,18 @@
         "node_modules",
         "integrations",
         "nodes",
-        "triggers"
+        "triggers",
+        "supabase"
     ],
-    "references": [
-        {
-            "path": "./packages"
-        },
-        {
-            "path": "./web"
-        },
-        {
-            "path": "./workflow-man"
-        }
-    ]
+    // "references": [
+    //     {
+    //         "path": "./packages"
+    //     },
+    //     {
+    //         "path": "./web"
+    //     },
+    //     {
+    //         "path": "./workflow-man"
+    //     }
+    // ]
 }

@@ -22,6 +22,7 @@
         "typescript": "^5.0.0"
     },
     "scripts": {
-        "build": "bun build index.ts --outdir build --target node && cp .env build/.env && cp service-account.json build/service-account.json && echo '{\"type\":\"module\"}' > build/package.json"
+        "build": "bun build.ts",
+        "dev": "bun build.ts --external && node build/index.js"
     }
 }

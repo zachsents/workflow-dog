@@ -44,7 +44,10 @@ import math_nodes_square_root_client from "../../math/nodes/square-root/client"
 import math_nodes_subtract_client from "../../math/nodes/subtract/client"
 import math_nodes_sum_client from "../../math/nodes/sum/client"
 import math_nodes_tan_client from "../../math/nodes/tan/client"
+import openai_nodes_generate_image_client from "../../openai/nodes/generate-image/client"
+import openai_nodes_moderate_client from "../../openai/nodes/moderate/client"
 import openai_nodes_prompt_chatgpt_client from "../../openai/nodes/prompt-chatgpt/client"
+import openai_nodes_text_to_speech_client from "../../openai/nodes/text-to-speech/client"
 
 
 const _definitions = {
@@ -91,7 +94,10 @@ const _definitions = {
     "https://nodes.workflow.dog/math/subtract": _.merge({ id: "https://nodes.workflow.dog/math/subtract" }, math_nodes_subtract_client),
     "https://nodes.workflow.dog/math/sum": _.merge({ id: "https://nodes.workflow.dog/math/sum" }, math_nodes_sum_client),
     "https://nodes.workflow.dog/math/tan": _.merge({ id: "https://nodes.workflow.dog/math/tan" }, math_nodes_tan_client),
+    "https://nodes.workflow.dog/openai/generate-image": _.merge({ id: "https://nodes.workflow.dog/openai/generate-image" }, openai_nodes_generate_image_client),
+    "https://nodes.workflow.dog/openai/moderate": _.merge({ id: "https://nodes.workflow.dog/openai/moderate" }, openai_nodes_moderate_client),
     "https://nodes.workflow.dog/openai/prompt-chatgpt": _.merge({ id: "https://nodes.workflow.dog/openai/prompt-chatgpt" }, openai_nodes_prompt_chatgpt_client),
+    "https://nodes.workflow.dog/openai/text-to-speech": _.merge({ id: "https://nodes.workflow.dog/openai/text-to-speech" }, openai_nodes_text_to_speech_client),
 }
 
 export const Definitions = createExport<MergedClientNodeDefinition, typeof _definitions>(_definitions)

@@ -5,5 +5,5 @@ import { z } from "zod"
 export default createSharedDataTypeDefinition({
     name: "Chat History",
     description: "A chat history from ChatGPT.",
-    schema: z.array(z.union([systemMessage, userMessage, assistantMessage, toolMessage])),
+    schema: z.array(z.discriminatedUnion("role", [systemMessage, userMessage, assistantMessage, toolMessage])),
 })

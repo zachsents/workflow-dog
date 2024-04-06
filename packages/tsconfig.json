@@ -13,6 +13,9 @@
     "references": [
         {
             "path": "../web"
+        },
+        {
+            "path": "../shared"
         }
     ]
 }

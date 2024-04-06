@@ -103,6 +103,9 @@ export type ClientNodeDefinition<T extends SharedNodeDefinition> = {
     renderNode?: ComponentType<{ id: string }>
 
     renderBody?: ComponentType<{ id: string }>
+
+    /** WIP */
+    renderOptions?: ComponentType<{ id: string }>
 }
 
 export function createSharedNodeDefinition<T extends SharedNodeDefinition>(def: T): SharedNodeDefinition<T["inputs"], T["outputs"]> {

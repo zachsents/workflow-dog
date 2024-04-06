@@ -44,7 +44,10 @@ import math_nodes_square_root_execution from "../../math/nodes/square-root/execu
 import math_nodes_subtract_execution from "../../math/nodes/subtract/execution"
 import math_nodes_sum_execution from "../../math/nodes/sum/execution"
 import math_nodes_tan_execution from "../../math/nodes/tan/execution"
+import openai_nodes_generate_image_execution from "../../openai/nodes/generate-image/execution"
+import openai_nodes_moderate_execution from "../../openai/nodes/moderate/execution"
 import openai_nodes_prompt_chatgpt_execution from "../../openai/nodes/prompt-chatgpt/execution"
+import openai_nodes_text_to_speech_execution from "../../openai/nodes/text-to-speech/execution"
 
 
 const _definitions = {
@@ -91,7 +94,10 @@ const _definitions = {
     "https://nodes.workflow.dog/math/subtract": _.merge({ id: "https://nodes.workflow.dog/math/subtract" }, math_nodes_subtract_execution),
     "https://nodes.workflow.dog/math/sum": _.merge({ id: "https://nodes.workflow.dog/math/sum" }, math_nodes_sum_execution),
     "https://nodes.workflow.dog/math/tan": _.merge({ id: "https://nodes.workflow.dog/math/tan" }, math_nodes_tan_execution),
+    "https://nodes.workflow.dog/openai/generate-image": _.merge({ id: "https://nodes.workflow.dog/openai/generate-image" }, openai_nodes_generate_image_execution),
+    "https://nodes.workflow.dog/openai/moderate": _.merge({ id: "https://nodes.workflow.dog/openai/moderate" }, openai_nodes_moderate_execution),
     "https://nodes.workflow.dog/openai/prompt-chatgpt": _.merge({ id: "https://nodes.workflow.dog/openai/prompt-chatgpt" }, openai_nodes_prompt_chatgpt_execution),
+    "https://nodes.workflow.dog/openai/text-to-speech": _.merge({ id: "https://nodes.workflow.dog/openai/text-to-speech" }, openai_nodes_text_to_speech_execution),
 }
 
 export const Definitions = createExport<MergedExecutionNodeDefinition, typeof _definitions>(_definitions)

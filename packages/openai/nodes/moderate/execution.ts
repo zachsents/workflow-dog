@@ -1,6 +1,7 @@
 import { createExecutionNodeDefinition } from "@pkg/types"
 import axios from "axios"
 import shared from "./shared"
+import { catchOpenAIError } from "@pkg/openai/util"
 
 export default createExecutionNodeDefinition(shared, {
     action: async ({ message }, { token }) => {
@@ -11,7 +12,7 @@ export default createExecutionNodeDefinition(shared, {
             input: message,
         }, {
             headers: { Authorization: `Bearer ${token?.key}` },
-        })
+        }).catch(catchOpenAIError)
 
         return {
             flagged: data.results[0].flagged,

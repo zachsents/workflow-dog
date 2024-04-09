@@ -64,8 +64,9 @@ export default function HandleRenderer({ type }: { type: "input" | "output" }): 
                         <div key={definitionId}>
                             {definition?.group &&
                                 <p className="text-xs text-muted-foreground">
-                                    {definition.name}
+                                    {definition.groupName || definition.name}
                                 </p>}
+
                             <div className={cn(
                                 "flex flex-col items-stretch gap-1",
                                 isInput ? "-translate-x-2 items-start" : "translate-x-2 items-end",
@@ -79,6 +80,7 @@ export default function HandleRenderer({ type }: { type: "input" | "output" }): 
                                     />
                                 )}
                             </div>
+
                             {definition?.group &&
                                 <Button
                                     size="sm" variant="link"

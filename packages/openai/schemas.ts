@@ -6,8 +6,22 @@ export const systemMessage = z.object({
     name: z.string().optional(),
 })
 
+export const userMessageContentPart = z.discriminatedUnion("type", [
+    z.object({
+        type: z.literal("text"),
+        text: z.string(),
+    }),
+    z.object({
+        type: z.literal("image_url"),
+        image_url: z.object({
+            url: z.string(),
+            detail: z.enum(["low", "high", "auto"]).optional(),
+        }),
+    }),
+])
+
 export const userMessage = z.object({
-    content: z.string(),
+    content: z.string().or(z.array(userMessageContentPart)),
     role: z.literal("user"),
     name: z.string().optional(),
 })
@@ -24,3 +38,5 @@ export const toolMessage = z.object({
     role: z.literal("tool"),
     tool_call_id: z.string(),
 })
+
+export const chatHistory = z.array(z.discriminatedUnion("role", [systemMessage, userMessage, assistantMessage, toolMessage]))

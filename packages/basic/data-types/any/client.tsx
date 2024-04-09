@@ -17,11 +17,11 @@ export default createClientDataTypeDefinition(shared, {
     },
     renderPreview: ({ value }) => {
         return (
-            <p>
+            <pre className="whitespace-pre-wrap break-all">
                 {stringifyObject(value, {
                     indent: "  ",
                 })}
-            </p>
+            </pre>
         )
     },
 })

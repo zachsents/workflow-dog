@@ -18,7 +18,7 @@ export default createClientDataTypeDefinition(shared, {
     },
     renderPreview: ({ value }) => {
         return (
-            <p>
+            <p className="whitespace-pre-wrap">
                 {value || <span className="text-muted-foreground">&lt;no text&gt;</span>}
             </p>
         )

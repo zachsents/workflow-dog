@@ -1,6 +1,7 @@
 import { createExecutionNodeDefinition } from "@pkg/types"
 import axios from "axios"
 import shared from "./shared"
+import { catchOpenAIError } from "@pkg/openai/util"
 
 export default createExecutionNodeDefinition(shared, {
     action: async ({ text }, { node, token }) => {
@@ -21,7 +22,7 @@ export default createExecutionNodeDefinition(shared, {
         }, {
             headers: { Authorization: `Bearer ${token?.key}` },
             responseType: "arraybuffer",
-        })
+        }).catch(catchOpenAIError)
 
         return {
             audio: {

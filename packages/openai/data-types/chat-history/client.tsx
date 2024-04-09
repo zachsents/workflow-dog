@@ -24,7 +24,21 @@ export default createClientDataTypeDefinition(shared, {
                                 </p>
                             </td>
                             <td>
-                                {message.content}
+                                {!!message.content
+                                    ? typeof message.content === "string"
+                                        ? message.content
+                                        : message.content.map((content, i) =>
+                                            content.type === "text"
+                                                ? <p key={i}>{content.text}</p>
+                                                : content.type === "image_url"
+                                                    ? <img
+                                                        key={i}
+                                                        src={content.image_url.url}
+                                                        className="h-32 rounded-md"
+                                                    />
+                                                    : null
+                                        )
+                                    : null}
                             </td>
                         </tr>
                     )}

@@ -408,7 +408,7 @@ function ValueDisplay({ runValue, dataTypeId }: { runValue: any, dataTypeId: str
                     <TooltipContent
                         side="right" avoidCollisions={false}
                         className={cn(
-                            "max-w-[12rem] max-h-[12rem] [&>p]:truncate transition-opacity cursor-pointer hover:opacity-90",
+                            "max-w-[12rem] max-h-[12rem] *:truncate transition-opacity cursor-pointer hover:opacity-90",
                         )}
                         onClick={dialog.open}
                     >

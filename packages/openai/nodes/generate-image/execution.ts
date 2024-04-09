@@ -1,6 +1,7 @@
 import { createExecutionNodeDefinition } from "@pkg/types"
 import axios from "axios"
 import shared from "./shared"
+import { catchOpenAIError } from "@pkg/openai/util"
 
 export default createExecutionNodeDefinition(shared, {
     action: async ({ prompt }, { node, token }) => {
@@ -21,14 +22,15 @@ export default createExecutionNodeDefinition(shared, {
             ...options,
         }, {
             headers: { Authorization: `Bearer ${token?.key}` },
-        })
+        }).catch(catchOpenAIError)
 
         return {
             image: {
                 name: "image.png",
                 mimeType: "image/png",
                 data: data.data[0].b64_json,
-            }
+            },
+            revisedPrompt: data.data[0].revised_prompt,
         }
     },
 })

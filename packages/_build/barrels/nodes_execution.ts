@@ -44,10 +44,15 @@ import math_nodes_square_root_execution from "../../math/nodes/square-root/execu
 import math_nodes_subtract_execution from "../../math/nodes/subtract/execution"
 import math_nodes_sum_execution from "../../math/nodes/sum/execution"
 import math_nodes_tan_execution from "../../math/nodes/tan/execution"
+import openai_nodes_classify_execution from "../../openai/nodes/classify/execution"
 import openai_nodes_generate_image_execution from "../../openai/nodes/generate-image/execution"
 import openai_nodes_moderate_execution from "../../openai/nodes/moderate/execution"
+import openai_nodes_parse_execution from "../../openai/nodes/parse/execution"
 import openai_nodes_prompt_chatgpt_execution from "../../openai/nodes/prompt-chatgpt/execution"
+import openai_nodes_prompt_chatgpt_vision_execution from "../../openai/nodes/prompt-chatgpt-vision/execution"
+import openai_nodes_speech_to_text_execution from "../../openai/nodes/speech-to-text/execution"
 import openai_nodes_text_to_speech_execution from "../../openai/nodes/text-to-speech/execution"
+import openai_nodes_yes_no_decision_execution from "../../openai/nodes/yes-no-decision/execution"
 
 
 const _definitions = {
@@ -94,10 +99,15 @@ const _definitions = {
     "https://nodes.workflow.dog/math/subtract": _.merge({ id: "https://nodes.workflow.dog/math/subtract" }, math_nodes_subtract_execution),
     "https://nodes.workflow.dog/math/sum": _.merge({ id: "https://nodes.workflow.dog/math/sum" }, math_nodes_sum_execution),
     "https://nodes.workflow.dog/math/tan": _.merge({ id: "https://nodes.workflow.dog/math/tan" }, math_nodes_tan_execution),
+    "https://nodes.workflow.dog/openai/classify": _.merge({ id: "https://nodes.workflow.dog/openai/classify" }, openai_nodes_classify_execution),
     "https://nodes.workflow.dog/openai/generate-image": _.merge({ id: "https://nodes.workflow.dog/openai/generate-image" }, openai_nodes_generate_image_execution),
     "https://nodes.workflow.dog/openai/moderate": _.merge({ id: "https://nodes.workflow.dog/openai/moderate" }, openai_nodes_moderate_execution),
+    "https://nodes.workflow.dog/openai/parse": _.merge({ id: "https://nodes.workflow.dog/openai/parse" }, openai_nodes_parse_execution),
     "https://nodes.workflow.dog/openai/prompt-chatgpt": _.merge({ id: "https://nodes.workflow.dog/openai/prompt-chatgpt" }, openai_nodes_prompt_chatgpt_execution),
+    "https://nodes.workflow.dog/openai/prompt-chatgpt-vision": _.merge({ id: "https://nodes.workflow.dog/openai/prompt-chatgpt-vision" }, openai_nodes_prompt_chatgpt_vision_execution),
+    "https://nodes.workflow.dog/openai/speech-to-text": _.merge({ id: "https://nodes.workflow.dog/openai/speech-to-text" }, openai_nodes_speech_to_text_execution),
     "https://nodes.workflow.dog/openai/text-to-speech": _.merge({ id: "https://nodes.workflow.dog/openai/text-to-speech" }, openai_nodes_text_to_speech_execution),
+    "https://nodes.workflow.dog/openai/yes-no-decision": _.merge({ id: "https://nodes.workflow.dog/openai/yes-no-decision" }, openai_nodes_yes_no_decision_execution),
 }
 
 export const Definitions = createExport<MergedExecutionNodeDefinition, typeof _definitions>(_definitions)

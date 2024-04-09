@@ -5,9 +5,16 @@ import shared from "./shared"
 export default createClientNodeDefinition(shared, {
     icon: TbRobot,
     color: "#000000",
-    tags: ["ChatGPT", "OpenAI", "AI", "DALL-E"],
+    tags: ["ChatGPT", "OpenAI", "AI"],
     inputs: {
-        prompt: {
+        text: {
+            recommendedNode: {
+                definition: "https://nodes.workflow.dog/basic/template",
+                handle: "result",
+            }
+        },
+        targets: {
+            groupName: "Targets",
             recommendedNode: {
                 definition: "https://nodes.workflow.dog/basic/text",
                 handle: "text",
@@ -15,7 +22,6 @@ export default createClientNodeDefinition(shared, {
         },
     },
     outputs: {
-        image: {},
-        revisedPrompt: {},
+        extracted: {},
     },
 })

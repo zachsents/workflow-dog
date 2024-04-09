@@ -108,3 +108,6 @@ little:
     ✔ reverse row order of edit handle buttons @done (4/1/2024, 7:02:37 PM)
     ☐ fix bug where sometimes new runs don't load in. something isn't getting invalidated
     ✔ hide edge delete buttons when run is selected @done (4/1/2024, 7:06:00 PM)
+    ☐ add saving indicator
+    ☐ add minimize nodes option
+

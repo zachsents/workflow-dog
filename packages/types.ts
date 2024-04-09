@@ -76,6 +76,10 @@ export interface ExecutionNodeDefinition<T extends SharedNodeDefinition> {
 
 export interface ClientNodeDefinitionInterface {
     description?: string
+
+    /** Shown in the handle group subtitle for group handles */
+    groupName?: string
+
     bullet?: boolean
     recommendedNode?: {
         definition: string

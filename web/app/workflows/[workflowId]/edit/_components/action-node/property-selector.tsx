@@ -110,7 +110,7 @@ export default function PropertySelector({ handleId, dataTypeId }: PropertySelec
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
-            <PopoverContent align="start" className="w-[240px] p-1">
+            <PopoverContent align="start" className="w-[240px] p-0">
                 <Command>
                     <CommandInput placeholder="Search properties..." />
                     <CommandList>

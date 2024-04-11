@@ -41,6 +41,7 @@ const edgeTypes = {
 
 const defaultEdgeOptions = {
     type: "data",
+    // animated: true,
 }
 
 const snapGrid: [number, number] = [25, 25]
@@ -86,8 +87,8 @@ export default function WorkflowGraphEditor({
                 snapGrid={snapGrid}
                 snapToGrid={settings?.showGrid || false}
 
-                elevateNodesOnSelect
-                elevateEdgesOnSelect
+                elevateNodesOnSelect={true}
+                elevateEdgesOnSelect={false}
                 nodesFocusable={false}
                 edgesFocusable={false}
                 // This switches whether onMouseDown or onClick is used
@@ -105,7 +106,10 @@ export default function WorkflowGraphEditor({
                 // zoomOnScroll={false}
 
                 id="workflow-graph-editor"
-                className={cn("w-full h-full bg-slate-50", props.className)}
+                className={cn(
+                    "w-full h-full bg-slate-50",
+                    props.className
+                )}
 
                 onCopy={onCopy}
                 onPaste={() => onPaste()}

@@ -80,7 +80,6 @@ export interface ClientNodeDefinitionInterface {
     /** Shown in the handle group subtitle for group handles */
     groupName?: string
 
-    bullet?: boolean
     recommendedNode?: {
         definition: string
         handle: string
@@ -95,6 +94,7 @@ export interface ClientNodeDefinitionOutput extends ClientNodeDefinitionInterfac
 export type ClientNodeDefinition<T extends SharedNodeDefinition> = {
     icon: IconType | ComponentType
     color: string
+    badge?: string
     tags: string[]
     inputs: {
         [K in keyof T["inputs"]]: ClientNodeDefinitionInterface

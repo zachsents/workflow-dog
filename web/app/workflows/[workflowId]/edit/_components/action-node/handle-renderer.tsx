@@ -1,5 +1,4 @@
 import { Button } from "@web/components/ui/button"
-import { Separator } from "@web/components/ui/separator"
 import { cn } from "@web/lib/utils"
 import { uniqueId } from "@web/modules/util"
 import { useDefinition, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
@@ -55,7 +54,7 @@ export default function HandleRenderer({ type }: { type: "input" | "output" }): 
             <p className="uppercase text-xs text-muted-foreground font-bold text-center">
                 {plural}
             </p>
-            <Separator />
+            {/* <Separator /> */}
 
             <div className="flex flex-col gap-2">
                 {interfaceGroups.map(([definitionId, interfaces]) => {
@@ -69,7 +68,8 @@ export default function HandleRenderer({ type }: { type: "input" | "output" }): 
 
                             <div className={cn(
                                 "flex flex-col items-stretch gap-1",
-                                isInput ? "-translate-x-2 items-start" : "translate-x-2 items-end",
+                                // isInput ? "-translate-x-2 items-start" : "translate-x-2 items-end",
+                                // isInput ? "-translate-x-4" : "translate-x-4",
                             )}>
                                 {interfaces.map(inter =>
                                     <ActionNodeHandle

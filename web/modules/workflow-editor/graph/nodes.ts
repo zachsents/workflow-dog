@@ -5,8 +5,8 @@ import { produce } from "immer"
 import _ from "lodash"
 import { NodeDefinitions } from "packages/client"
 import { useCallback, useEffect, useMemo } from "react"
-import type { Edge, ReactFlowInstance, ReactFlowState } from "reactflow"
-import { useNodeId, useReactFlow, useStore, useUpdateNodeInternals } from "reactflow"
+import type { Node as RFNode, Edge, ReactFlowInstance, ReactFlowState } from "reactflow"
+import { internalsSymbol, useNodeId, useReactFlow, useStore, useUpdateNodeInternals } from "reactflow"
 import { PREFIX } from "shared/prefixes"
 import type { Node } from "shared/types"
 import colors from "tailwindcss/colors"
@@ -327,6 +327,57 @@ export function useIsHandleConnected(nodeId = useNodeId(), handleId: string) {
     ))
 }
 
+export function useIsHandleConnectedEdgeSelected(nodeId = useNodeId(), handleId: string) {
+    return useStore(s => s.edges.some(
+        edge => edge.selected && (
+            edge.source === nodeId && edge.sourceHandle === handleId
+            || edge.target === nodeId && edge.targetHandle === handleId
+        )
+    ))
+}
+
+export function useIsHandleConnectable(nodeId = useNodeId(), handleId: string) {
+    const isConnected = useIsHandleConnected(undefined, handleId)
+    const isOutput = useStore(s => !!s.nodeInternals.get(nodeId!)?.[internalsSymbol]?.handleBounds?.source
+        ?.find(h => h.id === handleId))
+    return !isConnected || isOutput
+}
+
+export function useIsHandleConnectableWhileConnecting(nodeId = useNodeId(), handleId: string) {
+    const isConnectable = useIsHandleConnectable(nodeId, handleId)
+    const startHandle = useStore(s => s.connectionStartHandle)
+    const hasEndHandle = useStore(s => !!s.connectionEndHandle)
+    const type = useStore(s => !!s.nodeInternals.get(nodeId!)?.[internalsSymbol]?.handleBounds?.source
+        ?.find(h => h.id === handleId) ? "source" : "target")
+    return !!startHandle
+        && isConnectable
+        && startHandle.handleId !== handleId
+        && nodeId !== startHandle.nodeId
+        && type !== startHandle.type
+        && !hasEndHandle
+}
+
+export function useHandleRect(nodeId = useNodeId(), handleId: string) {
+
+    const getNode = (s: ReactFlowState) => s.nodeInternals.get(nodeId!)
+
+    const findHandle = (node: RFNode) => Object.values(node?.[internalsSymbol]?.handleBounds ?? {})
+        .flat()
+        .find(h => h?.id === handleId)
+
+    const selectHandlePosition = (s: ReactFlowState, coord: "x" | "y") => {
+        const node = getNode(s)
+        const nodeCoord = node?.positionAbsolute?.[coord] ?? 0
+        const handleCoord = findHandle(node!)?.[coord] ?? 0
+        return nodeCoord + handleCoord
+    }
+    const x = useStore(s => selectHandlePosition(s, "x"))
+    const y = useStore(s => selectHandlePosition(s, "y"))
+    const width = useStore(s => findHandle(getNode(s)!)?.width ?? 0)
+    const height = useStore(s => findHandle(getNode(s)!)?.height ?? 0)
+
+    return { x, y, width, height }
+}
 
 export function useIsNodeSelected(nodeId = useNodeId()) {
     return useStore(s => s.nodeInternals.get(nodeId!)?.selected) ?? false

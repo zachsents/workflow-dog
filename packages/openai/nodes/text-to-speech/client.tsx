@@ -17,6 +17,7 @@ const voices = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
 export default createClientNodeDefinition(shared, {
     icon: TbRobot,
     color: "#000000",
+    badge: "OpenAI",
     tags: ["ChatGPT", "OpenAI", "AI", "Whisper"],
     inputs: {
         text: {
@@ -35,7 +36,7 @@ export default createClientNodeDefinition(shared, {
             <div className="mt-1 self-stretch">
                 <p className="text-xs font-medium text-left">Voice</p>
                 <Select onValueChange={setVoice} defaultValue={voice || "alloy"}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger>
                         <SelectValue placeholder="Pick one..." />
                     </SelectTrigger>
                     <SelectContent>

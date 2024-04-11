@@ -47,7 +47,7 @@ export default function DataEdge({
             <path
                 d={path}
                 className="fill-none stroke-slate-50"
-                style={{ strokeWidth: 8 }}
+                style={{ strokeWidth: 8, strokeDasharray: "none", animation: "none" }}
             />
 
             {/* Main Path */}
@@ -63,7 +63,7 @@ export default function DataEdge({
                     id={id}
                     path={path}
                     style={{
-                        strokeWidth: 4,
+                        strokeWidth: 3,
                         stroke: "currentColor",
                         strokeLinecap: "round",
                         strokeDasharray: data?.forced ? "5 5" : undefined,
@@ -75,7 +75,7 @@ export default function DataEdge({
             <EdgeLabelRenderer>
                 <div
                     // z-index of 1000 is required to make sure the label is above the edge
-                    className="group absolute -translate-x-1/2 -translate-y-1/2 flex center pointer-events-auto z-[1000]"
+                    className="group absolute -translate-x-1/2 -translate-y-1/2 flex center pointer-events-auto z-[1002]"
                     style={{
                         top: labelY,
                         left: labelX,

@@ -65,6 +65,9 @@ importers:
         version: 3.22.4
 
     devDependencies:
+      '@tabler/icons-react':
+        specifier: '*'
+        version: 3.1.0(react@18.2.0)
       '@types/lodash':
         specifier: ^4.17.0
         version: 4.17.0
@@ -162,6 +165,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.39.2
         version: 2.41.1
+      '@tabler/icons-react':
+        specifier: '*'
+        version: 3.1.0(react@18.2.0)
       '@tanstack/react-query':
         specifier: ^5.17.5
         version: 5.28.9(react@18.2.0)
@@ -5539,6 +5545,17 @@ packages:
     dependencies:
       tslib: 2.6.2
     dev: false
+
+  /@tabler/icons-react@3.1.0(react@18.2.0):
+    resolution: {integrity: sha512-k/WTlax2vbj/LpxvaJ+BmaLAAhVUgyLj4Ftgaczz66tUSNzqrAZXCFdOU7cRMYPNVBqyqE2IdQd2rzzhDEJvkw==}
+    peerDependencies:
+      react: '>= 16'
+    dependencies:
+      '@tabler/icons': 3.1.0
+      react: 18.2.0
+
+  /@tabler/icons@3.1.0:
+    resolution: {integrity: sha512-CpZGyS1IVJKFcv88yZ2sYZIpWWhQ6oy76BQKQ5SF0fGgOqgyqKdBGG/YGyyMW632on37MX7VqQIMTzN/uQqmFg==}
 
   /@tanstack/query-core@5.28.9:
     resolution: {integrity: sha512-hNlfCiqZevr3GRVPXS3MhaGW5hjcxvCsIQ4q6ff7EPlvFwYZaS+0d9EIIgofnegDaU2BbCDlyURoYfRl5rmzow==}

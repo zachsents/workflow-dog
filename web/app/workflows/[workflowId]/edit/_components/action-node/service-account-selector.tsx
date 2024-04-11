@@ -91,7 +91,7 @@ export default function ServiceAccountSelector() {
                         defaultValue={selectedAccount}
                         onValueChange={setSelectedAccount}
                     >
-                        <SelectTrigger className="pointer-events-auto">
+                        <SelectTrigger className="pointer-events-auto bg-white">
                             <SelectValue placeholder="Select an account" />
                         </SelectTrigger>
                         <SelectContent>

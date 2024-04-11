@@ -16,15 +16,15 @@ import {
 } from "@ui/tooltip"
 import { Button, ButtonProps } from "@web/components/ui/button"
 import { Input } from "@web/components/ui/input"
-import { useDialogState } from "@web/lib/client/hooks"
+import { useDialogState, useHover } from "@web/lib/client/hooks"
 import { cn } from "@web/lib/utils"
-import { useCreateActionNode, useIsHandleConnected } from "@web/modules/workflow-editor/graph/nodes"
+import { useCreateActionNode, useHandleRect, useIsHandleConnectable, useIsHandleConnectableWhileConnecting, useIsHandleConnected, useIsHandleConnectedEdgeSelected } from "@web/modules/workflow-editor/graph/nodes"
 import { useSelectedWorkflowRun } from "@web/modules/workflows"
 import { produce } from "immer"
 import { DataTypeDefinitions, NodeDefinitions } from "packages/client"
 import React, { forwardRef, useMemo, useRef, useState } from "react"
 import { TbPencil, TbSparkles, TbX } from "react-icons/tb"
-import { HandleType, Position, Handle as RFHandle, useNodeId, useReactFlow } from "reactflow"
+import { EdgeLabelRenderer, HandleType, Position, Handle as RFHandle, useNodeId, useReactFlow, useStore } from "reactflow"
 import PropertySelector from "./property-selector"
 
 
@@ -56,6 +56,11 @@ export default function ActionNodeHandle({
 }: ActionNodeHandleProps) {
 
     const isConnected = useIsHandleConnected(undefined, id)
+    const isConnectedEdgeSelected = useIsHandleConnectedEdgeSelected(undefined, id)
+    const isConnectable = useIsHandleConnectable(undefined, id)
+    const isConnectingAnywhere = useStore(s => !!s.connectionStartHandle)
+    const isConnectableWhileConnecting = useIsHandleConnectableWhileConnecting(undefined, id)
+
     const ref = useRef<HTMLDivElement>(null)
 
     const nodeId = useNodeId()
@@ -74,6 +79,10 @@ export default function ActionNodeHandle({
     const dataType = DataTypeDefinitions.get(definition.type)
     const isDataTypeSelectable = (dataType?.schema as any)?.shape != null
 
+    const [hoverRef, isHovered] = useHover<HTMLDivElement>()
+
+    const handleRect = useHandleRect(undefined, id)
+
     return (
         <div className="relative group/handle" ref={ref}>
             <RFHandle
@@ -81,14 +90,21 @@ export default function ActionNodeHandle({
                 type={cleanHandleType(type)}
                 position={isInput(type) ? Position.Left : Position.Right}
                 className={cn(
-                    "!relative !transform-none !inset-0 !w-auto !h-auto flex !rounded-md !border !border-solid transition-colors",
-                    isConnected
-                        ? "!bg-slate-100 !border-slate-400"
-                        : "!bg-slate-50 hover:!bg-slate-100 !border-slate-300",
+                    "!relative !transform-none !inset-0 !w-auto !h-auto block !rounded-full !border-none  transition-colors via-slate-200 via-[0.5rem] to-[1rem]",
+                    isConnectedEdgeSelected ? "from-violet-400" : "from-neutral-400",
+                    isConnectable && "hover:outline hover:outline-yellow-500 hover:outline-2",
+                    isConnectableWhileConnecting ? "!bg-amber-200" : "!bg-slate-100",
+                    !isConnectingAnywhere && "!pointer-events-auto",
                 )}
-                isConnectable={!isConnected || isOutput(type)}
+                style={{
+                    backgroundImage: isConnected
+                        ? `radial-gradient(circle at ${isInput(type) ? "1%" : "98%"} 50%, var(--tw-gradient-stops))`
+                        : "none",
+                }}
+                isConnectable={isConnectable}
+                ref={hoverRef}
             >
-                <div className="px-2 py-0.5 pointer-events-none w-24 text-center *:leading-none">
+                <div className="px-2 py-0.5 pointer-events-none text-center *:leading-none">
                     <p className="text-sm">
                         {displayName}
                     </p>
@@ -102,38 +118,40 @@ export default function ActionNodeHandle({
             </RFHandle>
 
             {!hasSelectedRun &&
-                <div
-                    className={cn(
-                        "absolute top-1/2 -translate-y-1/2 h-full flex center gap-1 nodrag nopan transition-opacity opacity-0 group-hover/handle:opacity-100 pointer-events-none group-hover/handle:pointer-events-auto",
-                        isInput(type)
-                            ? "right-full pr-1 pl-4 flex-row-reverse"
-                            : "left-full pl-0.5 pr-4 flex-row",
-                    )}
-                    onClick={ev => ev.stopPropagation()}
-                >
-                    {definition.named &&
-                        <EditNamedHandleButton
-                            handleId={id}
-                            handleType={type}
-                            handleName={name!}
-                            dataTypeId={definition.type}
-                        />}
-                    {definition.group &&
-                        <DeleteGroupHandleButton handleId={id} handleType={type} />}
-
-                    {isOutput(type) &&
-                        // (definition as WebNodeDefinitionOutput).selectable &&
-                        isDataTypeSelectable &&
-                        <PropertySelector handleId={id} dataTypeId={definition.type} />}
-
-                    {!isConnected && definition?.recommendedNode &&
-                        <RecommendedNodeButton
-                            handleId={id}
-                            handleRef={ref}
-                            handleType={type}
-                            recommendation={definition.recommendedNode}
-                        />}
-                </div>}
+                <EdgeLabelRenderer>
+                    <div
+                        className={cn(
+                            "absolute -translate-y-1/2 flex center gap-1 z-[1002] nodrag nopan pointer-events-none transition-opacity hover:opacity-100 hover:pointer-events-auto p-2",
+                            isInput(type) ? "-translate-x-full" : "translate-x-0",
+                            (isHovered && !isConnectingAnywhere) ? "opacity-100 pointer-events-auto" : "opacity-0",
+                        )}
+                        style={{
+                            top: handleRect.y + handleRect.height / 2,
+                            left: handleRect.x + (isInput(type) ? 0 : handleRect.width),
+                        }}
+                    >
+                        {definition.named &&
+                            <EditNamedHandleButton
+                                handleId={id}
+                                handleType={type}
+                                handleName={name!}
+                                dataTypeId={definition.type}
+                            />}
+                        {definition.group &&
+                            <DeleteGroupHandleButton handleId={id} handleType={type} />}
+                        {isOutput(type) &&
+                            // (definition as WebNodeDefinitionOutput).selectable &&
+                            isDataTypeSelectable &&
+                            <PropertySelector handleId={id} dataTypeId={definition.type} />}
+                        {!isConnected && definition?.recommendedNode &&
+                            <RecommendedNodeButton
+                                handleId={id}
+                                handleRef={ref}
+                                handleType={type}
+                                recommendation={definition.recommendedNode}
+                            />}
+                    </div>
+                </EdgeLabelRenderer>}
         </div >
     )
 }

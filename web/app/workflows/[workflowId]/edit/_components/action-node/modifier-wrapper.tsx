@@ -57,18 +57,12 @@ export default function ModifierWrapper({ children }: { children: any }) {
                 Control Modifiers
             </p>
 
-            {settings?.verticalLayout ?
-                inputComponent :
-                <div className="flex justify-between items-stretch mb-2">
-                    {inputComponent}
-                    {outputComponent}
-                </div>}
+            <div className="flex justify-between items-stretch mb-2">
+                {inputComponent}
+                {outputComponent}
+            </div>
 
             {children}
-
-            {settings?.verticalLayout ?
-                outputComponent :
-                null}
         </div> :
         children
 }

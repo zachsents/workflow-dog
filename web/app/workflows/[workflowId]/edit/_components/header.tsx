@@ -24,7 +24,7 @@ import { useWorkflow } from "@web/modules/workflows"
 import { toPng } from "html-to-image"
 import Link from "next/link"
 import { useRef, useState } from "react"
-import { TbArrowLeft, TbExternalLink, TbGridPattern, TbHeart, TbLayoutList, TbMap, TbMenu2, TbPhoto } from "react-icons/tb"
+import { TbArrowLeft, TbExternalLink, TbGridPattern, TbHeart, TbMap, TbMenu2, TbPhoto } from "react-icons/tb"
 import colors from "tailwindcss/colors"
 
 
@@ -127,13 +127,6 @@ function HeaderMenu() {
                 >
                     <TbMap className="mr-2" />
                     Show Minimap
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                    checked={settings?.verticalLayout || false}
-                    onCheckedChange={checked => void setSetting("verticalLayout", checked)}
-                >
-                    <TbLayoutList className="mr-2" />
-                    Vertical Node Layout
                 </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
         </DropdownMenu>

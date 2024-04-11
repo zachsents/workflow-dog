@@ -4,7 +4,6 @@ import { Button } from "@web/components/ui/button"
 import { Card } from "@web/components/ui/card"
 import { cn } from "@web/lib/utils"
 import { useDefinition, useNodeColors, useUpdateInternalsWhenNecessary } from "@web/modules/workflow-editor/graph/nodes"
-import { useEditorSettings } from "@web/modules/workflow-editor/settings"
 import { TbChevronDown } from "react-icons/tb"
 import { NodeProps } from "reactflow"
 import HandleRenderer from "./handle-renderer"
@@ -21,8 +20,6 @@ export default function ActionNode({ id, selected }: NodeProps): React.JSX.Eleme
 
     useUpdateInternalsWhenNecessary()
 
-    const [settings] = useEditorSettings()
-
     const hasInputs = Object.keys(definition?.inputs || {}).length > 0
     const hasOutputs = Object.keys(definition?.outputs || {}).length > 0
 
@@ -34,43 +31,56 @@ export default function ActionNode({ id, selected }: NodeProps): React.JSX.Eleme
             <NotesWrapper>
                 <SelectionWrapper selected={selected}>
                     <ModifierWrapper>
-                        <Card className={cn(
-                            "flex items-stretch rounded-lg border-slate-300",
-                            settings?.verticalLayout ? "flex-col" : "flex-row",
-                        )}>
-                            {hasInputs &&
-                                <HandleRenderer type="input" />}
-
-                            <div className="flex-v center gap-1 border border-y-0 p-2">
-                                {definition.icon &&
-                                    <div className="bg-[var(--dark-color)] text-primary-foreground px-2 py-1 rounded-sm">
-                                        <definition.icon />
-                                    </div>}
-
-                                <p className="text-sm text-center leading-tight font-medium max-w-32">
-                                    {definition.name}
-                                </p>
-
-                                {definition.renderBody &&
-                                    <definition.renderBody id={id} />}
-
-                                {/* WIP */}
-                                {definition.renderOptions &&
-                                    <Button
-                                        variant="ghost"
+                        <Card className="rounded-lg">
+                            <div className="flex items-center">
+                                <div className="self-stretch border-r">
+                                    <div
                                         className={cn(
-                                            "w-auto h-auto px-2 py-1 text-muted-foreground text-xs flex center gap-2 relative top-2 opacity-0 group-hover/node:opacity-100",
-                                            selected && "opacity-100",
+                                            "flex items-center gap-2 bg-[var(--base-color)] text-white px-3 py-1",
+                                            hasOutputs ? "rounded-tl-md" : "rounded-t-md",
                                         )}
                                     >
-                                        {/* <TbSettings /> */}
-                                        Options
-                                        <TbChevronDown />
-                                    </Button>}
-                            </div>
+                                        <div className="text-xl">
+                                            {definition.icon &&
+                                                <definition.icon />}
+                                        </div>
 
-                            {hasOutputs &&
-                                <HandleRenderer type="output" />}
+                                        <p className="text-lg leading-tight font-medium">
+                                            {definition.name}
+                                        </p>
+
+                                        {definition.badge &&
+                                            <p className="flex center ml-2 px-2 bg-primary-foreground text-[var(--base-color)] rounded-full text-xs font-bold">
+                                                {definition.badge}
+                                            </p>}
+                                    </div>
+
+                                    <div className="flex-v items-stretch px-2 pb-2 pt-1">
+                                        {hasInputs &&
+                                            <HandleRenderer type="input" />}
+                                        {definition.renderBody &&
+                                            <definition.renderBody id={id} />}
+                                        {/* WIP */}
+                                        {definition.renderOptions &&
+                                            <Button
+                                                variant="ghost"
+                                                className={cn(
+                                                    "w-auto h-auto px-2 py-1 text-muted-foreground text-xs flex center gap-2 relative top-2 opacity-0 group-hover/node:opacity-100",
+                                                    selected && "opacity-100",
+                                                )}
+                                            >
+                                                {/* <TbSettings /> */}
+                                                Options
+                                                <TbChevronDown />
+                                            </Button>}
+                                    </div>
+                                </div>
+
+                                {hasOutputs &&
+                                    <div className="p-1">
+                                        <HandleRenderer type="output" />
+                                    </div>}
+                            </div>
                         </Card>
                     </ModifierWrapper>
 

@@ -103,6 +103,7 @@ body {
     .debug {
         @apply outline-red-500 outline-dashed;
     }
+
     .debug-div {
         @apply w-4 aspect-square outline-red-500 outline-dashed bg-red-200;
     }
@@ -128,4 +129,8 @@ body {
         linear-gradient(to bottom, transparent 2px, white 1px);
     background-size: var(--bg-size) var(--bg-size);
     background-position: 0 0, calc(var(--bg-size) / 2) calc(var(--bg-size) / 2);
+}
+
+.react-flow__edges {
+    z-index: 1001 !important;
 }

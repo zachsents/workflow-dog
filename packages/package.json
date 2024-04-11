@@ -17,6 +17,7 @@
         "@types/lodash": "^4.17.0",
         "@types/react": "*",
         "react": "*",
+        "@tabler/icons-react": "*",
         "react-icons": "*"
     },
     "peerDependencies": {

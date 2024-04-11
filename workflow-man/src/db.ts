@@ -15,6 +15,27 @@ export async function updateRun(runId: string, data: any) {
 }
 
 
+export async function updateAsRunning(runId: string, workflowId: string) {
+    await Promise.all([
+        client
+            .from("workflow_runs")
+            .update({
+                status: "running",
+                started_at: new Date().toISOString(),
+            })
+            .eq("id", runId)
+            .throwOnError(),
+        client
+            .from("workflows")
+            .update({
+                last_ran_at: new Date().toISOString(),
+            })
+            .eq("id", workflowId)
+            .throwOnError(),
+    ])
+}
+
+
 export async function fetchIntegrationToken(accountId: string) {
 
     // console.log("Fetching token:", `${process.env.API_SERVER_URL}/accounts/${accountId}/token`)

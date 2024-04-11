@@ -1,9 +1,9 @@
 import "dotenv/config"
 import express from "express"
 import morgan from "morgan"
-import { client, updateRun } from "./db"
-import { runWorkflow } from "./execution"
 import { WorkflowRun } from "shared/types"
+import { client, updateAsRunning, updateRun } from "./db"
+import { runWorkflow } from "./execution"
 
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8081
@@ -52,13 +52,11 @@ app.post("/workflow-runs/:runId/execute", async (req, res) => {
         return
     }
 
-    await updateRun(req.params.runId, {
-        status: "running",
-        started_at: new Date().toISOString(),
-    })
+    const [, runState] = await Promise.all([
+        updateAsRunning(req.params.runId, workflow.id),
+        runWorkflow(run, workflow),
+    ])
 
-    const runState = await runWorkflow(run, workflow)
-    
     await updateRun(req.params.runId, {
         status: "completed",
         error_count: Object.keys(runState.errors || {}).length,

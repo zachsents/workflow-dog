@@ -1,9 +1,9 @@
-import { useNodeProperty, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
-import { type RefObject, useEffect, useRef, useState } from "react"
-import { TbAbc } from "react-icons/tb"
 import { createClientNodeDefinition } from "@pkg/types"
-import shared from "./shared"
 import { Textarea } from "@web/components/ui/textarea"
+import { useNodeProperty, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
+import { useEffect, useRef, useState } from "react"
+import { TbAbc } from "react-icons/tb"
+import shared from "./shared"
 
 
 export default createClientNodeDefinition(shared, {
@@ -12,9 +12,7 @@ export default createClientNodeDefinition(shared, {
     tags: ["Text", "Basic"],
     inputs: {},
     outputs: {
-        text: {
-            bullet: true,
-        }
+        text: {}
     },
     renderBody: () => {
         const inputRef = useRef<HTMLTextAreaElement>(null)

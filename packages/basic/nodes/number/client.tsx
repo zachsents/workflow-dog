@@ -12,9 +12,7 @@ export default createClientNodeDefinition(shared, {
     tags: ["Math", "Basic"],
     inputs: {},
     outputs: {
-        number: {
-            bullet: true
-        }
+        number: {}
     },
     renderBody: ({ id }) => {
 

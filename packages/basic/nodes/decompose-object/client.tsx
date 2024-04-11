@@ -5,7 +5,7 @@ import shared from "./shared"
 
 export default createClientNodeDefinition(shared, {
     icon: TbArrowsSplit,
-    color: "#1f2937",
+    color: "#4b5563",
     tags: ["Basic"],
     inputs: {
         object: {

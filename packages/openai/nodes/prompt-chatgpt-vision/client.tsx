@@ -1,9 +1,9 @@
 import { createClientNodeDefinition } from "@pkg/types"
-import { TbRobot } from "react-icons/tb"
+import { TbBrandOpenai } from "react-icons/tb"
 import shared from "./shared"
 
 export default createClientNodeDefinition(shared, {
-    icon: TbRobot,
+    icon: TbBrandOpenai,
     color: "#000000",
     tags: ["ChatGPT", "OpenAI", "AI", "Vision"],
     inputs: {

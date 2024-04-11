@@ -7,7 +7,7 @@ import shared from "./shared"
 
 export default createClientNodeDefinition(shared, {
     icon: TbMathLower,
-    color: "#1f2937",
+    color: "#4b5563",
     tags: ["Math", "Comparison"],
     inputs: {
         a: {},

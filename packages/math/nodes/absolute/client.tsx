@@ -13,7 +13,7 @@ const AbsIcon = (props: React.ComponentPropsWithoutRef<typeof TbEqual>) =>
 
 export default createClientNodeDefinition(shared, {
     icon: AbsIcon,
-    color: "#1f2937",
+    color: "#4b5563",
     tags: ["Math"],
     inputs: {
         number: {},

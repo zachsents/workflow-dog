@@ -7,7 +7,7 @@ import shared from "./shared"
 
 export default createClientNodeDefinition(shared, {
     icon: TbCircuitSwitchOpen,
-    color: "#1f2937",
+    color: "#4b5563",
     tags: ["Logic", "Basic"],
     inputs: {},
     outputs: {

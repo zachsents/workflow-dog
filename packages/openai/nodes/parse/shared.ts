@@ -18,7 +18,7 @@ export default createSharedNodeDefinition({
     outputs: {
         extracted: {
             name: "Extracted",
-            type: "https://data-types.workflow.dog/basic/any",
+            type: "https://data-types.workflow.dog/basic/string",
             group: true,
             named: false,
         },

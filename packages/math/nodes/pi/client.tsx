@@ -4,7 +4,7 @@ import { TbMathPi } from "react-icons/tb"
 
 export default createClientNodeDefinition(shared, {
     icon: TbMathPi,
-    color: "#1f2937",
+    color: "#4b5563",
     tags: ["Math"],
     inputs: {},
     outputs: {

@@ -5,7 +5,7 @@ import shared from "./shared"
 
 export default createClientNodeDefinition(shared, {
     icon: TbBraces,
-    color: "#1f2937",
+    color: "#4b5563",
     tags: ["Basic", "JSON"],
     inputs: {
         object: {

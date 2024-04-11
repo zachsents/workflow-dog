@@ -11,7 +11,7 @@ import shared from "./shared"
 export default createClientTriggerDefinition(shared, {
     tags: ["Basic"],
     icon: TbLink,
-    color: "#1f2937",
+    color: "#4b5563",
     renderConfig: ({ workflowId, workflow, updateConfig, isUpdating }) => {
 
         const [waitUntilFinished, setWaitUntilFinished] = useState(workflow?.trigger?.config?.waitUntilFinished || false)

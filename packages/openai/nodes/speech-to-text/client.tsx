@@ -7,7 +7,7 @@ import {
     SelectValue,
 } from "@ui/select"
 import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
-import { TbRobot } from "react-icons/tb"
+import { TbBrandOpenai } from "react-icons/tb"
 import shared from "./shared"
 
 
@@ -748,7 +748,7 @@ const languages = [
 
 
 export default createClientNodeDefinition(shared, {
-    icon: TbRobot,
+    icon: TbBrandOpenai,
     color: "#000000",
     tags: ["ChatGPT", "OpenAI", "AI", "Whisper"],
     inputs: {

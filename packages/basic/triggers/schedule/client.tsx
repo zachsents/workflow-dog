@@ -27,7 +27,7 @@ import shared from "./shared"
 export default createClientTriggerDefinition(shared, {
     tags: ["Basic"],
     icon: TbClock,
-    color: "#1f2937",
+    color: "#4b5563",
     renderConfig: ({ workflow, updateConfig, isUpdating, onClose }) => {
 
         const [intervals, setIntervals] = useState(workflow?.trigger?.config?.intervals || [])

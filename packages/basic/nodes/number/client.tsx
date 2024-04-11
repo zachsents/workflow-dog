@@ -8,7 +8,7 @@ import { Button } from "@web/components/ui/button"
 
 export default createClientNodeDefinition(shared, {
     icon: TbNumbers,
-    color: "#1f2937",
+    color: "#4b5563",
     tags: ["Math", "Basic"],
     inputs: {},
     outputs: {

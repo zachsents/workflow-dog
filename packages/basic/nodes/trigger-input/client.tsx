@@ -17,7 +17,7 @@ import shared from "./shared"
 
 export default createClientNodeDefinition(shared, {
     icon: TbPlayerSkipForward,
-    color: "#1f2937",
+    color: "#4b5563",
     tags: ["Trigger", "Basic"],
     inputs: {},
     outputs: {

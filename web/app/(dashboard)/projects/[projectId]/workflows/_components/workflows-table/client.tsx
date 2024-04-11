@@ -32,6 +32,7 @@ import { useDialogState } from "@web/lib/client/hooks"
 import { useFromStoreList } from "@web/lib/queries/store"
 import type { Database, Json } from "@web/lib/types/supabase-db"
 import { cn } from "@web/lib/utils"
+import dayjs from "@web/modules/dayjs"
 import Link from "next/link"
 import { TriggerDefinitions } from "packages/client"
 import { useEffect } from "react"
@@ -77,41 +78,62 @@ const columns: ColumnDef<Partial<Workflow>>[] = [
             )
 
             return (
-                <Portal stopPropagation={["onClick"]}>
-                    <TooltipProvider>
-                        <Tooltip delayDuration={0}>
-                            <TooltipTrigger>
-                                <Badge
-                                    variant={isEnabled ? "default" : "secondary"}
-                                    className={cn(
-                                        isEnabled && "bg-green-500 hover:bg-green-700",
-                                        isPending && "opacity-50 pointer-events-none cursor-not-allowed",
-                                    )}
-                                    onClick={() => void setEnabled(!isEnabled)}
-                                    aria-disabled={isPending}
-                                >
-                                    {isPending && <Loader mr />}
-                                    {isEnabled ? "Enabled" : "Disabled"}
-                                </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{isEnabled ? "Disable" : "Enable"}?</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                </Portal>
+                <div className="ml-4">
+                    <Portal stopPropagation={["onClick"]}>
+                        <TooltipProvider>
+                            <Tooltip delayDuration={0}>
+                                <TooltipTrigger>
+                                    <Badge
+                                        variant={isEnabled ? "default" : "secondary"}
+                                        className={cn(
+                                            isEnabled && "bg-green-500 hover:bg-green-700",
+                                            isPending && "opacity-50 pointer-events-none cursor-not-allowed",
+                                        )}
+                                        onClick={() => void setEnabled(!isEnabled)}
+                                        aria-disabled={isPending}
+                                    >
+                                        {isPending && <Loader mr />}
+                                        {isEnabled ? "Enabled" : "Disabled"}
+                                    </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>{isEnabled ? "Disable" : "Enable"}?</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </Portal>
+                </div>
             )
         }
     },
     {
+        id: "last_edited_at",
+        accessorFn: row => new Date(row.last_edited_at || 0),
+        header: "Last Edited",
+        enableSorting: true,
+        sortingFn: "datetime",
+        cell: ({ getValue }) => {
+            const val = getValue<Date>()
+            return (
+                <p className="ml-4">
+                    {val.getTime() > 0
+                        ? dayjs(val).fromNow()
+                        : "Never"}
+                </p>
+            )
+        },
+    },
+    {
         id: "created_at",
-        accessorFn: row => new Date(row.created_at as any),
+        accessorFn: row => new Date(row.created_at || 0),
         header: "Created",
         enableSorting: true,
         sortingFn: "datetime",
-        cell: ({ getValue }) => getValue<Date>().toLocaleDateString(undefined, {
-            dateStyle: "medium",
-        }),
+        cell: ({ getValue }) => <p className="ml-4">
+            {getValue<Date>().toLocaleDateString(undefined, {
+                dateStyle: "medium",
+            })}
+        </p>,
     },
     {
         id: "edit",
@@ -296,6 +318,9 @@ export default function WorkflowsTableClient({
                 data={workflows} columns={columns}
                 tableOptions={{
                     getRowId: (row) => row.id!,
+                    initialState: {
+                        sorting: [{ id: "last_edited_at", desc: true }]
+                    },
                 }}
             >
                 {(row) =>

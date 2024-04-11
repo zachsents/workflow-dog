@@ -195,7 +195,7 @@ function TriggerDialog(props: React.ComponentProps<typeof Dialog>) {
                         When should this workflow be triggered?
                     </DialogTitle>
                     <DialogDescription>
-                        Choose a trigger to start your workflow.
+                        Choose a trigger to start your workflow. You can always change this later.
                     </DialogDescription>
                 </DialogHeader>
 

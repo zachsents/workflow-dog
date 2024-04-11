@@ -156,7 +156,7 @@ export default function PastRunsTable({ onClose }: PastRunsTableProps) {
                 },
                 state: {
                     rowSelection,
-                }
+                },
             }}
             className="border-none rounded-none [&_th_button]:px-1 first:[&_th]:pl-4 last:[&_th]:pr-4 [&_td]:p-1 [&_td]:text-xs [&_td]:text-center [&_td]:text-nowrap"
         >

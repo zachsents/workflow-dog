@@ -19,7 +19,7 @@ async function WorkflowsTableLoader({ projectId }: { projectId: string }) {
 
     const query = await supabase
         .from("workflows")
-        .select("id, name, created_at, is_enabled, trigger_type:trigger->type")
+        .select("id, name, created_at, last_edited_at, is_enabled, trigger_type:trigger->type")
         .eq("team_id", projectId)
         .throwOnError()
 

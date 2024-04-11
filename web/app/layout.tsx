@@ -3,6 +3,7 @@ import "@web/styles/globals.css"
 import { Providers } from "@web/app/providers"
 import { Toaster } from "@ui/toaster"
 
+
 export const metadata: Metadata = {
     title: "WorkflowDog",
     description: "Automation for power users.",

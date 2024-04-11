@@ -29,7 +29,10 @@ export function useGraphSaving() {
     const updateGraph = useSupabaseMutation(
         (supabase) => supabase
             .from("workflows")
-            .update({ graph: convertedGraph as any })
+            .update({
+                graph: convertedGraph as any,
+                last_edited_at: new Date().toISOString(),
+            })
             .eq("id", workflow!.id) as any,
         {
             enabled: !!workflow,

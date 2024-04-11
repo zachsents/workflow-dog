@@ -12,12 +12,15 @@ export interface ActionNodeInterface {
     name?: string
 }
 
-export interface ActionNodeInput extends ActionNodeInterface {}
-export interface ActionNodeOutput extends ActionNodeInterface {}
+export interface ActionNodeInput extends ActionNodeInterface { }
+export interface ActionNodeOutput extends ActionNodeInterface { }
 
 export type ActionNodeData = {
     inputs?: ActionNodeInput[]
     outputs?: ActionNodeOutput[]
+    controlModifiers?: {
+        [key in ControlModifier]: boolean
+    }
 }
 
 export type ActionNode = Node<ActionNodeData, "action">
@@ -28,3 +31,5 @@ export interface DataEdgeData {
 }
 
 export type DataEdge = Edge<DataEdgeData>
+
+export type ControlModifier = "waitFor" | "delay" | "conditional" | "finished" | "error"

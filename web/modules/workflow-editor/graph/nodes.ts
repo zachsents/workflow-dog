@@ -224,30 +224,34 @@ export function useUpdateInternalsWhenNecessary(nodeId = useNodeId()) {
     const updateInternals = useUpdateInternals(nodeId)
 
     const handlesHash = useStore(s => {
-        const node = s.nodeInternals.get(nodeId!)
-
+        const node = s.nodeInternals.get(nodeId!) as ActionNode
         return node ? stringHash([
-            node.data.inputs?.map((input: any) => _.pick(input, ["id", "hidden", "mode"])),
-            node.data.outputs?.map((output: any) => _.pick(output, ["id", "hidden"])),
-            node.data.modifier?.id,
+            _.map(node.data.inputs, "id"),
+            _.map(node.data.outputs, "id"),
+            Object.keys(node.data.controlModifiers ?? {})
+                .filter(k => node.data.controlModifiers?.[k]),
         ]) : null
     })
 
     useEffect(() => {
+        console.debug("Updating internals for", nodeId)
         updateInternals()
     }, [handlesHash])
 
-    const selected = useStore(s => s.nodeInternals.get(nodeId!)?.selected)
+    /**
+     * For animated selection state
+     */
+    // const selected = useStore(s => s.nodeInternals.get(nodeId!)?.selected)
 
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            updateInternals()
-        }, 75)
+    // useEffect(() => {
+    //     const intervalId = setInterval(() => {
+    //         updateInternals()
+    //     }, 75)
 
-        const cleanup = () => clearInterval(intervalId)
-        setTimeout(cleanup, 400)
-        return cleanup
-    }, [selected])
+    //     const cleanup = () => clearInterval(intervalId)
+    //     setTimeout(cleanup, 400)
+    //     return cleanup
+    // }, [selected])
 }
 
 

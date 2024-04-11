@@ -124,17 +124,34 @@ const columns: ColumnDef<Partial<Workflow>>[] = [
         },
     },
     {
-        id: "created_at",
-        accessorFn: row => new Date(row.created_at || 0),
-        header: "Created",
+        id: "last_ran_at",
+        accessorFn: row => new Date(row.last_ran_at || 0),
+        header: "Last Ran",
         enableSorting: true,
         sortingFn: "datetime",
-        cell: ({ getValue }) => <p className="ml-4">
-            {getValue<Date>().toLocaleDateString(undefined, {
-                dateStyle: "medium",
-            })}
-        </p>,
+        cell: ({ getValue }) => {
+            const val = getValue<Date>()
+            return (
+                <p className="ml-4">
+                    {val.getTime() > 0
+                        ? dayjs(val).fromNow()
+                        : "Never"}
+                </p>
+            )
+        },
     },
+    // {
+    //     id: "created_at",
+    //     accessorFn: row => new Date(row.created_at || 0),
+    //     header: "Created",
+    //     enableSorting: true,
+    //     sortingFn: "datetime",
+    //     cell: ({ getValue }) => <p className="ml-4">
+    //         {getValue<Date>().toLocaleDateString(undefined, {
+    //             dateStyle: "medium",
+    //         })}
+    //     </p>,
+    // },
     {
         id: "edit",
         cell: ({ row }) =>

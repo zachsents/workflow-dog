@@ -46,8 +46,16 @@ export default function DataEdge({
             {/* Background Path */}
             <path
                 d={path}
-                className="fill-none stroke-slate-50"
-                style={{ strokeWidth: 8, strokeDasharray: "none", animation: "none" }}
+                className={cn(
+                    "fill-none",
+                    "stroke-slate-50",
+                    // data?.forced ? "stroke-red-500/50" : "stroke-slate-50",
+                )}
+                style={{
+                    strokeWidth: 8,
+                    strokeDasharray: "none",
+                    animation: "none",
+                }}
             />
 
             {/* Main Path */}

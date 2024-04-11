@@ -92,9 +92,11 @@ export default function ActionNodeHandle({
                 className={cn(
                     "!relative !transform-none !inset-0 !w-auto !h-auto block !rounded-full !border-none  transition-colors via-slate-200 via-[0.5rem] to-[1rem]",
                     isConnectedEdgeSelected ? "from-violet-400" : "from-neutral-400",
-                    isConnectable && "hover:outline hover:outline-yellow-500 hover:outline-2",
-                    isConnectableWhileConnecting ? "!bg-amber-200" : "!bg-slate-100",
-                    !isConnectingAnywhere && "!pointer-events-auto",
+                    hasSelectedRun ? "!bg-slate-100" : [
+                        isConnectable && "hover:outline hover:outline-yellow-500 hover:outline-2",
+                        isConnectableWhileConnecting ? "!bg-amber-200" : "!bg-slate-100",
+                        !isConnectingAnywhere && "!pointer-events-auto",
+                    ],
                 )}
                 style={{
                     backgroundImage: isConnected

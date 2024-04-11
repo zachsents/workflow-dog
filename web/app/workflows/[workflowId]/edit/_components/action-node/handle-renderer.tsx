@@ -8,6 +8,7 @@ import { TbPlus } from "react-icons/tb"
 import { useNodeId, useReactFlow } from "reactflow"
 import { PREFIX } from "shared/prefixes"
 import ActionNodeHandle from "./handle"
+import { useEditorStore } from "@web/modules/workflow-editor/store"
 
 
 export default function HandleRenderer({ type }: { type: "input" | "output" }): React.JSX.Element {
@@ -20,6 +21,8 @@ export default function HandleRenderer({ type }: { type: "input" | "output" }): 
 
     const nodeDefinition = useDefinition()
     const interfaces: any[] = useNodePropertyValue(undefined, `data.${plural}`) || []
+
+    const hasSelectedRun = useEditorStore(s => !!s.selectedRunId)
 
     const interfaceGroups = useMemo(
         () => Object.keys(nodeDefinition?.[plural] ?? {})
@@ -81,7 +84,7 @@ export default function HandleRenderer({ type }: { type: "input" | "output" }): 
                                 )}
                             </div>
 
-                            {definition?.group &&
+                            {!hasSelectedRun && definition?.group &&
                                 <Button
                                     size="sm" variant="link"
                                     className="text-xs h-[1.25em]"

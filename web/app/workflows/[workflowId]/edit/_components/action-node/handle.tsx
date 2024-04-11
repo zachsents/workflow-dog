@@ -122,7 +122,7 @@ export default function ActionNodeHandle({
                     <div
                         className={cn(
                             "absolute -translate-y-1/2 flex center gap-1 z-[1002] nodrag nopan pointer-events-none transition-opacity hover:opacity-100 hover:pointer-events-auto p-2",
-                            isInput(type) ? "-translate-x-full" : "translate-x-0",
+                            isInput(type) ? "-translate-x-full flex-row-reverse" : "translate-x-0",
                             (isHovered && !isConnectingAnywhere) ? "opacity-100 pointer-events-auto" : "opacity-0",
                         )}
                         style={{

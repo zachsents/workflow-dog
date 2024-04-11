@@ -4,7 +4,6 @@
 env_files=(
   "web/.env"
   "web/.env.local"
-  "api-server/.env"
   "workflow-man/.env"
 )
 

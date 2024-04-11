@@ -106,8 +106,9 @@ little:
     ✔ make manual run form a little wider @done (4/1/2024, 6:56:36 PM)
     ✔ hide manual run button when disabled @done (4/1/2024, 7:01:20 PM)
     ✔ reverse row order of edit handle buttons @done (4/1/2024, 7:02:37 PM)
-    ☐ fix bug where sometimes new runs don't load in. something isn't getting invalidated
+    ✔ fix bug where sometimes new runs don't load in. something isn't getting invalidated @done (4/10/2024, 8:06:54 PM)
     ✔ hide edge delete buttons when run is selected @done (4/1/2024, 7:06:00 PM)
     ☐ add saving indicator
     ☐ add minimize nodes option
+
 

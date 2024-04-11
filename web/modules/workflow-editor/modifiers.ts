@@ -1,14 +1,15 @@
 import { TbActivity, TbAlertCircle, TbArrowsSplit2, TbCheck, TbClock } from "react-icons/tb"
+import { ControlModifier } from "./types"
 
 type ControlModifierDefinition = {
-    id: string
+    id: ControlModifier
     name: string
     type: string
     icon: JSX.ElementType
     handleType: "input" | "output"
 }
 
-const controlModifiers: Record<string, Omit<ControlModifierDefinition, "id">> = {
+const controlModifiers: Record<ControlModifier, Omit<ControlModifierDefinition, "id">> = {
     waitFor: {
         name: "Wait For",
         type: "https://data-types.workflow.dog/basic/any",

@@ -250,7 +250,9 @@ function DeleteControl() {
 function ModifierButton({ id, icon: Icon, name }) {
 
     const selectedNodeId = useStore(s => s.getNodes().find(n => n.selected)?.id)
-    const [enabled, setEnabled] = useNodeProperty(selectedNodeId, `data.controlModifiers.${id}`)
+    const [enabled, setEnabled] = useNodeProperty(selectedNodeId, `data.controlModifiers.${id}`, {
+        defaultValue: false,
+    })
 
     const IconComponent = (props: React.HTMLProps<HTMLDivElement>) =>
         <div

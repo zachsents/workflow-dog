@@ -30,13 +30,15 @@ export default function ServiceAccountSelector() {
     const service = ServiceDefinitions.get(requirement?.id!)
 
     const isSelected = useIsNodeSelected()
-    const [selectedAccount, setSelectedAccount] = useNodeProperty<string | null>(undefined, "data.serviceAccount")
-
-    // this has to happen in the next render cycle and I haven't the foggiest idea why
-    useDebouncedEffect(() => {
-        if (selectedAccount === undefined && accounts.length === 1)
-            setSelectedAccount(accounts[0].id)
-    }, [selectedAccount, accounts.length, setSelectedAccount], 0)
+    const [selectedAccount, setSelectedAccount] = useNodeProperty<string | null>(
+        undefined,
+        "data.serviceAccount",
+        {
+            defaultValue: accounts.length === 1
+                ? accounts[0].id
+                : undefined
+        }
+    )
 
     const iconComponent = service?.icon &&
         <service.icon className="text-lg w-[1em] h-[1em] shrink-0" />

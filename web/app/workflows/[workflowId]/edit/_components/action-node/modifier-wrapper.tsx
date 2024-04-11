@@ -1,16 +1,18 @@
 import { useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
 import { list as modifiersList } from "@web/modules/workflow-editor/modifiers"
+import { ControlModifier } from "@web/modules/workflow-editor/types"
 import { useMemo } from "react"
 import { PREFIX } from "shared/prefixes"
 import ActionNodeHandle from "./handle"
-import { useEditorSettings } from "@web/modules/workflow-editor/settings"
 
 
 export default function ModifierWrapper({ children }: { children: any }) {
 
-    const [settings] = useEditorSettings()
+    const modifiers = useNodePropertyValue<{ [key in ControlModifier]: boolean } | undefined>(
+        undefined,
+        "data.controlModifiers"
+    )
 
-    const modifiers = useNodePropertyValue(undefined, "data.controlModifiers")
     const hasAnyModifiers = useMemo(
         () => Object.values(modifiers || {}).some(Boolean),
         [modifiers]

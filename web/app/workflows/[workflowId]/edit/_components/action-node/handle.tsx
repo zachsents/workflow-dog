@@ -75,6 +75,7 @@ export default function ActionNodeHandle({
         const handleValues = runState?.outputs?.[nodeId!] ?? {}
         return [id in handleValues, handleValues[id]] as const
     }, [selectedRun, nodeId, id])
+    const isShowingRunValue = hasSelectedRun && isOutput(type) && hasRunValue
 
     const dataType = DataTypeDefinitions.get(definition.type)
     const isDataTypeSelectable = (dataType?.schema as any)?.shape != null
@@ -115,47 +116,54 @@ export default function ActionNodeHandle({
                     </p>
                 </div>
 
-                {selectedRun && isOutput(type) && hasRunValue &&
-                    <ValueDisplay runValue={runValue} dataTypeId={definition.type} />}
+                {/* {selectedRun && isOutput(type) && hasRunValue &&
+                    <ValueDisplay runValue={runValue} dataTypeId={definition.type} />} */}
             </RFHandle>
 
             {/* WILO: Moving the value display into an EdgeLabelRenderer as well */}
 
-            {!hasSelectedRun &&
-                <EdgeLabelRenderer>
-                    <div
-                        className={cn(
-                            "absolute -translate-y-1/2 flex center gap-1 z-[1002] nodrag nopan pointer-events-none transition-opacity hover:opacity-100 hover:pointer-events-auto p-2",
-                            isInput(type) ? "-translate-x-full flex-row-reverse" : "translate-x-0",
-                            (isHovered && !isConnectingAnywhere) ? "opacity-100 pointer-events-auto" : "opacity-0",
-                        )}
-                        style={{
-                            top: handleRect.y + handleRect.height / 2,
-                            left: handleRect.x + (isInput(type) ? 0 : handleRect.width),
-                        }}
-                    >
-                        {definition.named &&
-                            <EditNamedHandleButton
-                                handleId={id}
-                                handleType={type}
-                                handleName={name!}
-                                dataTypeId={definition.type}
-                            />}
-                        {definition.group &&
-                            <DeleteGroupHandleButton handleId={id} handleType={type} />}
-                        {isOutput(type) &&
-                            // (definition as WebNodeDefinitionOutput).selectable &&
-                            isDataTypeSelectable &&
-                            <PropertySelector handleId={id} dataTypeId={definition.type} />}
-                        {!isConnected && definition?.recommendedNode &&
-                            <RecommendedNodeButton
-                                handleId={id}
-                                handleRef={ref}
-                                handleType={type}
-                                recommendation={definition.recommendedNode}
-                            />}
-                    </div>
-                </EdgeLabelRenderer>}
+            <EdgeLabelRenderer>
+                <div
+                    className={cn(
+                        "absolute -translate-y-1/2 flex center gap-1 z-[1002] nodrag nopan pointer-events-none transition-opacity hover:opacity-100 hover:pointer-events-auto p-2",
+                        isInput(type) ? "-translate-x-full flex-row-reverse" : "translate-x-0",
+                        ((isHovered && !isConnectingAnywhere) || isShowingRunValue)
+                            ? "opacity-100 pointer-events-auto"
+                            : "opacity-0",
+                    )}
+                    style={{
+                        top: handleRect.y + handleRect.height / 2,
+                        left: handleRect.x + (isInput(type) ? 0 : handleRect.width),
+                    }}
+                >
+                    {hasSelectedRun
+                        ? isShowingRunValue
+                            ? <ValueDisplay runValue={runValue} dataTypeId={definition.type} />
+                            : null
+                        : <>
+                            {definition.named &&
+                                <EditNamedHandleButton
+                                    handleId={id}
+                                    handleType={type}
+                                    handleName={name!}
+                                    dataTypeId={definition.type}
+                                />}
+                            {definition.group &&
+                                <DeleteGroupHandleButton handleId={id} handleType={type} />}
+                            {isOutput(type) &&
+                                // (definition as WebNodeDefinitionOutput).selectable &&
+                                isDataTypeSelectable &&
+                                <PropertySelector handleId={id} dataTypeId={definition.type} />}
+                            {!isConnected && definition?.recommendedNode &&
+                                <RecommendedNodeButton
+                                    handleId={id}
+                                    handleRef={ref}
+                                    handleType={type}
+                                    recommendation={definition.recommendedNode}
+                                />}
+                        </>}
+                </div>
+            </EdgeLabelRenderer>
         </div >
     )
 }
@@ -419,9 +427,7 @@ function ValueDisplay({ runValue, dataTypeId }: { runValue: any, dataTypeId: str
     const dialog = useDialogState()
 
     return (
-        <div
-            className="absolute top-1/2 -translate-y-1/2 nodrag left-full translate-x-2"
-        >
+        <>
             <TooltipProvider delayDuration={0}>
                 <Tooltip open>
                     <TooltipTrigger asChild>
@@ -457,6 +463,6 @@ function ValueDisplay({ runValue, dataTypeId }: { runValue: any, dataTypeId: str
                             </p>}
                 </DialogContent>
             </Dialog>
-        </div>
+        </>
     )
 }

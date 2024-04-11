@@ -22,7 +22,7 @@ export default createClientNodeDefinition(shared, {
                 inputRef.current?.focus()
         }, [selected])
 
-        const [value, setValue] = useNodeProperty(undefined, "data.state.value", {
+        const [value, setValue] = useNodeProperty<string>(undefined, "data.state.value", {
             debounce: 200,
         })
         const [textLength, setTextLength] = useState(value?.length ?? 0)

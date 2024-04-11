@@ -1,5 +1,6 @@
 "use client"
 
+import { useDebouncedEffect } from "@react-hookz/web"
 import { useQueryClient } from "@tanstack/react-query"
 import {
     DropdownMenu,
@@ -15,7 +16,7 @@ import { useAvailableIntegrationAccounts } from "@web/modules/integrations"
 import { useIsNodeSelected, useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
 import { useWorkflow } from "@web/modules/workflows"
 import { ServiceDefinitions } from "packages/client"
-import { TbDots, TbExternalLink, TbPlugConnected, TbRefresh, TbSettings } from "react-icons/tb"
+import { TbDots, TbExternalLink, TbPlugConnected, TbRefresh, TbSettings, TbX } from "react-icons/tb"
 import APIKeyDialog from "./api-key-dialog"
 
 
@@ -29,7 +30,13 @@ export default function ServiceAccountSelector() {
     const service = ServiceDefinitions.get(requirement?.id!)
 
     const isSelected = useIsNodeSelected()
-    const [selectedAccount, setSelectedAccount] = useNodeProperty(undefined, "data.serviceAccount")
+    const [selectedAccount, setSelectedAccount] = useNodeProperty<string | null>(undefined, "data.serviceAccount")
+
+    // this has to happen in the next render cycle and I haven't the foggiest idea why
+    useDebouncedEffect(() => {
+        if (selectedAccount === undefined && accounts.length === 1)
+            setSelectedAccount(accounts[0].id)
+    }, [selectedAccount, accounts.length, setSelectedAccount], 0)
 
     const iconComponent = service?.icon &&
         <service.icon className="text-lg w-[1em] h-[1em] shrink-0" />
@@ -72,7 +79,7 @@ export default function ServiceAccountSelector() {
         <div
             className={cn(
                 "absolute top-full left-1/2 -translate-x-1/2 mt-4 max-w-full min-w-[20rem] pointer-events-none flex center",
-                (!isSelected || isLoading) && "hidden",
+                ((!isSelected && !!selectedAccount) || isLoading) && "hidden",
             )}
         >
             {accounts.length === 0 ?
@@ -88,7 +95,7 @@ export default function ServiceAccountSelector() {
                     {iconComponent}
 
                     <Select
-                        defaultValue={selectedAccount}
+                        value={selectedAccount || ""}
                         onValueChange={setSelectedAccount}
                     >
                         <SelectTrigger className="pointer-events-auto bg-white">
@@ -143,6 +150,13 @@ export default function ServiceAccountSelector() {
                                     </div>
                                     <TbExternalLink />
                                 </a>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="flex items-center gap-2"
+                                onSelect={() => void setSelectedAccount(null)}
+                            >
+                                <TbX />
+                                Clear selection
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

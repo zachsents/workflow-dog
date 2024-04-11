@@ -28,7 +28,7 @@ export function useDefinition(nodeId = useNodeId()) {
 /**
  * Sets a property of a node using a path.
  */
-export function setNodeProperty(rf: ReactFlowInstance, nodeId: string, path: NodeDotPath, value: any) {
+export function setNodeProperty<T>(rf: ReactFlowInstance, nodeId: string, path: NodeDotPath, value: T) {
     rf.setNodes(produce(draft => {
         const node = draft.find(n => n.id === nodeId)
 
@@ -43,40 +43,51 @@ export function setNodeProperty(rf: ReactFlowInstance, nodeId: string, path: Nod
 /**
  * Hook that provides the value of a node property.
  */
-export function useNodePropertyValue(nodeId = useNodeId(), path: NodeDotPath) {
-    return useStore(s => _.get(s.nodeInternals.get(nodeId!), path))
+export function useNodePropertyValue<T>(nodeId = useNodeId(), path: NodeDotPath) {
+    return useStore(s => _.get(s.nodeInternals.get(nodeId!), path)) as T
 }
 
+interface UseSetNodePropertyOptions {
+    debounce?: number | false
+}
 
 /**
  * Hook that provides a setter for a node property.
  */
-export function useSetNodeProperty(nodeId = useNodeId(), path: NodeDotPath, {
-    debounce = 0,
-}: {
-    debounce?: number
-} = {}) {
+export function useSetNodeProperty<T>(nodeId = useNodeId(), path: NodeDotPath, {
+    debounce = false,
+}: UseSetNodePropertyOptions = {}) {
     const rf = useReactFlow()
-    return useDebouncedCallback(value => setNodeProperty(rf, nodeId!, path, value), [nodeId, path, rf], debounce)
+    const ignoreDebounce = useMemo(() => debounce === false, [])
+
+    const callbackParams = [
+        (value: T) => setNodeProperty(rf, nodeId!, path, value),
+        [rf, nodeId, path],
+    ] as const
+
+    return ignoreDebounce
+        ? useCallback(...callbackParams)
+        : useDebouncedCallback(...callbackParams, debounce || 0)
 }
 
+interface UseNodePropertyOptions<T> extends UseSetNodePropertyOptions {
+    defaultValue?: T | undefined
+}
 
 /**
  * Hook that provides the value of a node property and a setter.
  */
-export function useNodeProperty(nodeId = useNodeId(), path: NodeDotPath, {
+export function useNodeProperty<T>(nodeId = useNodeId(), path: NodeDotPath, {
     defaultValue,
-    debounce = 0,
-}: {
-    defaultValue?: any
-    debounce?: number
-} = {}) {
-    const value = useNodePropertyValue(nodeId, path)
-    const setValue = useSetNodeProperty(nodeId, path, { debounce })
+    ...setOptions
+}: UseNodePropertyOptions<T> = {}) {
+    const value = useNodePropertyValue<T>(nodeId, path)
+    const setValue = useSetNodeProperty<T>(nodeId, path, setOptions)
 
     useEffect(() => {
-        if (defaultValue !== undefined && value === undefined)
+        if (defaultValue !== undefined && value === undefined) {
             setValue(defaultValue)
+        }
     }, [value, setValue, defaultValue])
 
     return [value, setValue] as const
@@ -259,7 +270,7 @@ export function useUpdateInternalsWhenNecessary(nodeId = useNodeId()) {
 export function useDisabled(nodeId = useNodeId()) {
     const [disabled, setDisabled] = useNodeProperty(nodeId, "data.disabled", {
         defaultValue: false,
-    }) as [boolean, (disabled: boolean) => void]
+    })
 
     const findUpstreamDisabled = (state: ReactFlowState, nodeId: string): boolean => {
         const incomingNodeIds = state.edges

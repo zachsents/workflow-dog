@@ -11,7 +11,7 @@ export async function GET(
     { params: { accountId } }: { params: { accountId: string } }
 ) {
     const bearerKey = req.headers.get("authorization")?.split("Bearer ")[1] || ""
-    const requesterClient = createClient<Database>(process.env.SUPABASE_URL!, bearerKey)
+    const requesterClient = createClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL!, bearerKey)
 
     const { data: account } = await requesterClient
         .from("integration_accounts")

@@ -117,6 +117,8 @@ export default function ActionNodeHandle({
                     <ValueDisplay runValue={runValue} dataTypeId={definition.type} />}
             </RFHandle>
 
+            {/* WILO: Moving the value display into an EdgeLabelRenderer as well */}
+
             {!hasSelectedRun &&
                 <EdgeLabelRenderer>
                     <div

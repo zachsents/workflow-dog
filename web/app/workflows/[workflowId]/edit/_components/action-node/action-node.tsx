@@ -45,12 +45,12 @@ export default function ActionNode({ id, selected }: NodeProps): React.JSX.Eleme
                                                 <definition.icon />}
                                         </div>
 
-                                        <p className="text-lg leading-tight font-medium">
+                                        <p className="text-md leading-tight font-medium mr-2">
                                             {definition.name}
                                         </p>
 
                                         {definition.badge &&
-                                            <p className="flex center ml-2 px-2 bg-primary-foreground text-[var(--base-color)] rounded-full text-xs font-bold">
+                                            <p className="flex center px-2 bg-primary-foreground text-[var(--base-color)] rounded-full text-xs font-bold">
                                                 {definition.badge}
                                             </p>}
                                     </div>

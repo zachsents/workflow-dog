@@ -16,20 +16,21 @@ export default createClientNodeDefinition(shared, {
     },
     renderBody: () => {
         const inputRef = useRef<HTMLTextAreaElement>(null)
-        const selected = useNodePropertyValue(undefined, "selected")
+        const selected = useNodePropertyValue<boolean>(undefined, "selected")
         useEffect(() => {
             if (selected)
                 inputRef.current?.focus()
         }, [selected])
 
-        const [value, setValue] = useNodeProperty<string>(undefined, "data.state.value", {
+        const [value, setValue] = useNodeProperty(undefined, "data.state.value", {
+            defaultValue: "",
             debounce: 200,
         })
-        const [textLength, setTextLength] = useState(value?.length ?? 0)
+        const [textLength, setTextLength] = useState(value.length)
 
         return (
             <Textarea
-                defaultValue={value ?? ""}
+                defaultValue={value}
                 onChange={ev => {
                     setValue(ev.currentTarget.value)
                     setTextLength(ev.currentTarget.value.length)

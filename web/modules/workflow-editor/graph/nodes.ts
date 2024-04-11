@@ -1,4 +1,4 @@
-import { useDebouncedCallback } from "@react-hookz/web"
+import { useDebouncedCallback, useDebouncedEffect } from "@react-hookz/web"
 import { DotPath, stringHash, uniqueId } from "@web/modules/util"
 import Color from "color"
 import { produce } from "immer"
@@ -11,6 +11,7 @@ import { PREFIX } from "shared/prefixes"
 import type { Node } from "shared/types"
 import colors from "tailwindcss/colors"
 import { ActionNode } from "../types"
+import { useLogEffect } from "@web/lib/client/hooks"
 
 
 export type NodeDotPath = DotPath<Node>
@@ -84,13 +85,18 @@ export function useNodeProperty<T>(nodeId = useNodeId(), path: NodeDotPath, {
     const value = useNodePropertyValue<T>(nodeId, path)
     const setValue = useSetNodeProperty<T>(nodeId, path, setOptions)
 
-    useEffect(() => {
+    const shouldUseDefault = defaultValue !== undefined && value === undefined
+
+    useDebouncedEffect(() => {
         if (defaultValue !== undefined && value === undefined) {
             setValue(defaultValue)
         }
-    }, [value, setValue, defaultValue])
+    }, [shouldUseDefault, defaultValue, setValue], 0)
 
-    return [value, setValue] as const
+    return [
+        shouldUseDefault ? defaultValue : value,
+        setValue,
+    ] as const
 }
 
 

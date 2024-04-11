@@ -14,10 +14,15 @@ export default createClientNodeDefinition(shared, {
         enabled: {}
     },
     renderBody: () => {
-        const [value, setValue] = useNodeProperty(undefined, "data.state.value")
+        const [value, setValue] = useNodeProperty(undefined, "data.state.value", {
+            defaultValue: false
+        })
 
         return (
-            <div className="nodrag nopan" onClick={ev => ev.stopPropagation()}>
+            <div
+                className="nodrag nopan pt-1"
+                onClick={ev => ev.stopPropagation()}
+            >
                 <Switch
                     checked={value || false}
                     onCheckedChange={setValue}

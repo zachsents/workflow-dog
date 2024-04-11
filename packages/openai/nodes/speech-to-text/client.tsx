@@ -758,11 +758,19 @@ export default createClientNodeDefinition(shared, {
         transcription: {},
     },
     renderBody: () => {
-        const [language, setLanguage] = useNodeProperty(undefined, "data.state.language")
+        const [language, setLanguage] = useNodeProperty(undefined, "data.state.language", {
+            defaultValue: "en",
+        })
+
         return (
             <div className="mt-1 self-stretch">
-                <p className="text-xs font-medium text-left">Language</p>
-                <Select onValueChange={setLanguage} defaultValue={language || "en"}>
+                <p className="text-xs font-medium text-left">
+                    Language
+                </p>
+                <Select
+                    value={language}
+                    onValueChange={setLanguage}
+                >
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Pick one..." />
                     </SelectTrigger>

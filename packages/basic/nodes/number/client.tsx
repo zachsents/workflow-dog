@@ -1,9 +1,9 @@
-import { TbMinus, TbNumbers, TbPlus } from "react-icons/tb"
-import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
 import { createClientNodeDefinition } from "@pkg/types"
-import shared from "./shared"
-import { Input } from "@web/components/ui/input"
 import { Button } from "@web/components/ui/button"
+import { Input } from "@web/components/ui/input"
+import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
+import { TbMinus, TbNumbers, TbPlus } from "react-icons/tb"
+import shared from "./shared"
 
 
 export default createClientNodeDefinition(shared, {
@@ -16,17 +16,13 @@ export default createClientNodeDefinition(shared, {
     },
     renderBody: ({ id }) => {
 
-        const [value, _setValue] = useNodeProperty(id, "data.state.value")
-        const setValue = (newValue: string) => _setValue(newValue.replaceAll(/[^0-9.,-]/g, ""))
+        const [value, _setValue] = useNodeProperty(id, "data.state.value", {
+            defaultValue: "",
+        })
+        const setValue = (newValue: string) => _setValue(cleanNumberValue(newValue))
 
-        const increment = () => {
-            const newValue = parseNumber(value) + 1
-            if (!isNaN(newValue))
-                setValue(newValue.toString())
-        }
-
-        const decrement = () => {
-            const newValue = parseNumber(value) - 1
+        const changeValueBy = (amount: number) => () => {
+            const newValue = parseNumber(value) + amount
             if (!isNaN(newValue))
                 setValue(newValue.toString())
         }
@@ -46,13 +42,13 @@ export default createClientNodeDefinition(shared, {
                 >
                     <Button
                         size="sm" variant="ghost" className="px-2 h-auto flex-1"
-                        onClick={increment}
+                        onClick={changeValueBy(1)}
                     >
                         <TbPlus />
                     </Button>
                     <Button
                         size="sm" variant="ghost" className="px-2 h-auto flex-1"
-                        onClick={decrement}
+                        onClick={changeValueBy(-1)}
                     >
                         <TbMinus />
                     </Button>
@@ -62,6 +58,10 @@ export default createClientNodeDefinition(shared, {
     }
 })
 
+
+function cleanNumberValue(str: string) {
+    return str.replaceAll(/[^0-9.,-]/g, "")
+}
 
 function parseNumber(str?: string) {
     return parseFloat(str?.replaceAll(/[^0-9.-]/g, "") || "0")

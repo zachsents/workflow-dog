@@ -27,7 +27,9 @@ export default createClientNodeDefinition(shared, {
         const { data: workflow, isSuccess: hasWorkflowLoaded } = useWorkflow()
         const triggerDefinition = TriggerDefinitions.get((workflow?.trigger as any)?.type)
 
-        const [triggerInput, setTriggerInput] = useNodeProperty(undefined, "data.state.input")
+        const [triggerInput, setTriggerInput] = useNodeProperty<string | null>(undefined, "data.state.input", {
+            defaultValue: null
+        })
 
         const triggerInputIds = Object.keys(triggerDefinition?.inputs ?? {})
 
@@ -39,7 +41,10 @@ export default createClientNodeDefinition(shared, {
         const entries = Object.entries(triggerDefinition?.inputs ?? {})
 
         return (
-            <Select onValueChange={setTriggerInput} defaultValue={triggerInput || undefined}>
+            <Select
+                value={triggerInput || ""}
+                onValueChange={setTriggerInput}
+            >
                 <SelectTrigger className={cn(
                     "min-w-[180px]",
                     triggerInput && "[&>span]:flex [&>span]:between [&>span]:gap-2",
@@ -56,7 +61,9 @@ export default createClientNodeDefinition(shared, {
                                 </div>
                             </SelectItem>
                         )
-                        : <SelectItem disabled value="empty">No inputs available</SelectItem>}
+                        : <SelectItem disabled value="empty">
+                            No inputs available
+                        </SelectItem>}
                 </SelectContent>
             </Select>
         )

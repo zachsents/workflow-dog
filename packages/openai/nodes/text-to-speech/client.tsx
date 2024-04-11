@@ -31,11 +31,18 @@ export default createClientNodeDefinition(shared, {
         audio: {},
     },
     renderBody: () => {
-        const [voice, setVoice] = useNodeProperty(undefined, "data.state.voice")
+        const [voice, setVoice] = useNodeProperty(undefined, "data.state.voice", {
+            defaultValue: "alloy",
+        })
         return (
             <div className="mt-1 self-stretch">
-                <p className="text-xs font-medium text-left">Voice</p>
-                <Select onValueChange={setVoice} defaultValue={voice || "alloy"}>
+                <p className="text-xs font-medium text-left">
+                    Voice
+                </p>
+                <Select
+                    value={voice}
+                    onValueChange={setVoice}
+                >
                     <SelectTrigger>
                         <SelectValue placeholder="Pick one..." />
                     </SelectTrigger>

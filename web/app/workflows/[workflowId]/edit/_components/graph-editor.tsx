@@ -29,6 +29,7 @@ import GhostBuster from "./ghost-buster"
 import NodeToolbar from "./node-toolbar"
 import RunControls from "./run-controls/run-controls"
 import TriggerControl from "./trigger-control"
+import ConnectionLine from "./connection-line"
 
 
 const nodeTypes = {
@@ -83,6 +84,7 @@ export default function WorkflowGraphEditor({
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
 
+                connectionLineComponent={ConnectionLine}
                 connectOnClick={false}
                 snapGrid={snapGrid}
                 snapToGrid={settings?.showGrid || false}

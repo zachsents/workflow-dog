@@ -23,32 +23,31 @@ export async function POST(req: NextRequest) {
         return errorResponse(err.message, 400)
     }
 
-    switch (event.type) {
-        case "customer.subscription.created":
-            console.log("Subscription created")
-            await handleNewSubscription(event.data.object as Stripe.Subscription)
-            break
-        case "customer.subscription.deleted":
-            console.log("Subscription deleted")
-            break
-        case "customer.subscription.updated":
-            console.log("Subscription updated")
-            break
-    }
+    await EventHandlers[event.type]?.(event)
 
     return NextResponse.json({ success: true })
 }
 
 
-async function handleNewSubscription(subscription: Stripe.Subscription) {
+type EventHandlersRecord = Partial<{ [key in Stripe.Event["type"]]: (event: Stripe.Event) => Promise<void> }>
 
-    const projectId = subscription.metadata.projectId
-    if (!projectId) return
+const EventHandlers: EventHandlersRecord = {
+    "customer.subscription.created": async (event) => {
+        const sub = event.data.object as Stripe.Subscription
+        await setBillingPlan(sub.metadata.projectId, "pro")
+    },
+    "customer.subscription.deleted": async (event) => {
+        const sub = event.data.object as Stripe.Subscription
+        await setBillingPlan(sub.metadata.projectId, null)
+    },
+}
 
+
+async function setBillingPlan(projectId: string, billing_plan: string | null) {
     const supabase = await supabaseServerAdmin()
     await supabase
         .from("teams")
-        .update({ billing_plan: "pro" })
+        .update({ billing_plan: billing_plan as any })
         .eq("id", projectId)
         .throwOnError()
 }

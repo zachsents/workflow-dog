@@ -133,6 +133,7 @@ export type Database = {
       }
       teams: {
         Row: {
+          billing_plan: Database["public"]["Enums"]["billing_plan"] | null
           created_at: string
           creator: string | null
           id: string
@@ -140,6 +141,7 @@ export type Database = {
           name: string
         }
         Insert: {
+          billing_plan?: Database["public"]["Enums"]["billing_plan"] | null
           created_at?: string
           creator?: string | null
           id?: string
@@ -147,6 +149,7 @@ export type Database = {
           name?: string
         }
         Update: {
+          billing_plan?: Database["public"]["Enums"]["billing_plan"] | null
           created_at?: string
           creator?: string | null
           id?: string
@@ -404,6 +407,7 @@ export type Database = {
       }
     }
     Enums: {
+      billing_plan: "pro"
       team_invitation_status: "requested" | "pending"
       user_team_role: "viewer" | "editor"
       workflow_node_run_status:

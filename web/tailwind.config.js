@@ -7,6 +7,7 @@ module.exports = {
         './app/**/*.{ts,tsx}',
         './src/**/*.{ts,tsx}',
         '../packages/**/*.tsx',
+        './modules/plans.ts'
     ],
     prefix: "",
     theme: {

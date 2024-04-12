@@ -1,5 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
+import { createClient } from "@supabase/supabase-js"
 import type { Database } from "@web/lib/types/supabase-db"
+import jwt, { JwtPayload } from "jsonwebtoken"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { NextResponse, type NextRequest } from "next/server"
@@ -43,6 +45,42 @@ export function supabaseServer() {
             },
         }
     )
+}
+
+
+export async function supabaseServerAdmin() {
+    return createClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_KEY!,
+        // await getSecret("SUPABASE_SERVICE_KEY", false),
+    )
+}
+
+
+export function supabaseVerifyJWT(
+    req: Request,
+    shouldThrow = true
+): typeof shouldThrow extends true ? JwtPayload : (JwtPayload | false) {
+
+    const token = req.headers.get("Authorization")?.replace("Bearer ", "")
+    if (!token) {
+        if (shouldThrow)
+            throw new Error("No token provided")
+        else
+            return false
+    }
+
+    const verify = () => jwt.verify(token, process.env.SUPABASE_JWT_SECRET!) as JwtPayload
+
+    if (shouldThrow)
+        return verify()
+
+    try {
+        return verify()
+    }
+    catch (error) {
+        return false
+    }
 }
 
 

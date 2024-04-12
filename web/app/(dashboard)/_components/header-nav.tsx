@@ -21,6 +21,7 @@ export default function DashboardHeaderNav() {
                 <NavigationMenuItem>
                     {isProjectSelected && <>
                         <NavLink href={relative("/workflows")} shortcut="W">Workflows</NavLink>
+                        <NavLink href={relative("/usage")} shortcut="U">Usage</NavLink>
                         <NavLink href={relative("/settings")} shortcut="S">Settings</NavLink>
                     </>}
                 </NavigationMenuItem>

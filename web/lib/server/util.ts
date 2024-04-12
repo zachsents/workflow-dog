@@ -1,3 +1,4 @@
+import "server-only"
 
 export async function checkForErrorThenJson(res: Response) {
     if (!res.ok) {

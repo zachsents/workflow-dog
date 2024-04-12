@@ -1,5 +1,5 @@
 import { getAuth, parent } from "@web/lib/server/google"
-import { supabaseServerAdmin } from "@web/lib/server/supabase-admin"
+import { supabaseServerAdmin } from "@web/lib/server/supabase"
 import { google } from "googleapis"
 import { NextResponse } from "next/server"
 import { z } from "zod"

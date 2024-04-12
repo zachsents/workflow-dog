@@ -1,7 +1,6 @@
 "use server"
 
-import { remapError, supabaseServer } from "@web/lib/server/supabase"
-import { supabaseServerAdmin } from "@web/lib/server/supabase-admin"
+import { remapError, supabaseServer, supabaseServerAdmin } from "@web/lib/server/supabase"
 import { revalidatePath } from "next/cache"
 import { TriggerDefinitions } from "packages/server"
 

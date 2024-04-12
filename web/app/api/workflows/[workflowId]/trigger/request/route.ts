@@ -1,5 +1,4 @@
-import { remapError } from "@web/lib/server/supabase"
-import { supabaseServerAdmin } from "@web/lib/server/supabase-admin"
+import { remapError, supabaseServerAdmin } from "@web/lib/server/supabase"
 import { NextRequest, NextResponse } from "next/server"
 
 

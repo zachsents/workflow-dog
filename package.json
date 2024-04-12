@@ -1,6 +1,8 @@
 {
     "private": true,
-    "scripts": {},
+    "scripts": {
+        "gentypes": "supabase gen types typescript --project-id vewsmenzeqceyczoobfx > web/lib/types/supabase-db.ts"
+    },
     "devDependencies": {
         "@eslint/js": "^8.56.0",
         "@next/eslint-plugin-next": "^14.0.4",

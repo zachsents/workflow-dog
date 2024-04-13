@@ -34,20 +34,25 @@ type EventHandlersRecord = Partial<{ [key in Stripe.Event["type"]]: (event: Stri
 const EventHandlers: EventHandlersRecord = {
     "customer.subscription.created": async (event) => {
         const sub = event.data.object as Stripe.Subscription
-        await setBillingPlan(sub.metadata.projectId, "pro")
+        await setBillingPlan(sub.metadata.projectId, "pro", true)
     },
     "customer.subscription.deleted": async (event) => {
         const sub = event.data.object as Stripe.Subscription
-        await setBillingPlan(sub.metadata.projectId, null)
+        await setBillingPlan(sub.metadata.projectId, null, false)
     },
 }
 
 
-async function setBillingPlan(projectId: string, billing_plan: string | null) {
+async function setBillingPlan(projectId: string, billing_plan: string | null, updateStartDate: boolean) {
     const supabase = await supabaseServerAdmin()
     await supabase
         .from("teams")
-        .update({ billing_plan: billing_plan as any })
+        .update({
+            billing_plan: billing_plan as any,
+            ...updateStartDate && {
+                billing_start_date: new Date().toISOString().split("T")[0],
+            },
+        })
         .eq("id", projectId)
         .throwOnError()
 }

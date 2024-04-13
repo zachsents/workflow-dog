@@ -1,4 +1,5 @@
 import { TbBuildingFactory, TbCoffee } from "react-icons/tb"
+import { PlanLimits } from "./plan-limits"
 
 
 export type PlanData = {
@@ -8,7 +9,8 @@ export type PlanData = {
     showBillingButton: boolean
     badgeClassName: string
     upgradeButtonClassName?: string
-    upsell?: string
+    upsell?: string,
+    limits: typeof PlanLimits.free
 }
 
 export const PlanData: Record<string, PlanData> = {
@@ -22,6 +24,7 @@ export const PlanData: Record<string, PlanData> = {
         showBillingButton: false,
         badgeClassName: "bg-neutral-200 text-neutral-700",
         upsell: "pro",
+        limits: PlanLimits.free,
     },
     pro: {
         name: "Pro",
@@ -33,5 +36,6 @@ export const PlanData: Record<string, PlanData> = {
         showBillingButton: true,
         badgeClassName: "bg-primary text-primary-foreground",
         upgradeButtonClassName: "bg-neutral-800",
+        limits: PlanLimits.pro,
     },
 }

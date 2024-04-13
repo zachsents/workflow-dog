@@ -1,8 +1,9 @@
-import { supabaseServer } from "@web/lib/server/supabase"
+import { getProjectBilling, isCurrentUserOwner } from "@web/lib/server/projects"
 import CurrentPlanCard from "./_components/current-plan-card"
 import UpgradePlanCard from "./_components/upgrade-plan-card"
 import UsageByWorkflow from "./_components/usage-by-workflow"
 import UsageSummaryCard from "./_components/usage-summary-card"
+import { cn } from "@web/lib/utils"
 
 
 export default async function UsagePage({
@@ -10,41 +11,39 @@ export default async function UsagePage({
 }: {
     params: { projectId: string }
 }) {
-
-    const supabase = supabaseServer()
-    const projectQuery = await supabase
-        .from("teams")
-        .select("billing_plan")
-        .eq("id", projectId)
-        .single()
-        .throwOnError()
-
-    const billingPlan = projectQuery.data?.billing_plan || "free"
+    const billing = await getProjectBilling(projectId)
+    const isOwner = await isCurrentUserOwner(projectId)
 
     return (<>
-        <div className="flex justify-between gap-10">
-            <h1 className="text-2xl font-bold">
-                Usage
-            </h1>
-
-            {/* <CreateWorkflow /> */}
-        </div>
+        <h1 className="text-2xl font-bold">
+            Usage
+        </h1>
 
         <div className="grid grid-cols-2 gap-6">
-            <div className="row-span-2">
-                <UsageSummaryCard />
+            <div className={cn(
+                isOwner ? "row-span-2" : "col-span-full"
+            )}>
+                <UsageSummaryCard
+                    billingPlan={billing.plan}
+                    billingPeriod={billing.period}
+                    projectId={projectId}
+                />
             </div>
-            <div>
-                <CurrentPlanCard billingPlan={billingPlan} />
-            </div>
-            <div>
-                <UpgradePlanCard billingPlan={billingPlan} />
-            </div>
+            {isOwner && <>
+                <div>
+                    <CurrentPlanCard billingPlan={billing.plan} />
+                </div>
+                <div>
+                    <UpgradePlanCard billingPlan={billing.plan} />
+                </div>
+            </>}
 
             <div className="col-span-full">
-                <UsageByWorkflow />
+                <UsageByWorkflow
+                    projectId={projectId}
+                    billingPeriod={billing.period}
+                />
             </div>
         </div>
-        {/* <WorkflowsTable projectId={projectId} /> */}
     </>)
 }

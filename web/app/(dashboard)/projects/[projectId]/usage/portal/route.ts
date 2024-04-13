@@ -14,7 +14,6 @@ export async function GET(
         return NextResponse.redirect("/login")
 
     const stripe = getStripe()
-
     const { id: customerId } = await getStripeCustomerByUserId(stripe, user.id)
 
     const { url } = await stripe.billingPortal.sessions.create({

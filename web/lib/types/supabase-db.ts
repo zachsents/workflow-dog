@@ -134,6 +134,7 @@ export type Database = {
       teams: {
         Row: {
           billing_plan: Database["public"]["Enums"]["billing_plan"] | null
+          billing_start_date: string | null
           created_at: string
           creator: string | null
           id: string
@@ -142,6 +143,7 @@ export type Database = {
         }
         Insert: {
           billing_plan?: Database["public"]["Enums"]["billing_plan"] | null
+          billing_start_date?: string | null
           created_at?: string
           creator?: string | null
           id?: string
@@ -150,6 +152,7 @@ export type Database = {
         }
         Update: {
           billing_plan?: Database["public"]["Enums"]["billing_plan"] | null
+          billing_start_date?: string | null
           created_at?: string
           creator?: string | null
           id?: string

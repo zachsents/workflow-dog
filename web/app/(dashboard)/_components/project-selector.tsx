@@ -17,7 +17,7 @@ import Kbd from "@web/components/kbd"
 import { useCurrentProjectId, useDialogState } from "@web/lib/client/hooks"
 import { cn } from "@web/lib/utils"
 import { useProjectsForUser } from "@web/modules/projects"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useHotkeys } from "react-hotkeys-hook"
 import { TbCheck, TbChevronDown } from "react-icons/tb"
 
@@ -30,9 +30,12 @@ export default function ProjectSelector() {
 
     const activeProjectId = useCurrentProjectId()
     const router = useRouter()
+    const pathname = usePathname()
     const goToProject = (projectId: string) => () => {
-        if (activeProjectId !== projectId)
-            router.push(`/projects/${projectId}`)
+        if (activeProjectId !== projectId) {
+            const route = pathname.split("/").slice(3).join("/")
+            router.push(`/projects/${projectId}/${route}`)
+        }
         popover.close()
     }
 

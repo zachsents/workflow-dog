@@ -1,11 +1,12 @@
 import { Button } from "@web/components/ui/button"
 import { Card } from "@web/components/ui/card"
+import type { ProjectBillingPlan } from "@web/lib/server/projects"
 import { cn } from "@web/lib/utils"
 import { PlanData } from "@web/modules/plans"
 import Link from "next/link"
 
 
-export default async function CurrentPlanCard({ billingPlan }: { billingPlan: string }) {
+export default async function CurrentPlanCard({ billingPlan }: { billingPlan: ProjectBillingPlan }) {
 
     const planData = PlanData[billingPlan]
 

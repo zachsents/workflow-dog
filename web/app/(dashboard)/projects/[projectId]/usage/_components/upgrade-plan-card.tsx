@@ -1,11 +1,12 @@
 import { Button } from "@web/components/ui/button"
 import { Card } from "@web/components/ui/card"
+import type { ProjectBillingPlan } from "@web/lib/server/projects"
 import { PlanData } from "@web/modules/plans"
 import Link from "next/link"
 import { TbConfetti } from "react-icons/tb"
 
 
-export default function UpgradePlanCard({ billingPlan }: { billingPlan: string }) {
+export default function UpgradePlanCard({ billingPlan }: { billingPlan: ProjectBillingPlan }) {
 
     const planData = PlanData[PlanData[billingPlan].upsell!]
 

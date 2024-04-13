@@ -125,10 +125,18 @@ export async function renameWorkflow(workflowId: string, name: string) {
 }
 
 
+/**
+ * Server Action: Create Project
+ * ---
+ * Creates a new project (formerly known as a "team").
+ */
 export async function createProject(name: string) {
 
     const supabase = supabaseServer()
     const userId = await supabase.auth.getUser().then(u => u.data.user?.id)
+
+    if (!userId)
+        return { error: { message: "User not found" } }
 
     const insertQuery = await supabase
         .from("teams")

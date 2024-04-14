@@ -1,7 +1,8 @@
 import { getAuth, parent } from "@web/lib/server/google"
+import { errorResponse } from "@web/lib/server/router"
 import { supabaseServerAdmin } from "@web/lib/server/supabase"
 import { google } from "googleapis"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
 
@@ -13,16 +14,26 @@ const bodySchema = z.object({
 
 
 export async function POST(
-    req: Request,
+    req: NextRequest,
     { params: { workflowId } }: { params: { workflowId: string } }
 ) {
     const supabase = await supabaseServerAdmin()
+
+    const isEnabledQuery = await supabase
+        .from("workflows")
+        .select("is_enabled")
+        .eq("id", workflowId)
+        .single()
+        .throwOnError()
+
+    if (!isEnabledQuery.data?.is_enabled)
+        return errorResponse("Workflow is disabled.", 400)
 
     /*
      * Get the count so we can increment it. Should technically be done in a transaction
      * but it's purely for display purposes so it's fine.
      */
-    const { data } = await supabase
+    const countQuery = await supabase
         .from("workflow_runs")
         .select("count")
         .eq("workflow_id", workflowId)
@@ -30,7 +41,7 @@ export async function POST(
         .limit(1)
         .single()
 
-    const count = data?.count || 0
+    const count = countQuery.data?.count || 0
 
     const validatedBody = bodySchema.safeParse(await req.json())
 
@@ -76,8 +87,7 @@ export async function POST(
             method: "POST"
         })
     }
-
-    if (process.env.NODE_ENV === "production") {
+    else if (process.env.NODE_ENV === "production") {
         await google.cloudtasks({
             version: "v2",
             auth: getAuth(),
@@ -97,7 +107,7 @@ export async function POST(
         })
     }
 
-    if (!(new URL(req.url).searchParams.has("subscribe"))) {
+    if (!req.nextUrl.searchParams.has("subscribe")) {
         return NextResponse.json({
             id: newRunId,
             count: count + 1,

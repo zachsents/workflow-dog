@@ -362,6 +362,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      count_workflow_runs_for_project: {
+        Args: {
+          project_id: string
+          after: string
+        }
+        Returns: number
+      }
       does_user_exist: {
         Args: {
           _email: string
@@ -407,6 +414,13 @@ export type Database = {
           role: Database["public"]["Enums"]["user_team_role"]
         }
         Returns: boolean
+      }
+      queue_workflow_run: {
+        Args: {
+          _workflow_id: string
+          json_body: Json
+        }
+        Returns: string
       }
     }
     Enums: {

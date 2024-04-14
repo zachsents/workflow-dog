@@ -21,33 +21,34 @@ export async function isCurrentUserOwner(projectId: string) {
 
 export async function getProjectBilling(projectId: string) {
     const supabase = supabaseServer()
-    const projectQuery = await supabase
+    const { billing_plan, billing_start_date } = await supabase
         .from("teams")
         .select("billing_plan, billing_start_date")
         .eq("id", projectId)
         .single()
         .throwOnError()
+        .then(q => ({
+            billing_plan: q.data?.billing_plan || "free",
+            billing_start_date: q.data?.billing_start_date || "2021-01-01",
+        }))
 
-    const plan = projectQuery.data?.billing_plan || "free"
-
-    const staticDay = new Date(projectQuery.data?.billing_start_date!)
-        .getUTCDate()
+    const staticDay = parseInt(billing_start_date.split("-")[2])
 
     const now = new Date()
     const currentMonth = now.getUTCMonth()
     const currentYear = now.getUTCFullYear()
-    const thisMonthsDay = new Date(currentYear, currentMonth, staticDay)
+    const thisMonthsDay = new Date(Date.UTC(currentYear, currentMonth, staticDay))
 
     const period: ProjectBillingPeriod = now < thisMonthsDay ? {
-        start: new Date(currentYear, currentMonth - 1, staticDay),
-        end: thisMonthsDay
+        start: new Date(Date.UTC(currentYear, currentMonth - 1, staticDay)),
+        end: thisMonthsDay,
     } : {
         start: thisMonthsDay,
-        end: new Date(currentYear, currentMonth + 1, staticDay)
+        end: new Date(Date.UTC(currentYear, currentMonth + 1, staticDay)),
     }
 
     return {
-        plan: plan as ProjectBillingPlan,
+        plan: billing_plan as ProjectBillingPlan,
         period
     }
 }

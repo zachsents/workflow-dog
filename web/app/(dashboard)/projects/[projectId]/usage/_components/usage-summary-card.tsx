@@ -17,32 +17,33 @@ export default async function UsageSummaryCard({
 }) {
 
     const supabase = supabaseServer()
-    const workflowRunsCountQuery = await supabase
-        .from("workflow_runs")
-        .select("*, workflows ( team_id )", { count: "exact", head: true })
-        .eq("workflows.team_id", projectId)
-        .gt("started_at", billingPeriod.start.toISOString())
-        .throwOnError()
 
-    const teamMemberCountQuery = await supabase
+    const workflowRunsCount = await supabase
+        .rpc("count_workflow_runs_for_project", {
+            project_id: projectId,
+            after: billingPeriod.start.toISOString(),
+        })
+        .throwOnError()
+        .then(q => q.data || 0)
+
+    const teamMembersCount = await supabase
         .from("users_teams")
         .select("*", { count: "exact", head: true })
         .eq("team_id", projectId)
         .throwOnError()
+        .then(q => q.count || 0)
 
     const planData = PlanData[billingPlan]
 
-    const workflowRunsUsage = workflowRunsCountQuery.count ?? 0
     const workflowRunsMax = planData.limits.workflowRuns
     const workflowRunsPercent = Math.min(
-        Math.floor(workflowRunsUsage / workflowRunsMax * 100),
+        Math.floor(workflowRunsCount / workflowRunsMax * 100),
         100,
     )
 
-    const teamMembersUsage = teamMemberCountQuery.count ?? 0
     const teamMembersMax = planData.limits.teamMembers
     const teamMembersPercent = Math.min(
-        Math.floor(teamMembersUsage / teamMembersMax * 100),
+        Math.floor(teamMembersCount / teamMembersMax * 100),
         100,
     )
 
@@ -65,7 +66,7 @@ export default async function UsageSummaryCard({
                 <div className="flex between text-muted-foreground px-2">
                     <p className="flex items-center gap-2">
                         <span className="font-bold">
-                            {fmt.format(workflowRunsUsage)}
+                            {fmt.format(workflowRunsCount)}
                         </span>
                         <span>/</span>
                         <span>
@@ -94,7 +95,7 @@ export default async function UsageSummaryCard({
                 <Progress value={teamMembersPercent} className="h-3" />
                 <p className="flex items-center gap-2 px-2 text-muted-foreground">
                     <span className="font-bold">
-                        {fmt.format(teamMembersUsage)}
+                        {fmt.format(teamMembersCount)}
                     </span>
                     <span>/</span>
                     <span>

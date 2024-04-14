@@ -196,7 +196,7 @@ export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
             })
 
             toast.promise(finishPromise, {
-                loading: `Running #${run.count}...`,
+                loading: "Running...",
                 success: (finishedRun: any) => `${Object.keys(finishedRun.state.outputs).length} outputs, ${finishedRun.error_count} errors`,
                 error: err => err,
                 dismissible: true,

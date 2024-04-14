@@ -23,12 +23,13 @@ import Loader from "@web/components/loader"
 import { useAction } from "@web/lib/client/actions"
 import { useBooleanState, useCurrentProjectId } from "@web/lib/client/hooks"
 import { useForm } from "react-hook-form"
-import { TbUserPlus } from "react-icons/tb"
+import { TbStar, TbUserPlus } from "react-icons/tb"
 import { inviteMember as inviteMemberAction } from "../actions"
 import { InviteMemberSchema, inviteMemberSchema } from "../schema"
+import Link from "next/link"
 
 
-export default function InviteMember() {
+export default function InviteMember({ reachedLimit }: { reachedLimit?: boolean }) {
 
     const projectId = useCurrentProjectId()
 
@@ -54,6 +55,16 @@ export default function InviteMember() {
             })
             .catch(err => form.setError("email", { message: err.message }))
     }
+
+    if (reachedLimit)
+        return (
+            <Button asChild>
+                <Link href="usage" className="flex center gap-2">
+                    <TbStar />
+                    Upgrade to invite more members
+                </Link>
+            </Button>
+        )
 
     return (
         <Dialog open={isOpen} onOpenChange={setOpen}>

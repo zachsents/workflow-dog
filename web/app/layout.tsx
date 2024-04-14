@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import "@web/styles/globals.css"
 import { Providers } from "@web/app/providers"
 import { Toaster } from "@ui/toaster"
+import "@web/lib/server/supabase-warning-fix"
 
 
 export const metadata: Metadata = {

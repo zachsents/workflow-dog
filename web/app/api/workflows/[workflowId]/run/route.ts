@@ -1,6 +1,8 @@
 import { getAuth, parent } from "@web/lib/server/google"
+import { getProjectBilling } from "@web/lib/server/projects"
 import { errorResponse } from "@web/lib/server/router"
 import { supabaseServerAdmin } from "@web/lib/server/supabase"
+import { PlanLimits } from "@web/modules/plan-limits"
 import { google } from "googleapis"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
@@ -17,68 +19,45 @@ export async function POST(
     req: NextRequest,
     { params: { workflowId } }: { params: { workflowId: string } }
 ) {
+    const validatedBody = bodySchema.safeParse(await req.json())
+    if (!validatedBody.success)
+        return NextResponse.json(validatedBody.error, { status: 400 })
+    const reqBody = validatedBody.data
+
     const supabase = await supabaseServerAdmin()
 
-    const isEnabledQuery = await supabase
+    const projectId = await supabase
         .from("workflows")
-        .select("is_enabled")
+        .select("team_id")
         .eq("id", workflowId)
         .single()
         .throwOnError()
+        .then(q => q.data?.team_id)
 
-    if (!isEnabledQuery.data?.is_enabled)
-        return errorResponse("Workflow is disabled.", 400)
+    if (!projectId)
+        return errorResponse("Workflow not found", 404)
 
-    /*
-     * Get the count so we can increment it. Should technically be done in a transaction
-     * but it's purely for display purposes so it's fine.
-     */
-    const countQuery = await supabase
-        .from("workflow_runs")
-        .select("count")
-        .eq("workflow_id", workflowId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single()
+    const billing = await getProjectBilling(projectId)
+    const usageLimit = PlanLimits[billing.plan].workflowRuns
 
-    const count = countQuery.data?.count || 0
-
-    const validatedBody = bodySchema.safeParse(await req.json())
-
-    if (!validatedBody.success) {
-        return NextResponse.json(validatedBody.error, { status: 400 })
-    }
-
-    const reqBody = validatedBody.data
-
-    if (reqBody.copyTriggerDataFrom) {
-        const query = await supabase
-            .from("workflow_runs")
-            .select("trigger_data")
-            .eq("id", reqBody.copyTriggerDataFrom)
-            .eq("workflow_id", workflowId)
-            .single()
-            .throwOnError()
-
-        reqBody.triggerData = query.data?.trigger_data
-    }
-
-    const insertRunQuery = await supabase
-        .from("workflow_runs")
-        .insert({
-            workflow_id: workflowId,
-            trigger_data: reqBody.triggerData,
-            count: count + 1,
-            ...reqBody.scheduledFor && {
-                status: "scheduled",
-                scheduled_for: reqBody.scheduledFor,
-            },
+    const usageCount = await supabase
+        .rpc("count_workflow_runs_for_project", {
+            project_id: projectId,
+            after: billing.period.start.toISOString(),
         })
-        .select("id")
-        .single()
         .throwOnError()
+        .then(q => q.data || 0)
 
-    const newRunId = insertRunQuery.data?.id
+    if (usageCount >= usageLimit)
+        return errorResponse(`Usage limit exceeded (${usageCount} / ${usageLimit})`, 429)
+
+    const newRunId = await supabase
+        .rpc("queue_workflow_run", {
+            _workflow_id: workflowId,
+            json_body: reqBody,
+        })
+        .throwOnError()
+        .then(q => q.data)
 
     console.debug(`Sending run (${newRunId}) to`, process.env.WORKFLOW_MAN_URL)
 
@@ -110,7 +89,6 @@ export async function POST(
     if (!req.nextUrl.searchParams.has("subscribe")) {
         return NextResponse.json({
             id: newRunId,
-            count: count + 1,
         }, { status: 201 })
     }
 

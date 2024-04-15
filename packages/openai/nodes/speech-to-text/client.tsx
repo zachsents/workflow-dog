@@ -750,6 +750,7 @@ const languages = [
 export default createClientNodeDefinition(shared, {
     icon: TbBrandOpenai,
     color: "#000000",
+    badge: "OpenAI",
     tags: ["ChatGPT", "OpenAI", "AI", "Whisper"],
     inputs: {
         audio: {},

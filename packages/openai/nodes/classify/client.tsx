@@ -5,6 +5,7 @@ import shared from "./shared"
 export default createClientNodeDefinition(shared, {
     icon: TbBrandOpenai,
     color: "#000000",
+    badge: "OpenAI",
     tags: ["ChatGPT", "OpenAI", "AI"],
     inputs: {
         prompt: {

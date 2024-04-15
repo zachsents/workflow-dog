@@ -5,6 +5,7 @@ import shared from "./shared"
 export default createClientNodeDefinition(shared, {
     icon: TbUsers,
     color: "#1463ff",
+    badge: "CloseCRM",
     tags: ["CloseCRM", "CRM", "Sales"],
     inputs: {
         limit: {},

@@ -3,18 +3,16 @@
 import Kbd from "@web/components/kbd"
 import { Button } from "@web/components/ui/button"
 import { Card } from "@web/components/ui/card"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@web/components/ui/dialog"
 import { Input } from "@web/components/ui/input"
 import { Popover, PopoverAnchor, PopoverContent } from "@web/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
-import { useDialogState, useLogEffect } from "@web/lib/client/hooks"
+import { useDialogState } from "@web/lib/client/hooks"
+import { cn } from "@web/lib/utils"
 import { useCreateActionNode, useNodeDefinitionColors } from "@web/modules/workflow-editor/graph/nodes"
+import { AllNodeDefinitionTags, useSearchNodes, type NodeSearchResult } from "@web/modules/workflow-editor/node-search"
 import { NodeDefinitions } from "packages/client"
-import { useMemo, useRef, useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
-import { TbChevronsUp } from "react-icons/tb"
-import Fuse, { FuseResult } from "fuse.js"
-import { useDebouncedCallback } from "@react-hookz/web"
+import { TbX } from "react-icons/tb"
 
 
 const fixedNodes = [
@@ -23,15 +21,18 @@ const fixedNodes = [
 ]
 
 
-type NodeSearchResult = FuseResult<typeof NodeDefinitions.asArray[0]>
-
-
 export default function EditorToolbar() {
 
-    const inputRef = useRef<HTMLInputElement>(null)
-
     const popover = useDialogState()
-    const dialog = useDialogState()
+
+    const {
+        searchResults,
+        onSearchChange,
+        inputRef,
+        tagSearchResults,
+        filters,
+        hasQuery,
+    } = useSearchNodes({ withFilters: true })
 
     useHotkeys("/", () => {
         inputRef.current?.focus()
@@ -50,21 +51,7 @@ export default function EditorToolbar() {
             inputRef.current.value = ""
         }
         popover.close()
-        dialog.close()
     }
-
-    const [searchResults, setSearchResults] = useState<NodeSearchResult[]>([])
-
-    const fuseIndex = useMemo(() => new Fuse(NodeDefinitions.asArray, {
-        includeScore: true,
-        keys: ["name", "description", "tags"],
-    }), [])
-
-    const onSearchChange = useDebouncedCallback((query: string) => {
-        setSearchResults(
-            fuseIndex.search(query, { limit: 8 })
-        )
-    }, [fuseIndex], 200)
 
     return (
         <Card className="p-1 flex items-stretch flex-nowrap gap-2 pointer-events-auto shadow-lg">
@@ -94,19 +81,19 @@ export default function EditorToolbar() {
 
             <Popover
                 {...popover.dialogProps}
-                open={popover.isOpen && searchResults.length > 0}
+                open={popover.isOpen}
             >
                 <PopoverAnchor>
                     <div className="relative">
                         <Input
-                            placeholder="Search tasks..."
+                            placeholder="Search actions..."
                             onFocus={ev => {
                                 popover.open()
                                 ev.currentTarget.select()
                             }}
                             onClick={popover.open}
                             onChange={ev => onSearchChange(ev.currentTarget.value)}
-                            className="peer/input"
+                            className="peer/input w-[280px]"
                             ref={inputRef}
                         />
 
@@ -115,16 +102,96 @@ export default function EditorToolbar() {
                 </PopoverAnchor>
                 <PopoverContent
                     side="top" align="center"
-                    className="p-1 w-[240px] shadow-md flex flex-col-reverse items-stretch gap-1"
+                    className="p-4 w-[540px] h-[380px] shadow-lg grid grid-cols-[auto_180px] gap-4"
                     onOpenAutoFocus={ev => ev.preventDefault()}
+                    onKeyDown={ev => {
+                        if (ev.key !== "Enter")
+                            inputRef.current?.focus()
+                    }}
                 >
-                    {searchResults.map(result =>
-                        <SearchResult
-                            key={result.item.id}
-                            result={result}
-                            onClick={() => addNode(result.item.id)}
-                        />
-                    )}
+                    <div className="flex-v items-stretch gap-1 overflow-y-scroll h-full pr-2">
+                        <p className="text-xs text-muted-foreground">
+                            {hasQuery ? "Search results" : "Common actions"}
+                        </p>
+
+                        {hasQuery
+                            ? searchResults.map(result =>
+                                <SearchResult
+                                    key={result.item.id}
+                                    result={result}
+                                    onClick={() => addNode(result.item.id)}
+                                />
+                            )
+                            : NodeDefinitions.asArray
+                                .filter(definition => Array.from(filters).every(tag => definition.tags.includes(tag)))
+                                .slice(0, 10)
+                                .map(definition =>
+                                    <SearchResult
+                                        key={definition.id}
+                                        result={{
+                                            item: definition,
+                                            score: 0,
+                                            refIndex: 0,
+                                        }}
+                                        onClick={() => addNode(definition.id)}
+                                    />
+
+                                )}
+                    </div>
+
+                    <div className="flex-v items-stretch gap-2 h-full overflow-y-scroll">
+                        <p className="font-bold text-sm">
+                            Filter actions
+                        </p>
+
+                        {filters.size > 0 && <>
+                            <p className="text-xs text-muted-foreground">
+                                Selected filters
+                            </p>
+                            <div className="flex-v items-stretch gap-2">
+                                {Array.from(filters).map(tag =>
+                                    <button
+                                        onClick={() => filters.delete(tag)}
+                                        className="rounded-full px-4 py-1 bg-violet-200 hover:bg-red-200 flex center gap-4 font-bold transition-colors text-sm"
+                                        key={tag}
+                                    >
+                                        {tag}
+                                        <TbX />
+                                    </button>
+                                )}
+                            </div>
+                        </>}
+
+
+                        <p className="text-xs text-muted-foreground">
+                            {hasQuery ? "Search results" : "Common tags"}
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-x-1 gap-y-2 flex-wrap">
+                            {hasQuery
+                                ? tagSearchResults.map((tag, i) =>
+                                    <TagSearchResult
+                                        onClick={() => filters.add(tag.item)}
+                                        big={i < 1}
+                                        key={tag.item}
+                                    >
+                                        {tag.item}
+                                    </TagSearchResult>
+                                )
+                                : AllNodeDefinitionTags
+                                    .filter(tag => !filters.has(tag))
+                                    .slice(0, 10)
+                                    .map((tag, i) =>
+                                        <TagSearchResult
+                                            onClick={() => filters.add(tag)}
+                                            big={i < 5}
+                                            key={tag}
+                                        >
+                                            {tag}
+                                        </TagSearchResult>
+                                    )}
+                        </div>
+                    </div>
                 </PopoverContent>
             </Popover>
 
@@ -141,7 +208,7 @@ export default function EditorToolbar() {
                 </Tooltip>
             </TooltipProvider> */}
 
-            <Dialog {...dialog.dialogProps}>
+            {/* <Dialog {...dialog.dialogProps}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
@@ -149,7 +216,7 @@ export default function EditorToolbar() {
                         </DialogTitle>
                     </DialogHeader>
                 </DialogContent>
-            </Dialog>
+            </Dialog> */}
         </Card >
     )
 }
@@ -184,6 +251,26 @@ function SearchResult({
                     {result.item.description}
                 </p>
             </div>
+        </button>
+    )
+}
+
+
+interface TagSearchResultProps extends React.ComponentProps<"button"> {
+    children: any
+    big?: boolean
+}
+
+function TagSearchResult({ children, big, ...props }: TagSearchResultProps) {
+    return (
+        <button
+            className={cn(
+                "rounded-full px-4 py-1 bg-slate-100 hover:bg-violet-200 font-bold transition-colors",
+                big ? "col-span-2 text-sm" : "text-xs",
+            )}
+            {...props}
+        >
+            {children}
         </button>
     )
 }

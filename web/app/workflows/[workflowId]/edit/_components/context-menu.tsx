@@ -12,11 +12,12 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@ui/popover"
+import { Badge } from "@web/components/ui/badge"
 import { cn } from "@web/lib/utils"
 import { stringHash } from "@web/modules/util"
 import { useCreateActionNode } from "@web/modules/workflow-editor/graph/nodes"
+import { useSearchNodes } from "@web/modules/workflow-editor/node-search"
 import { useEditorStore, useEditorStoreState } from "@web/modules/workflow-editor/store"
-import { NodeDefinitions } from "packages/client"
 import { useMemo } from "react"
 import { useReactFlow } from "reactflow"
 
@@ -44,6 +45,8 @@ export default function ContextMenu() {
 
     const popoverKey = useMemo(() => stringHash(position), [position])
 
+    const { searchResults, onSearchChange, inputRef } = useSearchNodes()
+
     return (<>
         <Popover open={isOpen} onOpenChange={setOpen} key={popoverKey}>
             <PopoverTrigger asChild>
@@ -58,19 +61,35 @@ export default function ContextMenu() {
                     }}
                 />
             </PopoverTrigger>
-            <PopoverContent className="w-[240px] p-1">
-                <Command>
-                    <CommandInput placeholder="Search nodes..." />
+            <PopoverContent className="w-[300px] p-1">
+                <Command shouldFilter={false}>
+                    <CommandInput
+                        placeholder="Search actions..."
+                        onValueChange={onSearchChange}
+                        ref={inputRef}
+                    />
                     <CommandList>
-                        <CommandEmpty>No nodes found.</CommandEmpty>
-                        {NodeDefinitions.asArray.map(definition => (
+                        <CommandEmpty>No actions found.</CommandEmpty>
+                        {searchResults.map(({ item: definition }) => (
                             <CommandItem
                                 key={definition.id}
                                 value={definition.id}
                                 onSelect={currentValue => addNode(currentValue)}
+                                className="flex between gap-2 flex-nowrap"
+                                style={{ color: definition.color }}
                             >
-                                {definition.icon && <definition.icon className="mr-2" />}
-                                {definition.name}
+                                <div className="flex items-center gap-2">
+                                    {definition.icon &&
+                                        <definition.icon />}
+                                    <p className="text-foreground">
+                                        {definition.name}
+                                    </p>
+                                </div>
+
+                                {definition.badge &&
+                                    <Badge variant="secondary" className="text-current">
+                                        {definition.badge}
+                                    </Badge>}
                             </CommandItem>
                         ))}
                     </CommandList>

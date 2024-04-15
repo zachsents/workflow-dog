@@ -1,8 +1,8 @@
 import Logo from "@web/public/logo.svg"
 import Link from "next/link"
+import AccountMenu from "./account-menu"
 import DashboardHeaderNav from "./header-nav"
 import ProjectSelector from "./project-selector"
-import AccountMenu from "./account-menu"
 
 
 export default function DashboardHeader() {

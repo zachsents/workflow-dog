@@ -9,7 +9,7 @@ export type NodeSearchResult = FuseResult<typeof NodeDefinitions.asArray[0]>
 
 const nodesFuseIndex = new Fuse(NodeDefinitions.asArray, {
     includeScore: true,
-    keys: ["name", "description", "tags"],
+    keys: ["name", "description", "tags", "searchTerms"],
 })
 
 export const AllNodeDefinitionTags = Array.from(new Set(NodeDefinitions.asArray.flatMap(node => node.tags)))

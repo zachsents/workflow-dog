@@ -96,6 +96,7 @@ export type ClientNodeDefinition<T extends SharedNodeDefinition> = {
     color: string
     badge?: string
     tags: string[]
+    searchTerms?: string[]
     inputs: {
         [K in keyof T["inputs"]]: ClientNodeDefinitionInterface
     }
@@ -121,7 +122,9 @@ export function createExecutionNodeDefinition<T extends SharedNodeDefinition>(sh
 }
 
 export function createClientNodeDefinition<T extends SharedNodeDefinition>(sharedDef: T, def: ClientNodeDefinition<T>) {
-    return _.merge({}, sharedDef, def)
+    return _.merge({}, sharedDef, {
+        searchTerms: [],
+    } satisfies Partial<ClientNodeDefinition<T>>, def)
 }
 
 export type MergedExecutionNodeDefinition = SharedNodeDefinition & ExecutionNodeDefinition<SharedNodeDefinition> & { id: string }

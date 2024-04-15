@@ -15,7 +15,6 @@ import basic_nodes_not_equal_client from "../../basic/nodes/not-equal/client"
 import basic_nodes_number_client from "../../basic/nodes/number/client"
 import basic_nodes_or_client from "../../basic/nodes/or/client"
 import basic_nodes_switch_client from "../../basic/nodes/switch/client"
-import basic_nodes_template_client from "../../basic/nodes/template/client"
 import basic_nodes_text_client from "../../basic/nodes/text/client"
 import basic_nodes_trigger_input_client from "../../basic/nodes/trigger-input/client"
 import basic_nodes_xor_client from "../../basic/nodes/xor/client"
@@ -53,6 +52,16 @@ import openai_nodes_prompt_chatgpt_vision_client from "../../openai/nodes/prompt
 import openai_nodes_speech_to_text_client from "../../openai/nodes/speech-to-text/client"
 import openai_nodes_text_to_speech_client from "../../openai/nodes/text-to-speech/client"
 import openai_nodes_yes_no_decision_client from "../../openai/nodes/yes-no-decision/client"
+import text_nodes_concatenate_client from "../../text/nodes/concatenate/client"
+import text_nodes_lowercase_client from "../../text/nodes/lowercase/client"
+import text_nodes_regex_client from "../../text/nodes/regex/client"
+import text_nodes_regex_search_client from "../../text/nodes/regex-search/client"
+import text_nodes_regex_search_multiple_client from "../../text/nodes/regex-search-multiple/client"
+import text_nodes_replace_client from "../../text/nodes/replace/client"
+import text_nodes_slice_client from "../../text/nodes/slice/client"
+import text_nodes_template_client from "../../text/nodes/template/client"
+import text_nodes_trim_whitespace_client from "../../text/nodes/trim-whitespace/client"
+import text_nodes_uppercase_client from "../../text/nodes/uppercase/client"
 
 
 const _definitions = {
@@ -70,7 +79,6 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/number": _.merge({ id: "https://nodes.workflow.dog/basic/number" }, basic_nodes_number_client),
     "https://nodes.workflow.dog/basic/or": _.merge({ id: "https://nodes.workflow.dog/basic/or" }, basic_nodes_or_client),
     "https://nodes.workflow.dog/basic/switch": _.merge({ id: "https://nodes.workflow.dog/basic/switch" }, basic_nodes_switch_client),
-    "https://nodes.workflow.dog/basic/template": _.merge({ id: "https://nodes.workflow.dog/basic/template" }, basic_nodes_template_client),
     "https://nodes.workflow.dog/basic/text": _.merge({ id: "https://nodes.workflow.dog/basic/text" }, basic_nodes_text_client),
     "https://nodes.workflow.dog/basic/trigger-input": _.merge({ id: "https://nodes.workflow.dog/basic/trigger-input" }, basic_nodes_trigger_input_client),
     "https://nodes.workflow.dog/basic/xor": _.merge({ id: "https://nodes.workflow.dog/basic/xor" }, basic_nodes_xor_client),
@@ -108,6 +116,16 @@ const _definitions = {
     "https://nodes.workflow.dog/openai/speech-to-text": _.merge({ id: "https://nodes.workflow.dog/openai/speech-to-text" }, openai_nodes_speech_to_text_client),
     "https://nodes.workflow.dog/openai/text-to-speech": _.merge({ id: "https://nodes.workflow.dog/openai/text-to-speech" }, openai_nodes_text_to_speech_client),
     "https://nodes.workflow.dog/openai/yes-no-decision": _.merge({ id: "https://nodes.workflow.dog/openai/yes-no-decision" }, openai_nodes_yes_no_decision_client),
+    "https://nodes.workflow.dog/text/concatenate": _.merge({ id: "https://nodes.workflow.dog/text/concatenate" }, text_nodes_concatenate_client),
+    "https://nodes.workflow.dog/text/lowercase": _.merge({ id: "https://nodes.workflow.dog/text/lowercase" }, text_nodes_lowercase_client),
+    "https://nodes.workflow.dog/text/regex": _.merge({ id: "https://nodes.workflow.dog/text/regex" }, text_nodes_regex_client),
+    "https://nodes.workflow.dog/text/regex-search": _.merge({ id: "https://nodes.workflow.dog/text/regex-search" }, text_nodes_regex_search_client),
+    "https://nodes.workflow.dog/text/regex-search-multiple": _.merge({ id: "https://nodes.workflow.dog/text/regex-search-multiple" }, text_nodes_regex_search_multiple_client),
+    "https://nodes.workflow.dog/text/replace": _.merge({ id: "https://nodes.workflow.dog/text/replace" }, text_nodes_replace_client),
+    "https://nodes.workflow.dog/text/slice": _.merge({ id: "https://nodes.workflow.dog/text/slice" }, text_nodes_slice_client),
+    "https://nodes.workflow.dog/text/template": _.merge({ id: "https://nodes.workflow.dog/text/template" }, text_nodes_template_client),
+    "https://nodes.workflow.dog/text/trim-whitespace": _.merge({ id: "https://nodes.workflow.dog/text/trim-whitespace" }, text_nodes_trim_whitespace_client),
+    "https://nodes.workflow.dog/text/uppercase": _.merge({ id: "https://nodes.workflow.dog/text/uppercase" }, text_nodes_uppercase_client),
 }
 
 export const Definitions = createExport<MergedClientNodeDefinition, typeof _definitions>(_definitions)

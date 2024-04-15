@@ -12,6 +12,8 @@ import basic_data_types_string_client from "../../basic/data-types/string/client
 import closecrm_data_types_lead_client from "../../closecrm/data-types/lead/client"
 import openai_data_types_chat_history_client from "../../openai/data-types/chat-history/client"
 import openai_data_types_moderation_categories_client from "../../openai/data-types/moderation-categories/client"
+import text_data_types_regex_client from "../../text/data-types/regex/client"
+import text_data_types_text_or_regex_client from "../../text/data-types/text-or-regex/client"
 
 
 const _definitions = {
@@ -26,6 +28,8 @@ const _definitions = {
     "https://data-types.workflow.dog/closecrm/lead": _.merge({ id: "https://data-types.workflow.dog/closecrm/lead" }, closecrm_data_types_lead_client),
     "https://data-types.workflow.dog/openai/chat-history": _.merge({ id: "https://data-types.workflow.dog/openai/chat-history" }, openai_data_types_chat_history_client),
     "https://data-types.workflow.dog/openai/moderation-categories": _.merge({ id: "https://data-types.workflow.dog/openai/moderation-categories" }, openai_data_types_moderation_categories_client),
+    "https://data-types.workflow.dog/text/regex": _.merge({ id: "https://data-types.workflow.dog/text/regex" }, text_data_types_regex_client),
+    "https://data-types.workflow.dog/text/text-or-regex": _.merge({ id: "https://data-types.workflow.dog/text/text-or-regex" }, text_data_types_text_or_regex_client),
 }
 
 export const Definitions = createExport<MergedClientDataTypeDefinition, typeof _definitions>(_definitions)

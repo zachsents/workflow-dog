@@ -17,6 +17,8 @@
         "@types/lodash": "^4.17.0",
         "@types/react": "*",
         "react": "*",
+        "@monaco-editor/react": "*",
+        "monaco-editor": "*",
         "@tabler/icons-react": "*",
         "react-icons": "*"
     },

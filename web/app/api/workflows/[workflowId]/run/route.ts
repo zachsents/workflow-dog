@@ -37,7 +37,7 @@ export async function POST(
     if (!projectId)
         return errorResponse("Workflow not found", 404)
 
-    const billing = await getProjectBilling(projectId)
+    const billing = await getProjectBilling(projectId, { admin: true })
     const usageLimit = PlanLimits[billing.plan].workflowRuns
 
     const usageCount = await supabase

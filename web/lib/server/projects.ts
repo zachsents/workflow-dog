@@ -1,4 +1,4 @@
-import { supabaseServer } from "./supabase"
+import { supabaseServer, supabaseServerAdmin } from "./supabase"
 import "server-only"
 
 
@@ -19,8 +19,15 @@ export async function isCurrentUserOwner(projectId: string) {
 }
 
 
-export async function getProjectBilling(projectId: string) {
-    const supabase = supabaseServer()
+interface GetProjectBillingOptions {
+    admin?: boolean
+}
+
+export async function getProjectBilling(projectId: string, { admin }: GetProjectBillingOptions = {}) {
+    const supabase = admin
+        ? await supabaseServerAdmin()
+        : supabaseServer()
+
     const { billing_plan, billing_start_date } = await supabase
         .from("teams")
         .select("billing_plan, billing_start_date")

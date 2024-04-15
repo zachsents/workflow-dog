@@ -84,9 +84,13 @@ export function useOnConnect() {
 
         // TODO: Implement a function that checks if the types match
         const anyType = "https://data-types.workflow.dog/basic/any"
-        const areTypesCompatible = sourceType?.id == targetType?.id
-            || sourceType?.id === anyType
-            || targetType?.id === anyType
+        const areTypesCompatible = !!sourceType && !!targetType && (
+            sourceType.id === targetType.id
+            || sourceType.id === anyType
+            || targetType.id === anyType
+            || sourceType.compatibleWith?.includes(targetType.id)
+            || targetType.compatibleWith?.includes(sourceType.id)
+        )
 
         connect(!areTypesCompatible)
         console.debug(`Connected ${sourceType?.name} to ${targetType?.name}`, sourceType, targetType)

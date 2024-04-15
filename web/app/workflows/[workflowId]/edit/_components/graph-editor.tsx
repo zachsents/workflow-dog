@@ -71,6 +71,7 @@ export default function WorkflowGraphEditor({
         <>
             <ReactFlow
                 {...props}
+                minZoom={0.1}
 
                 nodes={nodes}
                 edges={edges}

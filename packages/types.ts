@@ -124,7 +124,7 @@ export function createExecutionNodeDefinition<T extends SharedNodeDefinition>(sh
 export function createClientNodeDefinition<T extends SharedNodeDefinition>(sharedDef: T, def: ClientNodeDefinition<T>) {
     return _.merge({}, sharedDef, {
         searchTerms: [],
-    } satisfies Partial<ClientNodeDefinition<T>>, def)
+    }, def)
 }
 
 export type MergedExecutionNodeDefinition = SharedNodeDefinition & ExecutionNodeDefinition<SharedNodeDefinition> & { id: string }
@@ -273,6 +273,7 @@ export type SharedDataTypeDefinition<Z extends ZodSchema = ZodSchema> = {
     name: string
     description: string
     schema: Z
+    compatibleWith?: string[]
 }
 
 export type ClientDataTypeDefinition<T extends SharedDataTypeDefinition> = {

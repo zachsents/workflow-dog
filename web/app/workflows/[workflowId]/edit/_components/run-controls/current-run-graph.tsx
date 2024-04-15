@@ -67,6 +67,8 @@ function GraphRenderer({ nodes, edges }: GraphRendererProps) {
 
     return (
         <ReactFlow
+            minZoom={0.1}
+
             defaultNodes={convertedNodes}
             defaultEdges={convertedEdges}
 

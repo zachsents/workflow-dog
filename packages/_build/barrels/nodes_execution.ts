@@ -3,6 +3,8 @@ import { createExport } from "@pkg/_build/util"
 // IMPORTS
 import type { MergedExecutionNodeDefinition } from "@pkg/types"
 import basic_nodes_and_execution from "../../basic/nodes/and/execution"
+import basic_nodes_coalesce_falsy_execution from "../../basic/nodes/coalesce-falsy/execution"
+import basic_nodes_coalesce_nullish_execution from "../../basic/nodes/coalesce-nullish/execution"
 import basic_nodes_compose_list_execution from "../../basic/nodes/compose-list/execution"
 import basic_nodes_compose_object_execution from "../../basic/nodes/compose-object/execution"
 import basic_nodes_decompose_object_execution from "../../basic/nodes/decompose-object/execution"
@@ -53,12 +55,20 @@ import openai_nodes_speech_to_text_execution from "../../openai/nodes/speech-to-
 import openai_nodes_text_to_speech_execution from "../../openai/nodes/text-to-speech/execution"
 import openai_nodes_yes_no_decision_execution from "../../openai/nodes/yes-no-decision/execution"
 import text_nodes_concatenate_execution from "../../text/nodes/concatenate/execution"
+import text_nodes_contains_execution from "../../text/nodes/contains/execution"
+import text_nodes_convert_to_regex_execution from "../../text/nodes/convert-to-regex/execution"
+import text_nodes_convert_to_text_execution from "../../text/nodes/convert-to-text/execution"
+import text_nodes_count_occurrences_execution from "../../text/nodes/count-occurrences/execution"
+import text_nodes_length_execution from "../../text/nodes/length/execution"
 import text_nodes_lowercase_execution from "../../text/nodes/lowercase/execution"
 import text_nodes_regex_execution from "../../text/nodes/regex/execution"
 import text_nodes_regex_search_execution from "../../text/nodes/regex-search/execution"
 import text_nodes_regex_search_multiple_execution from "../../text/nodes/regex-search-multiple/execution"
+import text_nodes_regex_test_execution from "../../text/nodes/regex-test/execution"
 import text_nodes_replace_execution from "../../text/nodes/replace/execution"
 import text_nodes_slice_execution from "../../text/nodes/slice/execution"
+import text_nodes_split_execution from "../../text/nodes/split/execution"
+import text_nodes_split_into_list_execution from "../../text/nodes/split-into-list/execution"
 import text_nodes_template_execution from "../../text/nodes/template/execution"
 import text_nodes_trim_whitespace_execution from "../../text/nodes/trim-whitespace/execution"
 import text_nodes_uppercase_execution from "../../text/nodes/uppercase/execution"
@@ -67,6 +77,8 @@ import text_nodes_uppercase_execution from "../../text/nodes/uppercase/execution
 const _definitions = {
     // EXPORTS
     "https://nodes.workflow.dog/basic/and": _.merge({ id: "https://nodes.workflow.dog/basic/and" }, basic_nodes_and_execution),
+    "https://nodes.workflow.dog/basic/coalesce-falsy": _.merge({ id: "https://nodes.workflow.dog/basic/coalesce-falsy" }, basic_nodes_coalesce_falsy_execution),
+    "https://nodes.workflow.dog/basic/coalesce-nullish": _.merge({ id: "https://nodes.workflow.dog/basic/coalesce-nullish" }, basic_nodes_coalesce_nullish_execution),
     "https://nodes.workflow.dog/basic/compose-list": _.merge({ id: "https://nodes.workflow.dog/basic/compose-list" }, basic_nodes_compose_list_execution),
     "https://nodes.workflow.dog/basic/compose-object": _.merge({ id: "https://nodes.workflow.dog/basic/compose-object" }, basic_nodes_compose_object_execution),
     "https://nodes.workflow.dog/basic/decompose-object": _.merge({ id: "https://nodes.workflow.dog/basic/decompose-object" }, basic_nodes_decompose_object_execution),
@@ -117,12 +129,20 @@ const _definitions = {
     "https://nodes.workflow.dog/openai/text-to-speech": _.merge({ id: "https://nodes.workflow.dog/openai/text-to-speech" }, openai_nodes_text_to_speech_execution),
     "https://nodes.workflow.dog/openai/yes-no-decision": _.merge({ id: "https://nodes.workflow.dog/openai/yes-no-decision" }, openai_nodes_yes_no_decision_execution),
     "https://nodes.workflow.dog/text/concatenate": _.merge({ id: "https://nodes.workflow.dog/text/concatenate" }, text_nodes_concatenate_execution),
+    "https://nodes.workflow.dog/text/contains": _.merge({ id: "https://nodes.workflow.dog/text/contains" }, text_nodes_contains_execution),
+    "https://nodes.workflow.dog/text/convert-to-regex": _.merge({ id: "https://nodes.workflow.dog/text/convert-to-regex" }, text_nodes_convert_to_regex_execution),
+    "https://nodes.workflow.dog/text/convert-to-text": _.merge({ id: "https://nodes.workflow.dog/text/convert-to-text" }, text_nodes_convert_to_text_execution),
+    "https://nodes.workflow.dog/text/count-occurrences": _.merge({ id: "https://nodes.workflow.dog/text/count-occurrences" }, text_nodes_count_occurrences_execution),
+    "https://nodes.workflow.dog/text/length": _.merge({ id: "https://nodes.workflow.dog/text/length" }, text_nodes_length_execution),
     "https://nodes.workflow.dog/text/lowercase": _.merge({ id: "https://nodes.workflow.dog/text/lowercase" }, text_nodes_lowercase_execution),
     "https://nodes.workflow.dog/text/regex": _.merge({ id: "https://nodes.workflow.dog/text/regex" }, text_nodes_regex_execution),
     "https://nodes.workflow.dog/text/regex-search": _.merge({ id: "https://nodes.workflow.dog/text/regex-search" }, text_nodes_regex_search_execution),
     "https://nodes.workflow.dog/text/regex-search-multiple": _.merge({ id: "https://nodes.workflow.dog/text/regex-search-multiple" }, text_nodes_regex_search_multiple_execution),
+    "https://nodes.workflow.dog/text/regex-test": _.merge({ id: "https://nodes.workflow.dog/text/regex-test" }, text_nodes_regex_test_execution),
     "https://nodes.workflow.dog/text/replace": _.merge({ id: "https://nodes.workflow.dog/text/replace" }, text_nodes_replace_execution),
     "https://nodes.workflow.dog/text/slice": _.merge({ id: "https://nodes.workflow.dog/text/slice" }, text_nodes_slice_execution),
+    "https://nodes.workflow.dog/text/split": _.merge({ id: "https://nodes.workflow.dog/text/split" }, text_nodes_split_execution),
+    "https://nodes.workflow.dog/text/split-into-list": _.merge({ id: "https://nodes.workflow.dog/text/split-into-list" }, text_nodes_split_into_list_execution),
     "https://nodes.workflow.dog/text/template": _.merge({ id: "https://nodes.workflow.dog/text/template" }, text_nodes_template_execution),
     "https://nodes.workflow.dog/text/trim-whitespace": _.merge({ id: "https://nodes.workflow.dog/text/trim-whitespace" }, text_nodes_trim_whitespace_execution),
     "https://nodes.workflow.dog/text/uppercase": _.merge({ id: "https://nodes.workflow.dog/text/uppercase" }, text_nodes_uppercase_execution),

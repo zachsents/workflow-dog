@@ -13,29 +13,17 @@ export default async function UsageByWorkflow({
 }) {
 
     const supabase = supabaseServer()
-    const workflowRunsQuery = await supabase
-        .from("workflow_runs")
-        .select("workflow_id, workflows ( name, team_id )")
-        .eq("workflows.team_id", projectId)
-        .gt("started_at", billingPeriod.start.toISOString())
+
+    const countRows = await supabase
+        .rpc("count_workflow_runs_by_workflow_for_project", {
+            project_id: projectId,
+            after: billingPeriod.start.toISOString(),
+        })
         .throwOnError()
-
-    const countMap: Record<string, { count: number, name: string, id: string }> =
-        workflowRunsQuery.data?.reduce((acc, entry) => {
-            acc[entry.workflow_id] ??= {
-                count: 0,
-                name: entry.workflows?.name || "",
-                id: entry.workflow_id,
-            }
-            acc[entry.workflow_id].count++
-            return acc
-        }, {}) || {}
-
-    const barGraphRows = Object.values(countMap)
-        .sort((a, b) => b.count - a.count)
+        .then(q => q.data || [])
 
     const maxCount = Math.max(
-        barGraphRows.reduce((max, row) => Math.max(max, row.count), 0),
+        countRows.reduce((max, row) => Math.max(max, row.run_count), 0),
         10,
     )
 
@@ -47,27 +35,33 @@ export default async function UsageByWorkflow({
                 Usage by Workflow
             </p>
 
-            <div className="grid grid-cols-[220px_auto] gap-x-8 items-center">
-                {barGraphRows.map((row, i) =>
-                    <Fragment key={row.id}>
-                        <div className="border-r py-1">
-                            <p className="line-clamp-2">
-                                {row.name || "Deleted"}
-                            </p>
-                            <p className="text-muted-foreground text-sm text-nowrap">
-                                {fmt.format(row.count)} runs
-                            </p>
-                        </div>
-                        <div
-                            className="h-6 bg-violet-600 rounded-sm"
-                            style={{
-                                width: `${Math.max(Math.floor(row.count / maxCount * 100), 1)}%`,
-                                opacity: Math.max(0.25, 1 - i * 0.15),
-                            }}
-                        />
-                    </Fragment>
-                )}
-            </div>
+            {countRows.length > 0
+                ? <div className="grid grid-cols-[220px_auto] gap-x-8 items-center">
+                    {countRows.map((row, i) =>
+                        <Fragment key={row.workflow_id}>
+                            <div className="border-r py-1">
+                                <p className="line-clamp-2">
+                                    {row.workflow_name || "Deleted"}
+                                </p>
+                                <p className="text-muted-foreground text-sm text-nowrap">
+                                    {fmt.format(row.run_count)} runs
+                                </p>
+                            </div>
+                            <div
+                                className="h-6 bg-violet-600 rounded-sm"
+                                style={{
+                                    width: `${Math.max(Math.floor(row.run_count / maxCount * 100), 1)}%`,
+                                    opacity: Math.max(0.25, 1 - i * 0.15),
+                                }}
+                            />
+                        </Fragment>
+                    )}
+                </div>
+                : <p className="text-sm text-muted-foreground text-center pb-4">
+                    No runs yet since {billingPeriod.start.toLocaleDateString(undefined, {
+                        dateStyle: "medium",
+                    })}
+                </p>}
         </Card>
     )
 }

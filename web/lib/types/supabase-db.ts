@@ -362,6 +362,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      count_workflow_runs_by_workflow_for_project: {
+        Args: {
+          project_id: string
+          after: string
+        }
+        Returns: {
+          workflow_id: string
+          workflow_name: string
+          run_count: number
+        }[]
+      }
       count_workflow_runs_for_project: {
         Args: {
           project_id: string

@@ -25,10 +25,18 @@ export default function DashboardHeaderNav() {
                     <NavLink href={relative("/workflows")} shortcut="W" icon={TbVectorBezier2}>
                         Workflows
                     </NavLink>
-                    <NavLink href={relative("/usage")} shortcut="U" icon={TbChartBar}>
+                    <NavLink
+                        href={relative("/usage")}
+                        shortcut="U" icon={TbChartBar}
+                        tooltip="Usage limits & billing."
+                    >
                         Usage
                     </NavLink>
-                    <NavLink href={relative("/settings")} shortcut="S" icon={TbSettings}>
+                    <NavLink
+                        href={relative("/settings")}
+                        shortcut="S" icon={TbSettings}
+                        tooltip="Project name, team members, & integrations."
+                    >
                         Settings
                     </NavLink>
                 </>}
@@ -42,10 +50,10 @@ interface NavLinkProps {
     children: any
     shortcut?: string
     icon?: React.ComponentType
-    iconOnly?: boolean
+    tooltip?: string
 }
 
-function NavLink({ href, children, shortcut, icon: Icon, iconOnly }: NavLinkProps) {
+function NavLink({ href, children, shortcut, icon: Icon, tooltip }: NavLinkProps) {
     const pathname = usePathname()
 
     const router = useRouter()
@@ -68,21 +76,21 @@ function NavLink({ href, children, shortcut, icon: Icon, iconOnly }: NavLinkProp
                 >
                     {Icon &&
                         <Icon />}
-                    {iconOnly ? null : children}
+                    {children}
                     {shortcut &&
                         <Kbd>{shortcut}</Kbd>}
                 </NavigationMenuLink>
             </Link>
         </NavigationMenuItem>
 
-    return iconOnly
+    return tooltip
         ? <TooltipProvider>
-            <Tooltip delayDuration={0}>
+            <Tooltip delayDuration={500}>
                 <TooltipTrigger asChild>
                     {navItemComponent}
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
-                    <p>{children}</p>
+                    <p>{tooltip}</p>
                 </TooltipContent>
             </Tooltip>
         </TooltipProvider>

@@ -7,11 +7,13 @@ import basic_nodes_coalesce_falsy_execution from "../../basic/nodes/coalesce-fal
 import basic_nodes_coalesce_nullish_execution from "../../basic/nodes/coalesce-nullish/execution"
 import basic_nodes_compose_list_execution from "../../basic/nodes/compose-list/execution"
 import basic_nodes_compose_object_execution from "../../basic/nodes/compose-object/execution"
+import basic_nodes_convert_to_number_execution from "../../basic/nodes/convert-to-number/execution"
 import basic_nodes_decompose_object_execution from "../../basic/nodes/decompose-object/execution"
 import basic_nodes_equal_execution from "../../basic/nodes/equal/execution"
 import basic_nodes_get_element_execution from "../../basic/nodes/get-element/execution"
 import basic_nodes_json_parse_execution from "../../basic/nodes/json-parse/execution"
 import basic_nodes_json_stringify_execution from "../../basic/nodes/json-stringify/execution"
+import basic_nodes_loop_workflow_execution from "../../basic/nodes/loop-workflow/execution"
 import basic_nodes_not_execution from "../../basic/nodes/not/execution"
 import basic_nodes_not_equal_execution from "../../basic/nodes/not-equal/execution"
 import basic_nodes_number_execution from "../../basic/nodes/number/execution"
@@ -82,11 +84,13 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/coalesce-nullish": _.merge({ id: "https://nodes.workflow.dog/basic/coalesce-nullish" }, basic_nodes_coalesce_nullish_execution),
     "https://nodes.workflow.dog/basic/compose-list": _.merge({ id: "https://nodes.workflow.dog/basic/compose-list" }, basic_nodes_compose_list_execution),
     "https://nodes.workflow.dog/basic/compose-object": _.merge({ id: "https://nodes.workflow.dog/basic/compose-object" }, basic_nodes_compose_object_execution),
+    "https://nodes.workflow.dog/basic/convert-to-number": _.merge({ id: "https://nodes.workflow.dog/basic/convert-to-number" }, basic_nodes_convert_to_number_execution),
     "https://nodes.workflow.dog/basic/decompose-object": _.merge({ id: "https://nodes.workflow.dog/basic/decompose-object" }, basic_nodes_decompose_object_execution),
     "https://nodes.workflow.dog/basic/equal": _.merge({ id: "https://nodes.workflow.dog/basic/equal" }, basic_nodes_equal_execution),
     "https://nodes.workflow.dog/basic/get-element": _.merge({ id: "https://nodes.workflow.dog/basic/get-element" }, basic_nodes_get_element_execution),
     "https://nodes.workflow.dog/basic/json-parse": _.merge({ id: "https://nodes.workflow.dog/basic/json-parse" }, basic_nodes_json_parse_execution),
     "https://nodes.workflow.dog/basic/json-stringify": _.merge({ id: "https://nodes.workflow.dog/basic/json-stringify" }, basic_nodes_json_stringify_execution),
+    "https://nodes.workflow.dog/basic/loop-workflow": _.merge({ id: "https://nodes.workflow.dog/basic/loop-workflow" }, basic_nodes_loop_workflow_execution),
     "https://nodes.workflow.dog/basic/not": _.merge({ id: "https://nodes.workflow.dog/basic/not" }, basic_nodes_not_execution),
     "https://nodes.workflow.dog/basic/not-equal": _.merge({ id: "https://nodes.workflow.dog/basic/not-equal" }, basic_nodes_not_equal_execution),
     "https://nodes.workflow.dog/basic/number": _.merge({ id: "https://nodes.workflow.dog/basic/number" }, basic_nodes_number_execution),

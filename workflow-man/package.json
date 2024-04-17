@@ -11,6 +11,7 @@
         "googleapis": "^134.0.0",
         "mimetext": "^3.0.24",
         "morgan": "^1.10.0",
+        "p-limit": "^5.0.0",
         "packages": "workspace:*",
         "shared": "workspace:*"
     },

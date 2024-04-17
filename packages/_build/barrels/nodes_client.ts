@@ -7,11 +7,13 @@ import basic_nodes_coalesce_falsy_client from "../../basic/nodes/coalesce-falsy/
 import basic_nodes_coalesce_nullish_client from "../../basic/nodes/coalesce-nullish/client"
 import basic_nodes_compose_list_client from "../../basic/nodes/compose-list/client"
 import basic_nodes_compose_object_client from "../../basic/nodes/compose-object/client"
+import basic_nodes_convert_to_number_client from "../../basic/nodes/convert-to-number/client"
 import basic_nodes_decompose_object_client from "../../basic/nodes/decompose-object/client"
 import basic_nodes_equal_client from "../../basic/nodes/equal/client"
 import basic_nodes_get_element_client from "../../basic/nodes/get-element/client"
 import basic_nodes_json_parse_client from "../../basic/nodes/json-parse/client"
 import basic_nodes_json_stringify_client from "../../basic/nodes/json-stringify/client"
+import basic_nodes_loop_workflow_client from "../../basic/nodes/loop-workflow/client"
 import basic_nodes_not_client from "../../basic/nodes/not/client"
 import basic_nodes_not_equal_client from "../../basic/nodes/not-equal/client"
 import basic_nodes_number_client from "../../basic/nodes/number/client"
@@ -82,11 +84,13 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/coalesce-nullish": _.merge({ id: "https://nodes.workflow.dog/basic/coalesce-nullish" }, basic_nodes_coalesce_nullish_client),
     "https://nodes.workflow.dog/basic/compose-list": _.merge({ id: "https://nodes.workflow.dog/basic/compose-list" }, basic_nodes_compose_list_client),
     "https://nodes.workflow.dog/basic/compose-object": _.merge({ id: "https://nodes.workflow.dog/basic/compose-object" }, basic_nodes_compose_object_client),
+    "https://nodes.workflow.dog/basic/convert-to-number": _.merge({ id: "https://nodes.workflow.dog/basic/convert-to-number" }, basic_nodes_convert_to_number_client),
     "https://nodes.workflow.dog/basic/decompose-object": _.merge({ id: "https://nodes.workflow.dog/basic/decompose-object" }, basic_nodes_decompose_object_client),
     "https://nodes.workflow.dog/basic/equal": _.merge({ id: "https://nodes.workflow.dog/basic/equal" }, basic_nodes_equal_client),
     "https://nodes.workflow.dog/basic/get-element": _.merge({ id: "https://nodes.workflow.dog/basic/get-element" }, basic_nodes_get_element_client),
     "https://nodes.workflow.dog/basic/json-parse": _.merge({ id: "https://nodes.workflow.dog/basic/json-parse" }, basic_nodes_json_parse_client),
     "https://nodes.workflow.dog/basic/json-stringify": _.merge({ id: "https://nodes.workflow.dog/basic/json-stringify" }, basic_nodes_json_stringify_client),
+    "https://nodes.workflow.dog/basic/loop-workflow": _.merge({ id: "https://nodes.workflow.dog/basic/loop-workflow" }, basic_nodes_loop_workflow_client),
     "https://nodes.workflow.dog/basic/not": _.merge({ id: "https://nodes.workflow.dog/basic/not" }, basic_nodes_not_client),
     "https://nodes.workflow.dog/basic/not-equal": _.merge({ id: "https://nodes.workflow.dog/basic/not-equal" }, basic_nodes_not_equal_client),
     "https://nodes.workflow.dog/basic/number": _.merge({ id: "https://nodes.workflow.dog/basic/number" }, basic_nodes_number_client),

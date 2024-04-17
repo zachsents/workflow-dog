@@ -32,6 +32,24 @@ export function useWorkflow(workflowId = useCurrentWorkflowId()) {
 }
 
 
+export function useRunnableWorkflows(workflowId = useCurrentWorkflowId()) {
+    const supabase = useSupabaseBrowser()
+    const { data: workflow } = useWorkflow(workflowId)
+
+    return useQuery({
+        queryFn: async () => supabase
+            .from("workflows")
+            .select("id, name")
+            .eq("team_id", workflow!.team_id!)
+            .eq("trigger->>type", "https://triggers.workflow.dog/basic/manual")
+            .throwOnError()
+            .then(q => q.data),
+        queryKey: ["runnable-workflows", workflow?.team_id],
+        enabled: !!workflow?.team_id,
+    })
+}
+
+
 interface CreateWorkflowOptions {
     name: string
     trigger: string

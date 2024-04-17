@@ -23,6 +23,6 @@
     },
     "scripts": {
         "build": "bun build.ts",
-        "dev": "bun build.ts --external && node build/index.js"
+        "dev": "bun build.ts --dev --external && (cd build && node index.js)"
     }
 }

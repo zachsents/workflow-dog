@@ -46,6 +46,7 @@ interface ActionNodeHandleProps {
         bullet?: boolean
         recommendedNode?: Recommendation
     }
+    withBorder?: boolean
 }
 
 export default function ActionNodeHandle({
@@ -53,6 +54,7 @@ export default function ActionNodeHandle({
     name,
     type,
     definition,
+    withBorder,
 }: ActionNodeHandleProps) {
 
     const isConnected = useIsHandleConnected(undefined, id)
@@ -91,13 +93,16 @@ export default function ActionNodeHandle({
                 type={cleanHandleType(type)}
                 position={isInput(type) ? Position.Left : Position.Right}
                 className={cn(
-                    "!relative !transform-none !inset-0 !w-auto !h-auto block !rounded-full !border-none  transition-colors via-slate-200 via-[0.5rem] to-[1rem]",
+                    "!relative !transform-none !inset-0 !w-auto !h-auto block !rounded-full transition-colors via-slate-200 via-[0.5rem] to-[1rem]",
                     isConnectedEdgeSelected ? "from-violet-400" : "from-neutral-400",
                     hasSelectedRun ? "!bg-slate-100" : [
                         isConnectable && "hover:outline hover:outline-yellow-500 hover:outline-2",
                         isConnectableWhileConnecting ? "!bg-amber-200" : "!bg-slate-100",
                         !isConnectingAnywhere && "!pointer-events-auto",
                     ],
+                    withBorder
+                        ? "!border !border-slate-300 shadow-sm"
+                        : "!border-none",
                 )}
                 style={{
                     backgroundImage: isConnected

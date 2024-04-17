@@ -36,6 +36,7 @@ export default function ModifierWrapper({ children }: { children: any }) {
                     id={`${PREFIX.CONTROL_INPUT}:${control.id}`}
                     type="input"
                     definition={control}
+                    withBorder
                     key={control.id}
                 />
             )}
@@ -48,6 +49,7 @@ export default function ModifierWrapper({ children }: { children: any }) {
                     id={`${PREFIX.CONTROL_OUTPUT}:${control.id}`}
                     type="output"
                     definition={control}
+                    withBorder
                     key={control.id}
                 />
             )}

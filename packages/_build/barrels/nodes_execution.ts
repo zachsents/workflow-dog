@@ -16,6 +16,7 @@ import basic_nodes_not_execution from "../../basic/nodes/not/execution"
 import basic_nodes_not_equal_execution from "../../basic/nodes/not-equal/execution"
 import basic_nodes_number_execution from "../../basic/nodes/number/execution"
 import basic_nodes_or_execution from "../../basic/nodes/or/execution"
+import basic_nodes_run_workflow_execution from "../../basic/nodes/run-workflow/execution"
 import basic_nodes_switch_execution from "../../basic/nodes/switch/execution"
 import basic_nodes_text_execution from "../../basic/nodes/text/execution"
 import basic_nodes_trigger_input_execution from "../../basic/nodes/trigger-input/execution"
@@ -90,6 +91,7 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/not-equal": _.merge({ id: "https://nodes.workflow.dog/basic/not-equal" }, basic_nodes_not_equal_execution),
     "https://nodes.workflow.dog/basic/number": _.merge({ id: "https://nodes.workflow.dog/basic/number" }, basic_nodes_number_execution),
     "https://nodes.workflow.dog/basic/or": _.merge({ id: "https://nodes.workflow.dog/basic/or" }, basic_nodes_or_execution),
+    "https://nodes.workflow.dog/basic/run-workflow": _.merge({ id: "https://nodes.workflow.dog/basic/run-workflow" }, basic_nodes_run_workflow_execution),
     "https://nodes.workflow.dog/basic/switch": _.merge({ id: "https://nodes.workflow.dog/basic/switch" }, basic_nodes_switch_execution),
     "https://nodes.workflow.dog/basic/text": _.merge({ id: "https://nodes.workflow.dog/basic/text" }, basic_nodes_text_execution),
     "https://nodes.workflow.dog/basic/trigger-input": _.merge({ id: "https://nodes.workflow.dog/basic/trigger-input" }, basic_nodes_trigger_input_execution),

@@ -16,6 +16,7 @@ import basic_nodes_not_client from "../../basic/nodes/not/client"
 import basic_nodes_not_equal_client from "../../basic/nodes/not-equal/client"
 import basic_nodes_number_client from "../../basic/nodes/number/client"
 import basic_nodes_or_client from "../../basic/nodes/or/client"
+import basic_nodes_run_workflow_client from "../../basic/nodes/run-workflow/client"
 import basic_nodes_switch_client from "../../basic/nodes/switch/client"
 import basic_nodes_text_client from "../../basic/nodes/text/client"
 import basic_nodes_trigger_input_client from "../../basic/nodes/trigger-input/client"
@@ -90,6 +91,7 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/not-equal": _.merge({ id: "https://nodes.workflow.dog/basic/not-equal" }, basic_nodes_not_equal_client),
     "https://nodes.workflow.dog/basic/number": _.merge({ id: "https://nodes.workflow.dog/basic/number" }, basic_nodes_number_client),
     "https://nodes.workflow.dog/basic/or": _.merge({ id: "https://nodes.workflow.dog/basic/or" }, basic_nodes_or_client),
+    "https://nodes.workflow.dog/basic/run-workflow": _.merge({ id: "https://nodes.workflow.dog/basic/run-workflow" }, basic_nodes_run_workflow_client),
     "https://nodes.workflow.dog/basic/switch": _.merge({ id: "https://nodes.workflow.dog/basic/switch" }, basic_nodes_switch_client),
     "https://nodes.workflow.dog/basic/text": _.merge({ id: "https://nodes.workflow.dog/basic/text" }, basic_nodes_text_client),
     "https://nodes.workflow.dog/basic/trigger-input": _.merge({ id: "https://nodes.workflow.dog/basic/trigger-input" }, basic_nodes_trigger_input_client),

@@ -1,17 +1,19 @@
 import { createClientNodeDefinition } from "@pkg/types"
-import { TbBracketsContain } from "react-icons/tb"
+import { TbList } from "react-icons/tb"
 import shared from "./shared"
 
 export default createClientNodeDefinition(shared, {
-    icon: TbBracketsContain,
+    icon: TbList,
     color: "#4b5563",
     tags: ["Basic", "Lists"],
+    searchTerms: ["add to"],
     inputs: {
+        list: {},
         items: {
             groupName: "Items",
-        }
+        },
     },
     outputs: {
-        list: {}
+        newList: {},
     },
 })

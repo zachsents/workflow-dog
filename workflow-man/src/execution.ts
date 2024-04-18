@@ -125,32 +125,36 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
                 return
         }
 
-        const inputValues = node.data.inputs.reduce((acc, input) => {
-            const attachedEdge = getAttachedEdge(input.id)
-            if (!attachedEdge)
-                return acc
+        const nodeDefinition = NodeDefinitions.get(node.data.definition)
+        if (!nodeDefinition)
+            throw new Error(`Node definition not found: ${node.data.definition}`)
 
-            const definition = NodeDefinitions.get(node.data.definition)?.inputs[input.definition]
-            if (!definition)
-                throw new Error(`Input definition not found: ${input.definition}`)
+        const inputValues = Object.fromEntries(
+            Object.entries(nodeDefinition.inputs).map(([inputDefinitionId, inputDefinition]) => {
+                const inputs = node.data.inputs
+                    .filter(input => input.definition === inputDefinitionId)
 
-            const value = getEdgeOutputValue(attachedEdge)
+                const currentInputValues = inputs.map(input => {
+                    const attachedEdge = getAttachedEdge(input.id)
+                    return attachedEdge
+                        ? getEdgeOutputValue(attachedEdge)
+                        : undefined
+                })
 
-            if (!definition.group) {
-                acc[input.definition] = value
-                return acc
-            }
+                const convertedInputs = inputDefinition.group
+                    ? inputDefinition.named
+                        ? inputs.reduce((acc, input, i) => {
+                            const val = currentInputValues[i]
+                            if (val !== undefined && typeof input.name === "string")
+                                acc[input.name] = val
+                            return acc
+                        }, {})
+                        : currentInputValues
+                    : currentInputValues[0]
 
-            if (definition.named) {
-                acc[input.definition] ??= {}
-                acc[input.definition][input.name] = value
-                return acc
-            }
-
-            acc[input.definition] ??= []
-            acc[input.definition].push(value)
-            return acc
-        }, {})
+                return [inputDefinitionId, convertedInputs]
+            })
+        )
 
         // check for delay control modifier
         if (node.data.controlModifiers?.delay) {
@@ -169,7 +173,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
         await runNode(node, inputValues)
     }
 
-    await Promise.all(startingNodes.map(node => runNode(node, {})))
+    await Promise.all(startingNodes.map(node => checkIfNodeCanRun(node.id)))
 
     return runState
 }

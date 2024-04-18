@@ -4,7 +4,7 @@ import shared from "./shared"
 export default createExecutionNodeDefinition(shared, {
     action: ({ list, index }) => {
         return {
-            item: list.at(index),
+            item: list?.at(index) ?? null,
         }
     },
 })

@@ -13,6 +13,7 @@ import basic_nodes_equal_client from "../../basic/nodes/equal/client"
 import basic_nodes_get_element_client from "../../basic/nodes/get-element/client"
 import basic_nodes_json_parse_client from "../../basic/nodes/json-parse/client"
 import basic_nodes_json_stringify_client from "../../basic/nodes/json-stringify/client"
+import basic_nodes_list_append_client from "../../basic/nodes/list-append/client"
 import basic_nodes_loop_workflow_client from "../../basic/nodes/loop-workflow/client"
 import basic_nodes_not_client from "../../basic/nodes/not/client"
 import basic_nodes_not_equal_client from "../../basic/nodes/not-equal/client"
@@ -90,6 +91,7 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/get-element": _.merge({ id: "https://nodes.workflow.dog/basic/get-element" }, basic_nodes_get_element_client),
     "https://nodes.workflow.dog/basic/json-parse": _.merge({ id: "https://nodes.workflow.dog/basic/json-parse" }, basic_nodes_json_parse_client),
     "https://nodes.workflow.dog/basic/json-stringify": _.merge({ id: "https://nodes.workflow.dog/basic/json-stringify" }, basic_nodes_json_stringify_client),
+    "https://nodes.workflow.dog/basic/list-append": _.merge({ id: "https://nodes.workflow.dog/basic/list-append" }, basic_nodes_list_append_client),
     "https://nodes.workflow.dog/basic/loop-workflow": _.merge({ id: "https://nodes.workflow.dog/basic/loop-workflow" }, basic_nodes_loop_workflow_client),
     "https://nodes.workflow.dog/basic/not": _.merge({ id: "https://nodes.workflow.dog/basic/not" }, basic_nodes_not_client),
     "https://nodes.workflow.dog/basic/not-equal": _.merge({ id: "https://nodes.workflow.dog/basic/not-equal" }, basic_nodes_not_equal_client),

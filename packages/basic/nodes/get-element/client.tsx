@@ -8,7 +8,12 @@ export default createClientNodeDefinition(shared, {
     tags: ["Logic", "Basic"],
     inputs: {
         list: {},
-        index: {},
+        index: {
+            recommendedNode: {
+                definition: "https://nodes.workflow.dog/basic/number",
+                handle: "number",
+            }
+        },
     },
     outputs: {
         item: {},

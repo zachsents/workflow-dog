@@ -1,10 +1,10 @@
+import { TriggerConfig, TriggerConfigHeader, TriggerSettingsForm } from "@pkg/_components/trigger-config"
 import { createClientTriggerDefinition } from "@pkg/types"
 import { Checkbox } from "@ui/checkbox"
-import { Button } from "@web/components/ui/button"
-import { Label } from "@web/components/ui/label"
-import { useEffect, useState } from "react"
-import { TbCopy, TbLink } from "react-icons/tb"
-import { toast } from "sonner"
+import CopyButton from "@web/components/copy-button"
+import { FormControl, FormDescription, FormItem, FormLabel } from "@web/components/ui/form"
+import { TbLink } from "react-icons/tb"
+import { z } from "zod"
 import shared from "./shared"
 
 
@@ -12,63 +12,63 @@ export default createClientTriggerDefinition(shared, {
     tags: ["Basic"],
     icon: TbLink,
     color: "#4b5563",
-    renderConfig: ({ workflowId, workflow, updateConfig, isUpdating }) => {
-
-        const [waitUntilFinished, setWaitUntilFinished] = useState(workflow?.trigger?.config?.waitUntilFinished || false)
-
-        useEffect(() => {
-            if (isUpdating || workflow?.trigger?.config?.waitUntilFinished === waitUntilFinished)
-                return
-
-            const debugMessage = `Saving waitUntilFinished trigger setting: ${waitUntilFinished}`
-            console.time(debugMessage)
-
-            updateConfig({
-                waitUntilFinished
-            }).then(() => {
-                console.timeEnd(debugMessage)
-            })
-        }, [waitUntilFinished])
+    renderConfig: ({ workflowId, workflow, updateConfig, onClose }) => {
 
         const triggerUrl = `${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflowId}/trigger/request`
 
         return (
-            <div className="flex-v items-stretch gap-4">
-                <div className="flex-v gap-2">
-                    <p className="font-bold">
-                        Workflow URL:
-                    </p>
+            <TriggerConfig
+                aboveSettings={<>
+                    <TriggerConfigHeader>Workflow URL:</TriggerConfigHeader>
                     <p className="text-xs max-w-full font-mono text-ellipsis line-clamp-2 break-all bg-secondary border p-2 rounded-md">
                         {triggerUrl}
                     </p>
-                    <Button
+                    <CopyButton
+                        onClick={() => navigator.clipboard.writeText(triggerUrl)}
                         size="sm"
-                        onClick={() => {
-                            navigator.clipboard.writeText(triggerUrl)
-                            toast.success("Copied!")
-                        }}
                     >
-                        <TbCopy className="mr-2" />
                         Copy URL
-                    </Button>
-                </div>
-
-                <div className="flex-v gap-2">
-                    <p className="font-bold">
-                        Settings:
-                    </p>
-                    <div className="flex items-center gap-2">
-                        <Checkbox
-                            id="trigger-waitUntilFinished"
-                            checked={waitUntilFinished}
-                            onCheckedChange={setWaitUntilFinished}
-                        />
-                        <Label htmlFor="trigger-waitUntilFinished">
-                            Wait until the workflow finishes running
-                        </Label>
-                    </div>
-                </div>
-            </div>
+                    </CopyButton>
+                </>}
+                settings={
+                    <TriggerSettingsForm
+                        schema={configSchema}
+                        onSubmit={updateConfig}
+                        fields={[
+                            {
+                                key: "waitUntilFinished",
+                                defaultValue: workflow?.trigger?.config?.waitUntilFinished ?? false,
+                                render: ({ field }) => (
+                                    <FormItem className="flex gap-4 space-y-0">
+                                        <FormControl>
+                                            <Checkbox
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                                className="my-1"
+                                            />
+                                        </FormControl>
+                                        <div>
+                                            <FormLabel>
+                                                Wait until the workflow finishes running
+                                            </FormLabel>
+                                            <FormDescription>
+                                                If selected, the request will wait until the workflow is finished before responding. Otherwise, the request will return as soon as it's queued.
+                                            </FormDescription>
+                                        </div>
+                                    </FormItem>
+                                )
+                            }
+                        ]}
+                        onClose={onClose}
+                        closeOnFinishedSubmitting
+                    />
+                }
+            />
         )
     }
+})
+
+
+const configSchema = z.object({
+    waitUntilFinished: z.boolean(),
 })

@@ -1,7 +1,7 @@
 import _ from "lodash"
 import { customAlphabet } from "nanoid"
 import { alphanumeric } from "nanoid-dictionary"
-import { useEffect, useMemo, useState } from "react"
+import { forwardRef, useEffect, useMemo, useState } from "react"
 import { Subject, debounceTime, tap } from "rxjs"
 
 
@@ -198,3 +198,17 @@ export type CamelCase<S extends string> = S extends `${infer P1}_${infer P2}${in
 export type KeysToCamelCase<T> = {
     [K in keyof T as CamelCase<string & K>]: T[K] extends {} ? KeysToCamelCase<T[K]> : T[K]
 }
+
+
+export type TagOrComponent = keyof JSX.IntrinsicElements | React.ComponentType
+
+export function extendComponent<C extends TagOrComponent, P extends React.PropsWithoutRef<React.ComponentProps<C>> = React.PropsWithoutRef<React.ComponentProps<C>>>(
+    render: (
+        props: P,
+        ref: React.ForwardedRef<React.ElementRef<C>>
+    ) => React.ReactNode
+) {
+    return forwardRef<React.ElementRef<C>, P>(render)
+}
+
+export type ExtendProps<C extends TagOrComponent, P extends Record<string, any>> = React.PropsWithoutRef<React.ComponentProps<C>> & P

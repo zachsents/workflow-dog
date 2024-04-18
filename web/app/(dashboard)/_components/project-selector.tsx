@@ -14,8 +14,10 @@ import {
     PopoverTrigger,
 } from "@ui/popover"
 import Kbd from "@web/components/kbd"
+import { Badge } from "@web/components/ui/badge"
 import { useCurrentProjectId, useDialogState } from "@web/lib/client/hooks"
 import { cn } from "@web/lib/utils"
+import { PlanData } from "@web/modules/plans"
 import { useProjectsForUser } from "@web/modules/projects"
 import { usePathname, useRouter } from "next/navigation"
 import { useHotkeys } from "react-hotkeys-hook"
@@ -55,10 +57,10 @@ export default function ProjectSelector() {
                         !activeProjectId && "text-muted-foreground"
                     )}
                 >
-                    <span>
+                    <span className="truncate">
                         {activeProjectId
                             ? projects?.find((project) => project.id === activeProjectId)?.name
-                            : "Select project..."}
+                            : "Select projects..."}
                     </span>
 
                     <div className="flex center gap-2 shrink-0 text-sm text-muted-foreground">
@@ -67,28 +69,37 @@ export default function ProjectSelector() {
                     </div>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[220px] p-0">
+            <PopoverContent className="min-w-[260px] p-0">
                 <Command>
                     <CommandInput placeholder="Search project..." />
                     <CommandList>
                         <CommandEmpty>No project found.</CommandEmpty>
-                        {projects?.map(project => (
-                            <CommandItem
-                                key={project.id}
-                                value={project.name}
-                                onSelect={goToProject(project.id)}
-                            >
-                                <TbCheck
-                                    className={cn(
-                                        "mr-2 h-4 w-4",
-                                        activeProjectId === project.id
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                    )}
-                                />
-                                {project.name}
-                            </CommandItem>
-                        ))}
+                        {projects?.map(project => {
+
+                            const plan = PlanData[project.billing_plan || "free"]
+
+                            return (
+                                <CommandItem
+                                    key={project.id}
+                                    value={project.name}
+                                    onSelect={goToProject(project.id)}
+                                    className="flex between py-3"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <TbCheck
+                                            className={activeProjectId === project.id
+                                                ? "opacity-100"
+                                                : "opacity-0"}
+                                        />
+                                        {project.name}
+                                    </div>
+
+                                    <Badge className={cn(plan.badgeClassName, "pointer-events-none")}>
+                                        {plan.name}
+                                    </Badge>
+                                </CommandItem>
+                            )
+                        })}
                     </CommandList>
                 </Command>
             </PopoverContent>

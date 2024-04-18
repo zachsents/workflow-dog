@@ -9,7 +9,7 @@ export function useProjectsForUser() {
     return useQuery({
         queryFn: async () => supabase
             .from("users")
-            .select("teams!users_teams (id,name)")
+            .select("teams!users_teams (id,name,billing_plan)")
             .eq("id", user!.id)
             .single()
             .throwOnError()

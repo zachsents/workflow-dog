@@ -39,6 +39,7 @@
         "@tabler/icons-react": "*",
         "@tanstack/react-query": "^5.17.5",
         "@tanstack/react-table": "^8.14.0",
+        "axios": "^1.6.8",
         "class-variance-authority": "^0.7.0",
         "classnames": "^2.5.1",
         "client-only": "^0.0.1",

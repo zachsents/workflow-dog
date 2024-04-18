@@ -49,15 +49,23 @@ export async function POST(
         .then(q => q.data || 0)
 
     if (usageCount >= usageLimit)
-        return errorResponse(`Usage limit exceeded (${usageCount} / ${usageLimit})`, 429)
+        return errorResponse(`Usage limit exceeded (${usageCount} / ${usageLimit})`, 429, {
+            needsUpgrade: true,
+            upgradeUrl: req.nextUrl.origin + `/projects/${projectId}/usage/upgrade`,
+        })
 
-    const newRunId = await supabase
+    const queueQuery = await supabase
         .rpc("queue_workflow_run", {
             _workflow_id: workflowId,
             json_body: reqBody,
         })
-        .throwOnError()
-        .then(q => q.data)
+
+    if (queueQuery.error) {
+        console.debug("Error from queue RPC", queueQuery.error)
+        return errorResponse(queueQuery.error.message, 500)
+    }
+
+    const newRunId = queueQuery.data
 
     console.debug(`Sending run (${newRunId}) to`, process.env.WORKFLOW_MAN_URL)
 

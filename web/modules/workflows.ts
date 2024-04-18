@@ -3,11 +3,12 @@ import { useCurrentWorkflowId } from "@web/lib/client/hooks"
 import { useSupabaseBrowser } from "@web/lib/client/supabase"
 import "client-only"
 import { useSearchParams } from "next/navigation"
-import { toast } from "sonner"
+import { ExternalToast, toast } from "sonner"
 import { useUser } from "./auth"
 import { useOnDatabaseChange } from "./db"
 import { useQueryParam } from "./router"
 import { useEditorStore, useEditorStoreApi } from "./workflow-editor/store"
+import axios from "axios"
 
 
 export function useWorkflowIdFromUrl(skip?: string | undefined) {
@@ -181,16 +182,25 @@ export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
 
     const supabase = useSupabaseBrowser()
     const editorStore = useEditorStoreApi()
+    const { data: workflow } = useWorkflow(workflowId)
 
     return useMutation<any, any, any>({
         mutationFn: async (body: any) => {
             const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflowId}/run`)
 
-            const run = await fetch(url.toString(), {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            }).then(res => res.ok ? res.json() : Promise.reject(res.text()))
+            try {
+                var { data: run } = await axios.post(url.toString(), body)
+            } catch (err) {
+                const toastOptions: ExternalToast = err.response.data.error.needsUpgrade ? {
+                    action: {
+                        label: "Upgrade",
+                        onClick: () => window.open(`/projects/${workflow?.team_id}/usage/upgrade`),
+                    },
+                } : {}
+
+                toast.error(err.response.data.error.message, toastOptions)
+                return
+            }
 
             const finishPromise = new Promise((resolve, reject) => {
                 const channel = supabase
@@ -217,7 +227,7 @@ export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
                 loading: "Running...",
                 success: (finishedRun: any) => `${Object.keys(finishedRun.state.outputs).length} outputs, ${finishedRun.error_count} errors`,
                 error: err => err,
-                dismissible: true,
+                // dismissible: true,
             })
 
             if (selectRun)

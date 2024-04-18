@@ -186,6 +186,9 @@ importers:
       '@tanstack/react-table':
         specifier: ^8.14.0
         version: 8.15.3(react-dom@18.2.0)(react@18.2.0)
+      axios:
+        specifier: ^1.6.8
+        version: 1.6.8
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0

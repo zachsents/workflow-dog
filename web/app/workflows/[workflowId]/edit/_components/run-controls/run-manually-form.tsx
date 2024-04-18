@@ -97,7 +97,7 @@ export default function RunManuallyForm({ onClose }: RunManuallyFormProps) {
 
                     <Button
                         type="submit"
-                        disabled={submitMutation.isPending}
+                        disabled={isSubmitting}
                     >
                         {isSubmitting
                             ? <Loader mr />

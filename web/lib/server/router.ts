@@ -16,6 +16,6 @@ export function errorRedirect(message: string, {
         redirect(url)
 }
 
-export function errorResponse(message: string, status: number) {
-    return NextResponse.json({ error: { message } }, { status })
+export function errorResponse(message: string, status: number, extra?: any) {
+    return NextResponse.json({ error: { message, ...extra } }, { status })
 }

@@ -3,13 +3,12 @@ import {
     Form,
     FormField
 } from "@ui/form"
+import Loader from "@web/components/loader"
 import { Button } from "@web/components/ui/button"
-import { cn } from "@web/lib/utils"
 import { extendComponent, type ExtendProps } from "@web/modules/util"
 import { useForm } from "react-hook-form"
 import { TbCheck } from "react-icons/tb"
 import { ZodSchema, z } from "zod"
-import Loader from "@web/components/loader"
 
 
 export interface TriggerConfigProps {
@@ -64,6 +63,8 @@ export const TriggerSettingsForm = extendComponent<"form", TriggerSettingsFormPr
             onClose?.()
     }
 
+    const isSubmitButtonDisabled = !form.formState.isDirty || form.formState.isSubmitting
+
     return (
         <Form {...form}>
             <form
@@ -88,11 +89,8 @@ export const TriggerSettingsForm = extendComponent<"form", TriggerSettingsFormPr
 
                 <Button
                     size="sm"
-                    className={cn(
-                        "mt-2 self-end flex center gap-2 transition-opacity",
-                        form.formState.isDirty ? "opacity-100" : "opacity-0",
-                    )}
-                    disabled={!form.formState.isDirty || form.formState.isSubmitting}
+                    className="self-end mt-2 flex center gap-2"
+                    disabled={isSubmitButtonDisabled}
                     type="submit"
                 >
                     {form.formState.isSubmitting

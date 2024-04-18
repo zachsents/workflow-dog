@@ -1,4 +1,6 @@
+import { errorResponse } from "@web/lib/server/router"
 import { remapError, supabaseServerAdmin } from "@web/lib/server/supabase"
+import axios from "axios"
 import { NextRequest, NextResponse } from "next/server"
 
 
@@ -7,7 +9,6 @@ async function all(req: NextRequest, {
 }: {
     params: { workflowId: string }
 }) {
-
     const supabase = await supabaseServerAdmin()
 
     const triggerQuery = await supabase
@@ -17,12 +18,12 @@ async function all(req: NextRequest, {
         .single()
 
     let error = remapError(triggerQuery)
-    if (error) return NextResponse.json(error, { status: 500 })
+    if (error) return errorResponse(error.error.message, 500, error.error)
 
     const { triggerType, triggerConfig } = triggerQuery.data!
 
     if (triggerType !== "https://triggers.workflow.dog/basic/request") {
-        return NextResponse.json({ error: "This workflow does not have a URL Request trigger" }, { status: 400 })
+        return errorResponse("This workflow does not have a URL Request trigger", 400)
     }
 
     const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflowId}/run`)
@@ -32,12 +33,8 @@ async function all(req: NextRequest, {
         url.searchParams.set("subscribe", "true")
     }
 
-    const response = await fetch(url.toString(), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+    try {
+        var { data: response } = await axios.post(url.toString(), {
             triggerData: {
                 method: req.method,
                 url: req.url,
@@ -46,21 +43,25 @@ async function all(req: NextRequest, {
                 params: Object.fromEntries(req.nextUrl.searchParams.entries()),
             },
         })
-    }).then(async res => {
-        if (!res.ok) throw new Error(await res.text())
-        return res.json()
-    })
-
-    if (!waitUntilFinished) {
-        return new Response("👍", { status: 202 })
     }
+    catch (err) {
+        return errorResponse(err.response.data.error.message, 500, err.response.data.error)
+    }
+
+    if (!waitUntilFinished)
+        return NextResponse.json({ success: true, message: "👍" }, { status: 202 })
 
     const { status, headers, body } = response.state?.workflowOutputs ?? {}
 
-    return new Response(body ?? "", {
+    const responseOptions = {
         headers: headers ?? {},
         status: status ?? (response.has_errors ? 500 : 200),
-    })
+    }
+
+    if (typeof body === "object" && body !== null)
+        return NextResponse.json(body, responseOptions)
+
+    return new Response(body || "", responseOptions)
 }
 
 

@@ -60,10 +60,10 @@ export default function TriggerControl() {
             <Popover {...popover.dialogProps}>
                 <PopoverTrigger asChild>
                     <Button
-                        variant="outline" size="sm"
-                        className="flex center gap-2 bg-white/80 backdrop-blur-sm shadow-lg pointer-events-auto"
+                        variant="ghost" size="sm"
+                        className="flex center gap-2 border border-muted-foreground"
                     >
-                        <p className="text-muted-foreground font-normal mr-1">
+                        <p className="font-normal mr-1">
                             Trigger:
                         </p>
                         {triggerDefinition?.icon &&
@@ -75,7 +75,7 @@ export default function TriggerControl() {
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent
-                    align="start"
+                    align="center" side="bottom" sideOffset={10}
                     className="p-2 w-[24rem] max-h-[40rem] overflow-y-scroll flex-v items-stretch gap-2 shadow-lg"
                 >
                     <div className="flex justify-between items-center">

@@ -22,14 +22,13 @@ import ReactFlow, { Background, BackgroundVariant, ControlButton, Controls, Edge
 import "reactflow/dist/style.css"
 import colors from "tailwindcss/colors"
 import ActionNode from "./action-node/action-node"
+import ConnectionLine from "./connection-line"
 import ContextMenu from "./context-menu"
 import DataEdge from "./data-edge"
 import EditorToolbar from "./editor-toolbar"
 import GhostBuster from "./ghost-buster"
+import EditWorkflowHeader from "./header"
 import NodeToolbar from "./node-toolbar"
-import RunControls from "./run-controls/run-controls"
-import TriggerControl from "./trigger-control"
-import ConnectionLine from "./connection-line"
 
 
 const nodeTypes = {
@@ -150,13 +149,10 @@ export default function WorkflowGraphEditor({
                     <EditorToolbar />
                 </Panel>
 
-                <Panel position="top-left" className="!m-2 !pointer-events-none">
-                    <TriggerControl />
+                <Panel position="top-center" className="!m-2 !pointer-events-none">
+                    <EditWorkflowHeader />
                 </Panel>
 
-                <Panel position="top-right" className="!m-2 !pointer-events-none">
-                    <RunControls />
-                </Panel>
             </ReactFlow>
             <GhostBuster />
             <GraphHooks />

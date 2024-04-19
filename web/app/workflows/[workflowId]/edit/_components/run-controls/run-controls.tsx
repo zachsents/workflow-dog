@@ -16,17 +16,15 @@ export default function RunControls() {
     const hasSelectedRun = useEditorStore(s => !!s.selectedRunId)
 
     return (
-        <div className="flex-v items-end gap-3">
-            <div className="flex justify-end items-start gap-2">
-                {!hasSelectedRun &&
-                    <RunManually />}
-                <PastRuns />
-            </div>
+        <>
+            {!hasSelectedRun &&
+                <RunManually />}
+            <PastRuns />
 
             {hasSelectedRun
                 ? <CurrentRunInfo />
-                : <MostRecentRun />}
-        </div>
+                : /* <MostRecentRun /> */ null}
+        </>
     )
 }
 
@@ -40,15 +38,19 @@ function RunManually() {
         <Popover {...popover.dialogProps}>
             <PopoverTrigger asChild>
                 <Button
-                    size="sm"
-                    className="pointer-events-auto flex center gap-2 shadow-lg"
+                    size="sm" variant="ghost"
+                    className="flex center gap-2 border border-muted-foreground"
                     disabled={!isEnabled}
                 >
                     <TbPlayerPlay />
                     Run Manually
+                    <TbChevronDown />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[28rem] max-h-[40rem] overflow-y-auto p-3 mx-2">
+            <PopoverContent
+                className="w-[28rem] max-h-[40rem] overflow-y-auto p-3 mx-2"
+                side="bottom" sideOffset={10} align="center"
+            >
                 <RunManuallyForm onClose={popover.close} />
             </PopoverContent>
         </Popover>
@@ -62,15 +64,18 @@ function PastRuns() {
         <Popover {...popover.dialogProps}>
             <PopoverTrigger asChild>
                 <Button
-                    size="sm" variant="outline"
-                    className="pointer-events-auto flex center gap-2 bg-white/80 backdrop-blur-sm shadow-lg"
+                    size="sm" variant="ghost"
+                    className="flex center gap-2 border border-muted-foreground"
                 >
                     <TbClockPlay />
-                    View Runs
+                    View Past Runs
                     <TbChevronDown />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-auto max-h-[40rem] p-0 overflow-y-auto shadow-lg z-[60]">
+            <PopoverContent
+                className="w-auto max-h-[40rem] p-0 overflow-y-auto shadow-lg z-[60]"
+                side="bottom" sideOffset={10} align="center"
+            >
                 <PastRunsTable onClose={popover.close} />
             </PopoverContent>
         </Popover>
@@ -79,7 +84,6 @@ function PastRuns() {
 
 
 function MostRecentRun() {
-
     const { data: runs } = useWorkflowRuns(undefined)
     const mostRecentRun = runs?.[0]
 

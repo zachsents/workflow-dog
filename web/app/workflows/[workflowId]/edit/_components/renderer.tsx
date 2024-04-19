@@ -46,7 +46,6 @@ function ViewSwitcher() {
     return (
         <>
             <ReactFlowProvider>
-                <EditWorkflowHeader />
                 <WorkflowGraphEditor
                     initialGraph={workflow!.graph as any}
                     className={cn(hasSelectedRun && "hidden")}

@@ -1,7 +1,6 @@
 "use client"
 
 import { useClickOutside } from "@react-hookz/web"
-import { Badge } from "@ui/badge"
 import { Button } from "@ui/button"
 import {
     DropdownMenu,
@@ -19,36 +18,60 @@ import { cn } from "@web/lib/utils"
 import { useSupabaseMutation } from "@web/modules/db"
 import { useSyncToState } from "@web/modules/util"
 import { useEditorSettings } from "@web/modules/workflow-editor/settings"
-import { useEditorStore } from "@web/modules/workflow-editor/store"
 import { useWorkflow } from "@web/modules/workflows"
 import { toPng } from "html-to-image"
 import Link from "next/link"
 import { useRef, useState } from "react"
-import { TbArrowLeft, TbExternalLink, TbGridPattern, TbHeart, TbMap, TbMenu2, TbPhoto } from "react-icons/tb"
+import { TbArrowLeft, TbDots, TbExternalLink, TbGridPattern, TbHeart, TbMap, TbPhoto } from "react-icons/tb"
 import colors from "tailwindcss/colors"
+import HeaderContainer from "./header-container"
+import RunControls from "./run-controls/run-controls"
+import TriggerControl from "./trigger-control"
+import WorkflowStatusBadge from "./workflow-status-badge"
 
 
 export default function EditWorkflowHeader() {
-
-    const hasSelectedRun = useEditorStore(s => !!s.selectedRunId)
-    const { isSuccess: hasWorkflowLoaded } = useWorkflow()
-
     return (
-        <div
-            className={cn(
-                "absolute top-0 left-1/2 -translate-x-1/2 z-50 flex center flex-nowrap gap-10 text-primary-foreground bg-slate-800 px-4 py-1 rounded-b-lg shadow-lg transition",
-                (!hasWorkflowLoaded || hasSelectedRun) && "-translate-y-[110%] shadow-none",
-            )}
-        >
+        <HeaderContainer className="gap-4 rounded-lg px-6">
+            <BackButton />
+            <div className="mx-10">
+                <EditableTitle />
+            </div>
+            <div className="mx-2">
+                <WorkflowStatusBadge />
+            </div>
+            <TriggerControl />
+            <RunControls />
             <HeaderMenu />
-
-            <EditableTitle />
-
-            <WorkflowStatusBadge />
 
             {/* TODO: Implement UsersOnline component with Supabase Realtime */}
             {/* <UsersOnline /> */}
-        </div>
+        </HeaderContainer>
+    )
+}
+
+
+function BackButton() {
+
+    const projectId = useWorkflow().data?.team_id
+
+    return (
+        <TooltipProvider delayDuration={0}>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" asChild>
+                        <Link href={projectId ? `/projects/${projectId}/workflows` : "#"}>
+                            <TbArrowLeft />
+                        </Link>
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="start">
+                    <p>
+                        Back to project dashboard
+                    </p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     )
 }
 
@@ -81,10 +104,12 @@ function HeaderMenu() {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
-                    <TbMenu2 />
+                    <TbDots />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center">
+            <DropdownMenuContent
+                align="center" side="bottom" sideOffset={10}
+            >
                 <DropdownMenuItem asChild disabled={!hasWorkflowLoaded}>
                     <Link href={`/projects/${workflow?.team_id}/workflows`}>
                         <TbArrowLeft className="mr-2" />
@@ -200,47 +225,3 @@ function EditableTitle() {
     )
 }
 
-
-function WorkflowStatusBadge() {
-
-    const { data: workflow, isSuccess: hasWorkflowLoaded } = useWorkflow()
-    const isEnabled = workflow?.is_enabled || false
-
-    const setEnabled = useSupabaseMutation(
-        (supabase) => supabase
-            .from("workflows")
-            .update({ is_enabled: !isEnabled })
-            .eq("id", workflow?.id!) as any,
-        {
-            enabled: !!workflow,
-            invalidateKey: ["workflow", workflow?.id],
-        }
-    )
-
-    const { isPending } = setEnabled
-
-    return (
-        <TooltipProvider>
-            <Tooltip delayDuration={0}>
-                <TooltipTrigger>
-                    <Badge
-                        variant={isEnabled ? "default" : "secondary"}
-                        className={cn(
-                            isEnabled && "bg-green-500 hover:bg-green-700",
-                            isPending && "opacity-50 pointer-events-none cursor-not-allowed",
-                            !hasWorkflowLoaded && "text-transparent",
-                        )}
-                        onClick={() => void setEnabled.mutate(null)}
-                        aria-disabled={isPending}
-                    >
-                        {isPending && <Loader mr />}
-                        {isEnabled ? "Enabled" : "Disabled"}
-                    </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p>{isEnabled ? "Disable" : "Enable"}?</p>
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
-    )
-}

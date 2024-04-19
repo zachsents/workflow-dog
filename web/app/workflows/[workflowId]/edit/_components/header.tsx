@@ -28,6 +28,7 @@ import HeaderContainer from "./header-container"
 import { PastRuns, RunManually } from "./run-controls/run-controls"
 import TriggerControl from "./trigger-control"
 import WorkflowStatusBadge from "./workflow-status-badge"
+import { useEditorStore } from "@web/modules/workflow-editor/store"
 
 
 export default function EditWorkflowHeader() {
@@ -37,6 +38,9 @@ export default function EditWorkflowHeader() {
             <div className="mx-10">
                 <EditableTitle />
             </div>
+
+            <SavingIndicator />
+
             <div className="mx-2">
                 <WorkflowStatusBadge />
             </div>
@@ -48,6 +52,17 @@ export default function EditWorkflowHeader() {
             {/* TODO: Implement UsersOnline component with Supabase Realtime */}
             {/* <UsersOnline /> */}
         </HeaderContainer>
+    )
+}
+
+
+function SavingIndicator() {
+    const isSaving = useEditorStore(s => s.saving)
+
+    return (
+        <p className="w-20 text-xs opacity-50 text-center">
+            {isSaving ? "Saving..." : "Saved"}
+        </p>
     )
 }
 

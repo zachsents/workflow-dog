@@ -152,7 +152,6 @@ export default function WorkflowGraphEditor({
                 <Panel position="top-center" className="!m-2 !pointer-events-none">
                     <EditWorkflowHeader />
                 </Panel>
-
             </ReactFlow>
             <GhostBuster />
             <GraphHooks />

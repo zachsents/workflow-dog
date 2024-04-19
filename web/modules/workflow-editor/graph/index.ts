@@ -5,6 +5,7 @@ import { useWorkflow } from "@web/modules/workflows"
 import _ from "lodash"
 import { useEffect, useMemo } from "react"
 import { useEdges, useNodes } from "reactflow"
+import { useEditorStoreApi } from "../store"
 import { WorkflowGraph } from "../types"
 
 
@@ -45,16 +46,26 @@ export function useGraphSaving() {
         enabled: isWorkflowLoaded,
     })
 
+    const editorStore = useEditorStoreApi()
+
+    const shouldSave = isWorkflowLoaded
+        && !updateGraph.isPending
+        && isReadyToSave
+        && !(convertedGraph.nodes.length === 0 && convertedGraph.edges.length === 0)
+
+    useEffect(() => {
+        if (shouldSave)
+            editorStore.setState({ saving: true })
+    }, [convertedGraphStr])
+
     useDebouncedEffect(() => {
-        if (!isWorkflowLoaded || updateGraph.isPending || !isReadyToSave)
-            return
-
-        // Prevent empty graph from being saved -- this happens sometimes
-        if (convertedGraph.nodes.length === 0 && convertedGraph.edges.length === 0)
-            return console.debug("Graph is empty, not saving")
-
-        console.debug("Saving graph...", convertedGraph)
-        updateGraph.mutateAsync(null).then(() => console.log("Graph saved"))
+        if (shouldSave) {
+            console.debug("Saving graph...", convertedGraph)
+            updateGraph.mutateAsync(null).then(() => {
+                console.debug("Graph saved")
+                editorStore.setState({ saving: false })
+            })
+        }
     }, [convertedGraphStr], 1000)
 }
 

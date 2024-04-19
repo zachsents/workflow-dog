@@ -17,6 +17,7 @@ type EditorStore = {
     redo: () => void
     copy: CopyHandler
     paste: PasteHandler
+    saving: boolean
 }
 
 type EditorStoreApi = StoreApi<EditorStore>
@@ -37,6 +38,7 @@ export function EditorStoreProvider({ children }: { children: any }) {
             redo: () => {},
             copy: () => {},
             paste: () => {},
+            saving: false,
         }))
     }
 

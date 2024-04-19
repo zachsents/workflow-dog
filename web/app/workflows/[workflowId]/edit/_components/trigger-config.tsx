@@ -76,11 +76,12 @@ export const TriggerSettingsForm = extendComponent<"form", TriggerSettingsFormPr
                     Settings:
                 </TriggerConfigHeader>
 
-                <div className="flex-v gap-2 px-2">
+                <div className="flex-v gap-4 px-2">
                     {fields.map(f =>
                         <FormField
                             control={form.control}
                             name={f.key}
+                            disabled={form.formState.isSubmitting}
                             render={f.render}
                             key={f.key}
                         />

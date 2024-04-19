@@ -1,5 +1,6 @@
 "use client"
 
+import type { WorkflowTrigger } from "@pkg/types"
 import { useDebouncedCallback } from "@react-hookz/web"
 import {
     DialogContent,
@@ -32,9 +33,9 @@ export default function TriggerControl() {
     const workflowId = useCurrentWorkflowId()
     const { data: workflow, isSuccess: hasWorkflowLoaded } = useWorkflow()
 
-    const trigger = workflow?.trigger as any
+    const trigger = workflow?.trigger as WorkflowTrigger | undefined
     const hasTrigger = Boolean(trigger)
-    const triggerDefinition = TriggerDefinitions.get(trigger?.type)
+    const triggerDefinition = TriggerDefinitions.get(trigger?.type!)
 
     const popover = useDialogState()
     const dialog = useDialogState()
@@ -96,10 +97,11 @@ export default function TriggerControl() {
 
                     <Separator />
 
-                    <div className="flex-v items-stretch gap-2 p-2">
+                    <div className="flex-v items-stretch gap-4 p-2">
                         <p className="font-bold">
                             Configure Trigger
                         </p>
+
                         {triggerDefinition?.renderConfig ?
                             <triggerDefinition.renderConfig
                                 workflowId={workflow?.id!}

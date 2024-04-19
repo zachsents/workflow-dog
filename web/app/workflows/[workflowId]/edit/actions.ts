@@ -105,7 +105,7 @@ export async function updateTriggerConfig(workflowId: string, update: TriggerUpd
         ...oldTrigger,
         config: mergeObjectsOverwriteArrays(
             oldTrigger.config,
-            validation.data.config
+            validation.data.config,
         ),
     } as WorkflowTrigger
 
@@ -119,7 +119,7 @@ export async function updateTriggerConfig(workflowId: string, update: TriggerUpd
     error = remapError(updateQuery)
     if (error) return error
 
-    console.debug(`Updated fields (${Object.keys(validation.data)}) in trigger config for workflow (${workflowId})`)
+    console.debug(`Updated fields (${Object.keys(validation.data.config)}) in trigger config for workflow (${workflowId})`)
 
     const triggerDefinition = TriggerDefinitions.get(oldTrigger.type)
 

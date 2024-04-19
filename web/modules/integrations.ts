@@ -44,13 +44,9 @@ export function useIntegrationAccount(integrationAccountId: string | null | unde
 }
 
 
-export function useAvailableIntegrationAccounts() {
-    const nodeId = useNodeId()
-    const definition = useDefinition(nodeId)
+export function useAvailableIntegrationAccounts(serviceId: string, requiredScopes?: (string | string[])[]) {
     const supabase = useSupabaseBrowser()
     const workflowId = useCurrentWorkflowId()
-
-    const serviceId = definition?.requiredService?.id
 
     const query = useQuery({
         queryFn: async () => supabase
@@ -66,19 +62,17 @@ export function useAvailableIntegrationAccounts() {
     })
 
     const accounts = query.data?.filter(
-        account => definition?.requiredService?.scopes
-            ?.every(scope => {
-                const accountScopes = (account.scopes as string[] | null) || []
+        account => requiredScopes?.every(scope => {
+            const accountScopes = (account.scopes as string[] | null) || []
 
-                if (Array.isArray(scope))
-                    return scope.some(s => accountScopes.includes(s))
+            if (Array.isArray(scope))
+                return scope.some(s => accountScopes.includes(s))
 
-                return accountScopes.includes(scope)
-            })
-            ?? true
+            return accountScopes.includes(scope)
+        }) ?? true
     ) ?? []
 
-    return [definition?.requiredService, accounts, query] as const
+    return [accounts, query] as const
 }
 
 

@@ -141,8 +141,6 @@ export type SharedTriggerDefinition = {
     description: string
     inputs: Record<string, SharedTriggerDefinitionInterface>
     outputs: Record<string, SharedTriggerDefinitionInterface>
-    
-    requiredService?: NodeServiceRequirement
 }
 
 export interface SharedTriggerDefinitionInterface {
@@ -154,6 +152,7 @@ export interface SharedTriggerDefinitionInterface {
 export type WorkflowTrigger = {
     type: string
     config: Record<string, any>
+    serviceAccountId?: string
 }
 
 export type ServerTriggerDefinition = {

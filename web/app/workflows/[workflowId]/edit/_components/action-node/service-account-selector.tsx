@@ -1,6 +1,5 @@
 "use client"
 
-import { useDebouncedEffect } from "@react-hookz/web"
 import { useQueryClient } from "@tanstack/react-query"
 import {
     DropdownMenu,
@@ -13,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useDialogState } from "@web/lib/client/hooks"
 import { cn } from "@web/lib/utils"
 import { useAvailableIntegrationAccounts } from "@web/modules/integrations"
-import { useIsNodeSelected, useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
+import { useDefinition, useIsNodeSelected, useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
 import { useWorkflow } from "@web/modules/workflows"
 import { ServiceDefinitions } from "packages/client"
 import { TbDots, TbExternalLink, TbPlugConnected, TbRefresh, TbSettings, TbX } from "react-icons/tb"
@@ -21,15 +20,14 @@ import APIKeyDialog from "./api-key-dialog"
 
 
 
-export default function ServiceAccountSelector() {
+export function NodeServiceAccountSelector() {
 
-    const queryClient = useQueryClient()
-    const { data: workflow } = useWorkflow()
+    const isNodeSelected = useIsNodeSelected()
+    const nodeDefinition = useDefinition()
+    const requirement = nodeDefinition!.requiredService!
 
-    const [requirement, accounts, { isLoading }] = useAvailableIntegrationAccounts()
-    const service = ServiceDefinitions.get(requirement?.id!)
+    const [accounts] = useAvailableIntegrationAccounts(requirement.id, requirement.scopes)
 
-    const isSelected = useIsNodeSelected()
     const [selectedAccount, setSelectedAccount] = useNodeProperty<string | null>(
         undefined,
         "data.serviceAccount",
@@ -40,18 +38,56 @@ export default function ServiceAccountSelector() {
         }
     )
 
-    const iconComponent = service?.icon &&
-        <service.icon className="text-lg w-[1em] h-[1em] shrink-0" />
+    return (
+        <ServiceAccountSelector
+            serviceDefinitionId={requirement.id}
+            requiredScopes={requirement.scopes}
+            selectedAccount={selectedAccount}
+            setSelectedAccount={setSelectedAccount}
+            className={cn(
+                "absolute top-full left-1/2 -translate-x-1/2 mt-4 max-w-full min-w-[20rem] pointer-events-none",
+                (!isNodeSelected && !!selectedAccount) && "hidden",
+            )}
+        />
+    )
+}
+
+
+export interface ServiceAccountSelectorProps extends React.ComponentProps<typeof Select> {
+    serviceDefinitionId: string
+    requiredScopes?: (string | string[])[]
+    selectedAccount: string | null
+    setSelectedAccount: (account: string | null) => void
+    className?: string
+}
+
+export function ServiceAccountSelector({
+    serviceDefinitionId,
+    requiredScopes,
+    selectedAccount,
+    setSelectedAccount,
+    className,
+    ...props
+}: ServiceAccountSelectorProps) {
+
+    const queryClient = useQueryClient()
+    const { data: workflow } = useWorkflow()
+
+    const serviceDefinition = ServiceDefinitions.get(serviceDefinitionId)
+    const [accounts, { isLoading }] = useAvailableIntegrationAccounts(serviceDefinitionId, requiredScopes)
+
+    const iconComponent = serviceDefinition?.icon &&
+        <serviceDefinition.icon className="text-lg w-[1em] h-[1em] shrink-0" />
 
     const keyDialog = useDialogState()
 
     let connectionComponent: JSX.Element | null = null
     let onConnect: (() => void) | null = null
-    switch (service?.authAcquisition.method) {
+    switch (serviceDefinition?.authAcquisition.method) {
         case "key":
             connectionComponent =
                 <APIKeyDialog
-                    serviceId={requirement?.id!}
+                    serviceId={serviceDefinition.id}
                     {...keyDialog}
                 />
             onConnect = keyDialog.open
@@ -61,12 +97,12 @@ export default function ServiceAccountSelector() {
                 if (!workflow?.team_id)
                     return
 
-                const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/oauth2/connect/${ServiceDefinitions.safeName(service.id)}`)
+                const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/oauth2/connect/${ServiceDefinitions.safeName(serviceDefinition.id)}`)
 
                 url.searchParams.append("t", workflow.team_id)
 
-                if (requirement?.scopes) {
-                    const requestScopes = requirement.scopes
+                if (requiredScopes) {
+                    const requestScopes = requiredScopes
                         .map(scope => Array.isArray(scope) ? scope[0] : scope)
                         .join(",")
                     url.searchParams.append("scopes", requestScopes)
@@ -78,12 +114,11 @@ export default function ServiceAccountSelector() {
     }
 
     return (
-        <div
-            className={cn(
-                "absolute top-full left-1/2 -translate-x-1/2 mt-4 max-w-full min-w-[20rem] pointer-events-none flex center",
-                ((!isSelected && !!selectedAccount) || isLoading) && "hidden",
-            )}
-        >
+        <div className={cn(
+            "flex center gap-2",
+            isLoading && "opacity-50",
+            className,
+        )}>
             {accounts.length === 0 ?
                 <Button
                     variant="outline"
@@ -91,14 +126,15 @@ export default function ServiceAccountSelector() {
                     onClick={() => void onConnect?.()}
                 >
                     {iconComponent}
-                    Connect {service?.name}
+                    Connect {serviceDefinition?.name}
                 </Button> :
-                <div className="flex center gap-2">
+                <>
                     {iconComponent}
 
                     <Select
                         value={selectedAccount || ""}
                         onValueChange={setSelectedAccount}
+                        {...props}
                     >
                         <SelectTrigger className="pointer-events-auto bg-white">
                             <SelectValue placeholder="Select an account" />
@@ -129,12 +165,12 @@ export default function ServiceAccountSelector() {
                                 onSelect={() => void onConnect?.()}
                             >
                                 <TbPlugConnected />
-                                Connect new {service?.name} account
+                                Connect new {serviceDefinition?.name} account
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 className="flex items-center gap-2"
                                 onSelect={() => void queryClient.invalidateQueries({
-                                    queryKey: ["integrationAccountsForWorkflow", workflow?.id, service?.id]
+                                    queryKey: ["integrationAccountsForWorkflow", workflow?.id, serviceDefinition?.id]
                                 })}
                             >
                                 <TbRefresh />
@@ -162,7 +198,7 @@ export default function ServiceAccountSelector() {
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                </div>}
+                </>}
 
             {connectionComponent}
         </div>

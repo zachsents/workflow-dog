@@ -10,7 +10,7 @@ import HandleRenderer from "./handle-renderer"
 import ModifierWrapper from "./modifier-wrapper"
 import NotesWrapper from "./notes-wrapper"
 import SelectionWrapper from "./selection-wrapper"
-import ServiceAccountSelector from "./service-account-selector"
+import { NodeServiceAccountSelector } from "./service-account-selector"
 
 
 export default function ActionNode({ id, selected }: NodeProps): React.JSX.Element {
@@ -85,7 +85,7 @@ export default function ActionNode({ id, selected }: NodeProps): React.JSX.Eleme
                     </ModifierWrapper>
 
                     {definition?.requiredService &&
-                        <ServiceAccountSelector />}
+                        <NodeServiceAccountSelector />}
                 </SelectionWrapper>
             </NotesWrapper>
         </div> :

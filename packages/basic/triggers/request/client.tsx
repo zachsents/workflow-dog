@@ -16,6 +16,8 @@ export default createClientTriggerDefinition(shared, {
 
         const triggerUrl = `${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflowId}/trigger/request`
 
+        const defaultValue = (key: string, fallback: any = null) => workflow?.trigger?.config?.[key] ?? fallback
+
         return (
             <TriggerConfig
                 aboveSettings={<>
@@ -37,7 +39,7 @@ export default createClientTriggerDefinition(shared, {
                         fields={[
                             {
                                 key: "waitUntilFinished",
-                                defaultValue: workflow?.trigger?.config?.waitUntilFinished ?? false,
+                                defaultValue: defaultValue("waitUntilFinished", false),
                                 render: ({ field }) => (
                                     <FormItem className="flex gap-4 space-y-0">
                                         <FormControl>
@@ -57,7 +59,7 @@ export default createClientTriggerDefinition(shared, {
                                         </div>
                                     </FormItem>
                                 )
-                            }
+                            },
                         ]}
                         onClose={onClose}
                         closeOnFinishedSubmitting
@@ -65,7 +67,7 @@ export default createClientTriggerDefinition(shared, {
                 }
             />
         )
-    }
+    },
 })
 
 

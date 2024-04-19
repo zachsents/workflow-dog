@@ -29,7 +29,7 @@ export default function UpgradePlanCard({ billingPlan }: { billingPlan: ProjectB
                         </ul>
                     </div>
 
-                    <Button size="lg" asChild>
+                    <Button size="lg" asChild className="outline outline-amber-400">
                         <Link href="usage/upgrade" className="text-md flex center gap-2">
                             <TbConfetti />
                             Upgrade to {planData.name}
@@ -40,7 +40,7 @@ export default function UpgradePlanCard({ billingPlan }: { billingPlan: ProjectB
                     <p className="text-muted-foreground">
                         You're already on the highest plan we offer!
                     </p>
-                    <Button size="lg" asChild>
+                    <Button size="lg" asChild className="outline outline-amber-400">
                         <a
                             href="mailto:info@workflow.dog?subject=We%20need%20a%20custom%20plan&body=Tell%20us%20about%20your%20use-cases."
                             className="flex center gap-2"

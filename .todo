@@ -1,114 +1,49 @@
-Web:
-    Integration Server:
-        ☐ Make nonexistent accounts be unselected
 
-    Execution:
-        ☐ Check security of how i'm passing integration tokens to the execution engine
-
-    Running UI:
-        ☐ Make JSON builder component
-
-    Run Viewer UI: 
-        ☐ Design object/json viewer
-        ☐ Make dates consider scheduled time and add status icon
-        ☐ Add scroll shadow to data viewer tooltip
-        ☐ Add hidden property that doesnt show up in the UI or influence count
-
-    Triggers:
-        ☐ Add gmail trigger endpoint/infra
-        ☐ Change URL trigger to always return JSON
-        ☐ Allow custom values in trigger data node
-        ✘ Change trigger cleanup to use a database webhook since there are so many times it needs to happen: trigger change, trigger config update, workflow delete, etc. @cancelled (2/20/2024, 2:34:43 AM)
-        ☐ Add trigger cleanup on workflow delete
-
-    Misc:
-        ✔ Make nonexistent trigger inputs be unselected @done (2/13/2024, 4:34:53 AM)
-        ✔ Add interface for searching and adding nodes @done (2/17/2024, 10:53:49 PM)
-        ✔ Make text nodes autosize @done (2/15/2024, 9:40:41 PM)
-        ✔ minify number nodes @done (2/15/2024, 9:58:57 PM)
-        ✔ Add renaming + adding for group handles @done (3/31/2024, 10:46:40 PM)
-        ✔ Set up homepage redirect @done (2/15/2024, 4:48:46 PM)
-        ☐ Add node comments
-        ☐ Looping groups
-        ✔ Add custom domain to cloud run containers @done (2/18/2024, 10:19:52 AM)
-        ☐ Re-add node pinning
-        ✔ Graph saving bug @done (3/31/2024, 10:46:48 PM)
-        ✔ Investigate duplicate input ID bug @done (2/18/2024, 4:34:26 PM)
-        ✔ Investigate text node bug error from screenshot @done (2/19/2024, 3:21:47 PM)
-        ✔ Type labels on edges @done (3/31/2024, 10:46:52 PM)
-        ☐ Make workflow fetching realtime
-
-    Dev Ops:
-        ✔ Check .env templates into git @done (2/19/2024, 9:25:09 AM)
-
-    Nodes:
-        ✔ JSON stringify @done (2/15/2024, 10:43:34 PM)
-        ✔ JSON parse @done (2/15/2024, 10:34:52 PM)
-        ✔ Expand object @done (2/15/2024, 10:34:56 PM)
-        ✔ Compose object @done (2/15/2024, 10:40:22 PM)
-        ✔ Fix compose object node @done (2/18/2024, 10:13:16 AM)
-        ☐ Web scraping
-        ☐ Pass through
-        ☐ Logical operators
-        ✔ Switch @done (2/20/2024, 3:45:37 AM)
-        ✔ Math operators @done (2/20/2024, 6:08:32 AM)
-
-
-    ☐ Check integration system that I wanted to fix for some reason
-        ☐ I think i wanted to remove the access token field and just make the fetching all happen based on what type the integration is'
-        ☐ Also need to check security of how i'm passing token
-    ✔ Add type labels to handles @done (3/31/2024, 10:47:09 PM)
-    ✔ Add adding handles to node @done (3/31/2024, 10:47:11 PM)
-    ✔ Add renaming handles to node @done (3/31/2024, 10:47:12 PM)
-    ✔ Make account selector bigger @done (3/31/2024, 10:47:14 PM)
-    ✔ Generally fix scale of everything on nodes @done (3/31/2024, 10:47:15 PM)
-    ☐ Add errors for no account selected
-    ☐ Implement node search modal
-    ☐ Implement gmail trigger
-    ☐ Add required integrations to trigger config
-    ☐ Make new workflows have trigger data nodes for every trigger input
-    ☐ Make URL triggers return JSON
-    ☐ Implement workflow outputs
-    ☐ Add variable nodes
-    ☐ Add node pinning
-    ☐ Add trigger setup/cleanup functions that get called in every scenario
-    ☐ Add dynamic types for things like packing/unpacking objects
-
-extra:
-    ☐ Add RPC for individual nodes to be able to make calls from the client to fetch data
-    ☐ Add error page that takes redirects for all errors and also reports them to the server
-
-
-tonight:
-    ✔ Convert workflow-man @done (4/1/2024, 3:53:11 AM)
-    ✔ Make it show outputs @done (4/1/2024, 5:35:27 AM)
-    ✔ Add trigger updating server action @done (4/1/2024, 8:55:49 AM)
-    ✔ Add workflow creation @done (4/1/2024, 3:26:41 PM)
-    ✔ Make server action for workflow delete that cleans up triggers @done (4/1/2024, 9:20:25 AM)
+Critical & Core:
     ☐ Add integrations to trigger configs
     ☐ Add integration display in settings
     ☐ Make better manual input components that actually work
-    ✔ Change team name in db function @done (4/1/2024, 3:27:16 PM)
+    ☐ Saving indicator
+    ☐ Rearrange editor header
+    ☐ Permanent CTA once limit has been hit
 
-services:
-    ☐ convert existing
-    ☐ gmail
-    ☐ close
-    ☐ openai
-    ☐ text
-        ☐ uppercase
-        ☐ lowercase
-        ☐ title case
+Packages:
+    ☐ Gmail
+    ☐ Google Sheets
+    ☐ Airtable
+    ☐ Google Drive
+    ☐ Google Forms
+    ☐ Typeform
+    ☐ Google Calendar
+    ☐ LinkedIn
+    ☐ CloseCRM
+    ✔ OpenAI @done (4/18/2024, 10:26:51 PM)
+    ✔ Text @done (4/18/2024, 10:27:09 PM)
+    ☐ Web scraping
+    ✔ Logical operators @done (4/18/2024, 10:27:08 PM)
 
-little:
-    ✔ key prop bug in renderPreview @done (4/1/2024, 6:53:48 PM)
-    ✔ make manual run inputs optional @done (4/1/2024, 6:53:41 PM)
-    ✔ make manual run form a little wider @done (4/1/2024, 6:56:36 PM)
-    ✔ hide manual run button when disabled @done (4/1/2024, 7:01:20 PM)
-    ✔ reverse row order of edit handle buttons @done (4/1/2024, 7:02:37 PM)
-    ✔ fix bug where sometimes new runs don't load in. something isn't getting invalidated @done (4/10/2024, 8:06:54 PM)
-    ✔ hide edge delete buttons when run is selected @done (4/1/2024, 7:06:00 PM)
-    ☐ add saving indicator
-    ☐ add minimize nodes option
+Utility Nodes:
+    ☐ Variables/portals
+    ☐ Schedule workflow
+    ☐ Staggered loop workflows
 
+Small Fixes:
+    ☐ Active state for Workflows nav link in dashboard header
 
+Possible Future Features:
+    ☐ Incremental running
+    ☐ Tooltips for handles with detailed explanations on function, default behaviors, etc.
+    ☐ Switch group handles between passing in multiple handles or a single handle
+    ☐ Workflow outputs
+    ☐ Show simplified node model when zoomed out really far (even just icon)
+    ☐ Minimize node option
+    ☐ Looping groups
+    ☐ RPC commands in node definitions for making calls for data for the frontend
+    ☐ Central error reporting
+    ☐ Node comments
+    ☐ Pin node types to toolbar and context menu
+    ☐ Realtime workflow editor collab
+    ☐ New workflows have trigger data nodes for every trigger input
+    ☐ Dynamic type calculation
+    ☐ JSON builder component
+    ☐ Scheduled runs show up in run viewer

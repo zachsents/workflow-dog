@@ -126,7 +126,7 @@ interface PastRunsTableProps {
 
 export default function PastRunsTable({ onClose }: PastRunsTableProps) {
 
-    const { data: runs } = useWorkflowRuns()
+    const { data: runs, isLoading } = useWorkflowRuns()
 
     const [selectedRunId, setSelectedRunId] = useEditorStoreState<string | null>("selectedRunId")
 
@@ -157,6 +157,10 @@ export default function PastRunsTable({ onClose }: PastRunsTableProps) {
                 },
             }}
             className="border-none rounded-none [&_th_button]:px-1 first:[&_th]:pl-4 last:[&_th]:pr-4 [&_td]:p-1 [&_td]:text-xs [&_td]:text-center [&_td]:text-nowrap"
+
+            empty={isLoading
+                ? <Loader className="mx-auto" />
+                : "No runs yet."}
         >
             {row =>
                 <DataTableRow

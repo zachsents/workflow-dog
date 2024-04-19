@@ -97,7 +97,7 @@ export function useWorkflowRuns(workflowId = useCurrentWorkflowId()) {
     return useQuery({
         queryFn: async () => supabase
             .from("workflow_runs")
-            .select("*")
+            .select("id, count, status, created_at, scheduled_for, has_errors, error_count, started_at, finished_at")
             .eq("workflow_id", workflowId!)
             .order("created_at", { ascending: false })
             .limit(50)
@@ -187,7 +187,7 @@ export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
             const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflowId}/run`)
 
             try {
-                var { data: run } = await axios.post(url.toString(), body)
+                var { data: { id: runId } } = await axios.post(url.toString(), body)
             } catch (err) {
                 const toastOptions: ExternalToast = err.response.data.error.needsUpgrade ? {
                     action: {
@@ -202,18 +202,21 @@ export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
 
             const finishPromise = new Promise((resolve, reject) => {
                 const channel = supabase
-                    .channel(`workflow_run-${run.id}-changes`)
+                    .channel(`workflow_run-${runId}-changes`)
                     .on("postgres_changes", {
                         event: "UPDATE",
                         schema: "public",
                         table: "workflow_runs",
-                        filter: `id=eq.${run.id}`,
+                        filter: `id=eq.${runId}`,
                     }, (payload) => {
                         if (!["completed", "failed"].includes(payload.new.status))
                             return
 
-                        if (payload.errors?.length > 0)
-                            reject(payload.errors)
+                        const errors = (payload.errors || [])
+                            .filter(err => !err.includes("413"))
+
+                        if (errors.length > 0)
+                            reject(payload.errors.join("\n"))
 
                         channel.unsubscribe()
                         resolve(payload.new)
@@ -223,13 +226,15 @@ export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
 
             toast.promise(finishPromise, {
                 loading: "Running...",
-                success: (finishedRun: any) => `${Object.keys(finishedRun.state.outputs).length} outputs, ${finishedRun.error_count} errors`,
+                success: (finishedRun: any) => finishedRun.has_errors
+                    ? `Finished with ${finishedRun.error_count} error(s)`
+                    : "Finished!",
                 error: err => err,
                 // dismissible: true,
             })
 
             if (selectRun)
-                finishPromise.then(() => editorStore.setState({ selectedRunId: run.id }))
+                finishPromise.then(() => editorStore.setState({ selectedRunId: runId }))
         },
         ...options,
     })

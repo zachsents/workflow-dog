@@ -15,6 +15,9 @@ const bodySchema = z.object({
 })
 
 
+export const maxDuration = 300
+
+
 export async function POST(
     req: NextRequest,
     { params: { workflowId } }: { params: { workflowId: string } }

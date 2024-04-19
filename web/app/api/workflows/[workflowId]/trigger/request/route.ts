@@ -70,6 +70,8 @@ async function all(req: NextRequest, {
 }
 
 
+export const maxDuration = 300
+
 export const GET = all
 export const POST = all
 export const PUT = all

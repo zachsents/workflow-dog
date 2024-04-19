@@ -141,6 +141,8 @@ export type SharedTriggerDefinition = {
     description: string
     inputs: Record<string, SharedTriggerDefinitionInterface>
     outputs: Record<string, SharedTriggerDefinitionInterface>
+    
+    requiredService?: NodeServiceRequirement
 }
 
 export interface SharedTriggerDefinitionInterface {

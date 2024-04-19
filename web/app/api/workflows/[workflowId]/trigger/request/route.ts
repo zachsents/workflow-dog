@@ -1,3 +1,4 @@
+import { TriggerDefinitions } from "@pkg/server"
 import { errorResponse } from "@web/lib/server/router"
 import { remapError, supabaseServerAdmin } from "@web/lib/server/supabase"
 import axios from "axios"
@@ -22,7 +23,7 @@ async function all(req: NextRequest, {
 
     const { triggerType, triggerConfig } = triggerQuery.data!
 
-    if (triggerType !== "https://triggers.workflow.dog/basic/request") {
+    if (triggerType !== TriggerDefinitions.resolveId("basic/request")) {
         return errorResponse("This workflow does not have a URL Request trigger", 400)
     }
 
@@ -49,7 +50,11 @@ async function all(req: NextRequest, {
     }
 
     if (!waitUntilFinished)
-        return NextResponse.json({ success: true, message: "👍" }, { status: 202 })
+        return NextResponse.json({
+            success: true,
+            message: "👍",
+            workflowRunId: response.id,
+        }, { status: 202 })
 
     const { status, headers, body } = response.state?.workflowOutputs ?? {}
 

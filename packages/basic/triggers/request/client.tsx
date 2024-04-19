@@ -1,6 +1,6 @@
-import { TriggerConfig, TriggerConfigHeader, TriggerSettingsForm } from "@pkg/_components/trigger-config"
 import { createClientTriggerDefinition } from "@pkg/types"
 import { Checkbox } from "@ui/checkbox"
+import { TriggerConfig, TriggerConfigHeader, TriggerSettingsForm } from "@web/app/workflows/[workflowId]/edit/_components/trigger-config"
 import CopyButton from "@web/components/copy-button"
 import { FormControl, FormDescription, FormItem, FormLabel } from "@web/components/ui/form"
 import { TbLink } from "react-icons/tb"

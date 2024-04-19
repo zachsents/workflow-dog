@@ -6,6 +6,7 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { NextResponse, type NextRequest } from "next/server"
 import "server-only"
+import type { TypedSupabaseClient } from "../types/supabase"
 
 
 /*
@@ -183,4 +184,15 @@ export function remapError(result: any, messages: Record<string, string | false>
             message,
         }
     }
+}
+
+
+export interface PassableSupabaseOptions {
+    admin?: boolean
+    supabase?: TypedSupabaseClient
+}
+
+export async function getServerSupabaseClient({ admin, supabase }: PassableSupabaseOptions = {}) {
+    if (supabase) return supabase
+    return admin ? supabaseServerAdmin() : supabaseServer()
 }

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient, type UseMutationOptions } from "@tanstack/react-query"
 import { useCurrentWorkflowId } from "@web/lib/client/hooks"
 import { useSupabaseBrowser } from "@web/lib/client/supabase"
+import axios from "axios"
 import "client-only"
 import { useSearchParams } from "next/navigation"
 import { ExternalToast, toast } from "sonner"
@@ -8,7 +9,6 @@ import { useUser } from "./auth"
 import { useOnDatabaseChange } from "./db"
 import { useQueryParam } from "./router"
 import { useEditorStore, useEditorStoreApi } from "./workflow-editor/store"
-import axios from "axios"
 
 
 export function useWorkflowIdFromUrl(skip?: string | undefined) {
@@ -168,13 +168,11 @@ export function useSelectedWorkflowRun() {
 
 
 interface UseRunWorkflowMutationOptions extends UseMutationOptions {
-    subscribe?: boolean
     sendNotification?: boolean
     selectRun?: boolean
 }
 
 export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
-    subscribe = true,
     sendNotification = true,
     selectRun = true,
     ...options

@@ -1,6 +1,7 @@
 import { TriggerDefinitions } from "@pkg/server"
 import { errorResponse } from "@web/lib/server/router"
 import { remapError, supabaseServerAdmin } from "@web/lib/server/supabase"
+import { waitForRunToFinish } from "@web/lib/server/workflows"
 import axios from "axios"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -52,15 +53,16 @@ async function all(req: NextRequest, {
     if (!waitUntilFinished)
         return NextResponse.json({
             success: true,
-            message: "👍",
             workflowRunId: response.id,
         }, { status: 202 })
 
-    const { status, headers, body } = response.state?.workflowOutputs ?? {}
+    const finishedRun = await waitForRunToFinish(supabase, response.id)
+
+    const { status, headers, body } = finishedRun.state?.workflowOutputs ?? {}
 
     const responseOptions = {
         headers: headers ?? {},
-        status: status ?? (response.has_errors ? 500 : 200),
+        status: status ?? (finishedRun.has_errors ? 500 : 200),
     }
 
     if (typeof body === "object" && body !== null)

@@ -15,9 +15,6 @@ const bodySchema = z.object({
 })
 
 
-export const maxDuration = 300
-
-
 export async function POST(
     req: NextRequest,
     { params: { workflowId } }: { params: { workflowId: string } }
@@ -97,32 +94,7 @@ export async function POST(
         })
     }
 
-    if (!req.nextUrl.searchParams.has("subscribe")) {
-        return NextResponse.json({
-            id: newRunId,
-        }, { status: 201 })
-    }
-
-    const finishedRun = await new Promise((resolve, reject) => {
-        const channel = supabase
-            .channel(`workflow_run-${newRunId}-changes`)
-            .on("postgres_changes", {
-                event: "UPDATE",
-                schema: "public",
-                table: "workflow_runs",
-                filter: `id=eq.${newRunId}`,
-            }, (payload) => {
-                if (!["completed", "failed"].includes(payload.new.status))
-                    return
-
-                if (payload.errors?.length > 0)
-                    reject(payload.errors)
-
-                channel.unsubscribe()
-                resolve(payload.new)
-            })
-            .subscribe()
-    })
-
-    return NextResponse.json(finishedRun, { status: 200 })
+    return NextResponse.json({
+        id: newRunId,
+    }, { status: 202 })
 }

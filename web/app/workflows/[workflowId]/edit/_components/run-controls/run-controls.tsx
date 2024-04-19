@@ -4,32 +4,14 @@ import { Badge } from "@web/components/ui/badge"
 import { Button } from "@web/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@web/components/ui/popover"
 import { useDialogState } from "@web/lib/client/hooks"
-import { useEditorStore, useEditorStoreState } from "@web/modules/workflow-editor/store"
+import { useEditorStoreState } from "@web/modules/workflow-editor/store"
 import { useSelectedWorkflowRun, useWorkflow, useWorkflowRuns } from "@web/modules/workflows"
 import { TbChevronDown, TbClockPlay, TbPlayerPlay, TbX } from "react-icons/tb"
 import PastRunsTable from "./past-runs-table"
 import RunManuallyForm from "./run-manually-form"
 
 
-export default function RunControls() {
-
-    const hasSelectedRun = useEditorStore(s => !!s.selectedRunId)
-
-    return (
-        <>
-            {!hasSelectedRun &&
-                <RunManually />}
-            <PastRuns />
-
-            {hasSelectedRun
-                ? <CurrentRunInfo />
-                : /* <MostRecentRun /> */ null}
-        </>
-    )
-}
-
-
-function RunManually() {
+export function RunManually() {
     const { data: workflow } = useWorkflow()
     const isEnabled = workflow?.is_enabled ?? false
 
@@ -58,14 +40,14 @@ function RunManually() {
 }
 
 
-function PastRuns() {
+export function PastRuns() {
     const popover = useDialogState()
     return (
         <Popover {...popover.dialogProps}>
             <PopoverTrigger asChild>
                 <Button
                     size="sm" variant="ghost"
-                    className="flex center gap-2 border border-muted-foreground"
+                    className="flex center gap-2 border border-muted-foreground pointer-events-auto"
                 >
                     <TbClockPlay />
                     View Past Runs
@@ -114,19 +96,19 @@ function MostRecentRun() {
 }
 
 
-function CurrentRunInfo() {
+export function CurrentRunInfo() {
 
     const { data: selectedRun } = useSelectedWorkflowRun()
     const [, setSelectedRunId] = useEditorStoreState<string | null>("selectedRunId")
 
     return (
         <>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-muted-foreground">
                 Currently Viewing Run #{selectedRun?.count}
             </p>
             <Button
-                size="sm" variant="outline"
-                className="bg-white/80 backdrop-blur-sm shadow-lg pointer-events-auto flex center gap-2"
+                size="sm" variant="ghost"
+                className="pointer-events-auto flex center gap-2 border border-muted-foreground"
                 onClick={() => setSelectedRunId(null)}
             >
                 <TbX />

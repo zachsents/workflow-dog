@@ -51,7 +51,6 @@ export default function CurrentRunHeader() {
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
-
         </div>
     )
 }

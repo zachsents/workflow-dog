@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import { Controls, Edge, Node, Panel, ReactFlow } from "reactflow"
 import ActionNode from "../action-node/action-node"
 import DataEdge from "../data-edge"
-import RunControls from "./run-controls"
+import { CurrentRunInfo, PastRuns } from "./run-controls"
 import RunViewerToolbar from "./run-viewer-toolbar"
 
 
@@ -34,7 +34,10 @@ export default function CurrentRunGraph() {
                     </Panel>
 
                     <Panel position="top-right" className="!m-2 !pointer-events-none">
-                        <RunControls />
+                        <div className="flex-v items-end gap-2">
+                            <PastRuns />
+                            <CurrentRunInfo />
+                        </div>
                     </Panel>
                 </div>}
         </div>
@@ -99,7 +102,10 @@ function GraphRenderer({ nodes, edges }: GraphRendererProps) {
             </Panel>
 
             <Panel position="top-right" className="!m-2 !pointer-events-none">
-                <RunControls />
+                <div className="flex-v items-end gap-2">
+                    <PastRuns />
+                    <CurrentRunInfo />
+                </div>
             </Panel>
         </ReactFlow>
     )

@@ -150,9 +150,7 @@ export default function PastRunsTable({ onClose }: PastRunsTableProps) {
 
                     const newRunId = Object.keys(updater(rowSelection))[0] || null
                     setSelectedRunId(newRunId)
-                    if (newRunId)
-                        setTimeout(onClose, 75)
-                    // just to give the user some feedback
+                    onClose?.()
                 },
                 state: {
                     rowSelection,

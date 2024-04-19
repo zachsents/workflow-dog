@@ -25,7 +25,7 @@ import { useRef, useState } from "react"
 import { TbArrowLeft, TbDots, TbExternalLink, TbGridPattern, TbHeart, TbMap, TbPhoto } from "react-icons/tb"
 import colors from "tailwindcss/colors"
 import HeaderContainer from "./header-container"
-import RunControls from "./run-controls/run-controls"
+import { PastRuns, RunManually } from "./run-controls/run-controls"
 import TriggerControl from "./trigger-control"
 import WorkflowStatusBadge from "./workflow-status-badge"
 
@@ -41,7 +41,8 @@ export default function EditWorkflowHeader() {
                 <WorkflowStatusBadge />
             </div>
             <TriggerControl />
-            <RunControls />
+            <RunManually />
+            <PastRuns />
             <HeaderMenu />
 
             {/* TODO: Implement UsersOnline component with Supabase Realtime */}

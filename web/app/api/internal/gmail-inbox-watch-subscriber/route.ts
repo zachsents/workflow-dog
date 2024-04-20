@@ -95,6 +95,7 @@ export async function POST(req: NextRequest) {
         const relevantMessages = newMessages.filter(msg =>
             parseInt(msg.historyId!) >= currentHistoryId
             && msg.recipientAddress === emailAddress
+            && msg.headers["x-triggered-by"] !== "WorkflowDog"
         )
         return relevantMessages.map(async msg => {
             // console.debug([

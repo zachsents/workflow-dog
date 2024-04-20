@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
             const currentHistoryId = parseInt(w.startHistoryId)
             return newMessages
                 .filter(m => parseInt(m.historyId!) >= currentHistoryId)
-                .map(m => axios.post(`${process.env.NEXT_PUBLIC_API_URL}/workflows${w.id}/run`, {
+                .map(m => axios.post(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${w.id}/run`, {
                     triggerData: m.payload,
                 }))
         })

@@ -10,7 +10,7 @@ export default createClientNodeDefinition(shared, {
     inputs: {
         message: {
             recommendedNode: {
-                definition: "https://nodes.workflow.dog/basic/template",
+                definition: "https://nodes.workflow.dog/text/template",
                 handle: "result",
             }
         },

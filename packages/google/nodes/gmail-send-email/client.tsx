@@ -11,6 +11,9 @@ export default createClientNodeDefinition(shared, {
         to: {},
         subject: {},
         message: {},
+        attachments: {
+            groupName: "Attachments",
+        },
     },
     outputs: {},
 })

@@ -5,7 +5,7 @@ import shared from "./shared"
 
 
 export default createExecutionNodeDefinition(shared, {
-    action: async ({ to, message, subject }, { token }) => {
+    action: async ({ to, message, subject, attachments }, { token }) => {
         if (!to)
             throw new Error("No recipient provided")
 
@@ -15,13 +15,16 @@ export default createExecutionNodeDefinition(shared, {
         if (!subject)
             throw new Error("No subject provided")
 
-        // set up message
+        const senderAddress = await google.gmail("v1").users.getProfile({
+            userId: "me",
+            access_token: token?.access_token,
+        }).then(res => res.data.emailAddress)
+
         const msg = createMimeMessage()
-        // msg.setSender(senderEmailAddress)
+        msg.setSender(senderAddress!)
         msg.setRecipient(to)
         msg.setSubject(subject)
 
-        // add content
         msg.addMessage({
             contentType: "text/plain",
             data: message,
@@ -31,20 +34,22 @@ export default createExecutionNodeDefinition(shared, {
         //     data: html,
         // })
 
-        // add headers
+        // msg.setHeader("Reply-To", senderAddress!)
         msg.setHeader("X-Triggered-By", "WorkflowDog")
-        // headers.forEach(([name, value]) => msg.setHeader(name, value))
 
-        // add attachments
-        // attachments.forEach(attachment => {
-        //     msg.addAttachment(attachment)
-        // })
+        attachments.forEach(attachment => {
+            msg.addAttachment({
+                filename: attachment.name,
+                contentType: attachment.mimeType,
+                data: attachment.data,
+                encoding: "base64",
+            })
+        })
 
-        // encode message
         const encodedMessage = Buffer.from(msg.asRaw()).toString("base64url")
 
         await google.gmail("v1").users.messages.send({
-            access_token: token.access_token,
+            access_token: token?.access_token,
             userId: "me",
             requestBody: {
                 raw: encodedMessage,

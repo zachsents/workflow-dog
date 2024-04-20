@@ -16,6 +16,11 @@ export default createSharedNodeDefinition({
             name: "Message",
             type: "https://data-types.workflow.dog/basic/string",
         },
+        attachments: {
+            name: "Attachment",
+            type: "https://data-types.workflow.dog/basic/file",
+            group: true,
+        },
     },
     outputs: {},
     requiredService: {

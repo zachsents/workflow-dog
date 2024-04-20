@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
     const serviceAccountId = await supabase
         .from("integration_accounts")
         .select("id")
+        .eq("service_id", "https://services.workflow.dog/google/google-oauth")
         .eq("profile->>email", emailAddress)
         .single()
         .throwOnError()

@@ -1,6 +1,6 @@
 import { createClientTriggerDefinition } from "@pkg/types"
 import { Checkbox } from "@ui/checkbox"
-import { TriggerConfig, TriggerConfigHeader, TriggerSettingsForm } from "@web/app/workflows/[workflowId]/edit/_components/trigger-config"
+import { TriggerConfig, TriggerConfigHeader, TriggerSettingsForm, defaultValue } from "@web/app/workflows/[workflowId]/edit/_components/trigger-config"
 import CopyButton from "@web/components/copy-button"
 import { FormControl, FormDescription, FormItem, FormLabel } from "@web/components/ui/form"
 import { TbLink } from "react-icons/tb"
@@ -15,8 +15,6 @@ export default createClientTriggerDefinition(shared, {
     renderConfig: ({ workflowId, workflow, updateConfig, onClose }) => {
 
         const triggerUrl = `${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflowId}/trigger/request`
-
-        const defaultValue = (key: string, fallback: any = null) => workflow?.trigger?.config?.[key] ?? fallback
 
         return (
             <TriggerConfig
@@ -39,7 +37,7 @@ export default createClientTriggerDefinition(shared, {
                         fields={[
                             {
                                 key: "waitUntilFinished",
-                                defaultValue: defaultValue("waitUntilFinished", false),
+                                defaultValue: defaultValue(workflow, "waitUntilFinished", false),
                                 render: ({ field }) => (
                                     <FormItem className="flex gap-4 space-y-0">
                                         <FormControl>

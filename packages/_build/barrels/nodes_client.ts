@@ -39,14 +39,14 @@ import math_nodes_greater_than_client from "../../math/nodes/greater-than/client
 import math_nodes_less_than_client from "../../math/nodes/less-than/client"
 import math_nodes_log_client from "../../math/nodes/log/client"
 import math_nodes_max_client from "../../math/nodes/max/client"
-import math_nodes_min_client from "../../math/nodes/min/client"
 import math_nodes_multiply_client from "../../math/nodes/multiply/client"
+import math_nodes_min_client from "../../math/nodes/min/client"
 import math_nodes_natural_log_client from "../../math/nodes/natural-log/client"
 import math_nodes_pi_client from "../../math/nodes/pi/client"
 import math_nodes_round_client from "../../math/nodes/round/client"
 import math_nodes_sin_client from "../../math/nodes/sin/client"
-import math_nodes_square_root_client from "../../math/nodes/square-root/client"
 import math_nodes_subtract_client from "../../math/nodes/subtract/client"
+import math_nodes_square_root_client from "../../math/nodes/square-root/client"
 import math_nodes_sum_client from "../../math/nodes/sum/client"
 import math_nodes_tan_client from "../../math/nodes/tan/client"
 import openai_nodes_classify_client from "../../openai/nodes/classify/client"
@@ -117,14 +117,14 @@ const _definitions = {
     "https://nodes.workflow.dog/math/less-than": _.merge({ id: "https://nodes.workflow.dog/math/less-than" }, math_nodes_less_than_client),
     "https://nodes.workflow.dog/math/log": _.merge({ id: "https://nodes.workflow.dog/math/log" }, math_nodes_log_client),
     "https://nodes.workflow.dog/math/max": _.merge({ id: "https://nodes.workflow.dog/math/max" }, math_nodes_max_client),
-    "https://nodes.workflow.dog/math/min": _.merge({ id: "https://nodes.workflow.dog/math/min" }, math_nodes_min_client),
     "https://nodes.workflow.dog/math/multiply": _.merge({ id: "https://nodes.workflow.dog/math/multiply" }, math_nodes_multiply_client),
+    "https://nodes.workflow.dog/math/min": _.merge({ id: "https://nodes.workflow.dog/math/min" }, math_nodes_min_client),
     "https://nodes.workflow.dog/math/natural-log": _.merge({ id: "https://nodes.workflow.dog/math/natural-log" }, math_nodes_natural_log_client),
     "https://nodes.workflow.dog/math/pi": _.merge({ id: "https://nodes.workflow.dog/math/pi" }, math_nodes_pi_client),
     "https://nodes.workflow.dog/math/round": _.merge({ id: "https://nodes.workflow.dog/math/round" }, math_nodes_round_client),
     "https://nodes.workflow.dog/math/sin": _.merge({ id: "https://nodes.workflow.dog/math/sin" }, math_nodes_sin_client),
-    "https://nodes.workflow.dog/math/square-root": _.merge({ id: "https://nodes.workflow.dog/math/square-root" }, math_nodes_square_root_client),
     "https://nodes.workflow.dog/math/subtract": _.merge({ id: "https://nodes.workflow.dog/math/subtract" }, math_nodes_subtract_client),
+    "https://nodes.workflow.dog/math/square-root": _.merge({ id: "https://nodes.workflow.dog/math/square-root" }, math_nodes_square_root_client),
     "https://nodes.workflow.dog/math/sum": _.merge({ id: "https://nodes.workflow.dog/math/sum" }, math_nodes_sum_client),
     "https://nodes.workflow.dog/math/tan": _.merge({ id: "https://nodes.workflow.dog/math/tan" }, math_nodes_tan_client),
     "https://nodes.workflow.dog/openai/classify": _.merge({ id: "https://nodes.workflow.dog/openai/classify" }, openai_nodes_classify_client),

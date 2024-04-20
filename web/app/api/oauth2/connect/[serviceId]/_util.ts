@@ -1,9 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { getSecret } from "@web/lib/server/google"
-import { errorResponse } from "@web/lib/server/router"
 import type { Database } from "@web/lib/types/supabase-db"
+import { CodedError } from "@web/lib/utils"
 import _ from "lodash"
-import { NextResponse } from "next/server"
 import { ServiceDefinitions } from "packages/server"
 import type { OAuth2Config } from "packages/types"
 import "server-only"
@@ -82,13 +81,13 @@ export async function getTokenForOAuth2Account(account: any, requesterClient: Su
 
     // If the token is not expired, return it. Includes a 2 minute buffer.
     if (new Date(token.expires_at) > new Date(Date.now() + 120 * 1000))
-        return NextResponse.json({
+        return {
             access_token: token.access_token,
             refreshed: false,
-        })
+        }
 
     if (!refresh_token)
-        return errorResponse("No refresh token available. You might need to revoke access to WorkflowDog through the service's settings and then try connecting again.", 401)
+        throw new CodedError("No refresh token available. You might need to revoke access to WorkflowDog through the service's settings and then try connecting again.", 401)
 
     const service = ServiceDefinitions.get(service_id)
 
@@ -112,7 +111,7 @@ export async function getTokenForOAuth2Account(account: any, requesterClient: Su
         })
 
         if (!refreshResponse.ok)
-            return errorResponse(await refreshResponse.text(), refreshResponse.status)
+            throw new CodedError(await refreshResponse.text(), refreshResponse.status)
 
         const { refresh_token: newRefresh, ...newToken } = cleanToken(await refreshResponse.json())
 
@@ -129,13 +128,13 @@ export async function getTokenForOAuth2Account(account: any, requesterClient: Su
             .eq("id", account.id)
             .throwOnError()
 
-        return NextResponse.json({
+        return {
             access_token: newToken.access_token,
             refreshed: true,
-        })
+        }
     }
     catch (err) {
         console.error(err)
-        return errorResponse("Failed to refresh token", 500)
+        throw new CodedError("Failed to refresh token", 500)
     }
 }

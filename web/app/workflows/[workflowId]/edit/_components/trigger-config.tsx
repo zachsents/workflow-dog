@@ -111,3 +111,5 @@ export const TriggerConfigHeader = extendComponent<"p">(({ children }, ref) =>
         {children}
     </p>
 )
+
+export const defaultValue = (workflow: any, key: string, fallback: any = null) => workflow?.trigger?.config?.[key] ?? fallback

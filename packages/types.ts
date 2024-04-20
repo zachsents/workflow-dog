@@ -152,12 +152,12 @@ export interface SharedTriggerDefinitionInterface {
 export type WorkflowTrigger = {
     type: string
     config: Record<string, any>
-    serviceAccountId?: string
+    data?: Record<string, any>
 }
 
 export type ServerTriggerDefinition = {
     /** Called when this trigger is modified, created, or removed */
-    onChange?: (oldTrigger: WorkflowTrigger | null, newTrigger: WorkflowTrigger | null, workflowId: string) => Promise<void>
+    onChange?: (oldTrigger: WorkflowTrigger | null, newTrigger: WorkflowTrigger | null, workflowId: string) => Promise<void | Record<string, any>>
 }
 
 export type ClientTriggerDefinition = {

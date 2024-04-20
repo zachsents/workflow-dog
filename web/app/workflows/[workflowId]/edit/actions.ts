@@ -40,31 +40,36 @@ export async function assignNewTrigger(workflowId: string, newTrigger: TriggerSc
         }
     }
 
+    // call onChange handlers in parallel
+    const [, newTriggerData] = await Promise.all([
+        (async () => {
+            if (oldTrigger?.type) {
+                return await TriggerDefinitions.get(oldTrigger.type)
+                    ?.onChange?.(oldTrigger as any, null, workflowId)
+            }
+        })(),
+        (async () => {
+            if (newTrigger?.type) {
+                return await TriggerDefinitions.get(newTrigger.type)
+                    ?.onChange?.(null, newTrigger as any, workflowId)
+            }
+        })(),
+    ])
+
     const updateQuery = await supabase
         .from("workflows")
-        .update({ trigger: newTrigger })
+        .update({
+            trigger: {
+                ...newTrigger,
+                data: newTriggerData || {},
+            }
+        })
         .eq("id", workflowId)
         .select("id")
         .single()
 
     error = remapError(updateQuery)
     if (error) return error
-
-    // call onChange handlers in parallel
-    await Promise.all([
-        (async () => {
-            if (oldTrigger?.type) {
-                await TriggerDefinitions.get(oldTrigger.type)
-                    ?.onChange?.(oldTrigger as any, null, workflowId)
-            }
-        })(),
-        (async () => {
-            if (newTrigger?.type) {
-                await TriggerDefinitions.get(newTrigger.type)
-                    ?.onChange?.(null, newTrigger as any, workflowId)
-            }
-        })(),
-    ])
 
     return true
 }
@@ -109,9 +114,25 @@ export async function updateTriggerConfig(workflowId: string, update: TriggerUpd
         ),
     } as WorkflowTrigger
 
+    const triggerDefinition = TriggerDefinitions.get(oldTrigger.type)
+
+    if (!triggerDefinition)
+        console.warn(`No trigger definition found for trigger type: ${oldTrigger.type}`)
+
+    const newTriggerData = await triggerDefinition?.onChange?.(
+        oldTrigger,
+        newTrigger,
+        workflowId
+    )
+
     const updateQuery = await supabase
         .from("workflows")
-        .update({ trigger: newTrigger })
+        .update({
+            trigger: {
+                ...newTrigger,
+                data: newTriggerData || {},
+            }
+        })
         .eq("id", workflowId)
         .select("id")
         .single()
@@ -120,17 +141,6 @@ export async function updateTriggerConfig(workflowId: string, update: TriggerUpd
     if (error) return error
 
     console.debug(`Updated fields (${Object.keys(validation.data.config)}) in trigger config for workflow (${workflowId})`)
-
-    const triggerDefinition = TriggerDefinitions.get(oldTrigger.type)
-
-    if (!triggerDefinition)
-        console.warn(`No trigger definition found for trigger type: ${oldTrigger.type}`)
-
-    await triggerDefinition?.onChange?.(
-        oldTrigger,
-        newTrigger,
-        workflowId
-    )
 
     return true
 }

@@ -14,6 +14,8 @@ export function getAuth() {
 }
 
 
+export function parent<P extends string, IL extends boolean = true>(resourcePath: P, includeLocation?: IL): typeof includeLocation extends true ? `projects/${typeof PROJECT}/locations/${typeof LOCATION}/${P}` : `projects/${typeof PROJECT}/${P}`
+
 export function parent(resourcePath: string, includeLocation = true) {
     let path = `projects/${PROJECT}`
     if (includeLocation)
@@ -52,4 +54,9 @@ export async function getSecret(name: string, useLocalIfAvailable = true) {
         throw new Error(`Secret not found: ${name}`)
 
     return Buffer.from(encodedSecret, "base64").toString()
+}
+
+
+export function safeId(id: string) {
+    return id.replaceAll(/\W+/g, "_")
 }

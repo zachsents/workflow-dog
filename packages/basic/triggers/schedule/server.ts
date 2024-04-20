@@ -3,7 +3,7 @@ import { createServerTriggerDefinition } from "@pkg/types"
 import shared from "./shared"
 import _ from "lodash"
 import { google } from "googleapis"
-import { getAuth, parent } from "@web/lib/server/google"
+import { getAuth, parent, safeId } from "@web/lib/server/google"
 
 
 export default createServerTriggerDefinition(shared, {
@@ -71,11 +71,6 @@ async function handleScheduleChange(oldTrigger: ScheduleTrigger, newTrigger: Sch
     ].map(p => p.catch(console.error)))
 
     console.debug(`Deleted ${jobsToDelete.length} jobs, added ${jobsToAdd.length} jobs, and updated ${jobsToUpdate.length} jobs for workflow (${workflowId}) schedule trigger`)
-}
-
-
-function safeId(id: string) {
-    return id.replaceAll(/\W+/g, "_")
 }
 
 

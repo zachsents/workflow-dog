@@ -91,10 +91,15 @@ export async function POST(req: NextRequest) {
         workflows.flatMap(w => {
             const currentHistoryId = parseInt(w.startHistoryId)
             return newMessages
-                .filter(m => parseInt(m.historyId!) >= currentHistoryId)
-                .map(({ historyId, ...message }) => axios.post(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${w.id}/run`, {
-                    triggerData: message,
-                }))
+                .filter(m =>
+                    parseInt(m.historyId!) >= currentHistoryId
+                    && m.toAddress === emailAddress
+                )
+                .map(({ historyId, toAddress, ...message }) =>
+                    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${w.id}/run`, {
+                        triggerData: message,
+                    })
+                )
         })
     )
 
@@ -124,18 +129,22 @@ const decodedMessageSchema = z.object({
 
 function parseMessage(message: gmail_v1.Schema$Message) {
     const parsedPayload = parseMessagePayload(message.payload)
-    const [, senderName, senderAddress] = getHeader(message.payload!, "From")?.match(/(.+?)<(.+?)>/) || []
+
+    const fromHeader = getHeader(message.payload!, "From")
+    const sender: any = fromHeader ? parsePerson(fromHeader) : {}
 
     return {
-        id: message.id!,
         historyId: message.historyId!,
+        toAddress: parsePerson(getHeader(message.payload!, "To")!).email,
+
+        id: message.id!,
         threadId: message.threadId!,
         labelIds: message.labelIds || [],
         date: new Date(parseInt(message.internalDate!)).toISOString(),
         ...parsedPayload,
         subject: getHeader(message.payload!, "Subject"),
-        senderName: senderName?.trim() || null,
-        senderAddress: senderAddress?.trim() || null,
+        senderName: sender.name || null,
+        senderAddress: sender.email || null,
     }
 }
 
@@ -146,11 +155,12 @@ type ParsedMessage = {
     attachments: {
         name: string,
         mimeType: string,
-        data: string,
+        data?: string,
+        attachmentId?: string,
     }[],
 }
 
-function parseMessagePayload(payload: gmail_v1.Schema$MessagePart | undefined): ParsedMessage {
+export function parseMessagePayload(payload: gmail_v1.Schema$MessagePart | undefined): ParsedMessage {
     if (payload?.mimeType?.startsWith("multipart/")) {
         return (payload.parts || []).reduce((acc, part) => {
             const { attachments, ...rest } = parseMessagePayload(part)
@@ -169,6 +179,7 @@ function parseMessagePayload(payload: gmail_v1.Schema$MessagePart | undefined): 
     if (payload?.mimeType?.startsWith("text/")) {
         let text = Buffer.from(payload.body?.data || "", "base64url")
             .toString()
+            .replaceAll("\u0000", "")
 
         if (headers["Content-Transfer-Encoding"] === "quoted-printable")
             text = quotedPrintable.decode(text)
@@ -184,8 +195,7 @@ function parseMessagePayload(payload: gmail_v1.Schema$MessagePart | undefined): 
             {
                 name: payload?.filename!,
                 mimeType: payload?.mimeType!,
-                data: Buffer.from(payload?.body?.attachmentId || "", "base64url")
-                    .toString("base64")
+                attachmentId: payload?.body?.attachmentId!,
             }
         ]
     }
@@ -193,4 +203,14 @@ function parseMessagePayload(payload: gmail_v1.Schema$MessagePart | undefined): 
 
 function getHeader(payload: gmail_v1.Schema$MessagePart, name: string) {
     return payload.headers?.find(h => h.name === name)?.value
+}
+
+function parsePerson(person: string): { name?: string, email: string } {
+    const fullRegex = /(.+?)<(.+?)>/
+    if (fullRegex.test(person)) {
+        const [, name, email] = person.match(fullRegex)!
+        return { name: name.trim(), email: email.trim() }
+    }
+
+    return { email: person.trim() }
 }

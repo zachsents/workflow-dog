@@ -255,6 +255,9 @@ importers:
       observable-hooks:
         specifier: ^4.2.3
         version: 4.2.3(react-dom@18.2.0)(react@18.2.0)(rxjs@7.8.1)
+      quoted-printable:
+        specifier: ^1.0.1
+        version: 1.0.1
       react:
         specifier: '*'
         version: 18.2.0
@@ -322,6 +325,9 @@ importers:
       '@types/node':
         specifier: ^17.0.12
         version: 17.0.45
+      '@types/quoted-printable':
+        specifier: ^1.0.2
+        version: 1.0.2
       '@types/react':
         specifier: '*'
         version: 18.2.73
@@ -5956,6 +5962,10 @@ packages:
     resolution: {integrity: sha512-5khscbd3SwWMhFqylJBLQ0zIu7c1K6Vz0uBIt915BI3zV0q1nfjRQD3RqSBcPaO6PHEF4ov/t9y89fSiyThlPA==}
     dev: true
 
+  /@types/quoted-printable@1.0.2:
+    resolution: {integrity: sha512-3B28oB1rRaZNb3N5dlxysm8lH1ujzvReDuYBiIO4jvpTIg9ksrILCNgPxSGVyTWE/qwuxzgHaVehwMK3CVqAtA==}
+    dev: true
+
   /@types/range-parser@1.2.7:
     resolution: {integrity: sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==}
     dev: true
@@ -9194,6 +9204,13 @@ packages:
   /queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
+  /quoted-printable@1.0.1:
+    resolution: {integrity: sha512-cihC68OcGiQOjGiXuo5Jk6XHANTHl1K4JLk/xlEJRTIXfy19Sg6XzB95XonYgr+1rB88bCpr7WZE7D7AlZow4g==}
+    hasBin: true
+    dependencies:
+      utf8: 2.1.2
+    dev: false
+
   /ramda@0.29.1:
     resolution: {integrity: sha512-OfxIeWzd4xdUNxlWhgFazxsA/nl3mS4/jGZI5n00uWOoSSFRhC1b6gl6xvmzUamgmqELraWp0J/qqVlXYPDPyA==}
     dev: false
@@ -10211,6 +10228,10 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       react: 18.2.0
+    dev: false
+
+  /utf8@2.1.2:
+    resolution: {integrity: sha512-QXo+O/QkLP/x1nyi54uQiG0XrODxdysuQvE5dtVqv7F5K2Qb6FsN+qbr6KhF5wQ20tfcV3VQp0/2x1e1MRSPWg==}
     dev: false
 
   /util-deprecate@1.0.2:

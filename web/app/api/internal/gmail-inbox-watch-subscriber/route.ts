@@ -2,8 +2,9 @@ import { errorResponse } from "@web/lib/server/router"
 import { getServiceAccountToken } from "@web/lib/server/service-accounts"
 import { supabaseServerAdmin } from "@web/lib/server/supabase"
 import axios from "axios"
-import { google } from "googleapis"
+import { google, type gmail_v1 } from "googleapis"
 import { NextRequest, NextResponse } from "next/server"
+import quotedPrintable from "quoted-printable"
 import { z } from "zod"
 
 
@@ -75,26 +76,24 @@ export async function POST(req: NextRequest) {
                     !!message?.id
                     && message.labelIds?.includes("INBOX")
                 )
-                .map(
-                    async ({ message }) => gmail.users.messages.get({
+                .map(async ({ message }) =>
+                    gmail.users.messages.get({
                         userId: "me",
                         id: message?.id!,
                         format: "full",
                         access_token: token?.access_token!,
-                    }).then(res => res.data)
+                    }).then(res => parseMessage(res.data))
                 ) ?? []
         ) ?? []
     )
-
-    console.log(newMessages.map(m => m.payload))
 
     await Promise.all(
         workflows.flatMap(w => {
             const currentHistoryId = parseInt(w.startHistoryId)
             return newMessages
                 .filter(m => parseInt(m.historyId!) >= currentHistoryId)
-                .map(m => axios.post(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${w.id}/run`, {
-                    triggerData: m.payload,
+                .map(({ historyId, ...message }) => axios.post(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${w.id}/run`, {
+                    triggerData: message,
                 }))
         })
     )
@@ -121,3 +120,77 @@ const decodedMessageSchema = z.object({
     emailAddress: z.string().email(),
     historyId: z.number(),
 })
+
+
+function parseMessage(message: gmail_v1.Schema$Message) {
+    const parsedPayload = parseMessagePayload(message.payload)
+    const [, senderName, senderAddress] = getHeader(message.payload!, "From")?.match(/(.+?)<(.+?)>/) || []
+
+    return {
+        id: message.id!,
+        historyId: message.historyId!,
+        threadId: message.threadId!,
+        labelIds: message.labelIds || [],
+        date: new Date(parseInt(message.internalDate!)).toISOString(),
+        ...parsedPayload,
+        subject: getHeader(message.payload!, "Subject"),
+        senderName: senderName?.trim() || null,
+        senderAddress: senderAddress?.trim() || null,
+    }
+}
+
+
+type ParsedMessage = {
+    text?: string,
+    html?: string,
+    attachments: {
+        name: string,
+        mimeType: string,
+        data: string,
+    }[],
+}
+
+function parseMessagePayload(payload: gmail_v1.Schema$MessagePart | undefined): ParsedMessage {
+    if (payload?.mimeType?.startsWith("multipart/")) {
+        return (payload.parts || []).reduce((acc, part) => {
+            const { attachments, ...rest } = parseMessagePayload(part)
+            return {
+                ...acc,
+                ...rest,
+                attachments: [...acc.attachments, ...attachments],
+            }
+        }, { attachments: [] } as ParsedMessage)
+    }
+
+    const headers: Record<string, string> = Object.fromEntries(
+        payload?.headers?.map(h => [h.name, h.value]) || []
+    )
+
+    if (payload?.mimeType?.startsWith("text/")) {
+        let text = Buffer.from(payload.body?.data || "", "base64url")
+            .toString()
+
+        if (headers["Content-Transfer-Encoding"] === "quoted-printable")
+            text = quotedPrintable.decode(text)
+
+        return {
+            [payload.mimeType.split("/")[1]]: text,
+            attachments: [],
+        }
+    }
+
+    return {
+        attachments: [
+            {
+                name: payload?.filename!,
+                mimeType: payload?.mimeType!,
+                data: Buffer.from(payload?.body?.attachmentId || "", "base64url")
+                    .toString("base64")
+            }
+        ]
+    }
+}
+
+function getHeader(payload: gmail_v1.Schema$MessagePart, name: string) {
+    return payload.headers?.find(h => h.name === name)?.value
+}

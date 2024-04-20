@@ -3,6 +3,15 @@ import type { Node, Workflow, WorkflowRun, WorkflowRunState } from "shared/types
 import { fetchIntegrationToken } from "./db"
 
 
+enum ControlModifierId {
+    Conditional = "control-input:conditional",
+    WaitFor = "control-input:waitFor",
+    Delay = "control-input:delay",
+    Finished = "control-output:finished",
+    Error = "control-output:error",
+}
+
+
 export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
     const triggerData = run.trigger_data || {}
@@ -44,7 +53,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
         const actionOutputs = await callAction()
             .then((outputs: any) => {
                 if (node.data.controlModifiers?.finished) {
-                    normalizedOutputs["control-output:finished"] = true
+                    normalizedOutputs[ControlModifierId.Finished] = true
                 }
                 return outputs
             })
@@ -54,7 +63,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
                 console.debug(`Error in node ${node.id}:`, err.message)
 
                 if (node.data.controlModifiers?.error) {
-                    normalizedOutputs["control-output:error"] = err.message
+                    normalizedOutputs[ControlModifierId.Error] = err.message
                 }
             })
 
@@ -80,15 +89,30 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
                 })
         })
 
-        await Promise.all(Object.entries(normalizedOutputs).map(async ([outputId, outputValue]) => {
-            runState.outputs![node.id][outputId] = outputValue
+        await Promise.all(
+            Object.entries(normalizedOutputs).map(async ([outputId, outputValue]) => {
+                runState.outputs![node.id][outputId] = outputValue
 
-            await Promise.all(edges.filter(edge => edge.source === node.id && edge.sourceHandle === outputId)
-                .map(edge => checkIfNodeCanRun(edge.target).catch(err => {
-                    console.error(err)
-                    runState.errors![edge.target] = err.message
-                })))
-        }))
+                const outgoingEdges = edges.filter(edge =>
+                    edge.source === node.id
+                    && edge.sourceHandle === outputId
+                )
+
+                // using a set to avoid duplicate runs
+                const targetedNodeIds = Array.from(new Set(
+                    outgoingEdges.map(edge => edge.target)
+                ))
+
+                const targetExecutions = targetedNodeIds.map(
+                    nodeId => checkIfNodeCanRun(nodeId).catch(err => {
+                        console.error(err)
+                        runState.errors![nodeId] = err.message
+                    })
+                )
+
+                await Promise.all(targetExecutions)
+            })
+        )
     }
 
     const checkIfNodeCanRun = async (nodeId: string) => {
@@ -103,9 +127,9 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
         const allInputsAvailable = [
             ...node.data.inputs,
-            ...node.data.controlModifiers?.conditional ? [{ id: "control-input:conditional" }] : [],
-            ...node.data.controlModifiers?.waitFor ? [{ id: "control-input:waitFor" }] : [],
-            ...node.data.controlModifiers?.delay ? [{ id: "control-input:delay" }] : []
+            ...node.data.controlModifiers?.conditional ? [{ id: ControlModifierId.Conditional }] : [],
+            ...node.data.controlModifiers?.waitFor ? [{ id: ControlModifierId.WaitFor }] : [],
+            ...node.data.controlModifiers?.delay ? [{ id: ControlModifierId.Delay }] : []
         ].every(input => {
             const attachedEdge = getAttachedEdge(input.id)
 
@@ -120,7 +144,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
         // check conditional control modifier
         if (node.data.controlModifiers?.conditional) {
-            const attachedEdge = getAttachedEdge("control-input:conditional")
+            const attachedEdge = getAttachedEdge(ControlModifierId.Conditional)
             if (attachedEdge && !getEdgeOutputValue(attachedEdge))
                 return
         }
@@ -158,7 +182,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
         // check for delay control modifier
         if (node.data.controlModifiers?.delay) {
-            const attachedEdge = getAttachedEdge("control-input:delay")
+            const attachedEdge = getAttachedEdge(ControlModifierId.Delay)
 
             if (attachedEdge) {
                 const delayValue = parseFloat(getEdgeOutputValue(attachedEdge))

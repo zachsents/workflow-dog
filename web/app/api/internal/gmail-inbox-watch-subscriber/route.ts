@@ -8,8 +8,6 @@ import { z } from "zod"
 
 export async function POST(req: NextRequest) {
 
-    console.log(await req.json())
-
     const bodyValidation = bodySchema.safeParse(await req.json())
     if (!bodyValidation.success)
         return errorResponse("Invalid request body", 400)
@@ -65,6 +63,14 @@ export async function POST(req: NextRequest) {
             .throwOnError()
     }))
 
+    console.log({
+        success: "🤙",
+        historyId,
+        token: token?.access_token.slice(0, 10) + "...",
+        workflows,
+        history,
+    })
+
     // WILO: figuring out the best way to just set the nested fields
     // maybe a new workflow_triggers table? not sure
 
@@ -73,20 +79,24 @@ export async function POST(req: NextRequest) {
         historyId,
         token: token?.access_token.slice(0, 10) + "...",
         workflows,
+        history,
     })
 }
 
 
 const bodySchema = z.object({
     message: z.object({
-        data: z.string().describe("This is the actual notification data, as base64url-encoded JSON."),
-        messageId: z.string().describe("This is a Cloud Pub/Sub message id, unrelated to Gmail messages."),
-        "publishTime": z.string().datetime().describe("This is the publish time of the message."),
+        data: z.string()
+            .describe("This is the actual notification data, as base64url-encoded JSON."),
+        messageId: z.string()
+            .describe("This is a Cloud Pub/Sub message id, unrelated to Gmail messages."),
+        publishTime: z.string().datetime()
+            .describe("This is the publish time of the message."),
     }),
     subscription: z.string(),
 })
 
 const decodedMessageSchema = z.object({
     emailAddress: z.string().email(),
-    historyId: z.string().regex(/^\d+$/),
+    historyId: z.number(),
 })

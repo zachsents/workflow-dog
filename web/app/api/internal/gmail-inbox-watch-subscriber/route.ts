@@ -71,7 +71,10 @@ export async function POST(req: NextRequest) {
     const newMessages = await Promise.all(
         history?.flatMap(
             historyEntry => historyEntry.messagesAdded
-                ?.filter(({ message }) => message?.id)
+                ?.filter(({ message }) =>
+                    !!message?.id
+                    && message.labelIds?.includes("INBOX")
+                )
                 .map(
                     async ({ message }) => gmail.users.messages.get({
                         userId: "me",

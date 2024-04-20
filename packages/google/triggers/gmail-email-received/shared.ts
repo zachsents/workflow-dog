@@ -10,6 +10,14 @@ export default createSharedTriggerDefinition({
             name: "Sender Email Address",
             type: "https://data-types.workflow.dog/basic/string",
         },
+        senderName: {
+            name: "Sender Name",
+            type: "https://data-types.workflow.dog/basic/string",
+        },
+        date: {
+            name: "Date",
+            type: "https://data-types.workflow.dog/basic/datetime",
+        },
         subject: {
             name: "Subject",
             type: "https://data-types.workflow.dog/basic/string",
@@ -18,7 +26,7 @@ export default createSharedTriggerDefinition({
             name: "Body (HTML)",
             type: "https://data-types.workflow.dog/basic/string",
         },
-        plainText: {
+        plain: {
             name: "Body (Plain Text)",
             type: "https://data-types.workflow.dog/basic/string",
         },

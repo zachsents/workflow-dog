@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
         userId: "me",
         startHistoryId: oldestHistoryId,
         historyTypes: ["messageAdded"],
+        access_token: token?.access_token!,
     }).then(res => res.data)
 
     await Promise.all(workflows.map(w => {

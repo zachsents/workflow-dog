@@ -433,6 +433,14 @@ export type Database = {
         }
         Returns: string
       }
+      set_workflow_trigger_field: {
+        Args: {
+          _workflow_id: string
+          path: string[]
+          value: Json
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       billing_plan: "pro"

@@ -1,6 +1,7 @@
 import { errorResponse } from "@web/lib/server/router"
 import { getServiceAccountToken } from "@web/lib/server/service-accounts"
 import { supabaseServerAdmin } from "@web/lib/server/supabase"
+import axios from "axios"
 import { google } from "googleapis"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     const workflows = await supabase
         .from("workflows")
-        .select("id, startHistoryId:trigger->data->>historyId, trigger")
+        .select("id, startHistoryId:trigger->data->>historyId")
         .eq("trigger->>type", "https://triggers.workflow.dog/google/gmail-email-received")
         .eq("trigger->config->>googleAccount", serviceAccountId)
         .throwOnError()
@@ -48,40 +49,54 @@ export async function POST(req: NextRequest) {
         .reduce((oldest, current) => oldest < current ? oldest : current)
         .toString()
 
-    const { history, historyId: newHistoryId } = await google.gmail("v1").users.history.list({
+    const gmail = google.gmail("v1")
+
+    const { history, historyId: newHistoryId } = await gmail.users.history.list({
         userId: "me",
         startHistoryId: oldestHistoryId,
         historyTypes: ["messageAdded"],
         access_token: token?.access_token!,
     }).then(res => res.data)
 
-    await Promise.all(workflows.map(w => {
-        const newTrigger: any = structuredClone(w.trigger)
-        newTrigger.data.historyId = newHistoryId
-        return supabase
-            .from("workflows")
-            .update({ trigger: newTrigger })
-            .eq("id", w.id)
+    await Promise.all(workflows.map(w =>
+        supabase
+            .rpc("set_workflow_trigger_field", {
+                _workflow_id: w.id,
+                path: ["data", "historyId"],
+                value: newHistoryId!,
+            })
             .throwOnError()
-    }))
+    ))
 
-    console.log({
-        success: "🤙",
-        historyId,
-        token: token?.access_token.slice(0, 10) + "...",
-        workflows,
-        history,
-    })
+    const newMessages = await Promise.all(
+        history?.flatMap(
+            historyEntry => historyEntry.messagesAdded
+                ?.filter(({ message }) => message?.id)
+                .map(
+                    async ({ message }) => gmail.users.messages.get({
+                        userId: "me",
+                        id: message?.id!,
+                        format: "full",
+                    }).then(res => res.data)
+                ) ?? []
+        ) ?? []
+    )
 
-    // WILO: figuring out the best way to just set the nested fields
-    // maybe a new workflow_triggers table? not sure
+    console.log(newMessages.map(m => m.payload))
+
+    await Promise.all(
+        workflows.flatMap(w => {
+            const currentHistoryId = parseInt(w.startHistoryId)
+            return newMessages
+                .filter(m => parseInt(m.historyId!) >= currentHistoryId)
+                .map(m => axios.post(`${process.env.NEXT_PUBLIC_API_URL}/workflows${w.id}/run`, {
+                    triggerData: m.payload,
+                }))
+        })
+    )
 
     return NextResponse.json({
-        success: "🤙",
-        historyId,
-        token: token?.access_token.slice(0, 10) + "...",
-        workflows,
-        history,
+        success: true,
     })
 }
 

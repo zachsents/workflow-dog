@@ -160,7 +160,7 @@ type ParsedMessage = {
     }[],
 }
 
-export function parseMessagePayload(payload: gmail_v1.Schema$MessagePart | undefined): ParsedMessage {
+function parseMessagePayload(payload: gmail_v1.Schema$MessagePart | undefined): ParsedMessage {
     if (payload?.mimeType?.startsWith("multipart/")) {
         return (payload.parts || []).reduce((acc, part) => {
             const { attachments, ...rest } = parseMessagePayload(part)

@@ -50,7 +50,7 @@ export default createClientTriggerDefinition(shared, {
 
 const requiredService = {
     serviceDefinitionId: "https://services.workflow.dog/google/google-oauth",
-    requiredScopes: ["https://www.googleapis.com/auth/gmail.readonly"],
+    requiredScopes: ["https://www.googleapis.com/auth/gmail.modify"],
 }
 
 

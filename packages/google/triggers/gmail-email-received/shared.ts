@@ -14,13 +14,13 @@ export default createSharedTriggerDefinition({
             name: "Sender Name",
             type: "https://data-types.workflow.dog/basic/string",
         },
-        date: {
-            name: "Date",
-            type: "https://data-types.workflow.dog/basic/datetime",
-        },
         subject: {
             name: "Subject",
             type: "https://data-types.workflow.dog/basic/string",
+        },
+        date: {
+            name: "Date",
+            type: "https://data-types.workflow.dog/basic/datetime",
         },
         html: {
             name: "Body (HTML)",
@@ -28,6 +28,10 @@ export default createSharedTriggerDefinition({
         },
         plain: {
             name: "Body (Plain Text)",
+            type: "https://data-types.workflow.dog/basic/string",
+        },
+        id: {
+            name: "Message ID",
             type: "https://data-types.workflow.dog/basic/string",
         },
     },

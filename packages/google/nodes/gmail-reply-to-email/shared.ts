@@ -1,15 +1,11 @@
 import { createSharedNodeDefinition } from "@pkg/types"
 
 export default createSharedNodeDefinition({
-    name: "Send Email",
-    description: "Send an email from your Gmail account.",
+    name: "Reply to Email",
+    description: "Reply to an email in your Gmail account.",
     inputs: {
-        to: {
-            name: "To",
-            type: "https://data-types.workflow.dog/basic/string",
-        },
-        subject: {
-            name: "Subject",
+        messageId: {
+            name: "Message ID",
             type: "https://data-types.workflow.dog/basic/string",
         },
         message: {

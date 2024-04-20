@@ -1,10 +1,10 @@
+import { parseMessage } from "@web/lib/server/gmail"
 import { errorResponse } from "@web/lib/server/router"
 import { getServiceAccountToken } from "@web/lib/server/service-accounts"
 import { supabaseServerAdmin } from "@web/lib/server/supabase"
 import axios from "axios"
 import { google, type gmail_v1 } from "googleapis"
 import { NextRequest, NextResponse } from "next/server"
-import quotedPrintable from "quoted-printable"
 import { z } from "zod"
 
 
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
         const currentHistoryId = parseInt(w.startHistoryId)
         const relevantMessages = newMessages.filter(msg =>
             parseInt(msg.historyId!) >= currentHistoryId
-            && msg.toAddress === emailAddress
+            && msg.recipientAddress === emailAddress
         )
         return relevantMessages.map(async msg => {
             // console.debug([
@@ -136,93 +136,4 @@ const decodedMessageSchema = z.object({
     emailAddress: z.string().email(),
     historyId: z.number(),
 })
-
-
-function parseMessage(message: gmail_v1.Schema$Message) {
-    const parsedPayload = parseMessagePayload(message.payload)
-
-    const fromHeader = getHeader(message.payload!, "From")
-    const sender: any = fromHeader ? parsePerson(fromHeader) : {}
-
-    return {
-        historyId: message.historyId!,
-        toAddress: parsePerson(getHeader(message.payload!, "To")!).email,
-
-        id: message.id!,
-        threadId: message.threadId!,
-        labelIds: message.labelIds || [],
-        date: new Date(parseInt(message.internalDate!)).toISOString(),
-        ...parsedPayload,
-        subject: getHeader(message.payload!, "Subject"),
-        senderName: sender.name || null,
-        senderAddress: sender.email || null,
-    }
-}
-
-
-type ParsedMessage = {
-    plain?: string,
-    html?: string,
-    attachments: {
-        name: string,
-        mimeType: string,
-        data?: string,
-        attachmentId?: string,
-    }[],
-}
-
-function parseMessagePayload(payload: gmail_v1.Schema$MessagePart | undefined): ParsedMessage {
-    if (payload?.mimeType?.startsWith("multipart/")) {
-        return (payload.parts || []).reduce((acc, part) => {
-            const { attachments, ...rest } = parseMessagePayload(part)
-            return {
-                ...acc,
-                ...rest,
-                attachments: [...acc.attachments, ...attachments],
-            }
-        }, { attachments: [] } as ParsedMessage)
-    }
-
-    const headers: Record<string, string> = Object.fromEntries(
-        payload?.headers?.map(h => [h.name, h.value]) || []
-    )
-
-    if (payload?.mimeType?.startsWith("text/")) {
-        let text = Buffer.from(payload.body?.data || "", "base64url")
-            .toString()
-
-        if (headers["Content-Transfer-Encoding"] === "quoted-printable")
-            text = quotedPrintable.decode(text)
-                .replaceAll("\u0000", "")
-
-        return {
-            [payload.mimeType.split("/")[1]]: text,
-            attachments: [],
-        }
-    }
-
-    return {
-        attachments: [
-            {
-                name: payload?.filename!,
-                mimeType: payload?.mimeType!,
-                attachmentId: payload?.body?.attachmentId!,
-            }
-        ]
-    }
-}
-
-function getHeader(payload: gmail_v1.Schema$MessagePart, name: string) {
-    return payload.headers?.find(h => h.name === name)?.value
-}
-
-function parsePerson(person: string): { name?: string, email: string } {
-    const fullRegex = /(.+?)<(.+?)>/
-    if (fullRegex.test(person)) {
-        const [, name, email] = person.match(fullRegex)!
-        return { name: name.trim(), email: email.trim() }
-    }
-
-    return { email: person.trim() }
-}
 

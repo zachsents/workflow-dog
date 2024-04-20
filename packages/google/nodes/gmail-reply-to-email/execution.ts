@@ -1,6 +1,6 @@
 import { createExecutionNodeDefinition } from "@pkg/types"
 import { google } from "googleapis"
-import { createMimeMessage } from "mimetext"
+import { createMimeMessage, } from "mimetext"
 import shared from "./shared"
 import { parseMessage } from "@web/lib/server/gmail"
 
@@ -19,7 +19,7 @@ export default createExecutionNodeDefinition(shared, {
             gmail.users.getProfile({
                 userId: "me",
                 access_token: token?.access_token,
-            }).then(res => res.data.emailAddress),
+            }).then(res => res.data.emailAddress!),
 
             gmail.users.messages.get({
                 userId: "me",
@@ -30,7 +30,7 @@ export default createExecutionNodeDefinition(shared, {
         ])
 
         const msg = createMimeMessage()
-        msg.setSender(senderAddress!)
+        msg.setSender({ addr: senderAddress })
         msg.setRecipient({
             addr: originalMessage.senderAddress!,
             name: originalMessage.senderName!,

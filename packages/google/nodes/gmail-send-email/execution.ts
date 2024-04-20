@@ -18,10 +18,10 @@ export default createExecutionNodeDefinition(shared, {
         const senderAddress = await google.gmail("v1").users.getProfile({
             userId: "me",
             access_token: token?.access_token,
-        }).then(res => res.data.emailAddress)
+        }).then(res => res.data.emailAddress!)
 
         const msg = createMimeMessage()
-        msg.setSender(senderAddress!)
+        msg.setSender({ addr: senderAddress })
         msg.setRecipient(to)
         msg.setSubject(subject)
 

@@ -97,13 +97,17 @@ type ParsedContact = {
 }
 
 export function parseContact(contact: string): ParsedContact {
-    const fullRegex = /(.+?)<(.+?)>/
-    if (fullRegex.test(contact)) {
-        const [, name, email] = contact.match(fullRegex)!
-        return { name: name.trim(), email: email.trim() }
+    if (contact.includes("<") && contact.includes(">")) {
+        const match = contact.match(/(.+?)?<(.+?)>/) || []
+        return {
+            name: match[1]?.trim(),
+            email: match[2]?.trim(),
+        }
     }
 
-    return { email: contact.trim() }
+    return {
+        email: contact.trim(),
+    }
 }
 
 

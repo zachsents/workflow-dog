@@ -77,6 +77,7 @@ export async function POST(req: NextRequest) {
                         userId: "me",
                         id: message?.id!,
                         format: "full",
+                        access_token: token?.access_token!,
                     }).then(res => res.data)
                 ) ?? []
         ) ?? []

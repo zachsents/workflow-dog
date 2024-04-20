@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     if (!messageValidation.success)
         return errorResponse("Invalid message data", 400)
 
-    const { emailAddress, historyId } = messageValidation.data
+    const { emailAddress } = messageValidation.data
 
     const supabase = await supabaseServerAdmin()
 
@@ -69,39 +69,49 @@ export async function POST(req: NextRequest) {
             .throwOnError()
     ))
 
-    const newMessages = await Promise.all(
-        history?.flatMap(
-            historyEntry => historyEntry.messagesAdded
-                ?.filter(({ message }) =>
-                    !!message?.id
-                    && message.labelIds?.includes("INBOX")
-                )
-                .map(async ({ message }) =>
-                    gmail.users.messages.get({
-                        userId: "me",
-                        id: message?.id!,
-                        format: "full",
-                        access_token: token?.access_token!,
-                    }).then(res => parseMessage(res.data))
-                ) ?? []
-        ) ?? []
-    )
+    const filteredHistory = history?.flatMap(({ messagesAdded }) => {
+        if (!messagesAdded)
+            return []
 
-    await Promise.all(
-        workflows.flatMap(w => {
-            const currentHistoryId = parseInt(w.startHistoryId)
-            return newMessages
-                .filter(m =>
-                    parseInt(m.historyId!) >= currentHistoryId
-                    && m.toAddress === emailAddress
-                )
-                .map(({ historyId, toAddress, ...message }) =>
-                    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${w.id}/run`, {
-                        triggerData: message,
-                    })
-                )
+        return messagesAdded
+            .map(entry => entry.message)
+            .filter(msg => msg?.id && msg.labelIds?.includes("INBOX")) as gmail_v1.Schema$Message[]
+    }) ?? []
+
+    const newMessageRequests = filteredHistory.map(async msg => {
+        const res = await gmail.users.messages.get({
+            userId: "me",
+            id: msg.id!,
+            format: "full",
+            access_token: token?.access_token!,
         })
-    )
+        return parseMessage(res.data)
+    })
+
+    const newMessages = await Promise.all(newMessageRequests)
+
+    const workflowExecutionRequests = workflows.flatMap(w => {
+        const currentHistoryId = parseInt(w.startHistoryId)
+        const relevantMessages = newMessages.filter(msg =>
+            parseInt(msg.historyId!) >= currentHistoryId
+            && msg.toAddress === emailAddress
+        )
+        return relevantMessages.map(async msg => {
+            // console.debug([
+            //     "Subject: " + msg.subject,
+            //     `${msg.senderName} (${msg.senderAddress})`,
+            //     `### PLAIN ###\n${msg.plain?.slice(0, 50).replaceAll(/[\r\n]/g, "") + "..."}`,
+            //     `### HTML ###\n${msg.html?.slice(0, 50).replaceAll(/[\r\n]/g, "") + "..."}`,
+            // ].join("\n"))
+            // console.log()
+
+            return axios.post(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${w.id}/run`, {
+                triggerData: msg,
+            })
+        })
+    })
+
+    await Promise.all(workflowExecutionRequests)
 
     return NextResponse.json({
         success: true,
@@ -115,7 +125,8 @@ const bodySchema = z.object({
             .describe("This is the actual notification data, as base64url-encoded JSON."),
         messageId: z.string()
             .describe("This is a Cloud Pub/Sub message id, unrelated to Gmail messages."),
-        publishTime: z.string().datetime()
+        publishTime: z.string()
+            .datetime()
             .describe("This is the publish time of the message."),
     }),
     subscription: z.string(),
@@ -150,7 +161,7 @@ function parseMessage(message: gmail_v1.Schema$Message) {
 
 
 type ParsedMessage = {
-    text?: string,
+    plain?: string,
     html?: string,
     attachments: {
         name: string,
@@ -179,10 +190,10 @@ function parseMessagePayload(payload: gmail_v1.Schema$MessagePart | undefined): 
     if (payload?.mimeType?.startsWith("text/")) {
         let text = Buffer.from(payload.body?.data || "", "base64url")
             .toString()
-            .replaceAll("\u0000", "")
 
         if (headers["Content-Transfer-Encoding"] === "quoted-printable")
             text = quotedPrintable.decode(text)
+                .replaceAll("\u0000", "")
 
         return {
             [payload.mimeType.split("/")[1]]: text,
@@ -214,3 +225,4 @@ function parsePerson(person: string): { name?: string, email: string } {
 
     return { email: person.trim() }
 }
+

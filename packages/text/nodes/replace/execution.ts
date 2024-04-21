@@ -15,7 +15,10 @@ export default createExecutionNodeDefinition(shared, {
                     return result.replaceAll(search, replacement)
 
                 if (regexSchema.safeParse(search).success)
-                    return result.replaceAll(new RegExp(search.pattern, search.flags), replacement)
+                    return result.replaceAll(new RegExp(
+                        search.pattern,
+                        search.flags.replaceAll("g", "") + "g"
+                    ), replacement)
 
                 return result
             }, text)

@@ -108,6 +108,8 @@ export async function POST(req: NextRequest) {
 
             return axios.post(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${w.id}/run`, {
                 triggerData: msg,
+            }).catch(err => {
+                console.debug(`Error executing workflow ${w.id}: ${err.message}`)
             })
         })
     })

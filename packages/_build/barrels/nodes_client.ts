@@ -32,6 +32,7 @@ import google_nodes_gmail_get_attachment_client from "../../google/nodes/gmail-g
 import google_nodes_gmail_get_message_client from "../../google/nodes/gmail-get-message/client"
 import google_nodes_gmail_reply_to_email_client from "../../google/nodes/gmail-reply-to-email/client"
 import google_nodes_gmail_send_email_client from "../../google/nodes/gmail-send-email/client"
+import google_nodes_gmail_trash_message_client from "../../google/nodes/gmail-trash-message/client"
 import math_nodes_absolute_client from "../../math/nodes/absolute/client"
 import math_nodes_add_client from "../../math/nodes/add/client"
 import math_nodes_ceiling_client from "../../math/nodes/ceiling/client"
@@ -115,6 +116,7 @@ const _definitions = {
     "https://nodes.workflow.dog/google/gmail-get-message": _.merge({ id: "https://nodes.workflow.dog/google/gmail-get-message" }, google_nodes_gmail_get_message_client),
     "https://nodes.workflow.dog/google/gmail-reply-to-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-reply-to-email" }, google_nodes_gmail_reply_to_email_client),
     "https://nodes.workflow.dog/google/gmail-send-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-send-email" }, google_nodes_gmail_send_email_client),
+    "https://nodes.workflow.dog/google/gmail-trash-message": _.merge({ id: "https://nodes.workflow.dog/google/gmail-trash-message" }, google_nodes_gmail_trash_message_client),
     "https://nodes.workflow.dog/math/absolute": _.merge({ id: "https://nodes.workflow.dog/math/absolute" }, math_nodes_absolute_client),
     "https://nodes.workflow.dog/math/add": _.merge({ id: "https://nodes.workflow.dog/math/add" }, math_nodes_add_client),
     "https://nodes.workflow.dog/math/ceiling": _.merge({ id: "https://nodes.workflow.dog/math/ceiling" }, math_nodes_ceiling_client),

@@ -17,6 +17,15 @@ export function parseMessage(msg: gmail_v1.Schema$Message) {
         ? parseContact(toHeader)
         : undefined
 
+    const { attachments, ...parsedPayload } = msg.payload
+        ? parseMessagePayload(msg.payload)
+        : { attachments: [] }
+
+    const attachmentRefs = attachments?.map(a => ({
+        messageId: msg.id!,
+        ...a,
+    })) ?? []
+
     return {
         id: msg.id!,
         threadId: msg.threadId!,
@@ -32,7 +41,8 @@ export function parseMessage(msg: gmail_v1.Schema$Message) {
         subject: getHeader(msg.payload!, "Subject"),
         date: new Date(parseInt(msg.internalDate!)).toISOString(),
 
-        ...msg.payload ? parseMessagePayload(msg.payload) : {},
+        ...parsedPayload,
+        attachmentRefs,
     }
 }
 

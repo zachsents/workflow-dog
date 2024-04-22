@@ -28,6 +28,7 @@ import closecrm_nodes_get_lead_by_id_client from "../../closecrm/nodes/get-lead-
 import closecrm_nodes_list_leads_client from "../../closecrm/nodes/list-leads/client"
 import google_nodes_gmail_create_draft_client from "../../google/nodes/gmail-create-draft/client"
 import google_nodes_gmail_get_attachment_client from "../../google/nodes/gmail-get-attachment/client"
+import google_nodes_gmail_get_message_client from "../../google/nodes/gmail-get-message/client"
 import google_nodes_gmail_reply_to_email_client from "../../google/nodes/gmail-reply-to-email/client"
 import google_nodes_gmail_send_email_client from "../../google/nodes/gmail-send-email/client"
 import math_nodes_absolute_client from "../../math/nodes/absolute/client"
@@ -49,9 +50,9 @@ import math_nodes_pi_client from "../../math/nodes/pi/client"
 import math_nodes_round_client from "../../math/nodes/round/client"
 import math_nodes_sin_client from "../../math/nodes/sin/client"
 import math_nodes_square_root_client from "../../math/nodes/square-root/client"
+import math_nodes_tan_client from "../../math/nodes/tan/client"
 import math_nodes_subtract_client from "../../math/nodes/subtract/client"
 import math_nodes_sum_client from "../../math/nodes/sum/client"
-import math_nodes_tan_client from "../../math/nodes/tan/client"
 import openai_nodes_classify_client from "../../openai/nodes/classify/client"
 import openai_nodes_generate_image_client from "../../openai/nodes/generate-image/client"
 import openai_nodes_moderate_client from "../../openai/nodes/moderate/client"
@@ -109,6 +110,7 @@ const _definitions = {
     "https://nodes.workflow.dog/closecrm/list-leads": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-leads" }, closecrm_nodes_list_leads_client),
     "https://nodes.workflow.dog/google/gmail-create-draft": _.merge({ id: "https://nodes.workflow.dog/google/gmail-create-draft" }, google_nodes_gmail_create_draft_client),
     "https://nodes.workflow.dog/google/gmail-get-attachment": _.merge({ id: "https://nodes.workflow.dog/google/gmail-get-attachment" }, google_nodes_gmail_get_attachment_client),
+    "https://nodes.workflow.dog/google/gmail-get-message": _.merge({ id: "https://nodes.workflow.dog/google/gmail-get-message" }, google_nodes_gmail_get_message_client),
     "https://nodes.workflow.dog/google/gmail-reply-to-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-reply-to-email" }, google_nodes_gmail_reply_to_email_client),
     "https://nodes.workflow.dog/google/gmail-send-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-send-email" }, google_nodes_gmail_send_email_client),
     "https://nodes.workflow.dog/math/absolute": _.merge({ id: "https://nodes.workflow.dog/math/absolute" }, math_nodes_absolute_client),
@@ -130,9 +132,9 @@ const _definitions = {
     "https://nodes.workflow.dog/math/round": _.merge({ id: "https://nodes.workflow.dog/math/round" }, math_nodes_round_client),
     "https://nodes.workflow.dog/math/sin": _.merge({ id: "https://nodes.workflow.dog/math/sin" }, math_nodes_sin_client),
     "https://nodes.workflow.dog/math/square-root": _.merge({ id: "https://nodes.workflow.dog/math/square-root" }, math_nodes_square_root_client),
+    "https://nodes.workflow.dog/math/tan": _.merge({ id: "https://nodes.workflow.dog/math/tan" }, math_nodes_tan_client),
     "https://nodes.workflow.dog/math/subtract": _.merge({ id: "https://nodes.workflow.dog/math/subtract" }, math_nodes_subtract_client),
     "https://nodes.workflow.dog/math/sum": _.merge({ id: "https://nodes.workflow.dog/math/sum" }, math_nodes_sum_client),
-    "https://nodes.workflow.dog/math/tan": _.merge({ id: "https://nodes.workflow.dog/math/tan" }, math_nodes_tan_client),
     "https://nodes.workflow.dog/openai/classify": _.merge({ id: "https://nodes.workflow.dog/openai/classify" }, openai_nodes_classify_client),
     "https://nodes.workflow.dog/openai/generate-image": _.merge({ id: "https://nodes.workflow.dog/openai/generate-image" }, openai_nodes_generate_image_client),
     "https://nodes.workflow.dog/openai/moderate": _.merge({ id: "https://nodes.workflow.dog/openai/moderate" }, openai_nodes_moderate_client),

@@ -1,10 +1,9 @@
-import { getAttachmentAsFile, parseMessage } from "@web/lib/server/gmail"
+import { parseMessage } from "@web/lib/server/gmail"
 import { errorResponse } from "@web/lib/server/router"
 import { getServiceAccountToken } from "@web/lib/server/service-accounts"
 import { supabaseServerAdmin } from "@web/lib/server/supabase"
 import axios from "axios"
 import { google, type gmail_v1 } from "googleapis"
-import _ from "lodash"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
@@ -88,15 +87,7 @@ export async function POST(req: NextRequest) {
             format: "full",
         }).then(res => parseMessage(res.data))
 
-        const attachmentRefs = parsedMessage.attachments?.map(a => ({
-            messageId: msg.id!,
-            ...a,
-        })) ?? []
-
-        return {
-            ..._.omit(parsedMessage, "attachments"),
-            attachmentRefs,
-        }
+        return parsedMessage
     })
 
     const newMessages = await Promise.all(newMessageRequests)

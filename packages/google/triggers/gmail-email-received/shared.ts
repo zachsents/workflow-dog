@@ -30,9 +30,9 @@ export default createSharedTriggerDefinition({
             name: "Body (Plain Text)",
             type: "https://data-types.workflow.dog/basic/string",
         },
-        attachments: {
-            name: "Attachments",
-            type: "https://data-types.workflow.dog/basic/array",
+        attachment: {
+            name: "Attachment",
+            type: "https://data-types.workflow.dog/basic/file",
         },
         id: {
             name: "Message ID",

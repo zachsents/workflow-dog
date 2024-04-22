@@ -87,16 +87,17 @@ export async function POST(req: NextRequest) {
             format: "full",
         }).then(res => parseMessage(res.data))
 
-        const loadedAttachments = await Promise.all(
-            parsedMessage.attachments?.map(attachment => getAttachmentAsFile(gmail, {
-                attachment,
-                messageId: msg.id!,
-            })) ?? []
-        )
+        // only getting first attachment for now
+        const attachmentCount = parsedMessage.attachments?.length ?? 0
 
         return {
             ...parsedMessage,
-            attachments: loadedAttachments,
+            ...attachmentCount > 0 && {
+                attachment: await getAttachmentAsFile(gmail, {
+                    attachment: parsedMessage.attachments![0],
+                    messageId: msg.id!,
+                })
+            }
         }
     })
 

@@ -24,10 +24,12 @@ export default createExecutionNodeDefinition(shared, {
             mode: "encoded",
         }) as string
 
-        await gmail.users.messages.send({
+        await gmail.users.drafts.create({
             userId: "me",
             requestBody: {
-                raw: encodedMessage,
+                message: {
+                    raw: encodedMessage,
+                }
             }
         })
 

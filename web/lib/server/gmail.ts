@@ -118,3 +118,4 @@ export function indexHeaders(headers: gmail_v1.Schema$MessagePartHeader[]): Reco
             .map(h => [h.name!.toLowerCase(), h.value!])
     )
 }
+

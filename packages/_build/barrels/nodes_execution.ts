@@ -26,12 +26,14 @@ import basic_nodes_trigger_input_execution from "../../basic/nodes/trigger-input
 import basic_nodes_xor_execution from "../../basic/nodes/xor/execution"
 import closecrm_nodes_get_lead_by_id_execution from "../../closecrm/nodes/get-lead-by-id/execution"
 import closecrm_nodes_list_leads_execution from "../../closecrm/nodes/list-leads/execution"
+import google_nodes_gmail_add_labels_execution from "../../google/nodes/gmail-add-labels/execution"
 import google_nodes_gmail_create_draft_execution from "../../google/nodes/gmail-create-draft/execution"
 import google_nodes_gmail_create_draft_reply_execution from "../../google/nodes/gmail-create-draft-reply/execution"
 import google_nodes_gmail_get_attachment_execution from "../../google/nodes/gmail-get-attachment/execution"
 import google_nodes_gmail_get_message_execution from "../../google/nodes/gmail-get-message/execution"
 import google_nodes_gmail_mark_as_read_execution from "../../google/nodes/gmail-mark-as-read/execution"
 import google_nodes_gmail_mark_as_unread_execution from "../../google/nodes/gmail-mark-as-unread/execution"
+import google_nodes_gmail_remove_labels_execution from "../../google/nodes/gmail-remove-labels/execution"
 import google_nodes_gmail_reply_to_email_execution from "../../google/nodes/gmail-reply-to-email/execution"
 import google_nodes_gmail_send_email_execution from "../../google/nodes/gmail-send-email/execution"
 import google_nodes_gmail_trash_message_execution from "../../google/nodes/gmail-trash-message/execution"
@@ -112,12 +114,14 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/xor": _.merge({ id: "https://nodes.workflow.dog/basic/xor" }, basic_nodes_xor_execution),
     "https://nodes.workflow.dog/closecrm/get-lead-by-id": _.merge({ id: "https://nodes.workflow.dog/closecrm/get-lead-by-id" }, closecrm_nodes_get_lead_by_id_execution),
     "https://nodes.workflow.dog/closecrm/list-leads": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-leads" }, closecrm_nodes_list_leads_execution),
+    "https://nodes.workflow.dog/google/gmail-add-labels": _.merge({ id: "https://nodes.workflow.dog/google/gmail-add-labels" }, google_nodes_gmail_add_labels_execution),
     "https://nodes.workflow.dog/google/gmail-create-draft": _.merge({ id: "https://nodes.workflow.dog/google/gmail-create-draft" }, google_nodes_gmail_create_draft_execution),
     "https://nodes.workflow.dog/google/gmail-create-draft-reply": _.merge({ id: "https://nodes.workflow.dog/google/gmail-create-draft-reply" }, google_nodes_gmail_create_draft_reply_execution),
     "https://nodes.workflow.dog/google/gmail-get-attachment": _.merge({ id: "https://nodes.workflow.dog/google/gmail-get-attachment" }, google_nodes_gmail_get_attachment_execution),
     "https://nodes.workflow.dog/google/gmail-get-message": _.merge({ id: "https://nodes.workflow.dog/google/gmail-get-message" }, google_nodes_gmail_get_message_execution),
     "https://nodes.workflow.dog/google/gmail-mark-as-read": _.merge({ id: "https://nodes.workflow.dog/google/gmail-mark-as-read" }, google_nodes_gmail_mark_as_read_execution),
     "https://nodes.workflow.dog/google/gmail-mark-as-unread": _.merge({ id: "https://nodes.workflow.dog/google/gmail-mark-as-unread" }, google_nodes_gmail_mark_as_unread_execution),
+    "https://nodes.workflow.dog/google/gmail-remove-labels": _.merge({ id: "https://nodes.workflow.dog/google/gmail-remove-labels" }, google_nodes_gmail_remove_labels_execution),
     "https://nodes.workflow.dog/google/gmail-reply-to-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-reply-to-email" }, google_nodes_gmail_reply_to_email_execution),
     "https://nodes.workflow.dog/google/gmail-send-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-send-email" }, google_nodes_gmail_send_email_execution),
     "https://nodes.workflow.dog/google/gmail-trash-message": _.merge({ id: "https://nodes.workflow.dog/google/gmail-trash-message" }, google_nodes_gmail_trash_message_execution),

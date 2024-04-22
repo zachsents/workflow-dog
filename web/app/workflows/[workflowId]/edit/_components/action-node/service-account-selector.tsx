@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useDialogState } from "@web/lib/client/hooks"
 import { cn } from "@web/lib/utils"
 import { useAvailableIntegrationAccounts } from "@web/modules/integrations"
-import { useDefinition, useIsNodeSelected, useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
+import { useDefinition, useIsNodeSelected, useNodeProperty, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
 import { useWorkflow } from "@web/modules/workflows"
 import { ServiceDefinitions } from "packages/client"
 import { TbDots, TbExternalLink, TbPlugConnected, TbRefresh, TbSettings, TbX } from "react-icons/tb"

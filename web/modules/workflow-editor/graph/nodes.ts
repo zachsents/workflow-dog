@@ -1,7 +1,6 @@
-import { useDebouncedCallback, useDebouncedEffect } from "@react-hookz/web"
+import { useDebouncedCallback } from "@react-hookz/web"
 import { DotPath, stringHash, uniqueId } from "@web/modules/util"
 import Color from "color"
-import { produce } from "immer"
 import _ from "lodash"
 import { NodeDefinitions } from "packages/client"
 import { useCallback, useEffect, useMemo } from "react"
@@ -11,7 +10,6 @@ import { PREFIX } from "shared/prefixes"
 import type { Node } from "shared/types"
 import colors from "tailwindcss/colors"
 import { ActionNode } from "../types"
-import { useLogEffect } from "@web/lib/client/hooks"
 
 
 export type NodeDotPath = DotPath<Node>
@@ -21,7 +19,9 @@ export type NodeDotPath = DotPath<Node>
  * Hook that provides the type definition of a node.
  */
 export function useDefinition(nodeId = useNodeId()) {
-    const definitionId: string = useStore(s => s.nodeInternals.get(nodeId!)?.data?.definition)
+    const definitionId = useStore<string>(
+        s => s.nodeInternals.get(nodeId!)?.data?.definition
+    )
     return useMemo(() => NodeDefinitions.get(definitionId), [definitionId])
 }
 
@@ -30,13 +30,18 @@ export function useDefinition(nodeId = useNodeId()) {
  * Sets a property of a node using a path.
  */
 export function setNodeProperty<T>(rf: ReactFlowInstance, nodeId: string, path: NodeDotPath, value: T) {
-    rf.setNodes(produce(draft => {
-        const node = draft.find(n => n.id === nodeId)
+    rf.setNodes(nodes => nodes.map(n => {
+        if (n.id === nodeId) {
+            _.set(n, path, value)
 
-        if (node === undefined)
-            throw new Error(`Node ${nodeId} not found`)
-
-        _.set(node, path, value)
+            /**
+             * This part is critical.
+             * @see https://reactflow.dev/examples/nodes/update-node
+             */
+            if (path.startsWith("data"))
+                n.data = structuredClone(n.data)
+        }
+        return n
     }))
 }
 
@@ -45,53 +50,41 @@ export function setNodeProperty<T>(rf: ReactFlowInstance, nodeId: string, path: 
  * Hook that provides the value of a node property.
  */
 export function useNodePropertyValue<T>(nodeId = useNodeId(), path: NodeDotPath) {
-    return useStore(s => _.get(s.nodeInternals.get(nodeId!), path)) as T
+    return useStore<T>(s => _.get(s.nodeInternals.get(nodeId!), path))
 }
 
-interface UseSetNodePropertyOptions {
-    debounce?: number | false
-}
 
-/**
- * Hook that provides a setter for a node property.
- */
-export function useSetNodeProperty<T>(nodeId = useNodeId(), path: NodeDotPath, {
-    debounce = false,
-}: UseSetNodePropertyOptions = {}) {
-    const rf = useReactFlow()
-    const ignoreDebounce = useMemo(() => debounce === false, [])
-
-    const callbackParams = [
-        (value: T) => setNodeProperty(rf, nodeId!, path, value),
-        [rf, nodeId, path],
-    ] as const
-
-    return ignoreDebounce
-        ? useCallback(...callbackParams)
-        : useDebouncedCallback(...callbackParams, debounce || 0)
-}
-
-interface UseNodePropertyOptions<T> extends UseSetNodePropertyOptions {
+interface UseNodePropertyOptions<T> {
     defaultValue?: T | undefined
+    debounce?: number | false
 }
 
 /**
  * Hook that provides the value of a node property and a setter.
  */
-export function useNodeProperty<T>(nodeId = useNodeId(), path: NodeDotPath, {
+export function useNodeProperty<T>(nodeId = useNodeId()!, path: NodeDotPath, {
     defaultValue,
-    ...setOptions
+    debounce,
 }: UseNodePropertyOptions<T> = {}) {
+
+    const rf = useReactFlow()
     const value = useNodePropertyValue<T>(nodeId, path)
-    const setValue = useSetNodeProperty<T>(nodeId, path, setOptions)
+
+    const callbackOptions = [
+        (newValue: T) => setNodeProperty(rf, nodeId, path, newValue),
+        [rf, nodeId, path],
+    ] as const
+
+    const setValue = typeof debounce === "number"
+        ? useDebouncedCallback(...callbackOptions, debounce)
+        : useCallback(...callbackOptions)
 
     const shouldUseDefault = defaultValue !== undefined && value === undefined
 
-    useDebouncedEffect(() => {
-        if (defaultValue !== undefined && value === undefined) {
+    useEffect(() => {
+        if (shouldUseDefault)
             setValue(defaultValue)
-        }
-    }, [shouldUseDefault, defaultValue, setValue], 0)
+    }, [shouldUseDefault, defaultValue])
 
     return [
         shouldUseDefault ? defaultValue : value,
@@ -273,7 +266,7 @@ export function useUpdateInternalsWhenNecessary(nodeId = useNodeId()) {
 
 
 
-export function useDisabled(nodeId = useNodeId()) {
+export function useDisabled(nodeId = useNodeId()!) {
     const [disabled, setDisabled] = useNodeProperty(nodeId, "data.disabled", {
         defaultValue: false,
     })
@@ -304,13 +297,10 @@ export function useDisabled(nodeId = useNodeId()) {
 
 type NodeColorMode = "json" | "css"
 
-
 export function useNodeColors(nodeId = useNodeId(), mode: NodeColorMode = "json") {
     const definition = useDefinition(nodeId)
     return useNodeDefinitionColors(definition?.id!, mode)
 }
-
-
 
 export function useNodeDefinitionColors(definitionId: string, mode: NodeColorMode = "json") {
     return useMemo(() => {

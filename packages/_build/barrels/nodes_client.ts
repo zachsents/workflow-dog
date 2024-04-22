@@ -27,6 +27,7 @@ import basic_nodes_xor_client from "../../basic/nodes/xor/client"
 import closecrm_nodes_get_lead_by_id_client from "../../closecrm/nodes/get-lead-by-id/client"
 import closecrm_nodes_list_leads_client from "../../closecrm/nodes/list-leads/client"
 import google_nodes_gmail_create_draft_client from "../../google/nodes/gmail-create-draft/client"
+import google_nodes_gmail_get_attachment_client from "../../google/nodes/gmail-get-attachment/client"
 import google_nodes_gmail_reply_to_email_client from "../../google/nodes/gmail-reply-to-email/client"
 import google_nodes_gmail_send_email_client from "../../google/nodes/gmail-send-email/client"
 import math_nodes_absolute_client from "../../math/nodes/absolute/client"
@@ -107,6 +108,7 @@ const _definitions = {
     "https://nodes.workflow.dog/closecrm/get-lead-by-id": _.merge({ id: "https://nodes.workflow.dog/closecrm/get-lead-by-id" }, closecrm_nodes_get_lead_by_id_client),
     "https://nodes.workflow.dog/closecrm/list-leads": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-leads" }, closecrm_nodes_list_leads_client),
     "https://nodes.workflow.dog/google/gmail-create-draft": _.merge({ id: "https://nodes.workflow.dog/google/gmail-create-draft" }, google_nodes_gmail_create_draft_client),
+    "https://nodes.workflow.dog/google/gmail-get-attachment": _.merge({ id: "https://nodes.workflow.dog/google/gmail-get-attachment" }, google_nodes_gmail_get_attachment_client),
     "https://nodes.workflow.dog/google/gmail-reply-to-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-reply-to-email" }, google_nodes_gmail_reply_to_email_client),
     "https://nodes.workflow.dog/google/gmail-send-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-send-email" }, google_nodes_gmail_send_email_client),
     "https://nodes.workflow.dog/math/absolute": _.merge({ id: "https://nodes.workflow.dog/math/absolute" }, math_nodes_absolute_client),

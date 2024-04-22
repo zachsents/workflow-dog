@@ -1,7 +1,7 @@
 import { createSharedNodeDefinition } from "@pkg/types"
 
 export default createSharedNodeDefinition({
-    name: "Create Draft",
+    name: "Draft Message",
     description: "Send an email from your Gmail account.",
     inputs: {
         to: {

@@ -1,4 +1,4 @@
-import { parseMessage } from "@web/lib/server/gmail"
+import { getAttachmentAsFile, parseMessage } from "@web/lib/server/gmail"
 import { errorResponse } from "@web/lib/server/router"
 import { getServiceAccountToken } from "@web/lib/server/service-accounts"
 import { supabaseServerAdmin } from "@web/lib/server/supabase"
@@ -50,13 +50,15 @@ export async function POST(req: NextRequest) {
         .reduce((oldest, current) => oldest < current ? oldest : current)
         .toString()
 
-    const gmail = google.gmail("v1")
+    const gmail = google.gmail({
+        version: "v1",
+        params: { access_token: token?.access_token! },
+    })
 
     const { history, historyId: newHistoryId } = await gmail.users.history.list({
         userId: "me",
         startHistoryId: oldestHistoryId,
         historyTypes: ["messageAdded"],
-        access_token: token?.access_token!,
     }).then(res => res.data)
 
     await Promise.all(workflows.map(w =>
@@ -79,13 +81,23 @@ export async function POST(req: NextRequest) {
     }) ?? []
 
     const newMessageRequests = filteredHistory.map(async msg => {
-        const res = await gmail.users.messages.get({
+        const parsedMessage = await gmail.users.messages.get({
             userId: "me",
             id: msg.id!,
             format: "full",
-            access_token: token?.access_token!,
-        })
-        return parseMessage(res.data)
+        }).then(res => parseMessage(res.data))
+
+        const loadedAttachments = await Promise.all(
+            parsedMessage.attachments?.map(attachment => getAttachmentAsFile(gmail, {
+                attachment,
+                messageId: msg.id!,
+            })) ?? []
+        )
+
+        return {
+            ...parsedMessage,
+            attachments: loadedAttachments,
+        }
     })
 
     const newMessages = await Promise.all(newMessageRequests)
@@ -97,6 +109,7 @@ export async function POST(req: NextRequest) {
             && msg.recipientAddress === emailAddress
             && msg.headers["x-triggered-by"] !== "WorkflowDog"
         )
+
         return relevantMessages.map(async msg => {
             // console.debug([
             //     "Subject: " + msg.subject,

@@ -1,5 +1,7 @@
+import type { fileSchema } from "@pkg/basic/schemas"
 import { type gmail_v1 } from "googleapis"
 import quotedPrintable from "quoted-printable"
+import type { z } from "zod"
 
 
 export type ParsedMessage = ReturnType<typeof parseMessage>
@@ -34,16 +36,16 @@ export function parseMessage(msg: gmail_v1.Schema$Message) {
     }
 }
 
+type AttachmentReference = {
+    name: string,
+    mimeType: string,
+    attachmentId: string,
+}
 
 export type ParsedMessagePayload = {
     plain?: string,
     html?: string,
-    attachments: {
-        name: string,
-        mimeType: string,
-        data?: string,
-        attachmentId?: string,
-    }[],
+    attachments: AttachmentReference[],
 }
 
 export function parseMessagePayload(payload: gmail_v1.Schema$MessagePart | undefined): ParsedMessagePayload {
@@ -74,15 +76,17 @@ export function parseMessagePayload(payload: gmail_v1.Schema$MessagePart | undef
         }
     }
 
-    return {
-        attachments: [
-            {
+    if (payload?.body?.attachmentId) {
+        return {
+            attachments: [{
                 name: payload?.filename!,
                 mimeType: payload?.mimeType!,
                 attachmentId: payload?.body?.attachmentId!,
-            }
-        ]
+            }]
+        }
     }
+
+    return { attachments: [] }
 }
 
 
@@ -119,3 +123,23 @@ export function indexHeaders(headers: gmail_v1.Schema$MessagePartHeader[]): Reco
     )
 }
 
+
+export async function getAttachmentAsFile(gmail: gmail_v1.Gmail, {
+    messageId,
+    attachment,
+}: {
+    messageId: string
+    attachment: AttachmentReference
+}): Promise<z.infer<typeof fileSchema>> {
+    const base64urlData = await gmail.users.messages.attachments.get({
+        userId: "me",
+        messageId,
+        id: attachment.attachmentId,
+    }).then(res => res.data.data!)
+
+    return {
+        name: attachment.name,
+        mimeType: attachment.mimeType,
+        data: Buffer.from(base64urlData, "base64url").toString("base64"),
+    }
+}

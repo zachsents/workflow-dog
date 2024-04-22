@@ -2,8 +2,8 @@ import _ from "lodash"
 import { createExport } from "@pkg/_build/util"
 // IMPORTS
 import type { MergedClientDataTypeDefinition } from "@pkg/types"
-import basic_data_types_any_client from "../../basic/data-types/any/client"
 import basic_data_types_array_client from "../../basic/data-types/array/client"
+import basic_data_types_any_client from "../../basic/data-types/any/client"
 import basic_data_types_boolean_client from "../../basic/data-types/boolean/client"
 import basic_data_types_datetime_client from "../../basic/data-types/datetime/client"
 import basic_data_types_file_client from "../../basic/data-types/file/client"
@@ -20,8 +20,8 @@ import text_data_types_text_or_regex_client from "../../text/data-types/text-or-
 
 const _definitions = {
     // EXPORTS
-    "https://data-types.workflow.dog/basic/any": _.merge({ id: "https://data-types.workflow.dog/basic/any" }, basic_data_types_any_client),
     "https://data-types.workflow.dog/basic/array": _.merge({ id: "https://data-types.workflow.dog/basic/array" }, basic_data_types_array_client),
+    "https://data-types.workflow.dog/basic/any": _.merge({ id: "https://data-types.workflow.dog/basic/any" }, basic_data_types_any_client),
     "https://data-types.workflow.dog/basic/boolean": _.merge({ id: "https://data-types.workflow.dog/basic/boolean" }, basic_data_types_boolean_client),
     "https://data-types.workflow.dog/basic/datetime": _.merge({ id: "https://data-types.workflow.dog/basic/datetime" }, basic_data_types_datetime_client),
     "https://data-types.workflow.dog/basic/file": _.merge({ id: "https://data-types.workflow.dog/basic/file" }, basic_data_types_file_client),

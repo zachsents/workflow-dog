@@ -17,7 +17,7 @@ const controlModifiers: Record<ControlModifier, Omit<ControlModifierDefinition, 
         handleType: "input",
     },
     delay: {
-        name: "Delay",
+        name: "Delay (ms)",
         type: "https://data-types.workflow.dog/basic/number",
         icon: TbClock,
         handleType: "input",

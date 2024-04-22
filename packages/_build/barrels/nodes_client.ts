@@ -30,6 +30,8 @@ import google_nodes_gmail_create_draft_client from "../../google/nodes/gmail-cre
 import google_nodes_gmail_create_draft_reply_client from "../../google/nodes/gmail-create-draft-reply/client"
 import google_nodes_gmail_get_attachment_client from "../../google/nodes/gmail-get-attachment/client"
 import google_nodes_gmail_get_message_client from "../../google/nodes/gmail-get-message/client"
+import google_nodes_gmail_mark_as_read_client from "../../google/nodes/gmail-mark-as-read/client"
+import google_nodes_gmail_mark_as_unread_client from "../../google/nodes/gmail-mark-as-unread/client"
 import google_nodes_gmail_reply_to_email_client from "../../google/nodes/gmail-reply-to-email/client"
 import google_nodes_gmail_send_email_client from "../../google/nodes/gmail-send-email/client"
 import google_nodes_gmail_trash_message_client from "../../google/nodes/gmail-trash-message/client"
@@ -114,6 +116,8 @@ const _definitions = {
     "https://nodes.workflow.dog/google/gmail-create-draft-reply": _.merge({ id: "https://nodes.workflow.dog/google/gmail-create-draft-reply" }, google_nodes_gmail_create_draft_reply_client),
     "https://nodes.workflow.dog/google/gmail-get-attachment": _.merge({ id: "https://nodes.workflow.dog/google/gmail-get-attachment" }, google_nodes_gmail_get_attachment_client),
     "https://nodes.workflow.dog/google/gmail-get-message": _.merge({ id: "https://nodes.workflow.dog/google/gmail-get-message" }, google_nodes_gmail_get_message_client),
+    "https://nodes.workflow.dog/google/gmail-mark-as-read": _.merge({ id: "https://nodes.workflow.dog/google/gmail-mark-as-read" }, google_nodes_gmail_mark_as_read_client),
+    "https://nodes.workflow.dog/google/gmail-mark-as-unread": _.merge({ id: "https://nodes.workflow.dog/google/gmail-mark-as-unread" }, google_nodes_gmail_mark_as_unread_client),
     "https://nodes.workflow.dog/google/gmail-reply-to-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-reply-to-email" }, google_nodes_gmail_reply_to_email_client),
     "https://nodes.workflow.dog/google/gmail-send-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-send-email" }, google_nodes_gmail_send_email_client),
     "https://nodes.workflow.dog/google/gmail-trash-message": _.merge({ id: "https://nodes.workflow.dog/google/gmail-trash-message" }, google_nodes_gmail_trash_message_client),

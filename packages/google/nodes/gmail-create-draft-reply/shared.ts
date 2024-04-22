@@ -1,15 +1,11 @@
 import { createSharedNodeDefinition } from "@pkg/types"
 
 export default createSharedNodeDefinition({
-    name: "Draft Message",
-    description: "Create a draft email message.",
+    name: "Draft Reply",
+    description: "Create a draft reply to an email message.",
     inputs: {
-        to: {
-            name: "To",
-            type: "https://data-types.workflow.dog/basic/string",
-        },
-        subject: {
-            name: "Subject",
+        messageId: {
+            name: "Message ID",
             type: "https://data-types.workflow.dog/basic/string",
         },
         message: {

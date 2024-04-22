@@ -4,6 +4,7 @@ import { getServiceAccountToken } from "@web/lib/server/service-accounts"
 import { supabaseServerAdmin } from "@web/lib/server/supabase"
 import axios from "axios"
 import { google, type gmail_v1 } from "googleapis"
+import _ from "lodash"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
@@ -87,17 +88,14 @@ export async function POST(req: NextRequest) {
             format: "full",
         }).then(res => parseMessage(res.data))
 
-        // only getting first attachment for now
-        const attachmentCount = parsedMessage.attachments?.length ?? 0
+        const attachmentRefs = parsedMessage.attachments?.map(a => ({
+            messageId: msg.id!,
+            ...a,
+        })) ?? []
 
         return {
-            ...parsedMessage,
-            ...attachmentCount > 0 && {
-                attachment: await getAttachmentAsFile(gmail, {
-                    attachment: parsedMessage.attachments![0],
-                    messageId: msg.id!,
-                })
-            }
+            ..._.omit(parsedMessage, "attachments"),
+            attachmentRefs,
         }
     })
 

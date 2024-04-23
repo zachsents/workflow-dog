@@ -12,8 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Build stylesheet
+        working-directory: ./landing
+        run: |
+          npm i
+          npm run build
+
       - name: Google Auth
-        id: auth
         uses: "google-github-actions/auth@v2"
         with:
           token_format: "access_token"

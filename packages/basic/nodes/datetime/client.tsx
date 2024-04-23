@@ -24,7 +24,7 @@ export default createClientNodeDefinition(shared, {
                 value={value ?? ""}
                 onChange={ev => setValue(ev.currentTarget.value)}
                 type="datetime-local"
-                className="nodrag nopan shadow-none w-36"
+                className="nodrag nopan shadow-none w-72"
             />
         )
     }

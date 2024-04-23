@@ -7,11 +7,11 @@ export default createExecutionNodeDefinition(shared, {
 
         const client = getClient(token?.key!)
 
-        const leads = await client.get("/lead/", {
+        const contacts = await client.get("/contact/", {
             params: limit == null ? {} : { limit }
         })
             .then(res => res.data.data)
 
-        return { leads }
+        return { contacts }
     },
 })

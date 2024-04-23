@@ -8,6 +8,7 @@ import basic_nodes_coalesce_nullish_client from "../../basic/nodes/coalesce-null
 import basic_nodes_compose_list_client from "../../basic/nodes/compose-list/client"
 import basic_nodes_compose_object_client from "../../basic/nodes/compose-object/client"
 import basic_nodes_convert_to_number_client from "../../basic/nodes/convert-to-number/client"
+import basic_nodes_datetime_client from "../../basic/nodes/datetime/client"
 import basic_nodes_decompose_object_client from "../../basic/nodes/decompose-object/client"
 import basic_nodes_equal_client from "../../basic/nodes/equal/client"
 import basic_nodes_get_element_client from "../../basic/nodes/get-element/client"
@@ -26,7 +27,10 @@ import basic_nodes_switch_client from "../../basic/nodes/switch/client"
 import basic_nodes_text_client from "../../basic/nodes/text/client"
 import basic_nodes_trigger_input_client from "../../basic/nodes/trigger-input/client"
 import basic_nodes_xor_client from "../../basic/nodes/xor/client"
+import closecrm_nodes_get_contact_by_id_client from "../../closecrm/nodes/get-contact-by-id/client"
 import closecrm_nodes_get_lead_by_id_client from "../../closecrm/nodes/get-lead-by-id/client"
+import closecrm_nodes_list_contacts_client from "../../closecrm/nodes/list-contacts/client"
+import closecrm_nodes_list_emails_with_lead_client from "../../closecrm/nodes/list-emails-with-lead/client"
 import closecrm_nodes_list_leads_client from "../../closecrm/nodes/list-leads/client"
 import google_nodes_gmail_add_labels_client from "../../google/nodes/gmail-add-labels/client"
 import google_nodes_gmail_create_draft_client from "../../google/nodes/gmail-create-draft/client"
@@ -70,8 +74,8 @@ import openai_nodes_prompt_chatgpt_vision_client from "../../openai/nodes/prompt
 import openai_nodes_speech_to_text_client from "../../openai/nodes/speech-to-text/client"
 import openai_nodes_text_to_speech_client from "../../openai/nodes/text-to-speech/client"
 import openai_nodes_yes_no_decision_client from "../../openai/nodes/yes-no-decision/client"
-import text_nodes_concatenate_client from "../../text/nodes/concatenate/client"
 import text_nodes_contains_client from "../../text/nodes/contains/client"
+import text_nodes_concatenate_client from "../../text/nodes/concatenate/client"
 import text_nodes_convert_to_regex_client from "../../text/nodes/convert-to-regex/client"
 import text_nodes_convert_to_text_client from "../../text/nodes/convert-to-text/client"
 import text_nodes_count_occurrences_client from "../../text/nodes/count-occurrences/client"
@@ -98,6 +102,7 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/compose-list": _.merge({ id: "https://nodes.workflow.dog/basic/compose-list" }, basic_nodes_compose_list_client),
     "https://nodes.workflow.dog/basic/compose-object": _.merge({ id: "https://nodes.workflow.dog/basic/compose-object" }, basic_nodes_compose_object_client),
     "https://nodes.workflow.dog/basic/convert-to-number": _.merge({ id: "https://nodes.workflow.dog/basic/convert-to-number" }, basic_nodes_convert_to_number_client),
+    "https://nodes.workflow.dog/basic/datetime": _.merge({ id: "https://nodes.workflow.dog/basic/datetime" }, basic_nodes_datetime_client),
     "https://nodes.workflow.dog/basic/decompose-object": _.merge({ id: "https://nodes.workflow.dog/basic/decompose-object" }, basic_nodes_decompose_object_client),
     "https://nodes.workflow.dog/basic/equal": _.merge({ id: "https://nodes.workflow.dog/basic/equal" }, basic_nodes_equal_client),
     "https://nodes.workflow.dog/basic/get-element": _.merge({ id: "https://nodes.workflow.dog/basic/get-element" }, basic_nodes_get_element_client),
@@ -116,7 +121,10 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/text": _.merge({ id: "https://nodes.workflow.dog/basic/text" }, basic_nodes_text_client),
     "https://nodes.workflow.dog/basic/trigger-input": _.merge({ id: "https://nodes.workflow.dog/basic/trigger-input" }, basic_nodes_trigger_input_client),
     "https://nodes.workflow.dog/basic/xor": _.merge({ id: "https://nodes.workflow.dog/basic/xor" }, basic_nodes_xor_client),
+    "https://nodes.workflow.dog/closecrm/get-contact-by-id": _.merge({ id: "https://nodes.workflow.dog/closecrm/get-contact-by-id" }, closecrm_nodes_get_contact_by_id_client),
     "https://nodes.workflow.dog/closecrm/get-lead-by-id": _.merge({ id: "https://nodes.workflow.dog/closecrm/get-lead-by-id" }, closecrm_nodes_get_lead_by_id_client),
+    "https://nodes.workflow.dog/closecrm/list-contacts": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-contacts" }, closecrm_nodes_list_contacts_client),
+    "https://nodes.workflow.dog/closecrm/list-emails-with-lead": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-emails-with-lead" }, closecrm_nodes_list_emails_with_lead_client),
     "https://nodes.workflow.dog/closecrm/list-leads": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-leads" }, closecrm_nodes_list_leads_client),
     "https://nodes.workflow.dog/google/gmail-add-labels": _.merge({ id: "https://nodes.workflow.dog/google/gmail-add-labels" }, google_nodes_gmail_add_labels_client),
     "https://nodes.workflow.dog/google/gmail-create-draft": _.merge({ id: "https://nodes.workflow.dog/google/gmail-create-draft" }, google_nodes_gmail_create_draft_client),
@@ -160,8 +168,8 @@ const _definitions = {
     "https://nodes.workflow.dog/openai/speech-to-text": _.merge({ id: "https://nodes.workflow.dog/openai/speech-to-text" }, openai_nodes_speech_to_text_client),
     "https://nodes.workflow.dog/openai/text-to-speech": _.merge({ id: "https://nodes.workflow.dog/openai/text-to-speech" }, openai_nodes_text_to_speech_client),
     "https://nodes.workflow.dog/openai/yes-no-decision": _.merge({ id: "https://nodes.workflow.dog/openai/yes-no-decision" }, openai_nodes_yes_no_decision_client),
-    "https://nodes.workflow.dog/text/concatenate": _.merge({ id: "https://nodes.workflow.dog/text/concatenate" }, text_nodes_concatenate_client),
     "https://nodes.workflow.dog/text/contains": _.merge({ id: "https://nodes.workflow.dog/text/contains" }, text_nodes_contains_client),
+    "https://nodes.workflow.dog/text/concatenate": _.merge({ id: "https://nodes.workflow.dog/text/concatenate" }, text_nodes_concatenate_client),
     "https://nodes.workflow.dog/text/convert-to-regex": _.merge({ id: "https://nodes.workflow.dog/text/convert-to-regex" }, text_nodes_convert_to_regex_client),
     "https://nodes.workflow.dog/text/convert-to-text": _.merge({ id: "https://nodes.workflow.dog/text/convert-to-text" }, text_nodes_convert_to_text_client),
     "https://nodes.workflow.dog/text/count-occurrences": _.merge({ id: "https://nodes.workflow.dog/text/count-occurrences" }, text_nodes_count_occurrences_client),

@@ -24,7 +24,7 @@ export default createClientDataTypeDefinition(shared, {
     renderPreview: ({ value }) => {
         return (
             <p>
-                {value.length > 0 ? "List [...]" : "Empty List"}
+                List - {value.length} items
             </p>
         )
     },

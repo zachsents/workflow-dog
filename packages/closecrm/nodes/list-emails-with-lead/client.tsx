@@ -8,9 +8,11 @@ export default createClientNodeDefinition(shared, {
     badge: "CloseCRM",
     tags: ["CloseCRM", "CRM", "Sales"],
     inputs: {
-        limit: {},
+        leadId: {},
+        before: {},
+        after: {},
     },
     outputs: {
-        leads: {},
+        emails: {},
     },
 })

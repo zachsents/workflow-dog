@@ -11,6 +11,6 @@ export default createClientNodeDefinition(shared, {
         limit: {},
     },
     outputs: {
-        leads: {},
+        contacts: {},
     },
 })

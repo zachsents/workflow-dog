@@ -4,13 +4,13 @@ import { createExecutionNodeDefinition } from "@pkg/types"
 import shared from "./shared"
 
 export default createExecutionNodeDefinition(shared, {
-    action: async ({ leadId }, { token }) => {
-        assertArgProvided(leadId, "lead ID")
+    action: async ({ contactId }, { token }) => {
+        assertArgProvided(contactId, "contact ID")
 
         const client = getClient(token?.key!)
-        const lead = await client.get(`/lead/${leadId}/`)
+        const contact = await client.get(`/contact/${contactId}/`)
             .then(res => res.data)
 
-        return { lead }
+        return { contact }
     },
 })

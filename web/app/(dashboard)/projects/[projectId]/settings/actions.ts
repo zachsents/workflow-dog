@@ -127,6 +127,11 @@ export async function inviteMember(projectId: string, email: string) {
 
 export async function deleteProject(projectId: string) {
 
+    await supabaseServer()
+        .from("workflows")
+        .delete()
+        .eq("team_id", projectId)
+
     const query = await supabaseServer()
         .from("teams")
         .delete()

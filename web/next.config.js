@@ -2,8 +2,8 @@
 module.exports = {
     reactStrictMode: true,
     transpilePackages: ["packages"],
-    // output: "export",
     // productionBrowserSourceMaps: true,
+    output: "standalone",
 
     /**
      * @see https://react-svgr.com/docs/next/

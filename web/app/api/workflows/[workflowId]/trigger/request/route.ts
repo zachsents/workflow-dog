@@ -28,7 +28,7 @@ async function all(req: NextRequest, {
         return errorResponse("This workflow does not have a URL Request trigger", 400)
     }
 
-    const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/workflows/${workflowId}/run`)
+    const url = new URL(`http://localhost:3000/api/workflows/${workflowId}/run`)
 
     const waitUntilFinished: boolean = (triggerConfig as any)?.waitUntilFinished
     if (waitUntilFinished) {

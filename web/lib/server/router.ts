@@ -17,5 +17,7 @@ export function errorRedirect(message: string, {
 }
 
 export function errorResponse(message: string, status: number, extra?: any) {
+    console.log("after 3")
+
     return NextResponse.json({ error: { message, ...extra } }, { status })
 }

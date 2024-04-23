@@ -14,6 +14,8 @@ import basic_nodes_get_element_execution from "../../basic/nodes/get-element/exe
 import basic_nodes_json_parse_execution from "../../basic/nodes/json-parse/execution"
 import basic_nodes_json_stringify_execution from "../../basic/nodes/json-stringify/execution"
 import basic_nodes_list_append_execution from "../../basic/nodes/list-append/execution"
+import basic_nodes_list_get_first_execution from "../../basic/nodes/list-get-first/execution"
+import basic_nodes_list_get_last_execution from "../../basic/nodes/list-get-last/execution"
 import basic_nodes_loop_workflow_execution from "../../basic/nodes/loop-workflow/execution"
 import basic_nodes_not_execution from "../../basic/nodes/not/execution"
 import basic_nodes_not_equal_execution from "../../basic/nodes/not-equal/execution"
@@ -102,6 +104,8 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/json-parse": _.merge({ id: "https://nodes.workflow.dog/basic/json-parse" }, basic_nodes_json_parse_execution),
     "https://nodes.workflow.dog/basic/json-stringify": _.merge({ id: "https://nodes.workflow.dog/basic/json-stringify" }, basic_nodes_json_stringify_execution),
     "https://nodes.workflow.dog/basic/list-append": _.merge({ id: "https://nodes.workflow.dog/basic/list-append" }, basic_nodes_list_append_execution),
+    "https://nodes.workflow.dog/basic/list-get-first": _.merge({ id: "https://nodes.workflow.dog/basic/list-get-first" }, basic_nodes_list_get_first_execution),
+    "https://nodes.workflow.dog/basic/list-get-last": _.merge({ id: "https://nodes.workflow.dog/basic/list-get-last" }, basic_nodes_list_get_last_execution),
     "https://nodes.workflow.dog/basic/loop-workflow": _.merge({ id: "https://nodes.workflow.dog/basic/loop-workflow" }, basic_nodes_loop_workflow_execution),
     "https://nodes.workflow.dog/basic/not": _.merge({ id: "https://nodes.workflow.dog/basic/not" }, basic_nodes_not_execution),
     "https://nodes.workflow.dog/basic/not-equal": _.merge({ id: "https://nodes.workflow.dog/basic/not-equal" }, basic_nodes_not_equal_execution),

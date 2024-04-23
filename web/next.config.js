@@ -2,7 +2,7 @@
 module.exports = {
     reactStrictMode: true,
     transpilePackages: ["packages"],
-    // productionBrowserSourceMaps: true,
+    productionBrowserSourceMaps: true,
     output: "standalone",
 
     /**

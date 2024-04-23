@@ -1,0 +1,276 @@
+<html>
+
+<head>
+    <title>Landing Page</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
+          rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body class="min-h-screen bg-slate-50 load-in">
+    <header>
+        <nav class="section-md flex-between gap-20 py-2">
+            <a href="/" class="text-2xl flex-center gap-4 font-bold">
+                <img src="logo.svg" class="h-[1.75em]" />
+                <p>WorkflowDog</p>
+            </a>
+            <ul class="flex-center gap-8 list-none text-md">
+                <li>
+                    <a href="#examples" class="hover:text-primary-700">
+                        Examples
+                    </a>
+                </li>
+                <li>
+                    <a href="#pricing" class="hover:text-primary-700">
+                        Pricing
+                    </a>
+                </li>
+
+                <div class="w-[1px] h-[1.25em] bg-gray-300 -mx-2"></div>
+
+                <li>
+                    <a href="https://learn.workflow.dog" class="hover:text-primary-700">
+                        Learn
+                    </a>
+                </li>
+                <li>
+                    <a href="https://app.workflow.dog">
+                        <button
+                                class="bg-gray-700 hover:bg-gray-900 text-white fun-button">
+                            Go to app
+                        </button>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="section-sm pt-[12vh] pb-24 flex-v items-stretch gap-8">
+        <h1
+            class="text-7xl font-bold">
+            Build
+            <span
+                  class="block bg-gradient-to-r from-violet-600 via-pink-600 to-yellow-500 bg-clip-text text-transparent">
+                powerful automations
+            </span>
+            in seconds
+        </h1>
+
+        <ul class="flex items-center gap-8 text-2xl">
+            <li class="flex center gap-4">
+                <img src="icons/circle-dashed-check.svg" />
+                <p>No-code</p>
+            </li>
+            <li class="flex center gap-4">
+                <img src="icons/circle-dashed-check.svg" />
+                <p>Integrate AI</p>
+            </li>
+            <li class="flex center gap-4">
+                <img src="icons/circle-dashed-check.svg" />
+                <p>Connect to Gmail, Sheets & more</p>
+            </li>
+        </ul>
+
+        <p class="text-lg max-w-xl text-balance">
+            Build automated workflows that integrate with AI, power APIs, or run entire businesses — and have a little
+            fun while you're at it.
+        </p>
+
+        <a href="https://app.workflow.dog">
+            <button
+                    class="bg-primary-700 hover:bg-primary-800 text-white fun-button text-2xl flex-center gap-4 group">
+                <span>Start building for free</span>
+                <img src="icons/run.svg"
+                     class="invert group-hover:translate-x-3 group-hover:opacity-25 transition" />
+            </button>
+        </a>
+    </section>
+
+    <section class="section-md pb-24">
+        <img src="banner.webp" class="rounded-xl shadow-xl" />
+    </section>
+
+    <section id="examples" class="section-md pb-24 flex-v items-stretch gap-10">
+        <h3 class="font-bold text-4xl text-center">
+            Examples
+        </h3>
+
+        <ul class="grid grid-cols-3 gap-6" x-data="examples">
+            <template x-for="eg in examples">
+                <li class="rounded-xl overflow-clip bg-white shadow-md relative group">
+                    <a :href="eg.href || 'javascript:;'" :target="eg.href ? '_blank' : '_self'">
+                        <img :src="eg.thumbnail" class="bg-slate-200 w-full h-auto aspect-video object-cover"
+                             x-show="eg.thumbnail" />
+                        <div class="bg-slate-200 aspect-video" x-show="!eg.thumbnail"></div>
+
+                        <div class="text-center px-4 py-2">
+                            <p class="font-bold h-[3em]" x-text="eg.title"></p>
+                            <p class="text-gray-500 text-sm" x-text="eg.subtitle"></p>
+                        </div>
+                        <img src="icons/external-link.svg"
+                             class="h-6 absolute top-4 right-4 opacity-0 group-hover:opacity-50 transition-opacity"
+                             x-show="eg.href" />
+                    </a>
+                </li>
+            </template>
+        </ul>
+
+        <p class="text-gray-500 text-center">
+            More examples coming soon!
+        </p>
+    </section>
+
+
+    <section id="pricing" class="section-md pb-36 flex-v items-stretch gap-10">
+        <h3 class="font-bold text-4xl text-center">
+            Pricing
+        </h3>
+
+        <div class="flex items-stretch justify-center gap-10" x-data="features">
+            <div class="bg-white rounded-xl max-w-sm p-8 shadow-lg flex-v items-center gap-4">
+                <p class="text-2xl font-bold text-center">Free</p>
+                <p class="text-balance text-center">
+                    See what it feels like to run your tasks in the background.
+                </p>
+
+                <a href="https://app.workflow.dog">
+                    <button class="fun-button bg-slate-400 hover:bg-slate-500 text-white my-2">
+                        Start for free
+                    </button>
+                </a>
+
+                <ul class="text-md flex-v gap-2 mt-6">
+                    <template x-for="feat in free">
+                        <li class="flex items-center gap-2">
+                            <img src="icons/circle-dashed-check.svg" />
+                            <span x-text="feat"></span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+
+            <div
+                 class="bg-white rounded-xl max-w-sm p-8 shadow-xl flex-v items-center gap-4 outline outline-primary-300 outline-4">
+                <div class="relative font-bold text-center self-stretch">
+                    <p
+                       class="text-6xl uppercase italic absolute text-primary-500 opacity-15 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none text-nowrap -rotate-6">
+                        Pro Pro Pro
+                    </p>
+                    <p class="text-3xl uppercase italic relative">Pro</p>
+                </div>
+
+                <p class="text-center font-bold">$47 / month</p>
+
+                <p class="text-balance text-center">
+                    See what it feels like to run your tasks in the background.
+                </p>
+
+                <a href="https://app.workflow.dog">
+                    <button class="fun-button bg-primary-700 hover:bg-primary-800 text-white my-2 text-xl">
+                        Sign up now
+                    </button>
+                </a>
+
+                <ul class="text-md flex-v gap-2 mt-6">
+                    <template x-for="feat in pro">
+                        <li class="flex items-center gap-2">
+                            <img src="icons/circle-dashed-check.svg" />
+                            <span x-text="feat"></span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
+
+        <div class="flex-between gap-20 self-center mt-10">
+            <div>
+                <p class="text-2xl font-bold">Need more runs?</p>
+                <p>
+                    Reach out for a custom plan. We're happy to help.
+                </p>
+            </div>
+
+            <a href="mailto:info@workflow.dog?subject=Request for a custom plan">
+                <button class="fun-button bg-white outline outline-2 outline-slate-200 hover:bg-slate-200">
+                    Send us an email
+                </button>
+            </a>
+        </div>
+    </section>
+
+    <section
+             class="section-sm mb-24 rounded-xl flex-between bg-gradient-to-br from-violet-800 via-pink-800 to-yellow-500 p-10">
+        <p class="text-4xl font-bold text-white">
+            It's time to start building.
+        </p>
+
+        <a href="https://app.workflow.dog">
+            <button class="fun-button bg-white text-xl">
+                Start Now
+            </button>
+        </a>
+    </section>
+
+    <footer class="section-md rounded-t-xl bg-slate-200 p-10 mt-32">
+        <div class="flex-center gap-20 text-sm text-gray-600">
+            <p>© 2024 WorkflowDog</p>
+            <p>Made by
+                <a class="text-primary-600 hover:underline" href="https://twitter.com/ZachSents"
+                   target="_blank">Zach Sents</a>
+                🚀
+            </p>
+        </div>
+    </footer>
+</body>
+
+<script>
+
+    window.onload = (ev) => {
+        Array.from(document.querySelectorAll(".load-in")).forEach(el => {
+            el.style.transformOrigin = `50% ${window.scrollY}px`
+            el.dataset.loaded = true
+        })
+    }
+
+    document.addEventListener("alpine:init", () => {
+        Alpine.data("examples", () => ({
+            examples: [
+                {
+                    title: "Chat with AI from your email",
+                    subtitle: "2 min",
+                },
+                {
+                    title: "Automate your social media",
+                    subtitle: "Coming soon",
+                },
+                {
+                    title: "Send a text message from a Google Sheet",
+                    subtitle: "Coming soon",
+                },
+            ],
+        }))
+
+        Alpine.data("features", () => ({
+            free: [
+                "100 workflow runs",
+                "Up to 3 team members",
+                "Unlimited workflows",
+                "Unlimited app integrations",
+            ],
+            pro: [
+                "10,000 workflow runs",
+                "Up to 20 team members",
+                "Unlimited workflows",
+                "Unlimited app integrations",
+                "Join the Discord channel for direct support",
+            ],
+        }))
+    })
+</script>
+
+</html>

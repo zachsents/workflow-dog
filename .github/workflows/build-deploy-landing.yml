@@ -1,0 +1,27 @@
+name: Build & Deploy Landing
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - landing/**
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Google Auth
+        id: auth
+        uses: "google-github-actions/auth@v2"
+        with:
+          token_format: "access_token"
+          credentials_json: ${{ secrets.GH_ACTIONS_SERVICE_ACCOUNT_KEY }}
+
+      - name: 
+        uses: "google-github-actions/upload-cloud-storage@v2"
+        with:
+          path: "landing/public"
+          destination: "workflow-dog-landing"
+          parent: false

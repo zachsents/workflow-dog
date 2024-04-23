@@ -3,3 +3,4 @@ packages:
   - 'packages'
   - 'workflow-man'
   - 'shared'
+  - 'landing'

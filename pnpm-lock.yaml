@@ -33,6 +33,12 @@ importers:
         specifier: ^1.148.6
         version: 1.151.1
 
+  landing:
+    devDependencies:
+      tailwindcss:
+        specifier: ^3.4.1
+        version: 3.4.3
+
   packages:
 
     dependencies:

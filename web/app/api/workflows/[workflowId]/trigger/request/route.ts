@@ -22,9 +22,7 @@ async function all(req: NextRequest, {
     let error = remapError(triggerQuery)
     if (error) return errorResponse(error.error.message, 500, error.error)
 
-    console.log("before 1")
     const { triggerType, triggerConfig } = triggerQuery.data!
-    console.log("after 1")
 
     if (triggerType !== TriggerDefinitions.resolveId("basic/request")) {
         return errorResponse("This workflow does not have a URL Request trigger", 400)
@@ -38,7 +36,6 @@ async function all(req: NextRequest, {
     }
 
     try {
-        console.log("before 2")
         var { data: response } = await axios.post(url.toString(), {
             triggerData: {
                 method: req.method,
@@ -48,12 +45,12 @@ async function all(req: NextRequest, {
                 params: Object.fromEntries(req.nextUrl.searchParams.entries()),
             },
         })
-        console.log("after 2")
     }
     catch (err) {
-        console.log("before 3")
-        console.log(err)
-        return errorResponse(err.response.data.error.message, 500, err.response.data.error)
+        if (err.response)
+            return errorResponse(err.response.data.error.message, 500, err.response.data.error)
+
+        return errorResponse(err.message, 500)
     }
 
     if (!waitUntilFinished)

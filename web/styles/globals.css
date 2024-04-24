@@ -8,8 +8,9 @@ body {
     padding: 0;
     margin: 0;
     scroll-behavior: smooth;
-    font-family: "DM Sans", sans-serif;
     height: 100%;
+    /* Don't need this -- covered in root layout */
+    /* font-family: "DM Sans", sans-serif; */
 }
 
 .grid-bg {

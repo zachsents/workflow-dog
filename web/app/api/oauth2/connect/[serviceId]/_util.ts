@@ -17,7 +17,7 @@ export const defaultOAuth2AccountConfig: Partial<OAuth2Config> = {
 }
 
 export function redirectUri(serviceName: string) {
-    return `${process.env.INTERNAL_API_URL}/oauth2/connect/${serviceName}/callback`
+    return `${process.env.NEXT_PUBLIC_API_URL}/oauth2/connect/${serviceName}/callback`
 }
 
 

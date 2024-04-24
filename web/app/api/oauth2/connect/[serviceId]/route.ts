@@ -31,7 +31,7 @@ export async function GET(
 
     const url = new URL(oauthConfig.authUrl)
     url.searchParams.append("client_id", clientId)
-    url.searchParams.append("redirect_uri", redirectUri(req.nextUrl.host, safeServiceId))
+    url.searchParams.append("redirect_uri", redirectUri(safeServiceId))
     url.searchParams.append("response_type", "code")
 
     const scopes = Array.from(new Set(

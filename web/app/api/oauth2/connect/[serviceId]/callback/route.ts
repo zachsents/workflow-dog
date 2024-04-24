@@ -56,7 +56,7 @@ export async function GET(
             code: searchParams.get("code"),
             grant_type: "authorization_code",
             ...config.includeRedirectUriInTokenRequest && {
-                redirect_uri: redirectUri(req.nextUrl.host, safeServiceId)
+                redirect_uri: redirectUri(safeServiceId)
             },
         } as any).toString(),
     })

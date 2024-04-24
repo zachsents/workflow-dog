@@ -16,8 +16,8 @@ export const defaultOAuth2AccountConfig: Partial<OAuth2Config> = {
     includeRedirectUriInTokenRequest: true,
 }
 
-export function redirectUri(host: string, serviceName: string) {
-    return `${host.includes("localhost") ? "http" : "https"}://${host}/api/oauth2/connect/${serviceName}/callback`
+export function redirectUri(serviceName: string) {
+    return `${process.env.INTERNAL_API_URL}/oauth2/connect/${serviceName}/callback`
 }
 
 

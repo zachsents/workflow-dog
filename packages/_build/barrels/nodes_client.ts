@@ -26,6 +26,7 @@ import basic_nodes_run_workflow_client from "../../basic/nodes/run-workflow/clie
 import basic_nodes_switch_client from "../../basic/nodes/switch/client"
 import basic_nodes_text_client from "../../basic/nodes/text/client"
 import basic_nodes_trigger_input_client from "../../basic/nodes/trigger-input/client"
+import basic_nodes_trigger_webhook_client from "../../basic/nodes/trigger-webhook/client"
 import basic_nodes_xor_client from "../../basic/nodes/xor/client"
 import closecrm_nodes_get_contact_by_id_client from "../../closecrm/nodes/get-contact-by-id/client"
 import closecrm_nodes_get_lead_by_id_client from "../../closecrm/nodes/get-lead-by-id/client"
@@ -74,8 +75,8 @@ import openai_nodes_prompt_chatgpt_vision_client from "../../openai/nodes/prompt
 import openai_nodes_speech_to_text_client from "../../openai/nodes/speech-to-text/client"
 import openai_nodes_text_to_speech_client from "../../openai/nodes/text-to-speech/client"
 import openai_nodes_yes_no_decision_client from "../../openai/nodes/yes-no-decision/client"
-import text_nodes_contains_client from "../../text/nodes/contains/client"
 import text_nodes_concatenate_client from "../../text/nodes/concatenate/client"
+import text_nodes_contains_client from "../../text/nodes/contains/client"
 import text_nodes_convert_to_regex_client from "../../text/nodes/convert-to-regex/client"
 import text_nodes_convert_to_text_client from "../../text/nodes/convert-to-text/client"
 import text_nodes_count_occurrences_client from "../../text/nodes/count-occurrences/client"
@@ -120,6 +121,7 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/switch": _.merge({ id: "https://nodes.workflow.dog/basic/switch" }, basic_nodes_switch_client),
     "https://nodes.workflow.dog/basic/text": _.merge({ id: "https://nodes.workflow.dog/basic/text" }, basic_nodes_text_client),
     "https://nodes.workflow.dog/basic/trigger-input": _.merge({ id: "https://nodes.workflow.dog/basic/trigger-input" }, basic_nodes_trigger_input_client),
+    "https://nodes.workflow.dog/basic/trigger-webhook": _.merge({ id: "https://nodes.workflow.dog/basic/trigger-webhook" }, basic_nodes_trigger_webhook_client),
     "https://nodes.workflow.dog/basic/xor": _.merge({ id: "https://nodes.workflow.dog/basic/xor" }, basic_nodes_xor_client),
     "https://nodes.workflow.dog/closecrm/get-contact-by-id": _.merge({ id: "https://nodes.workflow.dog/closecrm/get-contact-by-id" }, closecrm_nodes_get_contact_by_id_client),
     "https://nodes.workflow.dog/closecrm/get-lead-by-id": _.merge({ id: "https://nodes.workflow.dog/closecrm/get-lead-by-id" }, closecrm_nodes_get_lead_by_id_client),
@@ -168,8 +170,8 @@ const _definitions = {
     "https://nodes.workflow.dog/openai/speech-to-text": _.merge({ id: "https://nodes.workflow.dog/openai/speech-to-text" }, openai_nodes_speech_to_text_client),
     "https://nodes.workflow.dog/openai/text-to-speech": _.merge({ id: "https://nodes.workflow.dog/openai/text-to-speech" }, openai_nodes_text_to_speech_client),
     "https://nodes.workflow.dog/openai/yes-no-decision": _.merge({ id: "https://nodes.workflow.dog/openai/yes-no-decision" }, openai_nodes_yes_no_decision_client),
-    "https://nodes.workflow.dog/text/contains": _.merge({ id: "https://nodes.workflow.dog/text/contains" }, text_nodes_contains_client),
     "https://nodes.workflow.dog/text/concatenate": _.merge({ id: "https://nodes.workflow.dog/text/concatenate" }, text_nodes_concatenate_client),
+    "https://nodes.workflow.dog/text/contains": _.merge({ id: "https://nodes.workflow.dog/text/contains" }, text_nodes_contains_client),
     "https://nodes.workflow.dog/text/convert-to-regex": _.merge({ id: "https://nodes.workflow.dog/text/convert-to-regex" }, text_nodes_convert_to_regex_client),
     "https://nodes.workflow.dog/text/convert-to-text": _.merge({ id: "https://nodes.workflow.dog/text/convert-to-text" }, text_nodes_convert_to_text_client),
     "https://nodes.workflow.dog/text/count-occurrences": _.merge({ id: "https://nodes.workflow.dog/text/count-occurrences" }, text_nodes_count_occurrences_client),

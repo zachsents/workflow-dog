@@ -26,6 +26,7 @@ import basic_nodes_run_workflow_execution from "../../basic/nodes/run-workflow/e
 import basic_nodes_switch_execution from "../../basic/nodes/switch/execution"
 import basic_nodes_text_execution from "../../basic/nodes/text/execution"
 import basic_nodes_trigger_input_execution from "../../basic/nodes/trigger-input/execution"
+import basic_nodes_trigger_webhook_execution from "../../basic/nodes/trigger-webhook/execution"
 import basic_nodes_xor_execution from "../../basic/nodes/xor/execution"
 import closecrm_nodes_get_contact_by_id_execution from "../../closecrm/nodes/get-contact-by-id/execution"
 import closecrm_nodes_get_lead_by_id_execution from "../../closecrm/nodes/get-lead-by-id/execution"
@@ -120,6 +121,7 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/switch": _.merge({ id: "https://nodes.workflow.dog/basic/switch" }, basic_nodes_switch_execution),
     "https://nodes.workflow.dog/basic/text": _.merge({ id: "https://nodes.workflow.dog/basic/text" }, basic_nodes_text_execution),
     "https://nodes.workflow.dog/basic/trigger-input": _.merge({ id: "https://nodes.workflow.dog/basic/trigger-input" }, basic_nodes_trigger_input_execution),
+    "https://nodes.workflow.dog/basic/trigger-webhook": _.merge({ id: "https://nodes.workflow.dog/basic/trigger-webhook" }, basic_nodes_trigger_webhook_execution),
     "https://nodes.workflow.dog/basic/xor": _.merge({ id: "https://nodes.workflow.dog/basic/xor" }, basic_nodes_xor_execution),
     "https://nodes.workflow.dog/closecrm/get-contact-by-id": _.merge({ id: "https://nodes.workflow.dog/closecrm/get-contact-by-id" }, closecrm_nodes_get_contact_by_id_execution),
     "https://nodes.workflow.dog/closecrm/get-lead-by-id": _.merge({ id: "https://nodes.workflow.dog/closecrm/get-lead-by-id" }, closecrm_nodes_get_lead_by_id_execution),

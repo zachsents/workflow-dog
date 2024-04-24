@@ -41,6 +41,11 @@ module.exports = {
                 destination: "/projects",
                 permanent: false,
             },
+            {
+                source: "/feedback",
+                destination: "https://forms.gle/SwmPPmUg45LnJ2nx7",
+                permanent: false,
+            },
         ]
     },
 }

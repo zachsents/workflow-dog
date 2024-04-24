@@ -1,12 +1,11 @@
 import { errorRedirect } from "@web/lib/server/router"
 import { supabaseServer } from "@web/lib/server/supabase"
 import { revalidatePath } from "next/cache"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
 
-export async function GET(request: Request) {
-    const { searchParams, origin } = new URL(request.url)
-    const code = searchParams.get("code")
+export async function GET(request: NextRequest) {
+    const code = request.nextUrl.searchParams.get("code")
 
     if (!code)
         return errorRedirect("No code provided", { nextResponse: true })
@@ -20,5 +19,5 @@ export async function GET(request: Request) {
     console.debug(`Logged in as ${data.user.email}`)
 
     revalidatePath("/projects", "layout")
-    return NextResponse.redirect(`${origin}/projects`)
+    return NextResponse.redirect(`${process.env.APP_URL}/projects`)
 }

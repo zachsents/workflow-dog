@@ -51,7 +51,7 @@ export async function POST(
     if (usageCount >= usageLimit)
         return errorResponse(`Usage limit exceeded (${usageCount} / ${usageLimit})`, 429, {
             needsUpgrade: true,
-            upgradeUrl: req.nextUrl.origin + `/projects/${projectId}/usage/upgrade`,
+            upgradeUrl: `${process.env.APP_URL}/projects/${projectId}/usage/upgrade`,
         })
 
     const queueQuery = await supabase

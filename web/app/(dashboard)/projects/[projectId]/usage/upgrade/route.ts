@@ -28,7 +28,7 @@ export async function GET(
             .throwOnError()
     ])
 
-    const return_url = `${req.nextUrl.origin}/projects/${projectId}/usage`
+    const return_url = `${process.env.APP_URL}/projects/${projectId}/usage`
 
     const { url } = await stripe.checkout.sessions.create({
         customer: customerId,

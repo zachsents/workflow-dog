@@ -53,13 +53,13 @@
 
 <body class="min-h-screen bg-slate-50 load-in">
     <header>
-        <nav class="section-md flex-between gap-20 py-4" x-data="{ open: false }">
-            <a href="/" class="text-2xl flex-center gap-4 font-bold">
+        <nav class="section-md flex-between gap-10 sm:gap-20 py-4" x-data="{ open: false }">
+            <a href="/" class="text-xl sm:text-2xl flex-center gap-4 font-bold">
                 <img src="logo.svg" class="h-[1.75em]" />
                 <p>WorkflowDog</p>
             </a>
 
-            <div class="relative">
+            <div class="relative shrink-0">
                 <button class="p-6 md:hidden" @click="open = !open">
                     <img src="icons/menu-2.svg" class="h-8 transition-transform" :class="open && 'rotate-90'" />
                 </button>

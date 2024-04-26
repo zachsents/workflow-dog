@@ -5,6 +5,7 @@ import { FormControl, FormItem, FormLabel } from "@web/components/ui/form"
 import { TbBrandGmail } from "react-icons/tb"
 import { z } from "zod"
 import shared from "./shared"
+import GoogleConsentWarning from "@web/components/google-consent-warning"
 
 
 export default createClientTriggerDefinition(shared, {
@@ -14,6 +15,7 @@ export default createClientTriggerDefinition(shared, {
     renderConfig: ({ workflow, updateConfig, onClose }) => {
         return (
             <TriggerConfig
+                aboveSettings={<GoogleConsentWarning />}
                 settings={
                     <TriggerSettingsForm
                         schema={configSchema}

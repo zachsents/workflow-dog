@@ -7,12 +7,14 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@ui/dropdown-menu"
+import GoogleConsentWarning from "@web/components/google-consent-warning"
 import { Button } from "@web/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@web/components/ui/select"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import { useDialogState } from "@web/lib/client/hooks"
 import { cn } from "@web/lib/utils"
 import { useAvailableIntegrationAccounts } from "@web/modules/integrations"
-import { useDefinition, useIsNodeSelected, useNodeProperty, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
+import { useDefinition, useIsNodeSelected, useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
 import { useWorkflow } from "@web/modules/workflows"
 import { ServiceDefinitions } from "packages/client"
 import { TbDots, TbExternalLink, TbPlugConnected, TbRefresh, TbSettings, TbX } from "react-icons/tb"
@@ -113,6 +115,10 @@ export function ServiceAccountSelector({
             break
     }
 
+    const refreshAccounts = () => void queryClient.invalidateQueries({
+        queryKey: ["integrationAccountsForWorkflow", workflow?.id, serviceDefinition?.id]
+    })
+
     return (
         <div className={cn(
             "flex center gap-2",
@@ -120,14 +126,46 @@ export function ServiceAccountSelector({
             className,
         )}>
             {accounts.length === 0 ?
-                <Button
-                    variant="outline"
-                    className="pointer-events-auto flex center gap-2 shadow-sm"
-                    onClick={() => void onConnect?.()}
-                >
-                    {iconComponent}
-                    Connect {serviceDefinition?.name}
-                </Button> :
+                <>
+                    <TooltipProvider delayDuration={0}>
+                        <Tooltip
+                            open={serviceDefinitionId === "https://services.workflow.dog/google/google-oauth" ? undefined : false}
+                        >
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className="pointer-events-auto flex center gap-2 shadow-sm"
+                                    onClick={() => void onConnect?.()}
+                                >
+                                    {iconComponent}
+                                    Connect {serviceDefinition?.name}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom">
+                                <div className="max-w-64">
+                                    <GoogleConsentWarning withWrapper={false} />
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="outline" size="icon" onClick={refreshAccounts}
+                                    className="pointer-events-auto"
+                                >
+                                    <TbRefresh />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>
+                                    Refresh
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </> :
                 <>
                     {iconComponent}
 
@@ -169,9 +207,7 @@ export function ServiceAccountSelector({
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 className="flex items-center gap-2"
-                                onSelect={() => void queryClient.invalidateQueries({
-                                    queryKey: ["integrationAccountsForWorkflow", workflow?.id, serviceDefinition?.id]
-                                })}
+                                onSelect={refreshAccounts}
                             >
                                 <TbRefresh />
                                 Refresh accounts

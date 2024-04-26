@@ -3,7 +3,7 @@ const defaultColors = require("tailwindcss/colors")
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: [
-        "./**/*.html",
+        "./src/**/*.html",
     ],
     theme: {
         extend: {

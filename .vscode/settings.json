@@ -8,5 +8,5 @@
     "editor.quickSuggestions": {
         "strings": true
     },
-    "editor.inlineSuggest.enabled": true,
+    "editor.inlineSuggest.enabled": true
 }

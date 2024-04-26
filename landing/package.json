@@ -4,13 +4,24 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "tailwindcss -i ./src/input.css -o ./public/style.css --watch",
-        "build": "tailwindcss -i ./src/input.css -o ./public/style.css"
+        "build-css": "tailwindcss -i ./src/input.css -o ./public/style.css",
+        "dev-css": "tailwindcss -i ./src/input.css -o ./public/style.css --watch",
+        "build-html": "node build-html.js",
+        "dev-html": "chokidar \"src/**/*.html\" -c \"pnpm run build-html\"",
+        "build": "conc \"pnpm:build-html\" \"pnpm:build-css\"",
+        "dev": "conc \"pnpm:dev-html\" \"pnpm:dev-css\" \"live-server --port=3000 public\" --names \"html,css,server\""
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "devDependencies": {
-        "tailwindcss": "^3.4.1"
-    }
+        "concurrently": "^8.2.2",
+        "glob": "^10.3.12",
+        "live-server": "^1.2.2",
+        "posthtml": "^0.16.6",
+        "posthtml-include": "^2.0.1",
+        "tailwindcss": "^3.4.1",
+        "chokidar-cli": "^3.0.0"
+    },
+    "type": "module"
 }

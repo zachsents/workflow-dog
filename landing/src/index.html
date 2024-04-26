@@ -1,95 +1,18 @@
 <html>
 
-<head>
-    <title>WorkflowDog - Build powerful automations in seconds</title>
-
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- <script type="application/ld+json">
-        {JSON.stringify(structuredData, null, 2)}
-    </script> -->
-
-    <!-- Meta Description -->
-    <meta name="description" content="Validate your product idea with high-intent early adopters by building a premium waitlist in under 5 minutes for free.">
-
-    <!-- Favicon & other icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
-    <link rel="manifest" href="/assets/site.webmanifest">
-
-    <!-- OpenGraph -->
-    <meta property="og:title" content="WorkflowDog">
-    <meta property="og:description" content="Build powerful automations in seconds">
-    <meta property="og:image" content="/assets/og.png">
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="WorkflowDog">
-    <meta name="twitter:creator" content="@ZachSents">
-    <meta name="twitter:image" content="/assets/og.png">
-    <meta name="twitter:description" content="Build powerful automations in seconds">
-
-    <!-- My Styles -->
-    <link rel="stylesheet" href="/style.css">
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
-
-    <!-- Alpine -->
-    <script defer="" src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</head>
+<include src="_components/head.html">
+    { "title": "WorkflowDog - Build powerful automations in seconds" }
+</include>
 
 <body class="min-h-screen bg-slate-50 load-in">
-    <header>
-    <nav class="section-md flex-between gap-10 sm:gap-20 py-4" x-data="{ open: false }">
-        <a href="/" class="text-xl sm:text-2xl flex-center gap-4 font-bold">
-            <img src="/logo.svg" class="h-[1.75em]">
-            <p>WorkflowDog</p>
-        </a>
-
-        <div class="relative shrink-0">
-            <button class="p-6 md:hidden" @click="open = !open">
-                <img src="icons/menu-2.svg" class="h-8 transition-transform" :class="open && 'rotate-90'">
-            </button>
-
-            <ul class="absolute top-full right-0 bg-white px-6 py-4 rounded-lg shadow-xl md:static md:bg-transparent md:p-0 md:rounded-none md:shadow-none flex flex-col items-stretch md:flex-center md:flex-row md:gap-8 text-md text-center transition md:opacity-100 md:transform-none md:pointer-events-auto md:transition-none" :class="!open && 'opacity-0 -translate-y-10 pointer-events-none'">
-                <li>
-                    <a href="#examples" class="hover:text-primary-700 block py-2">
-                        Examples
-                    </a>
-                </li>
-                <li>
-                    <a href="#pricing" class="hover:text-primary-700 block py-2">
-                        Pricing
-                    </a>
-                </li>
-                <div class="w-[1px] h-[1.25em] bg-gray-300 -mx-2 hidden md:block"></div>
-                <li>
-                    <a href="https://learn.workflow.dog" class="hover:text-primary-700 block py-2">
-                        Learn
-                    </a>
-                </li>
-                <li class="my-2 md:my-0">
-                    <a href="https://app.workflow.dog">
-                        <button class="bg-gray-700 hover:bg-gray-900 text-white fun-button text-nowrap">
-                            Go to app
-                        </button>
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-</header>
+    <include src="_components/header.html"></include>
 
     <section class="section-sm pt-[12vh] pb-24 flex-v items-stretch gap-8">
-        <h1 class="text-5xl sm:text-7xl font-bold text-left">
+        <h1
+            class="text-5xl sm:text-7xl font-bold text-left">
             Build
-            <span class="block bg-gradient-to-r from-violet-600 via-pink-600 to-yellow-500 bg-clip-text text-transparent">
+            <span
+                  class="block bg-gradient-to-r from-violet-600 via-pink-600 to-yellow-500 bg-clip-text text-transparent">
                 powerful automations
             </span>
             in seconds
@@ -97,15 +20,15 @@
 
         <ul class="flex flex-col flex-wrap md:flex-row md:items-center gap-x-8 gap-y-2 text-xl sm:text-2xl">
             <li class="flex items-center gap-4">
-                <img src="icons/circle-dashed-check.svg" class="w-[1em] shrink-0">
+                <img src="icons/circle-dashed-check.svg" class="w-[1em] shrink-0" />
                 <p>No-code</p>
             </li>
             <li class="flex center gap-4">
-                <img src="icons/circle-dashed-check.svg" class="w-[1em] shrink-0">
+                <img src="icons/circle-dashed-check.svg" class="w-[1em] shrink-0" />
                 <p>Integrate AI</p>
             </li>
             <li class="flex center gap-4">
-                <img src="icons/circle-dashed-check.svg" class="w-[1em] shrink-0">
+                <img src="icons/circle-dashed-check.svg" class="w-[1em] shrink-0" />
                 <!-- <p>Connect to Gmail, Sheets & more</p> -->
                 <p>Connect to Gmail & more</p>
             </li>
@@ -118,15 +41,17 @@
         </p>
 
         <a href="https://app.workflow.dog">
-            <button class="bg-primary-700 hover:bg-primary-800 text-white fun-button text-xl sm:text-2xl text-left flex-center gap-4 group">
+            <button
+                    class="bg-primary-700 hover:bg-primary-800 text-white fun-button text-xl sm:text-2xl text-left flex-center gap-4 group">
                 <span>Start building for free</span>
-                <img src="icons/run.svg" class="invert group-hover:translate-x-3 group-hover:opacity-25 transition">
+                <img src="icons/run.svg"
+                     class="invert group-hover:translate-x-3 group-hover:opacity-25 transition" />
             </button>
         </a>
     </section>
 
     <section class="section-md pb-16 sm:pb-24">
-        <img src="banner.webp" class="rounded-xl shadow-xl">
+        <img src="banner.webp" class="rounded-xl shadow-xl" />
     </section>
 
     <section id="examples" class="section-md pb-24 flex-v items-stretch gap-10">
@@ -138,14 +63,17 @@
             <template x-for="eg in examples">
                 <li class="rounded-xl overflow-clip bg-white shadow-md relative group">
                     <a :href="eg.href || 'javascript:;'" :target="eg.href ? '_blank' : '_self'">
-                        <img :src="eg.thumbnail" class="bg-slate-200 w-full h-auto aspect-video object-cover" x-show="eg.thumbnail">
+                        <img :src="eg.thumbnail" class="bg-slate-200 w-full h-auto aspect-video object-cover"
+                             x-show="eg.thumbnail" />
                         <div class="bg-slate-200 aspect-video" x-show="!eg.thumbnail"></div>
 
                         <div class="text-center px-4 py-2">
                             <p class="font-bold h-[3em]" x-text="eg.title"></p>
                             <p class="text-gray-500 text-sm" x-text="eg.subtitle"></p>
                         </div>
-                        <img src="icons/external-link.svg" class="h-6 absolute top-4 right-4 opacity-0 group-hover:opacity-50 transition-opacity" x-show="eg.href">
+                        <img src="icons/external-link.svg"
+                             class="h-6 absolute top-4 right-4 opacity-0 group-hover:opacity-50 transition-opacity"
+                             x-show="eg.href" />
                     </a>
                 </li>
             </template>
@@ -178,16 +106,18 @@
                 <ul class="text-md flex-v gap-2 mt-6">
                     <template x-for="feat in free">
                         <li class="flex items-center gap-2">
-                            <img src="icons/circle-dashed-check.svg">
+                            <img src="icons/circle-dashed-check.svg" />
                             <span x-text="feat"></span>
                         </li>
                     </template>
                 </ul>
             </div>
 
-            <div class="bg-white rounded-xl max-w-sm p-8 shadow-xl flex-v items-center gap-4 outline outline-primary-300 outline-4 overflow-clip">
+            <div
+                 class="bg-white rounded-xl max-w-sm p-8 shadow-xl flex-v items-center gap-4 outline outline-primary-300 outline-4 overflow-clip">
                 <div class="relative font-bold text-center self-stretch">
-                    <p class="text-6xl uppercase italic absolute text-primary-500 opacity-15 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none text-nowrap -rotate-6">
+                    <p
+                       class="text-6xl uppercase italic absolute text-primary-500 opacity-15 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none text-nowrap -rotate-6">
                         Pro Pro Pro
                     </p>
                     <p class="text-3xl uppercase italic relative">Pro</p>
@@ -208,7 +138,7 @@
                 <ul class="text-md flex-v gap-2 mt-6">
                     <template x-for="feat in pro">
                         <li class="flex items-center gap-2">
-                            <img src="icons/circle-dashed-check.svg">
+                            <img src="icons/circle-dashed-check.svg" />
                             <span x-text="feat"></span>
                         </li>
                     </template>
@@ -232,8 +162,10 @@
         </div>
     </section>
 
-    <section class="section-sm mb-24">
-        <div class="rounded-xl flex flex-col items-center gap-6 sm:flex-row sm:flex-between sm:gap-4 bg-gradient-to-br from-violet-800 via-pink-800 to-yellow-500 p-10">
+    <section
+             class="section-sm mb-24">
+        <div
+             class="rounded-xl flex flex-col items-center gap-6 sm:flex-row sm:flex-between sm:gap-4 bg-gradient-to-br from-violet-800 via-pink-800 to-yellow-500 p-10">
             <p class="text-3xl sm:text-4xl font-bold text-white text-center sm:text-left">
                 It's time to start building.
             </p>
@@ -245,28 +177,7 @@
         </div>
     </section>
 
-    <footer class="section-md mt-32">
-    <div class="rounded-t-xl bg-slate-200 p-10">
-        <div class="flex flex-col gap-4 flex-between md:flex-row md:gap-20 text-center md:text-left">
-            <div class="flex-center gap-4 text-sm text-gray-600">
-                <p>
-                    Made by
-                    <a class="text-primary-600 hover:underline" href="https://twitter.com/ZachSents" target="_blank">Zach Sents</a>
-                    🚀
-                </p>
-
-                <a href="https://app.workflow.dog/feedback" target="_blank" class="hover:underline">
-                    Leave Feedback 📝
-                </a>
-            </div>
-            <div class="flex-center gap-4 text-xs text-gray-500">
-                <a href="/terms" class="hover:underline">Terms of Service</a>
-                <a href="/privacy" class="hover:underline">Privacy Policy</a>
-                <p>&copy; 2024 WorkflowDog</p>
-            </div>
-        </div>
-    </div>
-</footer>
+    <include src="_components/footer.html"></include>
 </body>
 
 <script>

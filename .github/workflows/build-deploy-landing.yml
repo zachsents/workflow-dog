@@ -16,8 +16,9 @@ jobs:
       - name: Build stylesheet
         working-directory: ./landing
         run: |
-          npm i
-          npm run build
+          npm i -g pnpm
+          pnpm install
+          pnpm run build
 
       - name: Google Auth
         uses: "google-github-actions/auth@v2"

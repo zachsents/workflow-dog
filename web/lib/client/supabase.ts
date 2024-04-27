@@ -17,6 +17,9 @@ export function useSupabaseBrowser() {
 }
 
 
+/**
+ * Only used once in the component below.
+ */
 export function useSupabaseSetup() {
     const queryClient = useQueryClient()
     const supabase = useSupabaseBrowser()

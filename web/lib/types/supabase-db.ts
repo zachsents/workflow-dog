@@ -96,6 +96,24 @@ export type Database = {
           },
         ]
       }
+      kv: {
+        Row: {
+          created_at: string
+          key: string
+          value: Json | null
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          value?: Json | null
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          value?: Json | null
+        }
+        Relationships: []
+      }
       team_invitations: {
         Row: {
           created_at: string

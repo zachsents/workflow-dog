@@ -2,6 +2,7 @@ import type { z } from "zod"
 import type { customLeadFieldSchema, leadSchema } from "./schemas"
 import axios, { type AxiosInstance } from "axios"
 import _ from "lodash"
+import { createHash } from "crypto"
 
 
 export function getClient(key: string) {
@@ -69,4 +70,36 @@ export async function getCustomLeadField(client: AxiosInstance, fieldId: string)
 
     return client.get(`/custom_field/lead/${fieldId}/`)
         .then(res => res.data as z.infer<typeof customLeadFieldSchema>)
+}
+
+
+export async function querySmartView(client: AxiosInstance, smartViewId: string) {
+    const smartView = await client.get(`/saved_search/${smartViewId}/`, {
+        params: { type: "lead" }
+    }).then(res => res.data)
+
+    let cursor = ""
+    let data: string[] = []
+    do {
+        const res = await client.post("/data/search/", {
+            ...smartView.s_query,
+            ...cursor && { cursor },
+        })
+        cursor = res.data.cursor || ""
+        data = [...data, ...res.data.data.map((lead: any) => lead.id)]
+    } while (!!cursor)
+
+    return data
+}
+
+export function produceHash(items: string[], includeDate = false) {
+    const hash = createHash("sha256")
+        .update(items.sort().join(","))
+        .digest("hex")
+
+    if (!includeDate)
+        return hash
+
+    const dateStr = new Date().toISOString().replaceAll(/[:.ZT\-]/g, "")
+    return `${dateStr}-${hash}`
 }

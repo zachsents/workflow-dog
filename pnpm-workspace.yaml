@@ -4,3 +4,4 @@ packages:
   - 'workflow-man'
   - 'shared'
   - 'landing'
+  - 'docs'

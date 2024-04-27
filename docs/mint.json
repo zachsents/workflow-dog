@@ -1,0 +1,96 @@
+{
+    "$schema": "https://mintlify.com/schema.json",
+    "name": "WorkflowDog",
+    "logo": {
+        "dark": "/logo/logo.svg",
+        "light": "/logo/logo.svg"
+    },
+    "favicon": "/favicon.svg",
+    "colors": {
+        "primary": "#7c3aed",
+        "light": "#ede9fe",
+        "dark": "#7e22ce"
+    },
+    "topbarLinks": [
+        {
+            "name": "Support",
+            "url": "mailto:info@workflow.dog"
+        }
+    ],
+    "topbarCtaButton": {
+        "name": "Dashboard",
+        "url": "https://app.workflow.dog"
+    },
+    "tabs": [
+        {
+            "name": "Triggers",
+            "url": "triggers"
+        },
+        {
+            "name": "Actions",
+            "url": "actions"
+        },
+        {
+            "name": "Integrations",
+            "url": "integrations"
+        }
+    ],
+    "primaryTab": {
+        "name": "Learn"
+    },
+    "anchors": [
+        {
+            "name": "Learn",
+            "icon": "book-open-cover",
+            "url": "/"
+        },
+        {
+            "name": "Examples",
+            "icon": "diagram-project",
+            "url": "/examples"
+        },
+        {
+            "name": "FAQ",
+            "icon": "question",
+            "url": "#coming-soon"
+        },
+        {
+            "name": "Community",
+            "icon": "discord",
+            "url": "#coming-soon"
+        }
+    ],
+    "navigation": [
+        {
+            "group": "Get Started",
+            "pages": [
+                "introduction",
+                "quickstart"
+            ]
+        },
+        {
+            "group": "Essential Concepts",
+            "pages": [
+                "essentials/workflows",
+                "essentials/actions",
+                "essentials/triggers",
+                "essentials/runs",
+                "essentials/integrations",
+                "essentials/control-flow"
+            ]
+        },
+        {
+            "group": "Guides",
+            "pages": [
+                "guides/testing-debugging",
+                "guides/looping",
+                "guides/conditional-logic",
+                "guides/batch-processing",
+                "guides/integrating-with-unsupported-services"
+            ]
+        }
+    ],
+    "footerSocials": {
+        "x": "https://x.com/WorkflowDog"
+    }
+}

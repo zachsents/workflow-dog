@@ -1,0 +1,16 @@
+{
+    "name": "docs",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "mintlify dev"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "mintlify": "^4.0.150",
+        "sharp": "^0.33.3"
+    }
+}

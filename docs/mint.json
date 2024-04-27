@@ -15,6 +15,10 @@
             "dark": "#0f172a"
         }
     },
+    "modeToggle": {
+        "default": "light",
+        "isHidden": true
+    },
     "topbarLinks": [
         {
             "name": "Support",

@@ -2,14 +2,18 @@
     "$schema": "https://mintlify.com/schema.json",
     "name": "WorkflowDog",
     "logo": {
-        "dark": "/logo/logo.svg",
-        "light": "/logo/logo.svg"
+        "dark": "/logo/learn-wfd-logo-dark.svg",
+        "light": "/logo/learn-wfd-logo-light.svg"
     },
     "favicon": "/favicon.svg",
     "colors": {
         "primary": "#7c3aed",
         "light": "#ede9fe",
-        "dark": "#7e22ce"
+        "dark": "#7e22ce",
+        "background": {
+            "light": "#f8fafc",
+            "dark": "#0f172a"
+        }
     },
     "topbarLinks": [
         {
@@ -23,12 +27,12 @@
     },
     "tabs": [
         {
-            "name": "Triggers",
-            "url": "triggers"
-        },
-        {
             "name": "Actions",
             "url": "actions"
+        },
+        {
+            "name": "Triggers",
+            "url": "triggers"
         },
         {
             "name": "Integrations",

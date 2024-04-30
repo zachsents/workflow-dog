@@ -10,49 +10,67 @@
     <section class="section-sm pt-[12vh] pb-24 flex-v items-stretch gap-8">
         <h1
             class="text-5xl sm:text-7xl font-bold text-left">
-            <span id="h1-before">Build</span>
+            <span id="h1-before">Launch</span>
             <span
                   id="h1-gradient"
                   class="block bg-gradient-to-r from-violet-600 via-pink-600 to-yellow-500 bg-clip-text text-transparent">
                 powerful automations
             </span>
-            <span id="h1-after">visually</span>
+            <span id="h1-after">without coding</span>
         </h1>
 
         <ul class="flex flex-col flex-wrap md:flex-row md:items-center gap-x-8 gap-y-2 text-xl sm:text-2xl">
             <li class="flex items-center gap-4">
-                <img src="icons/circle-dashed-check.svg" class="w-[1em] shrink-0" />
+                <img src="/icons/circle-dashed-check.svg" class="w-[1em] shrink-0" />
                 <p>No-code</p>
             </li>
             <li class="flex center gap-4">
-                <img src="icons/circle-dashed-check.svg" class="w-[1em] shrink-0" />
-                <p>Integrate AI</p>
+                <img src="/icons/circle-dashed-check.svg" class="w-[1em] shrink-0" />
+                <p>AI Integrations</p>
             </li>
             <li class="flex center gap-4">
-                <img src="icons/circle-dashed-check.svg" class="w-[1em] shrink-0" />
-                <!-- <p>Connect to Gmail, Sheets & more</p> -->
+                <img src="/icons/circle-dashed-check.svg" class="w-[1em] shrink-0" />
                 <p>Connect to Gmail & more</p>
             </li>
         </ul>
 
         <p id="hero-subtitle" class="text-lg max-w-xl text-balance">
-            Build automated workflows that integrate with AI, power APIs, or run entire businesses &mdash; and have a
-            little
-            fun while you're at it.
+            It's now fast, fun, and easy to build powerful automated systems. Push past the annoying limits of
+            traditional
+            automation tools.
         </p>
 
         <a href="https://app.workflow.dog">
             <button
                     class="bg-primary-700 hover:bg-primary-800 text-white fun-button text-xl sm:text-2xl text-left flex-center gap-4 group">
                 <span>Start building for free</span>
-                <img src="icons/run.svg"
+                <img src="/icons/run.svg"
                      class="invert group-hover:translate-x-3 group-hover:opacity-25 transition" />
             </button>
         </a>
     </section>
 
     <section class="section-md pb-16 sm:pb-24">
-        <img src="banner.webp" class="rounded-xl shadow-xl" />
+        <figure class="flex-center flex-col gap-4">
+            <div
+                 class="flex-center flex-col gap-4 p-4 rounded-3xl shadow-xl bg-cover"
+                 style="background-image: url('/images/curve-bg.svg');">
+                <div class="rounded-xl overflow-clip relative group">
+                    <video autoplay loop muted controls controlslist="nodownload"
+                           class="-mt-[20px] sm:-mt-[29px] -mb-[3px] min-h-[400px] object-cover">
+                        <source src="/images/demo.mp4" type="video/mp4" />
+                    </video>
+                    <figcaption
+                                class="hidden sm:block absolute bottom-14 left-1/2 -translate-x-1/2 text-center px-4 py-1 bg-neutral-900/75 rounded-md text-sm text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                        This workflow detects interested leads in your Gmail inbox and sends you a notification.
+                    </figcaption>
+                </div>
+            </div>
+
+            <p class="sm:hidden text-center px-4 py-1 bg-neutral-900/75 rounded-md text-sm text-white">
+                This workflow detects interested leads in your Gmail inbox and sends you a notification.
+            </p>
+        </figure>
     </section>
 
     <section id="examples" class="section-md pb-24 flex-v items-stretch gap-10">
@@ -63,18 +81,31 @@
         <ul class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" x-data="examples">
             <template x-for="eg in examples">
                 <li class="rounded-xl overflow-clip bg-white shadow-md relative group">
-                    <a :href="eg.href || 'javascript:;'" :target="eg.href ? '_blank' : '_self'">
-                        <img :src="eg.thumbnail" class="bg-slate-200 w-full h-auto aspect-video object-cover"
-                             x-show="eg.thumbnail" />
-                        <div class="bg-slate-200 aspect-video" x-show="!eg.thumbnail"></div>
+                    <a :href="eg.href || 'javascript:;'" :target="eg.href ? '_blank' : '_self'"
+                       :class="!eg.href && 'cursor-default'">
+                        <div class="bg-slate-200 aspect-video relative">
+                            <img :src="eg.thumbnail"
+                                 class="w-full h-auto object-cover group-hover:saturate-150 transition"
+                                 x-show="eg.thumbnail" />
+
+                            <div
+                                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex-center bg-slate-200 p-4 shadow-lg border-solid border-2 border-slate-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                 x-show="eg.href">
+                                <img src="/icons/player-play.svg"
+                                     class="h-8 opacity-50" />
+                            </div>
+                        </div>
 
                         <div class="text-center px-4 py-2">
                             <p class="font-bold h-[3em]" x-text="eg.title"></p>
                             <p class="text-gray-500 text-sm" x-text="eg.subtitle"></p>
                         </div>
-                        <img src="icons/external-link.svg"
+
+                        <img src="/icons/external-link.svg"
                              class="h-6 absolute top-4 right-4 opacity-0 group-hover:opacity-50 transition-opacity"
                              x-show="eg.href" />
+
+
                     </a>
                 </li>
             </template>
@@ -107,7 +138,7 @@
                 <ul class="text-md flex-v gap-2 mt-6">
                     <template x-for="feat in free">
                         <li class="flex items-center gap-2">
-                            <img src="icons/circle-dashed-check.svg" />
+                            <img src="/icons/circle-dashed-check.svg" />
                             <span x-text="feat"></span>
                         </li>
                     </template>
@@ -127,7 +158,7 @@
                 <p class="text-center font-bold">$47 / month</p>
 
                 <p class="text-balance text-center">
-                    See what it feels like to run your tasks in the background.
+                    You're a professional. Build like one.
                 </p>
 
                 <a href="https://app.workflow.dog">
@@ -139,7 +170,7 @@
                 <ul class="text-md flex-v gap-2 mt-6">
                     <template x-for="feat in pro">
                         <li class="flex items-center gap-2">
-                            <img src="icons/circle-dashed-check.svg" />
+                            <img src="/icons/circle-dashed-check.svg" />
                             <span x-text="feat"></span>
                         </li>
                     </template>
@@ -147,16 +178,17 @@
             </div>
         </div>
 
-        <div class="flex flex-col items-center gap-4 sm:flex-row sm:flex-between sm:gap-20 self-center mt-10">
+        <div class="max-w-3xl flex flex-col items-center gap-4 sm:flex-row sm:flex-between sm:gap-20 self-center mt-10">
             <div class="text-center sm:text-left">
-                <p class="text-2xl font-bold">Need more runs?</p>
+                <p class="text-2xl font-bold">Need more?</p>
                 <p>
-                    Reach out for a custom plan. We're happy to help.
+                    Reach out for a custom plan. We're happy to provide more runs, more team members, and even
+                    automation assistance.
                 </p>
             </div>
 
-            <a href="mailto:info@workflow.dog?subject=Request for a custom plan">
-                <button class="fun-button bg-white outline outline-2 outline-slate-200 hover:bg-slate-200">
+            <a href="mailto:info@workflow.dog?subject=Request for a custom plan" class="shrink-0">
+                <button class="fun-button bg-white outline outline-2 outline-slate-200 hover:bg-slate-200 text-nowrap">
                     Send us an email
                 </button>
             </a>
@@ -166,13 +198,13 @@
     <section
              class="section-sm mb-24">
         <div
-             class="rounded-xl flex flex-col items-center gap-6 sm:flex-row sm:flex-between sm:gap-4 bg-gradient-to-br from-violet-800 via-pink-800 to-yellow-500 p-10">
+             class="rounded-xl flex flex-col items-center gap-6 sm:flex-row sm:flex-between bg-gradient-to-br from-violet-700 via-pink-700 to-yellow-400 p-10">
             <p class="text-3xl sm:text-4xl font-bold text-white text-center sm:text-left">
-                It's time to start building.
+                You're ready to create.
             </p>
-            <a href="https://app.workflow.dog">
-                <button class="fun-button bg-white text-xl">
-                    Start Now
+            <a href="https://app.workflow.dog" class="shrink-0">
+                <button class="fun-button bg-white text-xl text-nowrap">
+                    Start Building
                 </button>
             </a>
         </div>
@@ -199,7 +231,7 @@
                     title: "AI chatbot inside Gmail",
                     subtitle: "5 min",
                     href: "https://www.youtube.com/watch?v=7Qb0Z56-bDY",
-                    thumbnail: "/thumbnails/ai-chatbot-inside-email-thumb.webp"
+                    thumbnail: "/images/thumbnails/ai-chatbot-inside-email-thumb.webp"
                 },
                 {
                     title: "Periodically follow up with leads",

@@ -25,11 +25,11 @@
     }
 
     .section-md {
-        @apply max-w-6xl w-full mx-auto px-10;
+        @apply max-w-6xl w-full mx-auto px-6 sm:px-10;
     }
 
     .section-sm {
-        @apply max-w-4xl w-full mx-auto px-10;
+        @apply max-w-4xl w-full mx-auto px-6 sm:px-10;
     }
 }
 

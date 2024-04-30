@@ -1,3 +1,11 @@
+import { useLocalStorageValue } from "@react-hookz/web"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@ui/select"
 import {
     Table,
     TableBody,
@@ -6,17 +14,7 @@ import {
     TableHeader,
     TableRow
 } from "@ui/table"
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from "@ui/select"
 import { cn } from "@web/lib/utils"
-import { useLocalStorageValue } from "@react-hookz/web"
 import stringifyObject from "stringify-object"
 
 export default function ObjectViewer({ children, depth = 0 }: { children: Record<string, any>, depth?: number }) {

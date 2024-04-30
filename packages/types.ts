@@ -280,8 +280,9 @@ export type SharedDataTypeDefinition<Z extends ZodSchema = ZodSchema> = {
 export type ClientDataTypeDefinition<T extends SharedDataTypeDefinition> = {
     icon: IconType | ComponentType
     manualInputComponent?: ComponentType<DataTypeManualInputProps<T["schema"]>>
-    renderPreview: ComponentType<{ value: z.infer<T["schema"]> }>
+    renderPreview?: ComponentType<{ value: z.infer<T["schema"]> }>
     renderExpanded?: ComponentType<{ value: z.infer<T["schema"]> }>
+    useNativeExpanded?: boolean
 }
 
 export interface DataTypeManualInputProps<T extends ZodSchema> {

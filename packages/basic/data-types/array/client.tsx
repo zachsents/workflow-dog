@@ -2,7 +2,6 @@ import { createClientDataTypeDefinition } from "@pkg/types"
 import { Textarea } from "@web/components/ui/textarea"
 import { cn } from "@web/lib/utils"
 import { TbBracketsContain } from "react-icons/tb"
-import stringifyObject from "stringify-object"
 import shared from "./shared"
 
 export default createClientDataTypeDefinition(shared, {
@@ -19,22 +18,6 @@ export default createClientDataTypeDefinition(shared, {
                 placeholder="Enter JSON data here..."
                 value={value || ""}
             />
-        )
-    },
-    renderPreview: ({ value }) => {
-        return (
-            <p>
-                List - {value.length} items
-            </p>
-        )
-    },
-    renderExpanded: ({ value }) => {
-        return (
-            <pre>
-                {stringifyObject(value, {
-                    indent: "  ",
-                })}
-            </pre>
         )
     },
 })

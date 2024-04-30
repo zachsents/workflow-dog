@@ -1,8 +1,8 @@
 import { createClientDataTypeDefinition } from "@pkg/types"
-import { TbAbc } from "react-icons/tb"
-import shared from "./shared"
 import { Textarea } from "@web/components/ui/textarea"
 import { cn } from "@web/lib/utils"
+import { TbAbc } from "react-icons/tb"
+import shared from "./shared"
 
 export default createClientDataTypeDefinition(shared, {
     icon: TbAbc,
@@ -14,13 +14,6 @@ export default createClientDataTypeDefinition(shared, {
                 className={cn("resize-none", props.className)}
                 value={props.value || ""}
             />
-        )
-    },
-    renderPreview: ({ value }) => {
-        return (
-            <p className="whitespace-pre-wrap">
-                {value || <span className="text-muted-foreground">&lt;no text&gt;</span>}
-            </p>
         )
     },
 })

@@ -26,6 +26,8 @@ import React, { forwardRef, useMemo, useRef, useState } from "react"
 import { TbPencil, TbSparkles, TbX } from "react-icons/tb"
 import { EdgeLabelRenderer, HandleType, Position, Handle as RFHandle, useNodeId, useReactFlow, useStore } from "reactflow"
 import PropertySelector from "./property-selector"
+import stringifyObject from "stringify-object"
+import { OmniPreview, OmniViewer } from "@web/components/omni-viewer"
 
 
 type Recommendation = {
@@ -445,8 +447,9 @@ function ValueDisplay({ runValue, dataTypeId }: { runValue: any, dataTypeId: str
                         )}
                         onClick={dialog.open}
                     >
-                        {dataType?.renderPreview &&
-                            <dataType.renderPreview value={runValue} />}
+                        {dataType?.renderPreview
+                            ? <dataType.renderPreview value={runValue} />
+                            : <OmniPreview>{runValue}</OmniPreview>}
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
@@ -461,11 +464,9 @@ function ValueDisplay({ runValue, dataTypeId }: { runValue: any, dataTypeId: str
 
                     {dataType?.renderExpanded
                         ? <dataType.renderExpanded value={runValue} />
-                        : dataType?.renderPreview
+                        : (dataType?.renderPreview && !dataType?.useNativeExpanded)
                             ? <dataType.renderPreview value={runValue} />
-                            : <p>
-                                {runValue}
-                            </p>}
+                            : <OmniViewer>{runValue}</OmniViewer>}
                 </DialogContent>
             </Dialog>
         </>

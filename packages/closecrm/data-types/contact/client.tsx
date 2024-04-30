@@ -1,17 +1,12 @@
 import { createClientDataTypeDefinition } from "@pkg/types"
 import { Textarea } from "@web/components/ui/textarea"
 import { cn } from "@web/lib/utils"
-import { TbTriangleSquareCircle } from "react-icons/tb"
+import { TbUser } from "react-icons/tb"
 import shared from "./shared"
 
-
 export default createClientDataTypeDefinition(shared, {
-    icon: TbTriangleSquareCircle,
+    icon: TbUser,
     manualInputComponent: ({ value, ...props }: any) => {
-        // TODO: add intermediate value for converting between object
-        // and string representations. maybe do the conversion on blur
-        // or just make it one-way
-
         return (
             <Textarea
                 {...props}
@@ -21,4 +16,12 @@ export default createClientDataTypeDefinition(shared, {
             />
         )
     },
+    renderPreview: ({ value }) => (
+        <p>
+            <span className="text-muted-foreground">[Contact]</span>
+            {" "}{value.name}
+        </p>
+    ),
+    useNativeExpanded: true,
 })
+

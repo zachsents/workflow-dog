@@ -7,7 +7,8 @@ Critical & Core:
     ✔ Rearrange editor header @done (4/18/2024, 11:35:14 PM)
     ☐ Permanent CTA once limit has been hit
     ✘ Add vercel speed insights tag @cancelled (4/19/2024, 10:48:42 AM)
-    ☐ Set up vercel supabase integration
+    ✘ Set up vercel supabase integration @cancelled (4/30/2024, 2:47:17 AM)
+    ☐ Make usage records persist even when workflows have been deleted
 
 Packages:
     ☐ Gmail

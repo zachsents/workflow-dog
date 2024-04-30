@@ -29,6 +29,7 @@ import basic_nodes_trigger_input_client from "../../basic/nodes/trigger-input/cl
 import basic_nodes_trigger_webhook_client from "../../basic/nodes/trigger-webhook/client"
 import basic_nodes_xor_client from "../../basic/nodes/xor/client"
 import closecrm_nodes_get_contact_by_id_client from "../../closecrm/nodes/get-contact-by-id/client"
+import closecrm_nodes_get_contacts_for_lead_client from "../../closecrm/nodes/get-contacts-for-lead/client"
 import closecrm_nodes_get_lead_by_id_client from "../../closecrm/nodes/get-lead-by-id/client"
 import closecrm_nodes_list_contacts_client from "../../closecrm/nodes/list-contacts/client"
 import closecrm_nodes_list_emails_with_lead_client from "../../closecrm/nodes/list-emails-with-lead/client"
@@ -124,6 +125,7 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/trigger-webhook": _.merge({ id: "https://nodes.workflow.dog/basic/trigger-webhook" }, basic_nodes_trigger_webhook_client),
     "https://nodes.workflow.dog/basic/xor": _.merge({ id: "https://nodes.workflow.dog/basic/xor" }, basic_nodes_xor_client),
     "https://nodes.workflow.dog/closecrm/get-contact-by-id": _.merge({ id: "https://nodes.workflow.dog/closecrm/get-contact-by-id" }, closecrm_nodes_get_contact_by_id_client),
+    "https://nodes.workflow.dog/closecrm/get-contacts-for-lead": _.merge({ id: "https://nodes.workflow.dog/closecrm/get-contacts-for-lead" }, closecrm_nodes_get_contacts_for_lead_client),
     "https://nodes.workflow.dog/closecrm/get-lead-by-id": _.merge({ id: "https://nodes.workflow.dog/closecrm/get-lead-by-id" }, closecrm_nodes_get_lead_by_id_client),
     "https://nodes.workflow.dog/closecrm/list-contacts": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-contacts" }, closecrm_nodes_list_contacts_client),
     "https://nodes.workflow.dog/closecrm/list-emails-with-lead": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-emails-with-lead" }, closecrm_nodes_list_emails_with_lead_client),

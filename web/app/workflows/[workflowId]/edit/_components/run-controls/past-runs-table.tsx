@@ -110,7 +110,7 @@ const createColumns = (onClose: () => void): ColumnDef<Partial<WorkflowRun>>[] =
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>Re-run with same inputs</p>
+                            <p>Run current workflow with this trigger data</p>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>

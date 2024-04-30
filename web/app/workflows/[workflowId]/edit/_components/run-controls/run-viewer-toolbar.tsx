@@ -77,7 +77,7 @@ export default function RunViewerToolbar() {
                                 {runMutation.isPending
                                     ? <Loader mr />
                                     : <TbRotateClockwise2 className="mr-2" />}
-                                Re-run
+                                Run current workflow with this trigger data
                             </Button>
                             <Button
                                 size="sm" variant="secondary"

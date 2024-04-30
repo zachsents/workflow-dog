@@ -13,7 +13,7 @@ export default createExecutionNodeDefinition(shared, {
         )
 
         return {
-            properties: Object.fromEntries(keys.map(key => [key, _.get(object, key)]))
+            properties: Object.fromEntries(keys.map(key => [key, _.get(object, key) ?? null]))
         }
     },
 })

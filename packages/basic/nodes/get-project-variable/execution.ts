@@ -16,7 +16,7 @@ export default createExecutionNodeDefinition(shared, {
             .eq("project_id", projectId)
             .eq("key", node.data.state?.key)
             .throwOnError()
-            .then(q => q.data?.[0].value ?? null)
+            .then(q => q.data?.[0]?.value ?? null)
 
         if (value === undefined)
             throw new Error(`Project variable "${node.data.state?.key}" not found`)

@@ -79,6 +79,7 @@ export type WorkflowRunState = {
 
 export type WorkflowRun = {
     id: string
+    workflow_id: string
     created_at: string
     state: WorkflowRunState
     status: WorkflowRunStatus

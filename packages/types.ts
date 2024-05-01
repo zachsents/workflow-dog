@@ -67,6 +67,8 @@ export interface ExecutionNodeDefinition<T extends SharedNodeDefinition> {
         triggerData: Record<string, any>
         runState: WorkflowRunState
         token?: { access_token?: string, key?: string }
+        projectId: string
+        workflowId: string
     }) => {
         [K in keyof T["outputs"]]: InterfaceValue<T, "outputs", K>
     } | Promise<{

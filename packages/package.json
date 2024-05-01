@@ -6,6 +6,7 @@
         "build": "node _build/build.js"
     },
     "dependencies": {
+        "@supabase/supabase-js": "^2.43.0",
         "googleapis": "^134.0.0",
         "lodash": "^4.17.21",
         "mimetext": "^3.0.24",
@@ -14,12 +15,12 @@
         "zod": "^3.22.4"
     },
     "devDependencies": {
+        "@monaco-editor/react": "*",
+        "@tabler/icons-react": "*",
         "@types/lodash": "^4.17.0",
         "@types/react": "*",
-        "react": "*",
-        "@monaco-editor/react": "*",
         "monaco-editor": "*",
-        "@tabler/icons-react": "*",
+        "react": "*",
         "react-icons": "*"
     },
     "peerDependencies": {

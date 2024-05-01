@@ -1,9 +1,7 @@
-import { type SupabaseClient, createClient } from "@supabase/supabase-js"
-import { getSecret } from "./secrets"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 
 
-const serviceKey = await getSecret("SUPABASE_SERVICE_KEY")
-export const client: SupabaseClient<any, "public", any> = createClient(process.env.SUPABASE_URL as string, serviceKey)
+export const client: SupabaseClient<any, "public", any> = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!)
 
 
 export async function updateRun(runId: string, data: any) {
@@ -42,7 +40,7 @@ export async function fetchIntegrationToken(accountId: string) {
 
     const response = await fetch(`${process.env.API_SERVER_URL}/accounts/${accountId}/token`, {
         headers: {
-            Authorization: `Bearer ${serviceKey}`
+            Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY!}`
         }
     }).then(res => {
         if (!res.ok)

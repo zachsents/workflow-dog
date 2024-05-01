@@ -35,7 +35,7 @@ export default createClientNodeDefinition(shared, {
                     setValue(ev.currentTarget.value)
                     setTextLength(ev.currentTarget.value.length)
                 }}
-                className="nodrag nopan min-w-[13ch] max-w-[28ch] resize-none shadow-none"
+                className="nodrag nopan nowheel min-w-[13ch] max-w-[28ch] resize-none shadow-none"
                 style={{
                     width: `calc(${Math.min(28, Math.max(12, textLength))}ch + 1rem)`,
                     height: `calc(${Math.min(12, Math.max(0, Math.ceil(textLength / 28)))}em + 2em)`,
@@ -46,8 +46,6 @@ export default createClientNodeDefinition(shared, {
 
                 onCopy={ev => void ev.stopPropagation()}
                 onPaste={ev => void ev.stopPropagation()}
-                onWheel={ev => void ev.stopPropagation()}
-                onScroll={ev => void ev.stopPropagation()}
             />
         )
     },

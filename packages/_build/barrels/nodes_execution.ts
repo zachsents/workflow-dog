@@ -12,6 +12,7 @@ import basic_nodes_datetime_execution from "../../basic/nodes/datetime/execution
 import basic_nodes_decompose_object_execution from "../../basic/nodes/decompose-object/execution"
 import basic_nodes_equal_execution from "../../basic/nodes/equal/execution"
 import basic_nodes_get_element_execution from "../../basic/nodes/get-element/execution"
+import basic_nodes_get_project_variable_execution from "../../basic/nodes/get-project-variable/execution"
 import basic_nodes_json_parse_execution from "../../basic/nodes/json-parse/execution"
 import basic_nodes_json_stringify_execution from "../../basic/nodes/json-stringify/execution"
 import basic_nodes_list_append_execution from "../../basic/nodes/list-append/execution"
@@ -23,6 +24,7 @@ import basic_nodes_not_equal_execution from "../../basic/nodes/not-equal/executi
 import basic_nodes_number_execution from "../../basic/nodes/number/execution"
 import basic_nodes_or_execution from "../../basic/nodes/or/execution"
 import basic_nodes_run_workflow_execution from "../../basic/nodes/run-workflow/execution"
+import basic_nodes_set_project_variable_execution from "../../basic/nodes/set-project-variable/execution"
 import basic_nodes_switch_execution from "../../basic/nodes/switch/execution"
 import basic_nodes_text_execution from "../../basic/nodes/text/execution"
 import basic_nodes_trigger_input_execution from "../../basic/nodes/trigger-input/execution"
@@ -108,6 +110,7 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/decompose-object": _.merge({ id: "https://nodes.workflow.dog/basic/decompose-object" }, basic_nodes_decompose_object_execution),
     "https://nodes.workflow.dog/basic/equal": _.merge({ id: "https://nodes.workflow.dog/basic/equal" }, basic_nodes_equal_execution),
     "https://nodes.workflow.dog/basic/get-element": _.merge({ id: "https://nodes.workflow.dog/basic/get-element" }, basic_nodes_get_element_execution),
+    "https://nodes.workflow.dog/basic/get-project-variable": _.merge({ id: "https://nodes.workflow.dog/basic/get-project-variable" }, basic_nodes_get_project_variable_execution),
     "https://nodes.workflow.dog/basic/json-parse": _.merge({ id: "https://nodes.workflow.dog/basic/json-parse" }, basic_nodes_json_parse_execution),
     "https://nodes.workflow.dog/basic/json-stringify": _.merge({ id: "https://nodes.workflow.dog/basic/json-stringify" }, basic_nodes_json_stringify_execution),
     "https://nodes.workflow.dog/basic/list-append": _.merge({ id: "https://nodes.workflow.dog/basic/list-append" }, basic_nodes_list_append_execution),
@@ -119,6 +122,7 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/number": _.merge({ id: "https://nodes.workflow.dog/basic/number" }, basic_nodes_number_execution),
     "https://nodes.workflow.dog/basic/or": _.merge({ id: "https://nodes.workflow.dog/basic/or" }, basic_nodes_or_execution),
     "https://nodes.workflow.dog/basic/run-workflow": _.merge({ id: "https://nodes.workflow.dog/basic/run-workflow" }, basic_nodes_run_workflow_execution),
+    "https://nodes.workflow.dog/basic/set-project-variable": _.merge({ id: "https://nodes.workflow.dog/basic/set-project-variable" }, basic_nodes_set_project_variable_execution),
     "https://nodes.workflow.dog/basic/switch": _.merge({ id: "https://nodes.workflow.dog/basic/switch" }, basic_nodes_switch_execution),
     "https://nodes.workflow.dog/basic/text": _.merge({ id: "https://nodes.workflow.dog/basic/text" }, basic_nodes_text_execution),
     "https://nodes.workflow.dog/basic/trigger-input": _.merge({ id: "https://nodes.workflow.dog/basic/trigger-input" }, basic_nodes_trigger_input_execution),

@@ -45,6 +45,8 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
                 token: node.data.serviceAccount
                     ? await fetchIntegrationToken(node.data.serviceAccount)
                     : {},
+                projectId: workflow.team_id,
+                workflowId: run.workflow_id,
             })
         }
 

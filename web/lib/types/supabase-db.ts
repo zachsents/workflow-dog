@@ -114,6 +114,38 @@ export type Database = {
         }
         Relationships: []
       }
+      project_variables: {
+        Row: {
+          created_at: string
+          id: string
+          key: string | null
+          project_id: string | null
+          value: Json | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key?: string | null
+          project_id?: string | null
+          value?: Json | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string | null
+          project_id?: string | null
+          value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_variables_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_invitations: {
         Row: {
           created_at: string

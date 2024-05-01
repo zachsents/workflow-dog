@@ -23,7 +23,7 @@ app.post("/workflow-runs/:runId/execute", async (req, res) => {
 
     const { data: { workflows: workflow, ...run } } = await client
         .from("workflow_runs")
-        .select("*, workflows (id, graph, is_enabled)")
+        .select("*, workflows (id, graph, is_enabled, team_id)")
         .eq("id", req.params.runId)
         .single()
         .throwOnError()

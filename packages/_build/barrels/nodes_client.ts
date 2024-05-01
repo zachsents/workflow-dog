@@ -12,6 +12,7 @@ import basic_nodes_datetime_client from "../../basic/nodes/datetime/client"
 import basic_nodes_decompose_object_client from "../../basic/nodes/decompose-object/client"
 import basic_nodes_equal_client from "../../basic/nodes/equal/client"
 import basic_nodes_get_element_client from "../../basic/nodes/get-element/client"
+import basic_nodes_get_project_variable_client from "../../basic/nodes/get-project-variable/client"
 import basic_nodes_json_parse_client from "../../basic/nodes/json-parse/client"
 import basic_nodes_json_stringify_client from "../../basic/nodes/json-stringify/client"
 import basic_nodes_list_append_client from "../../basic/nodes/list-append/client"
@@ -23,6 +24,7 @@ import basic_nodes_not_equal_client from "../../basic/nodes/not-equal/client"
 import basic_nodes_number_client from "../../basic/nodes/number/client"
 import basic_nodes_or_client from "../../basic/nodes/or/client"
 import basic_nodes_run_workflow_client from "../../basic/nodes/run-workflow/client"
+import basic_nodes_set_project_variable_client from "../../basic/nodes/set-project-variable/client"
 import basic_nodes_switch_client from "../../basic/nodes/switch/client"
 import basic_nodes_text_client from "../../basic/nodes/text/client"
 import basic_nodes_trigger_input_client from "../../basic/nodes/trigger-input/client"
@@ -34,17 +36,6 @@ import closecrm_nodes_get_lead_by_id_client from "../../closecrm/nodes/get-lead-
 import closecrm_nodes_list_contacts_client from "../../closecrm/nodes/list-contacts/client"
 import closecrm_nodes_list_emails_with_lead_client from "../../closecrm/nodes/list-emails-with-lead/client"
 import closecrm_nodes_list_leads_client from "../../closecrm/nodes/list-leads/client"
-import google_nodes_gmail_add_labels_client from "../../google/nodes/gmail-add-labels/client"
-import google_nodes_gmail_create_draft_client from "../../google/nodes/gmail-create-draft/client"
-import google_nodes_gmail_create_draft_reply_client from "../../google/nodes/gmail-create-draft-reply/client"
-import google_nodes_gmail_get_attachment_client from "../../google/nodes/gmail-get-attachment/client"
-import google_nodes_gmail_get_message_client from "../../google/nodes/gmail-get-message/client"
-import google_nodes_gmail_mark_as_read_client from "../../google/nodes/gmail-mark-as-read/client"
-import google_nodes_gmail_mark_as_unread_client from "../../google/nodes/gmail-mark-as-unread/client"
-import google_nodes_gmail_remove_labels_client from "../../google/nodes/gmail-remove-labels/client"
-import google_nodes_gmail_reply_to_email_client from "../../google/nodes/gmail-reply-to-email/client"
-import google_nodes_gmail_send_email_client from "../../google/nodes/gmail-send-email/client"
-import google_nodes_gmail_trash_message_client from "../../google/nodes/gmail-trash-message/client"
 import math_nodes_absolute_client from "../../math/nodes/absolute/client"
 import math_nodes_add_client from "../../math/nodes/add/client"
 import math_nodes_ceiling_client from "../../math/nodes/ceiling/client"
@@ -67,6 +58,17 @@ import math_nodes_square_root_client from "../../math/nodes/square-root/client"
 import math_nodes_subtract_client from "../../math/nodes/subtract/client"
 import math_nodes_sum_client from "../../math/nodes/sum/client"
 import math_nodes_tan_client from "../../math/nodes/tan/client"
+import google_nodes_gmail_add_labels_client from "../../google/nodes/gmail-add-labels/client"
+import google_nodes_gmail_create_draft_client from "../../google/nodes/gmail-create-draft/client"
+import google_nodes_gmail_create_draft_reply_client from "../../google/nodes/gmail-create-draft-reply/client"
+import google_nodes_gmail_get_attachment_client from "../../google/nodes/gmail-get-attachment/client"
+import google_nodes_gmail_get_message_client from "../../google/nodes/gmail-get-message/client"
+import google_nodes_gmail_mark_as_read_client from "../../google/nodes/gmail-mark-as-read/client"
+import google_nodes_gmail_mark_as_unread_client from "../../google/nodes/gmail-mark-as-unread/client"
+import google_nodes_gmail_remove_labels_client from "../../google/nodes/gmail-remove-labels/client"
+import google_nodes_gmail_reply_to_email_client from "../../google/nodes/gmail-reply-to-email/client"
+import google_nodes_gmail_send_email_client from "../../google/nodes/gmail-send-email/client"
+import google_nodes_gmail_trash_message_client from "../../google/nodes/gmail-trash-message/client"
 import openai_nodes_classify_client from "../../openai/nodes/classify/client"
 import openai_nodes_generate_image_client from "../../openai/nodes/generate-image/client"
 import openai_nodes_moderate_client from "../../openai/nodes/moderate/client"
@@ -108,6 +110,7 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/decompose-object": _.merge({ id: "https://nodes.workflow.dog/basic/decompose-object" }, basic_nodes_decompose_object_client),
     "https://nodes.workflow.dog/basic/equal": _.merge({ id: "https://nodes.workflow.dog/basic/equal" }, basic_nodes_equal_client),
     "https://nodes.workflow.dog/basic/get-element": _.merge({ id: "https://nodes.workflow.dog/basic/get-element" }, basic_nodes_get_element_client),
+    "https://nodes.workflow.dog/basic/get-project-variable": _.merge({ id: "https://nodes.workflow.dog/basic/get-project-variable" }, basic_nodes_get_project_variable_client),
     "https://nodes.workflow.dog/basic/json-parse": _.merge({ id: "https://nodes.workflow.dog/basic/json-parse" }, basic_nodes_json_parse_client),
     "https://nodes.workflow.dog/basic/json-stringify": _.merge({ id: "https://nodes.workflow.dog/basic/json-stringify" }, basic_nodes_json_stringify_client),
     "https://nodes.workflow.dog/basic/list-append": _.merge({ id: "https://nodes.workflow.dog/basic/list-append" }, basic_nodes_list_append_client),
@@ -119,6 +122,7 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/number": _.merge({ id: "https://nodes.workflow.dog/basic/number" }, basic_nodes_number_client),
     "https://nodes.workflow.dog/basic/or": _.merge({ id: "https://nodes.workflow.dog/basic/or" }, basic_nodes_or_client),
     "https://nodes.workflow.dog/basic/run-workflow": _.merge({ id: "https://nodes.workflow.dog/basic/run-workflow" }, basic_nodes_run_workflow_client),
+    "https://nodes.workflow.dog/basic/set-project-variable": _.merge({ id: "https://nodes.workflow.dog/basic/set-project-variable" }, basic_nodes_set_project_variable_client),
     "https://nodes.workflow.dog/basic/switch": _.merge({ id: "https://nodes.workflow.dog/basic/switch" }, basic_nodes_switch_client),
     "https://nodes.workflow.dog/basic/text": _.merge({ id: "https://nodes.workflow.dog/basic/text" }, basic_nodes_text_client),
     "https://nodes.workflow.dog/basic/trigger-input": _.merge({ id: "https://nodes.workflow.dog/basic/trigger-input" }, basic_nodes_trigger_input_client),
@@ -130,17 +134,6 @@ const _definitions = {
     "https://nodes.workflow.dog/closecrm/list-contacts": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-contacts" }, closecrm_nodes_list_contacts_client),
     "https://nodes.workflow.dog/closecrm/list-emails-with-lead": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-emails-with-lead" }, closecrm_nodes_list_emails_with_lead_client),
     "https://nodes.workflow.dog/closecrm/list-leads": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-leads" }, closecrm_nodes_list_leads_client),
-    "https://nodes.workflow.dog/google/gmail-add-labels": _.merge({ id: "https://nodes.workflow.dog/google/gmail-add-labels" }, google_nodes_gmail_add_labels_client),
-    "https://nodes.workflow.dog/google/gmail-create-draft": _.merge({ id: "https://nodes.workflow.dog/google/gmail-create-draft" }, google_nodes_gmail_create_draft_client),
-    "https://nodes.workflow.dog/google/gmail-create-draft-reply": _.merge({ id: "https://nodes.workflow.dog/google/gmail-create-draft-reply" }, google_nodes_gmail_create_draft_reply_client),
-    "https://nodes.workflow.dog/google/gmail-get-attachment": _.merge({ id: "https://nodes.workflow.dog/google/gmail-get-attachment" }, google_nodes_gmail_get_attachment_client),
-    "https://nodes.workflow.dog/google/gmail-get-message": _.merge({ id: "https://nodes.workflow.dog/google/gmail-get-message" }, google_nodes_gmail_get_message_client),
-    "https://nodes.workflow.dog/google/gmail-mark-as-read": _.merge({ id: "https://nodes.workflow.dog/google/gmail-mark-as-read" }, google_nodes_gmail_mark_as_read_client),
-    "https://nodes.workflow.dog/google/gmail-mark-as-unread": _.merge({ id: "https://nodes.workflow.dog/google/gmail-mark-as-unread" }, google_nodes_gmail_mark_as_unread_client),
-    "https://nodes.workflow.dog/google/gmail-remove-labels": _.merge({ id: "https://nodes.workflow.dog/google/gmail-remove-labels" }, google_nodes_gmail_remove_labels_client),
-    "https://nodes.workflow.dog/google/gmail-reply-to-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-reply-to-email" }, google_nodes_gmail_reply_to_email_client),
-    "https://nodes.workflow.dog/google/gmail-send-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-send-email" }, google_nodes_gmail_send_email_client),
-    "https://nodes.workflow.dog/google/gmail-trash-message": _.merge({ id: "https://nodes.workflow.dog/google/gmail-trash-message" }, google_nodes_gmail_trash_message_client),
     "https://nodes.workflow.dog/math/absolute": _.merge({ id: "https://nodes.workflow.dog/math/absolute" }, math_nodes_absolute_client),
     "https://nodes.workflow.dog/math/add": _.merge({ id: "https://nodes.workflow.dog/math/add" }, math_nodes_add_client),
     "https://nodes.workflow.dog/math/ceiling": _.merge({ id: "https://nodes.workflow.dog/math/ceiling" }, math_nodes_ceiling_client),
@@ -163,6 +156,17 @@ const _definitions = {
     "https://nodes.workflow.dog/math/subtract": _.merge({ id: "https://nodes.workflow.dog/math/subtract" }, math_nodes_subtract_client),
     "https://nodes.workflow.dog/math/sum": _.merge({ id: "https://nodes.workflow.dog/math/sum" }, math_nodes_sum_client),
     "https://nodes.workflow.dog/math/tan": _.merge({ id: "https://nodes.workflow.dog/math/tan" }, math_nodes_tan_client),
+    "https://nodes.workflow.dog/google/gmail-add-labels": _.merge({ id: "https://nodes.workflow.dog/google/gmail-add-labels" }, google_nodes_gmail_add_labels_client),
+    "https://nodes.workflow.dog/google/gmail-create-draft": _.merge({ id: "https://nodes.workflow.dog/google/gmail-create-draft" }, google_nodes_gmail_create_draft_client),
+    "https://nodes.workflow.dog/google/gmail-create-draft-reply": _.merge({ id: "https://nodes.workflow.dog/google/gmail-create-draft-reply" }, google_nodes_gmail_create_draft_reply_client),
+    "https://nodes.workflow.dog/google/gmail-get-attachment": _.merge({ id: "https://nodes.workflow.dog/google/gmail-get-attachment" }, google_nodes_gmail_get_attachment_client),
+    "https://nodes.workflow.dog/google/gmail-get-message": _.merge({ id: "https://nodes.workflow.dog/google/gmail-get-message" }, google_nodes_gmail_get_message_client),
+    "https://nodes.workflow.dog/google/gmail-mark-as-read": _.merge({ id: "https://nodes.workflow.dog/google/gmail-mark-as-read" }, google_nodes_gmail_mark_as_read_client),
+    "https://nodes.workflow.dog/google/gmail-mark-as-unread": _.merge({ id: "https://nodes.workflow.dog/google/gmail-mark-as-unread" }, google_nodes_gmail_mark_as_unread_client),
+    "https://nodes.workflow.dog/google/gmail-remove-labels": _.merge({ id: "https://nodes.workflow.dog/google/gmail-remove-labels" }, google_nodes_gmail_remove_labels_client),
+    "https://nodes.workflow.dog/google/gmail-reply-to-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-reply-to-email" }, google_nodes_gmail_reply_to_email_client),
+    "https://nodes.workflow.dog/google/gmail-send-email": _.merge({ id: "https://nodes.workflow.dog/google/gmail-send-email" }, google_nodes_gmail_send_email_client),
+    "https://nodes.workflow.dog/google/gmail-trash-message": _.merge({ id: "https://nodes.workflow.dog/google/gmail-trash-message" }, google_nodes_gmail_trash_message_client),
     "https://nodes.workflow.dog/openai/classify": _.merge({ id: "https://nodes.workflow.dog/openai/classify" }, openai_nodes_classify_client),
     "https://nodes.workflow.dog/openai/generate-image": _.merge({ id: "https://nodes.workflow.dog/openai/generate-image" }, openai_nodes_generate_image_client),
     "https://nodes.workflow.dog/openai/moderate": _.merge({ id: "https://nodes.workflow.dog/openai/moderate" }, openai_nodes_moderate_client),

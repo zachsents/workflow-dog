@@ -19,6 +19,7 @@ import basic_nodes_list_append_execution from "../../basic/nodes/list-append/exe
 import basic_nodes_list_get_first_execution from "../../basic/nodes/list-get-first/execution"
 import basic_nodes_list_get_last_execution from "../../basic/nodes/list-get-last/execution"
 import basic_nodes_loop_workflow_execution from "../../basic/nodes/loop-workflow/execution"
+import basic_nodes_loop_workflow_staggered_execution from "../../basic/nodes/loop-workflow-staggered/execution"
 import basic_nodes_not_execution from "../../basic/nodes/not/execution"
 import basic_nodes_not_equal_execution from "../../basic/nodes/not-equal/execution"
 import basic_nodes_number_execution from "../../basic/nodes/number/execution"
@@ -36,6 +37,8 @@ import closecrm_nodes_get_lead_by_id_execution from "../../closecrm/nodes/get-le
 import closecrm_nodes_list_contacts_execution from "../../closecrm/nodes/list-contacts/execution"
 import closecrm_nodes_list_emails_with_lead_execution from "../../closecrm/nodes/list-emails-with-lead/execution"
 import closecrm_nodes_list_leads_execution from "../../closecrm/nodes/list-leads/execution"
+import closecrm_nodes_list_leads_in_smart_view_execution from "../../closecrm/nodes/list-leads-in-smart-view/execution"
+import closecrm_nodes_subscribe_contact_in_sequence_execution from "../../closecrm/nodes/subscribe-contact-in-sequence/execution"
 import google_nodes_gmail_add_labels_execution from "../../google/nodes/gmail-add-labels/execution"
 import google_nodes_gmail_create_draft_execution from "../../google/nodes/gmail-create-draft/execution"
 import google_nodes_gmail_create_draft_reply_execution from "../../google/nodes/gmail-create-draft-reply/execution"
@@ -117,6 +120,7 @@ const _definitions = {
     "https://nodes.workflow.dog/basic/list-get-first": _.merge({ id: "https://nodes.workflow.dog/basic/list-get-first" }, basic_nodes_list_get_first_execution),
     "https://nodes.workflow.dog/basic/list-get-last": _.merge({ id: "https://nodes.workflow.dog/basic/list-get-last" }, basic_nodes_list_get_last_execution),
     "https://nodes.workflow.dog/basic/loop-workflow": _.merge({ id: "https://nodes.workflow.dog/basic/loop-workflow" }, basic_nodes_loop_workflow_execution),
+    "https://nodes.workflow.dog/basic/loop-workflow-staggered": _.merge({ id: "https://nodes.workflow.dog/basic/loop-workflow-staggered" }, basic_nodes_loop_workflow_staggered_execution),
     "https://nodes.workflow.dog/basic/not": _.merge({ id: "https://nodes.workflow.dog/basic/not" }, basic_nodes_not_execution),
     "https://nodes.workflow.dog/basic/not-equal": _.merge({ id: "https://nodes.workflow.dog/basic/not-equal" }, basic_nodes_not_equal_execution),
     "https://nodes.workflow.dog/basic/number": _.merge({ id: "https://nodes.workflow.dog/basic/number" }, basic_nodes_number_execution),
@@ -134,6 +138,8 @@ const _definitions = {
     "https://nodes.workflow.dog/closecrm/list-contacts": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-contacts" }, closecrm_nodes_list_contacts_execution),
     "https://nodes.workflow.dog/closecrm/list-emails-with-lead": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-emails-with-lead" }, closecrm_nodes_list_emails_with_lead_execution),
     "https://nodes.workflow.dog/closecrm/list-leads": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-leads" }, closecrm_nodes_list_leads_execution),
+    "https://nodes.workflow.dog/closecrm/list-leads-in-smart-view": _.merge({ id: "https://nodes.workflow.dog/closecrm/list-leads-in-smart-view" }, closecrm_nodes_list_leads_in_smart_view_execution),
+    "https://nodes.workflow.dog/closecrm/subscribe-contact-in-sequence": _.merge({ id: "https://nodes.workflow.dog/closecrm/subscribe-contact-in-sequence" }, closecrm_nodes_subscribe_contact_in_sequence_execution),
     "https://nodes.workflow.dog/google/gmail-add-labels": _.merge({ id: "https://nodes.workflow.dog/google/gmail-add-labels" }, google_nodes_gmail_add_labels_execution),
     "https://nodes.workflow.dog/google/gmail-create-draft": _.merge({ id: "https://nodes.workflow.dog/google/gmail-create-draft" }, google_nodes_gmail_create_draft_execution),
     "https://nodes.workflow.dog/google/gmail-create-draft-reply": _.merge({ id: "https://nodes.workflow.dog/google/gmail-create-draft-reply" }, google_nodes_gmail_create_draft_reply_execution),

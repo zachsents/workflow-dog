@@ -3,6 +3,7 @@ import { createExport } from "@pkg/_build/util"
 // IMPORTS
 import type { MergedExecutionNodeDefinition } from "@pkg/types"
 import basic_nodes_and_execution from "../../basic/nodes/and/execution"
+import basic_nodes_choose_value_execution from "../../basic/nodes/choose-value/execution"
 import basic_nodes_coalesce_falsy_execution from "../../basic/nodes/coalesce-falsy/execution"
 import basic_nodes_coalesce_nullish_execution from "../../basic/nodes/coalesce-nullish/execution"
 import basic_nodes_compose_list_execution from "../../basic/nodes/compose-list/execution"
@@ -79,8 +80,8 @@ import openai_nodes_parse_execution from "../../openai/nodes/parse/execution"
 import openai_nodes_prompt_chatgpt_execution from "../../openai/nodes/prompt-chatgpt/execution"
 import openai_nodes_prompt_chatgpt_vision_execution from "../../openai/nodes/prompt-chatgpt-vision/execution"
 import openai_nodes_speech_to_text_execution from "../../openai/nodes/speech-to-text/execution"
-import openai_nodes_text_to_speech_execution from "../../openai/nodes/text-to-speech/execution"
 import openai_nodes_yes_no_decision_execution from "../../openai/nodes/yes-no-decision/execution"
+import openai_nodes_text_to_speech_execution from "../../openai/nodes/text-to-speech/execution"
 import text_nodes_concatenate_execution from "../../text/nodes/concatenate/execution"
 import text_nodes_contains_execution from "../../text/nodes/contains/execution"
 import text_nodes_convert_to_regex_execution from "../../text/nodes/convert-to-regex/execution"
@@ -104,6 +105,7 @@ import text_nodes_uppercase_execution from "../../text/nodes/uppercase/execution
 const _definitions = {
     // EXPORTS
     "https://nodes.workflow.dog/basic/and": _.merge({ id: "https://nodes.workflow.dog/basic/and" }, basic_nodes_and_execution),
+    "https://nodes.workflow.dog/basic/choose-value": _.merge({ id: "https://nodes.workflow.dog/basic/choose-value" }, basic_nodes_choose_value_execution),
     "https://nodes.workflow.dog/basic/coalesce-falsy": _.merge({ id: "https://nodes.workflow.dog/basic/coalesce-falsy" }, basic_nodes_coalesce_falsy_execution),
     "https://nodes.workflow.dog/basic/coalesce-nullish": _.merge({ id: "https://nodes.workflow.dog/basic/coalesce-nullish" }, basic_nodes_coalesce_nullish_execution),
     "https://nodes.workflow.dog/basic/compose-list": _.merge({ id: "https://nodes.workflow.dog/basic/compose-list" }, basic_nodes_compose_list_execution),
@@ -180,8 +182,8 @@ const _definitions = {
     "https://nodes.workflow.dog/openai/prompt-chatgpt": _.merge({ id: "https://nodes.workflow.dog/openai/prompt-chatgpt" }, openai_nodes_prompt_chatgpt_execution),
     "https://nodes.workflow.dog/openai/prompt-chatgpt-vision": _.merge({ id: "https://nodes.workflow.dog/openai/prompt-chatgpt-vision" }, openai_nodes_prompt_chatgpt_vision_execution),
     "https://nodes.workflow.dog/openai/speech-to-text": _.merge({ id: "https://nodes.workflow.dog/openai/speech-to-text" }, openai_nodes_speech_to_text_execution),
-    "https://nodes.workflow.dog/openai/text-to-speech": _.merge({ id: "https://nodes.workflow.dog/openai/text-to-speech" }, openai_nodes_text_to_speech_execution),
     "https://nodes.workflow.dog/openai/yes-no-decision": _.merge({ id: "https://nodes.workflow.dog/openai/yes-no-decision" }, openai_nodes_yes_no_decision_execution),
+    "https://nodes.workflow.dog/openai/text-to-speech": _.merge({ id: "https://nodes.workflow.dog/openai/text-to-speech" }, openai_nodes_text_to_speech_execution),
     "https://nodes.workflow.dog/text/concatenate": _.merge({ id: "https://nodes.workflow.dog/text/concatenate" }, text_nodes_concatenate_execution),
     "https://nodes.workflow.dog/text/contains": _.merge({ id: "https://nodes.workflow.dog/text/contains" }, text_nodes_contains_execution),
     "https://nodes.workflow.dog/text/convert-to-regex": _.merge({ id: "https://nodes.workflow.dog/text/convert-to-regex" }, text_nodes_convert_to_regex_execution),

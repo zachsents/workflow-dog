@@ -3,6 +3,7 @@ import { createExport } from "@pkg/_build/util"
 // IMPORTS
 import type { MergedClientNodeDefinition } from "@pkg/types"
 import basic_nodes_and_client from "../../basic/nodes/and/client"
+import basic_nodes_choose_value_client from "../../basic/nodes/choose-value/client"
 import basic_nodes_coalesce_falsy_client from "../../basic/nodes/coalesce-falsy/client"
 import basic_nodes_coalesce_nullish_client from "../../basic/nodes/coalesce-nullish/client"
 import basic_nodes_compose_list_client from "../../basic/nodes/compose-list/client"
@@ -104,6 +105,7 @@ import text_nodes_uppercase_client from "../../text/nodes/uppercase/client"
 const _definitions = {
     // EXPORTS
     "https://nodes.workflow.dog/basic/and": _.merge({ id: "https://nodes.workflow.dog/basic/and" }, basic_nodes_and_client),
+    "https://nodes.workflow.dog/basic/choose-value": _.merge({ id: "https://nodes.workflow.dog/basic/choose-value" }, basic_nodes_choose_value_client),
     "https://nodes.workflow.dog/basic/coalesce-falsy": _.merge({ id: "https://nodes.workflow.dog/basic/coalesce-falsy" }, basic_nodes_coalesce_falsy_client),
     "https://nodes.workflow.dog/basic/coalesce-nullish": _.merge({ id: "https://nodes.workflow.dog/basic/coalesce-nullish" }, basic_nodes_coalesce_nullish_client),
     "https://nodes.workflow.dog/basic/compose-list": _.merge({ id: "https://nodes.workflow.dog/basic/compose-list" }, basic_nodes_compose_list_client),

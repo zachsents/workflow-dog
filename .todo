@@ -34,6 +34,7 @@ Small Fixes:
     ☐ Active state for Workflows nav link in dashboard header
 
 Possible Future Features:
+    ☐ Workflow quick switcher
     ☐ Incremental running
     ☐ Tooltips for handles with detailed explanations on function, default behaviors, etc.
     ☐ Switch group handles between passing in multiple handles or a single handle

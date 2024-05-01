@@ -66,6 +66,7 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
                 if (node.data.controlModifiers?.error) {
                     normalizedOutputs[ControlModifierId.Error] = err.message
+                    normalizedOutputs[ControlModifierId.Finished] = false
                 }
             })
 

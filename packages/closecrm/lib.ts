@@ -81,12 +81,22 @@ export async function querySmartView(client: AxiosInstance, smartViewId: string)
     let cursor = ""
     let data: string[] = []
     do {
-        const res = await client.post("/data/search/", {
-            ...smartView.s_query,
-            ...cursor && { cursor },
-        })
-        cursor = res.data.cursor || ""
-        data = [...data, ...res.data.data.map((lead: any) => lead.id)]
+        try {
+            const res = await client.post("/data/search/", {
+                ...smartView.s_query,
+                ...cursor && { cursor },
+                _limit: 200,
+            })
+            cursor = res.data.cursor || ""
+            data = [...data, ...res.data.data.map((lead: any) => lead.id)]
+        }
+        catch (err) {
+            console.log(err.response.data)
+            if (err.response.data?.error && "rate_reset" in err.response.data.error) {
+                const delay = parseFloat(err.response.data.error.rate_reset) * 1000 + 200
+                await new Promise(resolve => setTimeout(resolve, delay))
+            }
+        }
     } while (!!cursor)
 
     return data

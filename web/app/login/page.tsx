@@ -33,7 +33,7 @@ export default async function LoginPage() {
                     asChild variant="link"
                     className="absolute top-2 left-0 text-primary-foreground opacity-75 hover:opacity-100 transition-opacity text-xs"
                 >
-                    <Link href="/">
+                    <Link href="https://workflow.dog">
                         <TbArrowLeft className="mr-2" />
                         Back to landing page
                     </Link>
@@ -66,9 +66,21 @@ export default async function LoginPage() {
 
                 <p className="text-center text-xs text-muted-foreground absolute bottom-4 max-w-xs left-1/2 -translate-x-1/2">
                     By signing in, you agree to our{" "}
-                    <Link href="#" className="hover:underline">Terms of Service</Link>
+                    <Link
+                        href="https://workflow.dog/terms.html"
+                        target="_blank"
+                        className="hover:underline"
+                    >
+                        Terms of Service
+                    </Link>
                     {" "}and{" "}
-                    <Link href="#" className="hover:underline">Privacy Policy</Link>.
+                    <Link
+                        href="https://workflow.dog/privacy.html"
+                        target="_blank"
+                        className="hover:underline"
+                    >
+                        Privacy Policy
+                    </Link>.
                 </p>
             </div>
         </div>

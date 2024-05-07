@@ -1,6 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr"
 import { useQueryClient } from "@tanstack/react-query"
-import type { Database } from "@web/lib/types/supabase-db"
+import type { Database } from "@web/lib/types/db"
 import { useEffect, useMemo } from "react"
 
 

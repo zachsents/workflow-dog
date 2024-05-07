@@ -23,39 +23,6 @@ export function uniqueId(prefixOrOptions: string | {
 }
 
 
-/**
- * Converts an object's properties to camelCase deeply
- */
-export function deepCamelCase<T extends object>(obj: T, options: {
-    excludeDashedKeys?: boolean
-    excludeColonKeys?: boolean
-} = {}) {
-    if (Array.isArray(obj))
-        return obj.map(item => _.isObjectLike(item) ? deepCamelCase(item, options) : item)
-
-    if (_.isObjectLike(obj)) {
-        const withNewKeys = _.mapKeys(
-            obj,
-            (__, key) => {
-                if (options.excludeColonKeys && key.includes?.(":"))
-                    return key
-                if (options.excludeDashedKeys && key.includes?.("-"))
-                    return key
-
-                return _.camelCase(key)
-            }
-        )
-
-        return _.mapValues(
-            withNewKeys,
-            val => _.isObjectLike(val) ? deepCamelCase(val as object, options) : val
-        )
-    }
-
-    return obj
-}
-
-
 export function useDebouncedState<T>(initialValue: T, {
     debounce = 500,
     syncWithInitialValue = false,
@@ -189,15 +156,6 @@ export function useControlledSelectedKeys<T>(value: T, setValue: (value: T) => v
 export type DotPath<T> = T extends object ? { [K in keyof T]:
     `${Exclude<K, symbol>}${"" | `.${DotPath<T[K]>}`}`
 }[keyof T] : never
-
-
-export type CamelCase<S extends string> = S extends `${infer P1}_${infer P2}${infer P3}`
-    ? `${Lowercase<P1>}${Uppercase<P2>}${CamelCase<P3>}`
-    : Lowercase<S>
-
-export type KeysToCamelCase<T> = {
-    [K in keyof T as CamelCase<string & K>]: T[K] extends {} ? KeysToCamelCase<T[K]> : T[K]
-}
 
 
 export type TagOrComponent = keyof JSX.IntrinsicElements | React.ComponentType

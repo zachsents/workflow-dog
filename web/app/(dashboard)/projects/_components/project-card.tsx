@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@ui/card"
-import { Database } from "@web/lib/types/supabase-db"
+import { RouterOutput } from "@web/lib/types/trpc"
 import Link from "next/link"
 import { TbArrowRight } from "react-icons/tb"
 
@@ -7,12 +7,10 @@ import { TbArrowRight } from "react-icons/tb"
 export default function ProjectCard({
     project
 }: {
-    project: Partial<Database["public"]["Tables"]["teams"]["Row"]> & {
-        users: { email: string | null }[]
-    }
+    project: RouterOutput["projects"]["list"]["0"]
 }) {
 
-    const userInitials = project.users.map(u => u.email?.[0].toUpperCase() ?? "?")
+    const userInitials = project.members.map(u => u.email?.[0].toUpperCase() ?? "?")
 
     const creationDate = new Date(project.created_at!).toLocaleDateString(undefined, {
         dateStyle: "medium"
@@ -30,7 +28,7 @@ export default function ProjectCard({
                 <CardContent>
                     <UserDots initials={userInitials} max={8} />
                     <p className="text-muted-foreground text-sm mt-1">
-                        {project.users.length} members
+                        {project.members.length} members
                     </p>
                 </CardContent>
                 <CardFooter className="flex justify-end">

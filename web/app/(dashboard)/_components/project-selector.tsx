@@ -16,9 +16,9 @@ import {
 import Kbd from "@web/components/kbd"
 import { Badge } from "@web/components/ui/badge"
 import { useCurrentProjectId, useDialogState } from "@web/lib/client/hooks"
+import { trpc } from "@web/lib/client/trpc"
 import { cn } from "@web/lib/utils"
 import { PlanData } from "@web/modules/plans"
-import { useProjectsForUser } from "@web/modules/projects"
 import { usePathname, useRouter } from "next/navigation"
 import { useHotkeys } from "react-hotkeys-hook"
 import { TbCheck, TbChevronDown } from "react-icons/tb"
@@ -26,11 +26,12 @@ import { TbCheck, TbChevronDown } from "react-icons/tb"
 
 export default function ProjectSelector() {
 
-    const { data: projects } = useProjectsForUser()
+    const { data: projects, isLoading } = trpc.projects.list.useQuery()
 
     const popover = useDialogState()
 
     const activeProjectId = useCurrentProjectId()
+
     const router = useRouter()
     const pathname = usePathname()
     const goToProject = (projectId: string) => () => {
@@ -56,11 +57,14 @@ export default function ProjectSelector() {
                         "w-[220px] justify-between",
                         !activeProjectId && "text-muted-foreground"
                     )}
+                    disabled={isLoading}
                 >
                     <span className="truncate">
-                        {activeProjectId
-                            ? projects?.find((project) => project.id === activeProjectId)?.name
-                            : "Select projects..."}
+                        {isLoading
+                            ? "Loading projects..."
+                            : activeProjectId
+                                ? (projects!.find(p => p.id === activeProjectId)?.name ?? "Unknown project")
+                                : "Select projects..."}
                     </span>
 
                     <div className="flex center gap-2 shrink-0 text-sm text-muted-foreground">

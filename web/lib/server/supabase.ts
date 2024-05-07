@@ -1,12 +1,11 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
 import { createClient } from "@supabase/supabase-js"
-import type { Database } from "@web/lib/types/supabase-db"
+import type { Database } from "@web/lib/types/db"
 import jwt, { JwtPayload } from "jsonwebtoken"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { NextResponse, type NextRequest } from "next/server"
 import "server-only"
-import type { TypedSupabaseClient } from "../types/supabase"
 
 
 /*
@@ -53,7 +52,6 @@ export async function supabaseServerAdmin() {
     return createClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_KEY!,
-        // await getSecret("SUPABASE_SERVICE_KEY", false),
     )
 }
 
@@ -144,12 +142,24 @@ export async function updateSession(request: NextRequest) {
 }
 
 
-export async function requireLogin() {
+export interface RequireLoginOptions {
+    params?: Record<string, string>
+    beforeRedirect?: () => void
+}
+
+export async function requireLogin(options?: RequireLoginOptions) {
     const supabase = supabaseServer()
     const { data, error } = await supabase.auth.getUser()
 
     if (!error && data?.user)
         return data.user
+
+    options?.beforeRedirect?.()
+
+    if (options?.params) {
+        const urlParams = new URLSearchParams(options.params)
+        redirect(`/login?${urlParams.toString()}`)
+    }
 
     redirect("/login")
 }
@@ -184,15 +194,4 @@ export function remapError(result: any, messages: Record<string, string | false>
             message,
         }
     }
-}
-
-
-export interface PassableSupabaseOptions {
-    admin?: boolean
-    supabase?: TypedSupabaseClient
-}
-
-export async function getServerSupabaseClient({ admin, supabase }: PassableSupabaseOptions = {}) {
-    if (supabase) return supabase
-    return admin ? supabaseServerAdmin() : supabaseServer()
 }

@@ -20,54 +20,91 @@ import {
 } from "@ui/form"
 import { Input } from "@ui/input"
 import Loader from "@web/components/loader"
-import { useAction } from "@web/lib/client/actions"
-import { useBooleanState, useCurrentProjectId } from "@web/lib/client/hooks"
+import { useDialogState } from "@web/lib/client/hooks"
+import { trpc } from "@web/lib/client/trpc"
+import { Schemas } from "@web/lib/iso/schemas"
+import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { TbStar, TbUserPlus } from "react-icons/tb"
-import { inviteMember as inviteMemberAction } from "../actions"
-import { InviteMemberSchema, inviteMemberSchema } from "../schema"
-import Link from "next/link"
+import { toast } from "sonner"
+import { z } from "zod"
 
 
-export default function InviteMember({ reachedLimit }: { reachedLimit?: boolean }) {
+interface InviteMemberProps {
+    projectId: string
+}
 
-    const projectId = useCurrentProjectId()
+export default function InviteMember({ projectId }: InviteMemberProps) {
 
-    const [inviteMember] = useAction(
-        inviteMemberAction.bind(null, projectId),
-        { successToast: "User invited!" }
-    )
+    const {
+        data: members,
+        isLoading: membersLoading,
+    } = trpc.projects.listMembers.useQuery({ projectId })
 
-    const form = useForm<InviteMemberSchema>({
-        resolver: zodResolver(inviteMemberSchema),
-        defaultValues: { email: "" },
-    })
+    const {
+        data: billing,
+        isLoading: billingLoading,
+    } = trpc.projects.billingInfo.useQuery({ id: projectId })
 
-    const { isSubmitting } = form.formState
+    if (membersLoading || billingLoading)
+        return null
 
-    const [isOpen, , close, setOpen] = useBooleanState()
-
-    async function onSubmit(values: InviteMemberSchema) {
-        await inviteMember(values.email)
-            .then(() => {
-                close()
-                form.reset()
-            })
-            .catch(err => form.setError("email", { message: err.message }))
-    }
-
-    if (reachedLimit)
+    const hasReachedLimit = (members?.length ?? 0) >= (billing?.limits.teamMembers ?? 0)
+    if (hasReachedLimit)
         return (
             <Button asChild>
-                <Link href="usage" className="flex center gap-2">
+                <Link
+                    href={`/projects/${projectId}/usage`}
+                    className="flex center gap-2"
+                >
                     <TbStar />
                     Upgrade to invite more members
                 </Link>
             </Button>
         )
 
+    return <InviteMemberButton projectId={projectId} />
+}
+
+
+type FormSchema = z.infer<typeof Schemas.Projects.InviteMember>
+
+
+function InviteMemberButton({ projectId }: InviteMemberProps) {
+
+    const dialog = useDialogState()
+
+    const form = useForm<FormSchema>({
+        resolver: zodResolver(Schemas.Projects.InviteMember),
+        defaultValues: { email: "" },
+    })
+
+    const {
+        mutate: inviteMember,
+        isPending: isSubmitting,
+    } = trpc.projects.inviteMember.useMutation({
+        onSuccess: () => {
+            toast.success("Invitation sent!")
+            dialog.close()
+            form.reset()
+        },
+        onError: (err) => {
+            console.debug(err)
+            form.setError("email", {
+                message: err.data?.message || "Error",
+            })
+        },
+    })
+
+    function onSubmit(values: FormSchema) {
+        inviteMember({
+            projectId,
+            email: values.email,
+        })
+    }
+
     return (
-        <Dialog open={isOpen} onOpenChange={setOpen}>
+        <Dialog {...dialog.dialogProps}>
             <DialogTrigger asChild>
                 <Button>
                     <TbUserPlus className="mr-2" />
@@ -78,7 +115,7 @@ export default function InviteMember({ reachedLimit }: { reachedLimit?: boolean 
                 <DialogHeader>
                     <DialogTitle>Invite someone to this project</DialogTitle>
                     <DialogDescription>
-                        This person will need to have a WorkflowDog account. If they don't have one, tell them to make one first.
+                        If they don't have an account, they will have to make one first.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -100,9 +137,6 @@ export default function InviteMember({ reachedLimit }: { reachedLimit?: boolean 
                                             {...field}
                                         />
                                     </FormControl>
-                                    {/* <FormDescription>
-                                        This is the name that will be displayed to other users.
-                                    </FormDescription> */}
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -113,8 +147,12 @@ export default function InviteMember({ reachedLimit }: { reachedLimit?: boolean 
                             type="submit"
                             disabled={isSubmitting}
                         >
-                            {isSubmitting && <Loader mr />}
-                            Invite
+                            {isSubmitting
+                                ? <>
+                                    <Loader mr />
+                                    Inviting...
+                                </>
+                                : "Invite"}
                         </Button>
                     </form>
                 </Form>

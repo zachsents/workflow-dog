@@ -9,6 +9,7 @@ Critical & Core:
     ✘ Add vercel speed insights tag @cancelled (4/19/2024, 10:48:42 AM)
     ✘ Set up vercel supabase integration @cancelled (4/30/2024, 2:47:17 AM)
     ☐ Make usage records persist even when workflows have been deleted
+    ☐ Add queueMany endpoint for creating multiple runs at once that respects limits
 
 Packages:
     ☐ Gmail
@@ -34,6 +35,9 @@ Small Fixes:
     ☐ Active state for Workflows nav link in dashboard header
 
 Possible Future Features:
+    Trigger event source db restructure
+    Popdown handle editor
+    Timeline view
     ☐ Workflow quick switcher
     ☐ Incremental running
     ☐ Tooltips for handles with detailed explanations on function, default behaviors, etc.

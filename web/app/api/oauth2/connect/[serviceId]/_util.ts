@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { getSecret } from "@web/lib/server/google"
-import type { Database } from "@web/lib/types/supabase-db"
+import type { Database } from "@web/lib/types/db"
 import { CodedError } from "@web/lib/utils"
 import _ from "lodash"
 import { ServiceDefinitions } from "packages/server"

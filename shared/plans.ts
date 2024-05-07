@@ -1,6 +1,5 @@
 
-
-export const PlanLimits = {
+const PlanLimits = {
     free: {
         teamMembers: 3,
         workflowRuns: 100,
@@ -9,4 +8,8 @@ export const PlanLimits = {
         teamMembers: 20,
         workflowRuns: 10000,
     },
+}
+
+export function getPlanLimits(plan: (keyof typeof PlanLimits) | null) {
+    return PlanLimits[plan || "free"]
 }

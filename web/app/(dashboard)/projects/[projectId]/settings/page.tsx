@@ -1,37 +1,14 @@
 import { Card } from "@ui/card"
-import { supabaseServer } from "@web/lib/server/supabase"
+import { Separator } from "@web/components/ui/separator"
 import { IconType } from "react-icons"
 import { TbPuzzle, TbSettings, TbUsers } from "react-icons/tb"
+import DeleteProject from "./_components/delete-project"
 import GeneralSettingsForm from "./_components/general-form"
 import InviteMember from "./_components/invite-member"
 import MembersTable from "./_components/members-table"
-import DeleteProject from "./_components/delete-project"
-import { Separator } from "@web/components/ui/separator"
-import { PlanLimits } from "@web/modules/plan-limits"
-import { getProjectBilling } from "@web/lib/server/projects"
 
 
 export default async function SettingsPage({ params: { projectId } }) {
-
-    const supabase = supabaseServer()
-    const [teamQuery, teamMemberCount] = await Promise.all([
-        supabase
-            .from("teams")
-            .select("id, name")
-            .eq("id", projectId)
-            .single()
-            .throwOnError(),
-        supabase
-            .from("users_teams")
-            .select("*", { count: "exact", head: true })
-            .eq("team_id", projectId)
-            .throwOnError()
-            .then(q => q.count || 0),
-    ])
-
-    const billing = await getProjectBilling(projectId)
-    const reachedTeamMembersLimit = teamMemberCount >= PlanLimits[billing.plan].teamMembers
-
     return (<>
         <div className="flex justify-between gap-10">
             <h1 className="text-2xl font-bold">
@@ -40,12 +17,7 @@ export default async function SettingsPage({ params: { projectId } }) {
         </div>
 
         <SettingsSection title="General" icon={TbSettings}>
-            <GeneralSettingsForm
-                projectId={projectId}
-                defaultValues={{
-                    projectName: teamQuery.data?.name || "",
-                }}
-            />
+            <GeneralSettingsForm projectId={projectId} />
 
             <Separator />
 
@@ -53,15 +25,16 @@ export default async function SettingsPage({ params: { projectId } }) {
                 <p className="font-bold">
                     Danger Zone
                 </p>
-                <DeleteProject />
+                <DeleteProject projectId={projectId} />
             </div>
         </SettingsSection>
 
         <SettingsSection
             title="Team" icon={TbUsers}
-            rightSection={<InviteMember reachedLimit={reachedTeamMembersLimit} />}
+            rightSection={<InviteMember projectId={projectId} />}
         >
-            <MembersTable projectId={projectId} />
+            Table here
+            {/* <MembersTable projectId={projectId} /> */}
         </SettingsSection>
 
         <SettingsSection title="Integrations" icon={TbPuzzle}>

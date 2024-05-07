@@ -9,45 +9,29 @@ import {
 } from "@ui/dropdown-menu"
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from "@ui/navigation-menu"
 import Kbd from "@web/components/kbd"
-import { useCurrentProjectId } from "@web/lib/client/hooks"
+import { useCurrentProjectId, useLocationHref } from "@web/lib/client/hooks"
 import { cn } from "@web/lib/utils"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useHotkeys } from "react-hotkeys-hook"
-import { TbChartBar, TbDots, TbPlugConnected, TbSettings, TbUsers, TbVectorBezier2 } from "react-icons/tb"
+import { TbChartBar, TbDots, TbPlugConnected, TbSettings, TbStar, TbUsers, TbVariable, TbVectorBezier2 } from "react-icons/tb"
 
 
 export default function DashboardHeaderNav() {
 
-    const currentProjectId = useCurrentProjectId()
-    const isProjectSelected = Boolean(currentProjectId)
-
-    const router = useRouter()
-    const pathname = usePathname()
-
-    const relative = (href: string) => `/projects/${currentProjectId}${href}`
-    const pushRelative = (href: string) => router.push(relative(href))
-
-    useHotkeys("w", () => pushRelative("/workflows"), {
-        preventDefault: true,
-    }, [router])
+    const isProjectSelected = !!useCurrentProjectId()
 
     return (
         <NavigationMenu>
             <NavigationMenuList>
                 {isProjectSelected && <>
-                    <NavigationMenuItem>
-                        <Link href={relative("/workflows")} legacyBehavior passHref>
-                            <NavigationMenuLink
-                                active={pathname === "/workflows"}
-                                className={cn("flex center gap-2", navigationMenuTriggerStyle())}
-                            >
-                                <TbVectorBezier2 />
-                                Workflows
-                                <Kbd>W</Kbd>
-                            </NavigationMenuLink>
-                        </Link>
-                    </NavigationMenuItem>
+                    <RegularNavLink
+                        path="/workflows"
+                        icon={<TbVectorBezier2 />}
+                        shortcutKey="W"
+                    >
+                        Workflows
+                    </RegularNavLink>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -61,36 +45,137 @@ export default function DashboardHeaderNav() {
                             className="[&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:pl-4 [&_a]:pr-8 [&_a]:py-2"
                         >
                             <DropdownMenuLabel>
-                                Settings
+                                Project Settings
                             </DropdownMenuLabel>
-                            <DropdownMenuItem asChild>
-                                <Link href={relative("/settings#general")}>
-                                    <TbSettings />
-                                    General Settings
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link href={relative("/usage")}>
-                                    <TbChartBar />
-                                    Usage & Billing
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link href={relative("/settings#team")}>
-                                    <TbUsers />
-                                    Team
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link href={relative("/settings#integrations")}>
-                                    <TbPlugConnected />
-                                    Integrations
-                                </Link>
-                            </DropdownMenuItem>
+                            <DropdownNavLink
+                                path="/settings#general"
+                                icon={<TbSettings />}
+                                description="Project name, deletion, etc."
+                            >
+                                General
+                            </DropdownNavLink>
+                            <DropdownNavLink
+                                path="/settings#team"
+                                icon={<TbUsers />}
+                                description="Invite team members"
+                            >
+                                Team
+                            </DropdownNavLink>
+                            <DropdownNavLink
+                                path="/settings#integrations"
+                                icon={<TbPlugConnected />}
+                                description="Manage third-party services"
+                            >
+                                Integrations
+                            </DropdownNavLink>
+                            <DropdownNavLink
+                                path="/#variables"
+                                icon={<TbVariable />}
+                                description="Coming soon"
+                            >
+                                Variables
+                            </DropdownNavLink>
+
+                            <DropdownMenuLabel>
+                                Usage
+                            </DropdownMenuLabel>
+                            <DropdownNavLink
+                                path="/usage"
+                                icon={<TbStar />}
+                                description="Upgrade your plan"
+                            >
+                                Upgrade
+                            </DropdownNavLink>
+                            <DropdownNavLink
+                                path="/usage"
+                                icon={<TbChartBar />}
+                                description="See how many runs you have left"
+                            >
+                                Plan Usage
+                            </DropdownNavLink>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </>}
             </NavigationMenuList>
         </NavigationMenu>
+    )
+}
+
+
+interface DropdownNavLinkProps {
+    path: string
+    children: React.ReactNode
+    icon?: React.ReactNode
+    description?: string
+}
+
+function DropdownNavLink({ path, children, icon, description }: DropdownNavLinkProps) {
+
+    const currentProjectId = useCurrentProjectId()
+    const href = `/projects/${currentProjectId}${path}`
+
+    const active = useLocationHref()?.endsWith(path) || false
+
+    return (
+        <DropdownMenuItem asChild>
+            <Link
+                href={href}
+                className="data-[active]:bg-slate-100 data-[active]:text-primary"
+                data-active={active || null}
+            >
+                {icon}
+                <div>
+                    <p>{children}</p>
+                    {description &&
+                        <p className="text-xs text-muted-foreground">
+                            {description}
+                        </p>}
+                </div>
+            </Link>
+        </DropdownMenuItem>
+    )
+}
+
+
+interface RegularNavLinkProps {
+    path: string
+    children: React.ReactNode
+    /** Tied to conditional hook. Can't change. */
+    shortcutKey?: string
+    icon?: React.ReactNode
+}
+
+function RegularNavLink({ path, children, shortcutKey, icon }: RegularNavLinkProps) {
+
+    const router = useRouter()
+
+    const currentProjectId = useCurrentProjectId()
+    const href = `/projects/${currentProjectId}${path}`
+
+    const active = useLocationHref()?.endsWith(path) || false
+
+    if (shortcutKey)
+        useHotkeys(shortcutKey.toLowerCase(), () => router.push(href), {
+            preventDefault: true,
+        }, [router])
+
+    return (
+        <NavigationMenuItem>
+            <Link href={href} legacyBehavior passHref>
+                <NavigationMenuLink
+                    active={active}
+                    // {...active && { active: true }}
+                    className={cn(
+                        navigationMenuTriggerStyle(),
+                        "flex center gap-2 data-[active]:bg-slate-100 data-[active]:text-primary"
+                    )}
+                >
+                    {icon}
+                    {children}
+                    {shortcutKey &&
+                        <Kbd>{shortcutKey}</Kbd>}
+                </NavigationMenuLink>
+            </Link>
+        </NavigationMenuItem>
     )
 }

@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js"
 import { errorResponse } from "@web/lib/server/router"
 import { getServiceAccountToken } from "@web/lib/server/service-accounts"
-import { Database } from "@web/lib/types/supabase-db"
+import { Database } from "@web/lib/types/db"
 import { NextRequest, NextResponse } from "next/server"
 
 

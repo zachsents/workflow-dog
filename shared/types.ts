@@ -91,16 +91,3 @@ export type WorkflowRun = {
     count: number
     error_count: number
 }
-
-
-/* -------------------------------------------------------------------------- */
-/*                                   Utility                                  */
-/* -------------------------------------------------------------------------- */
-
-type CamelCase<S extends string> = S extends `${infer P1}_${infer P2}${infer P3}`
-    ? `${Lowercase<P1>}${Uppercase<P2>}${CamelCase<P3>}`
-    : Lowercase<S>
-
-export type Camel<T> = {
-    [K in keyof T as CamelCase<string & K>]: T[K] extends {} ? Camel<T[K]> : T[K]
-}

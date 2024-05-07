@@ -13,43 +13,76 @@ import {
 } from "@ui/form"
 import { Input } from "@ui/input"
 import Loader from "@web/components/loader"
+import { Skeleton } from "@web/components/ui/skeleton"
+import { trpc } from "@web/lib/client/trpc"
+import { Schemas } from "@web/lib/iso/schemas"
 import { cn } from "@web/lib/utils"
-import type { DefaultValues } from "react-hook-form"
 import { useForm } from "react-hook-form"
-import { updateGeneralSettings } from "../actions"
-import { generalSettingsSchema, type GeneralSettingsSchema } from "../schema"
-import { useAction } from "@web/lib/client/actions"
+import { toast } from "sonner"
+import { z } from "zod"
 
 
-export default function GeneralSettingsForm({
-    projectId,
-    defaultValues,
-}: {
+/*
+    Modifying the schema to use name "projectName" instead of "name"
+    to help with browser autofill
+*/
+const ModifiedSettingsSchema = Schemas.Projects.Settings.omit({ name: true }).extend({
+    projectName: Schemas.Projects.Settings.shape.name,
+})
+
+type FormSchema = z.infer<typeof ModifiedSettingsSchema>
+
+
+interface GeneralSettingsFormProps {
     projectId: string
-    defaultValues: DefaultValues<GeneralSettingsSchema>
-}) {
-    const [updateSettings] = useAction(
-        updateGeneralSettings.bind(null, projectId),
-        {
-            successToast: "Settings updated!",
-            showErrorToast: true,
-        }
-    )
+}
 
-    const form = useForm<GeneralSettingsSchema>({
-        resolver: zodResolver(generalSettingsSchema),
-        defaultValues,
+export default function GeneralSettingsForm({ projectId }: GeneralSettingsFormProps) {
+
+    const utils = trpc.useUtils()
+
+    const {
+        data: project,
+        isSuccess: isProjectLoaded,
+    } = trpc.projects.byId.useQuery({ id: projectId })
+
+    const {
+        mutateAsync: updateSettings,
+        isPending: isSubmitting
+    } = trpc.projects.updateSettings.useMutation({
+        onSuccess: () => {
+            toast.success("Settings updated!")
+            utils.projects.byId.invalidate({ id: projectId })
+            utils.projects.list.invalidate()
+        },
+        onError: (err) => {
+            console.debug(err)
+            toast.error(err.data?.message)
+        },
     })
 
-    const { isDirty, isSubmitting } = form.formState
+    const form = useForm<FormSchema>({
+        resolver: zodResolver(ModifiedSettingsSchema),
+        values: {
+            projectName: project?.name ?? "",
+        },
+    })
 
-    async function onSubmit(values: GeneralSettingsSchema) {
-        await updateSettings(values)
-            .then(result => form.reset(result.data))
+    const { isDirty } = form.formState
+
+    async function onSubmit(values: FormSchema) {
+        await updateSettings({
+            id: projectId,
+            settings: {
+                name: values.projectName,
+            },
+        })
     }
 
-    return (
-        <Form {...form}>
+    const disableForm = !isProjectLoaded || isSubmitting
+
+    return isProjectLoaded
+        ? <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="flex-v items-stretch gap-4"
@@ -69,23 +102,30 @@ export default function GeneralSettingsForm({
                             <FormMessage />
                         </FormItem>
                     )}
-                    disabled={isSubmitting}
+                    disabled={disableForm}
                 />
 
-                <div className={cn("self-end flex gap-2", isDirty ? "opacity-100" : "opacity-0")}>
+                <div className={cn(
+                    "self-end flex gap-2",
+                    isDirty ? "opacity-100" : "opacity-0"
+                )}>
                     <Button
-                        type="reset" disabled={isSubmitting}
+                        type="reset" disabled={disableForm}
                         variant="ghost"
                         onClick={() => form.reset()}
                     >
                         Reset
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting && <Loader mr />}
-                        Save
+                    <Button type="submit" disabled={disableForm}>
+                        {isSubmitting
+                            ? <>
+                                <Loader mr />
+                                Saving...
+                            </>
+                            : "Save"}
                     </Button>
                 </div>
             </form>
         </Form>
-    )
+        : <Skeleton className="h-20" />
 }

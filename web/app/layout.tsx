@@ -1,9 +1,10 @@
+import { Toaster } from "@ui/toaster"
+import { Providers } from "@web/app/providers"
+import ParamToaster from "@web/components/param-toaster"
+import "@web/lib/server/supabase-warning-fix"
 import "@web/styles/globals.css"
 import type { Metadata } from "next"
-import { Providers } from "@web/app/providers"
-import { Toaster } from "@ui/toaster"
 import { DM_Sans } from "next/font/google"
-import "@web/lib/server/supabase-warning-fix"
 
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default function RootLayout({
                 <Toaster toastOptions={{
                     descriptionClassName: "text-muted-foreground",
                 }} />
+                <ParamToaster />
             </body>
         </html>
     )

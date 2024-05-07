@@ -6,8 +6,7 @@ import {
     BreadcrumbSeparator
 } from "@ui/breadcrumb"
 import { Skeleton } from "@ui/skeleton"
-import { FromStore } from "@web/lib/queries/store"
-import { supabaseServer } from "@web/lib/server/supabase"
+import { db } from "@web/lib/server/db"
 import Link from "next/link"
 import { Suspense } from "react"
 
@@ -46,18 +45,10 @@ export default async function ProjectLayout({
 
 async function ProjectName({ projectId }: { projectId: string }) {
 
-    const supabase = supabaseServer()
-
-    const { data } = await supabase
-        .from("teams")
+    const queryResult = await db.selectFrom("projects")
         .select("name")
-        .eq("id", projectId)
-        .single()
-        .throwOnError()
+        .where("id", "=", projectId)
+        .executeTakeFirst()
 
-    return <FromStore
-        path={["projects", projectId, "name"]}
-        initial={data?.name || "Unknown"}
-        pass
-    />
+    return queryResult?.name
 }

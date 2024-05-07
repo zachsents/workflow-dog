@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { SupabaseSetup } from "@web/lib/client/supabase"
+import { TRPCProvider } from "@web/lib/client/trpc"
 import { QueryStoreProvider } from "@web/lib/queries/store"
 import { useState } from "react"
 
@@ -21,11 +22,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
     )
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <QueryStoreProvider>
-                {children}
-            </QueryStoreProvider>
-            <SupabaseSetup />
-        </QueryClientProvider>
+        <TRPCProvider queryClient={queryClient}>
+            <QueryClientProvider client={queryClient}>
+                <QueryStoreProvider>
+                    {children}
+                </QueryStoreProvider>
+                <SupabaseSetup />
+            </QueryClientProvider>
+        </TRPCProvider>
     )
 }

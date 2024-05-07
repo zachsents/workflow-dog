@@ -1,5 +1,7 @@
-import { supabaseServer, supabaseServerAdmin } from "./supabase"
 import "server-only"
+import { db } from "./db"
+import { supabaseServer } from "./supabase"
+import { getPlanLimits } from "shared/plans"
 
 
 export async function isCurrentUserOwner(projectId: string) {
@@ -19,34 +21,24 @@ export async function isCurrentUserOwner(projectId: string) {
 }
 
 
-interface GetProjectBillingOptions {
-    admin?: boolean
-}
+export async function getProjectBilling(projectId: string) {
 
-export async function getProjectBilling(projectId: string, { admin }: GetProjectBillingOptions = {}) {
-    const supabase = admin
-        ? await supabaseServerAdmin()
-        : supabaseServer()
+    const { billing_plan, billing_start_date } = await db.selectFrom("projects")
+        .select(["billing_plan", "billing_start_date"])
+        .where("id", "=", projectId)
+        .executeTakeFirstOrThrow()
 
-    const { billing_plan, billing_start_date } = await supabase
-        .from("teams")
-        .select("billing_plan, billing_start_date")
-        .eq("id", projectId)
-        .single()
-        .throwOnError()
-        .then(q => ({
-            billing_plan: q.data?.billing_plan || "free",
-            billing_start_date: q.data?.billing_start_date || "2021-01-01",
-        }))
+    if (!billing_start_date)
+        throw new Error("Billing start date not set. This is a bug. Please contact support.")
 
-    const staticDay = parseInt(billing_start_date.split("-")[2])
+    const staticDay = billing_start_date.getUTCDate()
 
     const now = new Date()
     const currentMonth = now.getUTCMonth()
     const currentYear = now.getUTCFullYear()
     const thisMonthsDay = new Date(Date.UTC(currentYear, currentMonth, staticDay))
 
-    const period: ProjectBillingPeriod = now < thisMonthsDay ? {
+    const period = now < thisMonthsDay ? {
         start: new Date(Date.UTC(currentYear, currentMonth - 1, staticDay)),
         end: thisMonthsDay,
     } : {
@@ -55,14 +47,8 @@ export async function getProjectBilling(projectId: string, { admin }: GetProject
     }
 
     return {
-        plan: billing_plan as ProjectBillingPlan,
-        period
+        plan: billing_plan,
+        period,
+        limits: getPlanLimits(billing_plan),
     }
-}
-
-export type ProjectBillingPlan = "free" | "pro"
-
-export type ProjectBillingPeriod = {
-    start: Date
-    end: Date
 }

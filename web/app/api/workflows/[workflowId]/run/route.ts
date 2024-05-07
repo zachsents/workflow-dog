@@ -2,7 +2,6 @@ import { getAuth, parent } from "@web/lib/server/google"
 import { getProjectBilling } from "@web/lib/server/projects"
 import { errorResponse } from "@web/lib/server/router"
 import { supabaseServerAdmin } from "@web/lib/server/supabase"
-import { PlanLimits } from "@web/modules/plan-limits"
 import { google } from "googleapis"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
@@ -37,8 +36,7 @@ export async function POST(
     if (!projectId)
         return errorResponse("Workflow not found", 404)
 
-    const billing = await getProjectBilling(projectId, { admin: true })
-    const usageLimit = PlanLimits[billing.plan].workflowRuns
+    const billing = await getProjectBilling(projectId)
 
     const usageCount = await supabase
         .rpc("count_workflow_runs_for_project", {
@@ -48,8 +46,8 @@ export async function POST(
         .throwOnError()
         .then(q => q.data || 0)
 
-    if (usageCount >= usageLimit)
-        return errorResponse(`Usage limit exceeded (${usageCount} / ${usageLimit})`, 429, {
+    if (usageCount >= billing.limits.workflowRuns)
+        return errorResponse(`Usage limit exceeded (${usageCount} / ${billing.limits.workflowRuns})`, 429, {
             needsUpgrade: true,
             upgradeUrl: `${process.env.APP_URL}/projects/${projectId}/usage/upgrade`,
         })

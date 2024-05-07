@@ -12,28 +12,33 @@ import {
 } from "@ui/dialog"
 import Loader from "@web/components/loader"
 import { Button } from "@web/components/ui/button"
-import { useAction } from "@web/lib/client/actions"
-import { useCurrentProjectId } from "@web/lib/client/hooks"
+import { trpc } from "@web/lib/client/trpc"
 import { useRouter } from "next/navigation"
-import { deleteProject as deleteProjectAction } from "../actions"
+import { toast } from "sonner"
 
 
-export default function DeleteProject() {
+interface DeleteProjectProps {
+    projectId: string
+}
 
-    const projectId = useCurrentProjectId()
+export default function DeleteProject({ projectId }: DeleteProjectProps) {
+
     const router = useRouter()
+    const utils = trpc.useUtils()
 
-    const [deleteProject, { isPending: isDeleting }] = useAction(
-        deleteProjectAction.bind(null, projectId),
-        {
-            successToast: "Project deleted!",
-            invalidateKey: ["projectsForUser"],
-        }
-    )
-    const deleteAndRedirect = async () => {
-        await deleteProject()
-        router.push("/projects")
-    }
+    const { mutate: deleteProject, isPending, isSuccess } = trpc.projects.delete.useMutation({
+        onSuccess: () => {
+            toast.success("Project deleted!")
+            router.push("/projects")
+            utils.projects.list.invalidate()
+        },
+        onError: (err) => {
+            console.debug(err)
+            toast.error(err.data?.message)
+        },
+    })
+
+    const isDeleting = isPending || isSuccess
 
     return (
         <Dialog>
@@ -59,11 +64,15 @@ export default function DeleteProject() {
                     </DialogClose>
                     <Button
                         variant="destructive"
-                        onClick={deleteAndRedirect}
+                        onClick={() => deleteProject({ id: projectId })}
                         disabled={isDeleting}
                     >
-                        {isDeleting && <Loader mr />}
-                        I'm sure
+                        {isDeleting
+                            ? <>
+                                <Loader mr />
+                                Deleting...
+                            </>
+                            : "I'm sure"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

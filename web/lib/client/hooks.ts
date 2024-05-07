@@ -1,5 +1,5 @@
 import "client-only"
-import { useParams } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
 
@@ -106,4 +106,30 @@ export function useHover<T extends Element>() {
     }, [])
 
     return [ref, isHovered] as const
+}
+
+
+/**
+ * Hook for getting the current location href. It's surprisingly
+ * difficult to reliably re-render based on location changes. Did
+ * some hacky stuff here.
+ */
+export function useLocationHref() {
+    const [href, _setHref] = useState<string>()
+    const setHref = () => _setHref(window.location.href)
+
+    const pathname = usePathname()
+
+    useEffect(() => {
+        setTimeout(setHref, 0)
+    }, [pathname])
+
+    useEffect(() => {
+        if (typeof window === "undefined")
+            return
+        window.addEventListener("hashchange", setHref)
+        return () => void window.removeEventListener("hashchange", setHref)
+    }, [])
+
+    return href
 }

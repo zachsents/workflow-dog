@@ -1,38 +1,54 @@
-import { Skeleton } from "@ui/skeleton"
-import { supabaseServer } from "@web/lib/server/supabase"
-import { Suspense } from "react"
-import MembersTableClient from "./client"
+"use client"
+
+import Loader from "@web/components/loader"
+import { DataTable } from "@web/components/ui/data-table"
+import { trpc } from "@web/lib/client/trpc"
+import { RouterOutput } from "@web/lib/types/trpc"
+import { columns } from "./columns"
 
 
-export default function MembersTable({ projectId }: { projectId: string }) {
-    return (
-        <Suspense fallback={<Skeleton withLoader className="w-full h-40" />}>
-            <MembersTableLoader projectId={projectId} />
-        </Suspense>
-    )
+export type MemberRow = RouterOutput["projects"]["members"]["list"][0] & {
+    isInvitation?: boolean
 }
 
 
-async function MembersTableLoader({ projectId }: { projectId: string }) {
-
-    const supabase = supabaseServer()
-
-    const [query, { data: { user } }] = await Promise.all([
-        supabase.rpc("get_team_members", {
-            team_id_arg: projectId,
-        }),
-        supabase.auth.getUser()
-    ])
-
-    const members = query.data?.map(item => ({
-        id: item.member_id,
-        email: item.member_email,
-        isEditor: item.member_roles.includes("editor"),
-        isViewer: item.member_roles.includes("viewer"),
-        isYou: item.member_email.toLowerCase() === user?.email?.toLowerCase(),
-    })) || []
-
-    return (
-        <MembersTableClient members={members} />
-    )
+interface MembersTableProps {
+    projectId: string
 }
+
+export default function MembersTable({ projectId }: MembersTableProps) {
+
+    const {
+        data: members,
+        isLoading,
+    } = trpc.projects.members.list.useQuery({ projectId })
+
+    const {
+        data: invitations,
+    } = trpc.projects.invitations.list.useQuery({ projectId })
+
+    const rows: MemberRow[] = [
+        ...(members ?? []),
+        ...(invitations?.map(inv => ({
+            id: inv.id,
+            email: inv.invitee_email,
+            name: inv.invitee_email,
+            permissions: [],
+            isInvitation: true,
+        })) ?? []),
+    ]
+
+    return isLoading
+        ? <Loader className="mx-auto my-10" />
+        : <DataTable
+            data={rows}
+            columns={columns}
+            tableOptions={{
+                getRowId: (row) => row.id!,
+                initialState: {
+                    sorting: [{ id: "email", desc: false }]
+                },
+            }}
+            empty="No members."
+        />
+} 

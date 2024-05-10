@@ -39,7 +39,7 @@ export default function InviteMember({ projectId }: InviteMemberProps) {
     const {
         data: members,
         isLoading: membersLoading,
-    } = trpc.projects.listMembers.useQuery({ projectId })
+    } = trpc.projects.members.list.useQuery({ projectId })
 
     const {
         data: billing,
@@ -79,11 +79,14 @@ function InviteMemberButton({ projectId }: InviteMemberProps) {
         defaultValues: { email: "" },
     })
 
+    const utils = trpc.useUtils()
+
     const {
         mutate: inviteMember,
         isPending: isSubmitting,
-    } = trpc.projects.inviteMember.useMutation({
+    } = trpc.projects.members.invite.useMutation({
         onSuccess: () => {
+            utils.projects.invitations.list.invalidate()
             toast.success("Invitation sent!")
             dialog.close()
             form.reset()

@@ -33,8 +33,7 @@ export default async function SettingsPage({ params: { projectId } }) {
             title="Team" icon={TbUsers}
             rightSection={<InviteMember projectId={projectId} />}
         >
-            Table here
-            {/* <MembersTable projectId={projectId} /> */}
+            <MembersTable projectId={projectId} />
         </SettingsSection>
 
         <SettingsSection title="Integrations" icon={TbPuzzle}>

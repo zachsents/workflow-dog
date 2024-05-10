@@ -85,26 +85,6 @@ export const appRouter = t.router({
                 return queryResult
             }),
 
-        listMembers: t.procedure
-            .input(z.object({ projectId: z.string().uuid() }))
-            .query(async ({ input, ctx }) => {
-                const userId = Assert.authenticated(ctx)
-                await Assert.userHasProjectPermission(userId, input.projectId, "read")
-
-                const queryResult = await db.selectFrom("projects_users")
-                    .fullJoin("auth.users", "auth.users.id", "user_id")
-                    .select([
-                        "auth.users.id",
-                        "auth.users.email",
-                        sql<string>`auth.users.raw_user_meta_data->'name'`.as("name"),
-                        "permissions",
-                    ])
-                    .where("project_id", "=", input.projectId)
-                    .execute()
-
-                return queryResult
-            }),
-
         create: t.procedure
             .input(z.object({
                 name: z.string().min(1).max(120),
@@ -147,7 +127,7 @@ export const appRouter = t.router({
                         name: input.settings.name,
                     })
                     .where("id", "=", input.id)
-                    .executeTakeFirst()
+                    .executeTakeFirstOrThrow()
             }),
 
         "delete": t.procedure
@@ -172,68 +152,180 @@ export const appRouter = t.router({
                 return await getProjectBilling(input.id)
             }),
 
-        inviteMember: t.procedure
-            .input(z.object({
-                projectId: z.string().uuid(),
-                email: z.string().email(),
-            }))
-            .mutation(async ({ input, ctx }) => {
-                const userId = Assert.authenticated(ctx)
-                await Assert.userHasProjectPermission(userId, input.projectId, "write")
+        members: {
+            list: t.procedure
+                .input(z.object({ projectId: z.string().uuid() }))
+                .query(async ({ input, ctx }) => {
+                    const userId = Assert.authenticated(ctx)
+                    await Assert.userHasProjectPermission(userId, input.projectId, "read")
 
-                const { already_on_team } = await db.selectNoFrom(({ exists, selectFrom }) => exists(
-                    selectFrom("projects_users")
-                        .leftJoin("auth.users", "auth.users.id", "user_id")
+                    const queryResult = await db.selectFrom("projects_users")
+                        .fullJoin("auth.users", "auth.users.id", "user_id")
+                        .select([
+                            "auth.users.id",
+                            "auth.users.email",
+                            sql<string>`auth.users.raw_user_meta_data->'name'`.as("name"),
+                            "permissions",
+                        ])
                         .where("project_id", "=", input.projectId)
-                        .where("email", "=", input.email)
-                ).as("already_on_team")).executeTakeFirstOrThrow()
+                        .execute()
 
-                if (already_on_team)
-                    throw new TRPCError({
-                        code: "CONFLICT",
-                        message: "User is already on the team",
+                    return queryResult
+                }),
+
+            invite: t.procedure
+                .input(z.object({
+                    projectId: z.string().uuid(),
+                    email: z.string().email(),
+                }))
+                .mutation(async ({ input, ctx }) => {
+                    const userId = Assert.authenticated(ctx)
+                    await Assert.userHasProjectPermission(userId, input.projectId, "write")
+
+                    const { already_on_team } = await db.selectNoFrom(({ exists, selectFrom }) => exists(
+                        selectFrom("projects_users")
+                            .leftJoin("auth.users", "auth.users.id", "user_id")
+                            .where("project_id", "=", input.projectId)
+                            .where("email", "=", input.email)
+                    ).as("already_on_team")).executeTakeFirstOrThrow()
+
+                    if (already_on_team)
+                        throw new TRPCError({
+                            code: "CONFLICT",
+                            message: "User is already on the team",
+                        })
+
+                    const { already_invited } = await db.selectNoFrom(({ exists, selectFrom }) => exists(
+                        selectFrom("project_invitations")
+                            .where("project_id", "=", input.projectId)
+                            .where("invitee_email", "=", input.email)
+                    ).as("already_invited")).executeTakeFirstOrThrow()
+
+                    if (already_invited)
+                        throw new TRPCError({
+                            code: "CONFLICT",
+                            message: "User has already been invited",
+                        })
+
+                    const addInvitation = () => db.insertInto("project_invitations")
+                        .values({
+                            project_id: input.projectId,
+                            invitee_email: input.email,
+                        })
+                        .returning("id")
+                        .executeTakeFirstOrThrow()
+
+                    const lookupProjectName = () => db.selectFrom("projects")
+                        .select("name")
+                        .where("id", "=", input.projectId)
+                        .executeTakeFirstOrThrow()
+
+                    const [
+                        { id: invitationId },
+                        { name: projectName }
+                    ] = await Promise.all([
+                        addInvitation(),
+                        lookupProjectName(),
+                    ])
+
+                    await sendEmailFromTemplate("invite-member", {
+                        invitationId,
+                        projectName,
+                    }, {
+                        to: input.email,
                     })
+                }),
 
-                const { already_invited } = await db.selectNoFrom(({ exists, selectFrom }) => exists(
-                    selectFrom("project_invitations")
+            changePermissions: t.procedure
+                .input(z.object({
+                    projectId: z.string().uuid(),
+                    memberId: z.string().uuid(),
+                    addPermissions: Schemas.Projects.Permissions.array()
+                        .optional()
+                        .describe("Permissions to add"),
+                    removePermissions: Schemas.Projects.Permissions.array()
+                        .optional()
+                        .describe("Permissions to remove"),
+                    permissions: Schemas.Projects.Permissions.array()
+                        .optional()
+                        .describe("Overwrite permissions. When included, addPermissions and removePermissions are ignored."),
+                }))
+                .mutation(async ({ input, ctx }) => {
+                    const userId = Assert.authenticated(ctx)
+                    await Assert.userHasProjectPermission(userId, input.projectId, "write")
+
+                    if (input.permissions) {
+                        await db.updateTable("projects_users")
+                            .set({
+                                permissions: Array.from(new Set(input.permissions)),
+                            })
+                            .where("project_id", "=", input.projectId)
+                            .where("user_id", "=", input.memberId)
+                            .executeTakeFirstOrThrow()
+                        return
+                    }
+
+                    const removeExpr = input.removePermissions?.length
+                        ? sql.join(input.removePermissions)
+                        : sql.raw("")
+                    const addExpr = input.addPermissions?.length
+                        ? sql.join(input.addPermissions)
+                        : sql.raw("")
+
+                    await db.updateTable("projects_users")
+                        .set({
+                            permissions: sql`(select array(select unnest(permissions) except select unnest(array[${removeExpr}]::project_permission[]) union select unnest(array[${addExpr}]::project_permission[])))`,
+                        })
                         .where("project_id", "=", input.projectId)
-                        .where("invitee_email", "=", input.email)
-                ).as("already_invited")).executeTakeFirstOrThrow()
+                        .where("user_id", "=", input.memberId)
+                        .executeTakeFirstOrThrow()
+                }),
 
-                if (already_invited)
-                    throw new TRPCError({
-                        code: "CONFLICT",
-                        message: "User has already been invited",
-                    })
+            remove: t.procedure
+                .input(z.object({
+                    projectId: z.string().uuid(),
+                    memberId: z.string().uuid(),
+                }))
+                .mutation(async ({ input, ctx }) => {
+                    const userId = Assert.authenticated(ctx)
+                    await Assert.userHasProjectPermission(userId, input.projectId, "write")
 
-                const addInvitation = () => db.insertInto("project_invitations")
-                    .values({
-                        project_id: input.projectId,
-                        invitee_email: input.email,
-                    })
-                    .returning("id")
-                    .executeTakeFirstOrThrow()
+                    await db.deleteFrom("projects_users")
+                        .where("project_id", "=", input.projectId)
+                        .where("user_id", "=", input.memberId)
+                        .executeTakeFirst()
+                }),
+        },
 
-                const lookupProjectName = () => db.selectFrom("projects")
-                    .select("name")
-                    .where("id", "=", input.projectId)
-                    .executeTakeFirstOrThrow()
+        invitations: {
+            list: t.procedure
+                .input(z.object({ projectId: z.string().uuid() }))
+                .query(async ({ input, ctx }) => {
+                    const userId = Assert.authenticated(ctx)
+                    await Assert.userHasProjectPermission(userId, input.projectId, "read")
 
-                const [
-                    { id: invitationId },
-                    { name: projectName }
-                ] = await Promise.all([
-                    addInvitation(),
-                    lookupProjectName(),
-                ])
+                    const queryResult = await db.selectFrom("project_invitations")
+                        .selectAll()
+                        .where("project_id", "=", input.projectId)
+                        .execute()
 
-                await sendEmailFromTemplate("invite-member", {
-                    invitationId,
-                    projectName,
-                }, {
-                    to: input.email,
-                })
-            }),
+                    return queryResult
+                }),
+
+            cancel: t.procedure
+                .input(z.object({
+                    projectId: z.string().uuid(),
+                    invitationId: z.string().uuid(),
+                }))
+                .mutation(async ({ input, ctx }) => {
+                    const userId = Assert.authenticated(ctx)
+                    await Assert.userHasProjectPermission(userId, input.projectId, "write")
+
+                    await db.deleteFrom("project_invitations")
+                        .where("id", "=", input.invitationId)
+                        .executeTakeFirstOrThrow()
+                }),
+        }
     },
     workflows: {
         list: t.procedure
@@ -274,7 +366,7 @@ export const appRouter = t.router({
                             : sql<boolean>`not is_enabled`
                     })
                     .where("id", "=", input.workflowId)
-                    .executeTakeFirst()
+                    .executeTakeFirstOrThrow()
             })
     },
     users: {

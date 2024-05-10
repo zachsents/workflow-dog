@@ -8,5 +8,6 @@ export const Schemas = {
         InviteMember: z.object({
             email: z.string().email(),
         }),
+        Permissions: z.enum(["read", "write"]),
     }
 }

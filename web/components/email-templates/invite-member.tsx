@@ -11,10 +11,10 @@ export default createEmailTemplate<{
         return (
             <div style={{
                 maxWidth: "70ch",
-                margin: "1em auto",
-                border: "2px solid lightgray",
-                borderRadius: "12px",
-                padding: "2em",
+                // margin: "1em auto",
+                // border: "2px solid lightgray",
+                // borderRadius: "12px",
+                // padding: "2em",
             }}>
                 <p>
                     You've been invited to a project on WorkflowDog!

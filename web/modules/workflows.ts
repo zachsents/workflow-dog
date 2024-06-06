@@ -1,169 +1,40 @@
-import { useMutation, useQuery, useQueryClient, type UseMutationOptions } from "@tanstack/react-query"
-import { useCurrentWorkflowId } from "@web/lib/client/hooks"
+import { useMutation, type UseMutationOptions } from "@tanstack/react-query"
+import { useCurrentWorkflowId, useOnDatabaseChange } from "@web/lib/client/hooks"
 import { useSupabaseBrowser } from "@web/lib/client/supabase"
+import { trpc } from "@web/lib/client/trpc"
 import axios from "axios"
 import "client-only"
-import { useSearchParams } from "next/navigation"
 import { ExternalToast, toast } from "sonner"
-import { useUser } from "./auth"
-import { useOnDatabaseChange } from "./db"
-import { useQueryParam } from "./router"
 import { useEditorStore, useEditorStoreApi } from "./workflow-editor/store"
 
 
-export function useWorkflowIdFromUrl(skip?: string | undefined) {
-    const [workflowId] = useQueryParam("workflowId")
-    return skip || workflowId
-}
-
-
 export function useWorkflow(workflowId = useCurrentWorkflowId()) {
-    const supabase = useSupabaseBrowser()
-    return useQuery({
-        queryFn: async () => supabase
-            .from("workflows")
-            .select("*")
-            .eq("id", workflowId!)
-            .single()
-            .throwOnError()
-            .then(q => q.data),
-        queryKey: ["workflow", workflowId],
-        enabled: !!workflowId,
-    })
-}
-
-
-export function useRunnableWorkflows(workflowId = useCurrentWorkflowId()) {
-    const supabase = useSupabaseBrowser()
-    const { data: workflow } = useWorkflow(workflowId)
-
-    return useQuery({
-        queryFn: async () => supabase
-            .from("workflows")
-            .select("id, name")
-            .eq("team_id", workflow!.team_id!)
-            .eq("trigger->>type", "https://triggers.workflow.dog/basic/manual")
-            .throwOnError()
-            .then(q => q.data),
-        queryKey: ["runnable-workflows", workflow?.team_id],
-        enabled: !!workflow?.team_id,
-    })
-}
-
-
-interface CreateWorkflowOptions {
-    name: string
-    trigger: string
-}
-
-/**
- * TODO: change to API endpoint so we can:
- * - create associated version, trigger, etc.
- * - do property validation w/ something like zod/joi
- * 
- * Also need to figure out how to make default select from metadata table
- */
-export function useCreateWorkflow() {
-
-    const { data: user } = useUser()
-    const teamId = useSearchParams()?.get("team")
-
-    const supabase = useSupabaseBrowser()
-
-    return useMutation({
-        mutationFn: async ({ name, trigger }: CreateWorkflowOptions) => {
-            if (!user?.id) return void console.warn("User not set")
-            if (!teamId) return void console.warn("Team not set")
-
-            return supabase
-                .from("workflows")
-                .insert({
-                    name,
-                    team_id: teamId,
-                    trigger: { type: trigger },
-                    creator: user.id,
-                })
-                .select("id")
-                .single()
-                .throwOnError()
-                .then(q => q.data)
-        },
-    })
-}
-
-
-export function useWorkflowRuns(workflowId = useCurrentWorkflowId()) {
-    const supabase = useSupabaseBrowser()
-    return useQuery({
-        queryFn: async () => supabase
-            .from("workflow_runs")
-            .select("id, count, status, created_at, scheduled_for, has_errors, error_count, started_at, finished_at")
-            .eq("workflow_id", workflowId!)
-            .order("created_at", { ascending: false })
-            .limit(50)
-            .throwOnError()
-            .then(q => q.data),
-        queryKey: ["workflow-runs", workflowId],
-        enabled: !!workflowId,
+    return trpc.workflows.byId.useQuery({
+        id: workflowId,
     })
 }
 
 
 export function useInvalidateWorkflowRuns(workflowId = useCurrentWorkflowId()) {
-    const queryClient = useQueryClient()
+    const utils = trpc.useUtils()
     return useOnDatabaseChange({
         event: "*",
         schema: "public",
         table: "workflow_runs",
         filter: `workflow_id=eq.${workflowId}`,
     }, (newRow, oldRow) => {
-        queryClient.invalidateQueries({ queryKey: ["workflow-runs", workflowId] })
-        queryClient.invalidateQueries({ queryKey: ["workflow-run", newRow.id || oldRow.id] })
+        utils.workflows.runs.list.invalidate()
+        utils.workflows.runs.byId.invalidate({ id: newRow.id || oldRow.id })
     })
 }
-
-
-/**
- * @deprecated
- * Being phased out in favor of separate useWorkflowRuns and useInvalidateWorkflowRuns
- * so we can invalidate globally but use the query in each needed component
- */
-export function useWorkflowRunsRealtime(workflowId = useCurrentWorkflowId()) {
-    const supabase = useSupabaseBrowser()
-    return useQuery({
-        queryFn: async () => supabase
-            .from("workflow_runs")
-            .select("*")
-            .eq("workflow_id", workflowId!)
-            .order("created_at", { ascending: false })
-            .limit(50)
-            .throwOnError()
-            .then(q => q.data),
-        queryKey: ["workflow-runs", workflowId],
-        enabled: !!workflowId,
-    })
-}
-
-
-export function useWorkflowRun(runId: string) {
-    const supabase = useSupabaseBrowser()
-    return useQuery({
-        queryFn: async () => supabase
-            .from("workflow_runs")
-            .select("*")
-            .eq("id", runId)
-            .single()
-            .throwOnError()
-            .then(q => q.data),
-        queryKey: ["workflow-run", runId],
-        enabled: !!runId,
-    })
-}
-
 
 export function useSelectedWorkflowRun() {
     const selectedRunId = useEditorStore(s => s.selectedRunId)
-    return useWorkflowRun(selectedRunId!)
+    return trpc.workflows.runs.byId.useQuery({
+        id: selectedRunId!,
+    }, {
+        enabled: !!selectedRunId,
+    })
 }
 
 
@@ -192,7 +63,7 @@ export function useRunWorkflowMutation(workflowId = useCurrentWorkflowId(), {
                 const toastOptions: ExternalToast = err.response.data.error.needsUpgrade ? {
                     action: {
                         label: "Upgrade",
-                        onClick: () => window.open(`/projects/${workflow?.team_id}/usage/upgrade`),
+                        onClick: () => window.open(`/projects/${workflow?.team_id}/billing/upgrade`),
                     },
                 } : {}
 

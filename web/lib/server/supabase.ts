@@ -1,24 +1,29 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
 import { createClient } from "@supabase/supabase-js"
-import type { Database } from "@web/lib/types/db"
-import jwt, { JwtPayload } from "jsonwebtoken"
+import jwt, { type JwtPayload } from "jsonwebtoken"
 import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
 import { NextResponse, type NextRequest } from "next/server"
 import "server-only"
+import { getAuthTokenFromRequest } from "./utils"
 
 
-/*
-    Apparently this file should only use edge runtime stuff
-*/
-
-
+/**
+ * Creates in instance of the Supabase client for server-side use.
+ * Suitable for use in server components, as well as API routes (including
+ * TRPC procedures).
+ */
 export function supabaseServer() {
     const cookieStore = cookies()
 
-    return createServerClient<Database>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL)
+        throw new Error("NEXT_PUBLIC_SUPABASE_URL is not set")
+
+    if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+        throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY is not set")
+
+    return createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         {
             cookies: {
                 get(name: string) {
@@ -48,42 +53,120 @@ export function supabaseServer() {
 }
 
 
+/**
+ * Creates an admin instance of the Supabase client for server-side use.
+ * Make sure to always perform some other form of authentication before
+ * using this function, as it bypasses all Supabase security rules.
+ */
 export async function supabaseServerAdmin() {
-    return createClient<Database>(
+    return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_KEY!,
     )
 }
 
 
-export function supabaseVerifyJWT(
-    req: Request,
-    shouldThrow = true
-): typeof shouldThrow extends true ? JwtPayload : (JwtPayload | false) {
-
-    const token = req.headers.get("Authorization")?.replace("Bearer ", "")
-    if (!token) {
-        if (shouldThrow)
-            throw new Error("No token provided")
-        else
-            return false
+type SessionPayload = {
+    aud: string
+    exp: number
+    iat: number
+    iss: string
+    sub: string
+    email: string
+    phone: string
+    app_metadata: {
+        provider: string
+        providers: string[]
     }
+    user_metadata: {
+        avatar_url: string
+        email: string
+        email_verified: boolean
+        full_name: string
+        iss: string
+        name: string
+        phone_verified: boolean
+        picture: string
+        provider_id: string
+        sub: string
+    }
+    role: SupabaseJWTRole
+    aal: string
+    amr: Array<{
+        method: string
+        timestamp: number
+    }>
+    user_id: string
+    session_id: string
+    is_anonymous: boolean
+}
 
-    const verify = () => jwt.verify(token, process.env.SUPABASE_JWT_SECRET!) as JwtPayload
 
-    if (shouldThrow)
-        return verify()
+export async function getVerifiedSession() {
+    const supabase = supabaseServer()
+
+    const session = await supabase.auth.getSession()
+        .then(res => res.data.session)
+
+    if (!session)
+        return null
+
+    if (!process.env.SUPABASE_JWT_SECRET)
+        throw new Error("SUPABASE_JWT_SECRET is not set")
 
     try {
-        return verify()
+        const decoded = jwt.verify(session.access_token, process.env.SUPABASE_JWT_SECRET) as JwtPayload
+        return {
+            ...decoded,
+            user_id: decoded.sub,
+        } as SessionPayload
     }
-    catch (error) {
-        return false
+    catch (err) {
+        console.debug("JWT verification failed", err)
+        return null
     }
 }
 
 
-export async function updateSession(request: NextRequest) {
+export async function getCurrentUser() {
+    const supabase = supabaseServer()
+    return supabase.auth.getUser()
+        .then(res => res.data.user)
+}
+
+type SupabaseJWTRole = "authenticated" | "anon" | "service_role"
+
+type SupabaseJWTPayload = {
+    iss: string
+    ref: string
+    role: SupabaseJWTRole
+    iat: number
+    exp: number
+}
+
+export function supabaseVerifyJWT(requestOrToken: Request | string): { verified: false } | { verified: true, payload: SupabaseJWTPayload } {
+
+    const token = typeof requestOrToken === "string"
+        ? requestOrToken
+        : getAuthTokenFromRequest(requestOrToken)
+
+    if (!token)
+        return { verified: false }
+
+    try {
+        const payload = jwt.verify(token, process.env.SUPABASE_JWT_SECRET!) as SupabaseJWTPayload
+        return { verified: true, payload }
+    }
+    catch (err) {
+        console.debug("JWT verification failed", err)
+        return { verified: false }
+    }
+}
+
+
+export async function supabaseSessionRefreshMiddleware(request: NextRequest) {
+    console.debug("supabase/updateSession")
+
     let response = NextResponse.next({
         request: {
             headers: request.headers,
@@ -139,59 +222,4 @@ export async function updateSession(request: NextRequest) {
     await supabase.auth.getUser()
 
     return response
-}
-
-
-export interface RequireLoginOptions {
-    params?: Record<string, string>
-    beforeRedirect?: () => void
-}
-
-export async function requireLogin(options?: RequireLoginOptions) {
-    const supabase = supabaseServer()
-    const { data, error } = await supabase.auth.getUser()
-
-    if (!error && data?.user)
-        return data.user
-
-    options?.beforeRedirect?.()
-
-    if (options?.params) {
-        const urlParams = new URLSearchParams(options.params)
-        redirect(`/login?${urlParams.toString()}`)
-    }
-
-    redirect("/login")
-}
-
-
-const commonMessages = {
-    "PGRST116": "You don't have permission.",
-}
-
-export interface RemapErrorReturn {
-    error: {
-        message: string
-        [key: string]: any
-    }
-}
-
-export function remapError(result: any, messages: Record<string, string | false> = {}): RemapErrorReturn | null {
-    if (!result.error)
-        return null
-
-    const message = {
-        ...commonMessages,
-        ...messages,
-    }[result.error.code] ?? result.error.message
-
-    if (message === false)
-        return null
-
-    return {
-        error: {
-            ...result.error,
-            message,
-        }
-    }
 }

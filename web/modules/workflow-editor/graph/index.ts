@@ -1,10 +1,12 @@
 import { useDebouncedEffect, useDebouncedState } from "@react-hookz/web"
-import { useSupabaseMutation } from "@web/modules/db"
+import { useCurrentWorkflowId } from "@web/lib/client/hooks"
+import { trpc } from "@web/lib/client/trpc"
 import { useMountDelay } from "@web/modules/util"
 import { useWorkflow } from "@web/modules/workflows"
 import _ from "lodash"
 import { useEffect, useMemo } from "react"
 import { useEdges, useNodes } from "reactflow"
+import { toast } from "sonner"
 import { useEditorStoreApi } from "../store"
 import { WorkflowGraph } from "../types"
 
@@ -14,7 +16,8 @@ export function useGraphSaving() {
     const nodes = useNodes()
     const edges = useEdges()
 
-    const { data: workflow, isSuccess: isWorkflowLoaded } = useWorkflow()
+    const workflowId = useCurrentWorkflowId()
+    const { isSuccess: isWorkflowLoaded } = useWorkflow()
 
     const [debouncedRawGraph, onGraphChange] = useDebouncedState<WorkflowGraph>({ nodes, edges }, 250)
     useEffect(() => {
@@ -27,19 +30,15 @@ export function useGraphSaving() {
     const convertedGraph = useMemo(() => convertGraphForRemote(debouncedRawGraph), [debouncedRawGraph])
     const convertedGraphStr = useMemo(() => JSON.stringify(convertedGraph), [convertedGraph])
 
-    const updateGraph = useSupabaseMutation(
-        (supabase) => supabase
-            .from("workflows")
-            .update({
-                graph: convertedGraph as any,
-                last_edited_at: new Date().toISOString(),
-            })
-            .eq("id", workflow!.id) as any,
-        {
-            enabled: !!workflow,
-            // invalidateKey: ["workflow", workflow?.id],
+    const {
+        mutateAsync: updateGraph,
+        isPending: isSaving,
+    } = trpc.workflows.updateGraph.useMutation({
+        onError: (error) => {
+            console.debug(error)
+            toast.error("Failed to save graph. If you're not offline, then this is probably a bug.")
         }
-    )
+    })
 
     const isReadyToSave = useMountDelay(1000, {
         callback: () => console.debug("Ready to save graph"),
@@ -49,7 +48,7 @@ export function useGraphSaving() {
     const editorStore = useEditorStoreApi()
 
     const shouldSave = isWorkflowLoaded
-        && !updateGraph.isPending
+        && !isSaving
         && isReadyToSave
         && !(convertedGraph.nodes.length === 0 && convertedGraph.edges.length === 0)
 
@@ -61,7 +60,11 @@ export function useGraphSaving() {
     useDebouncedEffect(() => {
         if (shouldSave) {
             console.debug("Saving graph...", convertedGraph)
-            updateGraph.mutateAsync(null).then(() => {
+
+            updateGraph({
+                workflowId: workflowId,
+                graph: convertedGraph,
+            }).then(() => {
                 console.debug("Graph saved")
                 editorStore.setState({ saving: false })
             })
@@ -76,8 +79,9 @@ export function convertGraphFromRemote(graph: WorkflowGraph) {
 
 
 export function convertGraphForRemote(graph: WorkflowGraph) {
+    const omitProps = ["selected", "dragging"]
     return {
-        nodes: graph.nodes.map(n => _.omit(n, "selected")),
-        edges: graph.edges.map(e => _.omit(e, "selected")),
+        nodes: graph.nodes.map(n => _.omit(n, omitProps)),
+        edges: graph.edges.map(e => _.omit(e, omitProps)),
     }
 }

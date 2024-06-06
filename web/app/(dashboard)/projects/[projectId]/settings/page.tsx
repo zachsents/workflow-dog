@@ -1,7 +1,10 @@
 import { Card } from "@ui/card"
+import { Button } from "@web/components/ui/button"
 import { Separator } from "@web/components/ui/separator"
+import { countProjectMembers, getProjectBilling } from "@web/lib/server/internal"
+import Link from "next/link"
 import { IconType } from "react-icons"
-import { TbPuzzle, TbSettings, TbUsers } from "react-icons/tb"
+import { TbPuzzle, TbSettings, TbStar, TbUsers } from "react-icons/tb"
 import DeleteProject from "./_components/delete-project"
 import GeneralSettingsForm from "./_components/general-form"
 import InviteMember from "./_components/invite-member"
@@ -9,6 +12,11 @@ import MembersTable from "./_components/members-table"
 
 
 export default async function SettingsPage({ params: { projectId } }) {
+
+    const billingInfo = await getProjectBilling(projectId)
+    const memberCount = await countProjectMembers(projectId)
+    const hasReachedMemberLimit = memberCount >= billingInfo.limits.teamMembers
+
     return (<>
         <div className="flex justify-between gap-10">
             <h1 className="text-2xl font-bold">
@@ -31,7 +39,17 @@ export default async function SettingsPage({ params: { projectId } }) {
 
         <SettingsSection
             title="Team" icon={TbUsers}
-            rightSection={<InviteMember projectId={projectId} />}
+            rightSection={hasReachedMemberLimit
+                ? <Button asChild>
+                    <Link
+                        href={`/projects/${projectId}/billing/upgrade`}
+                        className="flex center gap-2"
+                    >
+                        <TbStar />
+                        Upgrade to invite more members
+                    </Link>
+                </Button>
+                : <InviteMember projectId={projectId} />}
         >
             <MembersTable projectId={projectId} />
         </SettingsSection>

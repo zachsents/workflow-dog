@@ -1,14 +1,13 @@
 import { Button } from "@web/components/ui/button"
 import { cn } from "@web/lib/utils"
-import { uniqueId } from "@web/modules/util"
 import { useDefinition, useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
+import { useEditorStore } from "@web/modules/workflow-editor/store"
 import { produce } from "immer"
 import { useMemo } from "react"
 import { TbPlus } from "react-icons/tb"
 import { useNodeId, useReactFlow } from "reactflow"
-import { PREFIX } from "shared/prefixes"
+import { IdNamespace, createRandomId } from "shared/utils"
 import ActionNodeHandle from "./handle"
-import { useEditorStore } from "@web/modules/workflow-editor/store"
 
 
 export default function HandleRenderer({ type }: { type: "input" | "output" }): React.JSX.Element {
@@ -33,7 +32,6 @@ export default function HandleRenderer({ type }: { type: "input" | "output" }): 
                         && !inter.hidden
                 ),
             ] as const),
-        // .filter(([, interfaces]) => interfaces.length > 0),
         [interfaces]
     )
 
@@ -42,12 +40,16 @@ export default function HandleRenderer({ type }: { type: "input" | "output" }): 
             const node = draft.find(node => node.id === nodeId)
             if (!node) return
 
-            const definition = nodeDefinition?.[plural][definitionId]
+            const definition = nodeDefinition?.[plural]?.[definitionId]
 
             node.data[plural].push({
-                id: uniqueId(isInput ? PREFIX.INPUT : PREFIX.OUTPUT),
+                id: createRandomId(
+                    isInput
+                        ? IdNamespace.InputHandle
+                        : IdNamespace.OutputHandle
+                ),
                 definition: definitionId,
-                ...definition?.named && { name: "" },
+                ...definition?.groupType === "record" && { name: "" },
             })
         }))
     }
@@ -61,12 +63,14 @@ export default function HandleRenderer({ type }: { type: "input" | "output" }): 
 
             <div className="flex flex-col gap-2">
                 {interfaceGroups.map(([definitionId, interfaces]) => {
-                    const definition = nodeDefinition?.[plural][definitionId]
+                    const definition = nodeDefinition?.[plural]?.[definitionId]
+                    const isMultiple = definition?.groupType === "list"
+                        || definition?.groupType === "record"
                     return (
                         <div key={definitionId}>
-                            {definition?.group &&
+                            {isMultiple &&
                                 <p className="text-xs text-muted-foreground">
-                                    {definition.groupName || definition.name}
+                                    {definition?.name}
                                 </p>}
 
                             <div className={cn(
@@ -84,7 +88,7 @@ export default function HandleRenderer({ type }: { type: "input" | "output" }): 
                                 )}
                             </div>
 
-                            {!hasSelectedRun && definition?.group &&
+                            {!hasSelectedRun && isMultiple &&
                                 <Button
                                     size="sm" variant="link"
                                     className="text-xs h-[1.25em]"

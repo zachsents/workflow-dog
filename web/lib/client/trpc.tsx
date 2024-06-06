@@ -5,6 +5,7 @@ import { createTRPCReact, httpBatchLink } from "@trpc/react-query"
 import "client-only"
 import { useState } from "react"
 import type { AppRouter } from "../types/trpc"
+import SuperJSON from "superjson"
 
 
 export const trpc = createTRPCReact<AppRouter>()
@@ -21,6 +22,7 @@ export function TRPCProvider({ queryClient, children }: { queryClient: QueryClie
                             // authorization: getAuthCookie(),
                         }
                     },
+                    transformer: SuperJSON,
                 }),
             ],
         }),

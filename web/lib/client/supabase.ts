@@ -1,11 +1,10 @@
 import { createBrowserClient } from "@supabase/ssr"
 import { useQueryClient } from "@tanstack/react-query"
-import type { Database } from "@web/lib/types/db"
 import { useEffect, useMemo } from "react"
 
 
 export function getSupabaseBrowserClient() {
-    return createBrowserClient<Database>(
+    return createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
@@ -18,9 +17,11 @@ export function useSupabaseBrowser() {
 
 
 /**
- * Only used once in the component below.
+ * Need this as a component instead of a custom hook so it can be
+ * nested in the QueryClientProvider.
  */
-export function useSupabaseSetup() {
+export function SupabaseSetup() {
+
     const queryClient = useQueryClient()
     const supabase = useSupabaseBrowser()
 
@@ -39,14 +40,6 @@ export function useSupabaseSetup() {
         })
         return () => subscription.unsubscribe()
     }, [])
-}
 
-
-/**
- * Need this as a component so it can be nested in the 
- * QueryClientProvider.
- */
-export function SupabaseSetup() {
-    useSupabaseSetup()
     return null
 }

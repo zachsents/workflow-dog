@@ -1,4 +1,4 @@
-import { requireLogin } from "@web/lib/server/supabase"
+import { requireLogin } from "@web/lib/server/router"
 import DashboardHeader from "./_components/header"
 
 
@@ -8,7 +8,6 @@ export default async function DashboardLayout({
     children: React.ReactNode
 }) {
     await requireLogin()
-
     return (
         <div className="bg-slate-200 bg-dots h-full">
             <DashboardHeader />

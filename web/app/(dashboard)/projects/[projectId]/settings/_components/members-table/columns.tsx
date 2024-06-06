@@ -1,6 +1,6 @@
 "use client"
 
-import { createColumnHelper, type CellContext } from "@tanstack/react-table"
+import { createColumnHelper, type CellContext, type ColumnDef } from "@tanstack/react-table"
 import { useUser } from "@web/modules/auth"
 import { TbCheck } from "react-icons/tb"
 import type { MemberRow } from "."
@@ -68,7 +68,7 @@ const actionsColumn = columnHelper.display({
     cell: MemberActionsMenu,
 })
 
-export const columns = [
+export const columns: ColumnDef<MemberRow, unknown>[] = [
     emailColumn,
     canReadColumn,
     canWriteColumn,

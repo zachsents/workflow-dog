@@ -1,8 +1,7 @@
-import { uniqueId } from "@web/modules/util"
 import { produce } from "immer"
 import type { Edge, Node, ReactFlowInstance, XYPosition } from "reactflow"
 import { getNodesBounds } from "reactflow"
-import { PREFIX } from "shared/prefixes"
+import { IdNamespace, createRandomId } from "shared/utils"
 import { ActionNodeInput, ActionNodeOutput } from "../types"
 
 
@@ -39,19 +38,19 @@ export function duplicateElements(
 
     const newNodes = nodes?.map(n => {
         const newNode = structuredClone(n)
-        newNode.id = uniqueId(PREFIX.NODE)
+        newNode.id = createRandomId(IdNamespace.ActionNode)
         newNode.position.x += position ? positionOffsetX : (xOffset ?? offset)
         newNode.position.y += position ? positionOffsetY : (yOffset ?? offset)
         newNode.selected = true
 
         newNode.data.inputs?.forEach((input: ActionNodeInput) => {
-            const newInputId = uniqueId(PREFIX.INPUT)
+            const newInputId = createRandomId(IdNamespace.InputHandle)
             nodeInputIdMap[input.id] = newInputId
             input.id = newInputId
         })
 
         newNode.data.outputs?.forEach((output: ActionNodeOutput) => {
-            const newOutputId = uniqueId(PREFIX.OUTPUT)
+            const newOutputId = createRandomId(IdNamespace.OutputHandle)
             nodeOutputIdMap[output.id] = newOutputId
             output.id = newOutputId
         })
@@ -63,7 +62,7 @@ export function duplicateElements(
 
     const newEdges = (edges?.map(e => {
         const newEdge = structuredClone(e)
-        newEdge.id = uniqueId(PREFIX.EDGE)
+        newEdge.id = createRandomId(IdNamespace.Edge)
         newEdge.source = nodeIdMap[e.source]
         newEdge.sourceHandle = nodeOutputIdMap[e.sourceHandle!] || e.sourceHandle
         newEdge.target = nodeIdMap[e.target]

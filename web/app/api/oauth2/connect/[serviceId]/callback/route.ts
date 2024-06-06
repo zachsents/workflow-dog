@@ -1,106 +1,113 @@
-import { errorResponse } from "@web/lib/server/router"
-import { remapError, supabaseServer } from "@web/lib/server/supabase"
-import _ from "lodash"
+import type { OAuth2Config } from "@pkg/types/server"
+import { db } from "@web/lib/server/db"
+import { cleanToken, fetchProfile, oauth2RedirectUrl } from "@web/lib/server/internal/service-accounts"
+import { errorResponse, requireLogin } from "@web/lib/server/router"
 import { cookies } from "next/headers"
 import { type NextRequest } from "next/server"
 import { ServiceDefinitions } from "packages/server"
-import type { OAuth2Config } from "packages/types"
-import { cleanToken, defaultOAuth2AccountConfig, fetchProfile, getOAuthClientForService, redirectUri } from "../_util"
 
 
 export async function GET(
     req: NextRequest,
-    { params: { serviceId: safeServiceId } }: { params: { serviceId: string } }
+    { params: { serviceId: serviceDefId } }: { params: { serviceId: string } }
 ) {
-    const searchParams = req.nextUrl.searchParams
+    const session = await requireLogin()
 
-    if (searchParams.has("error")) {
-        console.error("Error connecting service:", searchParams.get("error"))
-        return errorResponse(searchParams.get("error_description") || "Error connecting service", 400)
+    const params = req.nextUrl.searchParams
+
+    if (params.has("error")) {
+        console.error("Error connecting service:", params.get("error"))
+        return errorResponse(params.get("error_description") || "Error connecting service", 400)
     }
 
-    if (!searchParams.has("code"))
+    if (!params.has("code"))
         return errorResponse("Missing code", 400)
 
     const cookieStore = cookies()
-    const teamId = cookieStore.get("oauth_team")?.value
-    if (!teamId)
+    const projectId = cookieStore.get("oauth_project")?.value
+    if (!projectId)
         return errorResponse("Missing team ID", 400)
 
-    const service = ServiceDefinitions.resolve(safeServiceId)
+    const serviceDef = ServiceDefinitions.get(serviceDefId)
 
-    if (!service)
+    if (!serviceDef)
         return errorResponse("Service not found", 404)
 
-    const config = _.merge({}, defaultOAuth2AccountConfig, service.authAcquisition) as OAuth2Config
+    const oauthConfig = (serviceDef as any).oauth2Config as OAuth2Config
 
-    if (config.state) {
+    if (oauthConfig.state) {
         const cookieState = cookieStore.get("oauth_state")?.value
-        const queryState = searchParams.get("state")
+        const queryState = params.get("state")
 
         if (!cookieState || !queryState || cookieState !== queryState)
             return errorResponse("Invalid state", 400)
     }
 
-    const { clientId, clientSecret } = await getOAuthClientForService(service.id, true)
-
-    const response = await fetch(config.tokenUrl, {
+    const response = await fetch(oauthConfig.tokenUrl, {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
         },
         redirect: "follow",
         body: new URLSearchParams({
-            client_id: clientId,
-            client_secret: clientSecret,
-            code: searchParams.get("code"),
+            client_id: oauthConfig.clientId,
+            client_secret: oauthConfig.clientSecret,
+            code: params.get("code")!,
             grant_type: "authorization_code",
-            ...config.includeRedirectUriInTokenRequest && {
-                redirect_uri: redirectUri(safeServiceId)
+            ...oauthConfig.includeRedirectUriInTokenRequest && {
+                redirect_uri: oauth2RedirectUrl(serviceDefId)
             },
-        } as any).toString(),
+        }).toString(),
     })
 
     if (!response.ok)
         return errorResponse(await response.text(), response.status)
 
-    const { refresh_token, ...tokenObj } = cleanToken(await response.json())
+    const {
+        refresh_token,
+        ...tokenObj
+    } = cleanToken(await response.json(), oauthConfig.scopeDelimiter)
 
-    const profile = await fetchProfile(config.profileUrl, tokenObj.access_token)
+    const profile = await fetchProfile(oauthConfig.profileUrl, tokenObj.access_token)
 
-    const supabase = supabaseServer()
+    const accountData = {
+        service_id: serviceDefId,
+        service_user_id: oauthConfig.getServiceUserId(profile, tokenObj),
+        display_name: oauthConfig.getDisplayName(profile, tokenObj),
+        profile,
+        token: tokenObj,
+        creator: session.user_id,
+        // adding this as a separate field so it doesn't get overwritten 
+        // by other token updates
+        ...refresh_token && { refresh_token },
+    }
 
-    const insertQuery = await supabase
-        .from("integration_accounts")
-        .upsert({
-            service_id: service.id,
-            service_user_id: config.getServiceUserId(profile, tokenObj),
-            display_name: config.getDisplayName(profile, tokenObj),
-            profile,
-            token: tokenObj,
-            creator: await supabase.auth.getUser().then(u => u.data.user?.id),
-            // adding this as a separate field so it doesn't get overwritten 
-            // by other token updates
-            ...refresh_token && { refresh_token },
-        }, {
-            onConflict: "service_id, service_user_id",
-        })
-        .select("id")
-        .single()
+    await db.transaction().execute(async trx => {
 
-    let error = remapError(insertQuery)
-    if (error) return errorResponse(error.error.message, 500)
+        const existingAccount = await trx.selectFrom("service_accounts")
+            .select("id")
+            .where("service_def_id", "=", serviceDefId)
+            .where("service_user_id", "=", accountData.service_user_id)
+            .executeTakeFirst()
 
-    const joinQuery = await supabase.from("integration_accounts_teams").upsert({
-        integration_account_id: insertQuery.data?.id!,
-        team_id: teamId,
+        const newAccount = await (existingAccount
+            ? trx.updateTable("service_accounts")
+                .set(accountData)
+                .where("id", "=", existingAccount.id)
+                .returning("id")
+                .executeTakeFirstOrThrow()
+            : trx.insertInto("service_accounts")
+                .values(accountData)
+                .returning("id")
+                .executeTakeFirstOrThrow())
+
+        await trx.insertInto("projects_service_accounts")
+            .values({
+                project_id: projectId,
+                service_account_id: newAccount.id,
+            })
+            .executeTakeFirstOrThrow()
     })
-
-    error = remapError(joinQuery, {
-        "42501": false,
-        "23505": false,
-    })
-    if (error) return errorResponse(error.error.message, 500)
 
     return new Response("<p>Connected! You can close this tab now.</p><script>window.close()</script>", {
         headers: {

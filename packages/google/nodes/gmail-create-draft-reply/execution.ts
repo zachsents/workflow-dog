@@ -1,4 +1,4 @@
-import { assertArgProvided } from "@pkg/_lib"
+import { assertArgProvided } from "@pkg/lib"
 import { createExecutionNodeDefinition } from "@pkg/types"
 import { parseMessage } from "@web/lib/server/gmail"
 import { google } from "googleapis"

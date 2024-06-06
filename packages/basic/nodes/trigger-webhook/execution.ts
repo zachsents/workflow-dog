@@ -1,7 +1,7 @@
 import { createExecutionNodeDefinition } from "@pkg/types"
 import shared from "./shared"
 import axios from "axios"
-import { assertArgProvided } from "@pkg/_lib"
+import { assertArgProvided } from "@pkg/lib"
 
 export default createExecutionNodeDefinition(shared, {
     action: async ({ url, body }) => {

@@ -1,9 +1,9 @@
-import { uniqueId } from "@web/modules/util"
+import { areSchemasCompatible, createTypeLabel } from "@web/lib/client/type-meta-utils"
 import { object as modifierDefs } from "@web/modules/workflow-editor/modifiers"
-import { DataTypeDefinitions, NodeDefinitions } from "packages/client"
+import { NodeDefinitions } from "packages/client"
 import { useCallback } from "react"
 import { Edge, OnConnect, useReactFlow } from "reactflow"
-import { PREFIX } from "shared/prefixes"
+import { IdNamespace, createRandomId, parseId } from "shared/utils"
 import { toast } from "sonner"
 import { ActionNodeInput, ActionNodeOutput } from "../types"
 
@@ -39,64 +39,64 @@ export function useOnConnect() {
         /**
          * Search for the type of both handles
          */
-        function getType(nodeId: string, handleId: string) {
+        function getDefinition(nodeId: string, handleId: string) {
             const node = rf.getNode(nodeId)
 
             if (!node)
                 throw new Error(`Node with ID ${nodeId} not found`)
 
-            const [prefix, restOfId] = handleId.split(":")
+            const { namespace } = parseId(handleId)
 
-            if (prefix === PREFIX.CONTROL_INPUT || prefix === PREFIX.CONTROL_OUTPUT)
-                return DataTypeDefinitions.get(modifierDefs[restOfId].type)
+            if (namespace === IdNamespace.ControlInputHandle
+                || namespace === IdNamespace.ControlOutputHandle)
+                return modifierDefs[handleId].interfaceDefinition
 
             const nodeDefinition = NodeDefinitions.get(node.data.definition)
             if (!nodeDefinition)
                 throw new Error(`Node definition with ID ${node.data.definition} not found`)
 
-            if (prefix === PREFIX.INPUT) {
+            if (namespace === IdNamespace.InputHandle) {
                 const inputDefinitionId = node.data.inputs
                     .find((i: ActionNodeInput) => i.id === handleId)
                     .definition
-                const typeId = nodeDefinition.inputs[inputDefinitionId].type
-                return DataTypeDefinitions.get(typeId)
+                return nodeDefinition.inputs[inputDefinitionId]
             }
 
-            if (prefix === PREFIX.OUTPUT) {
+            if (namespace === IdNamespace.OutputHandle) {
                 const outputDefinitionId = node.data.outputs
                     .find((o: ActionNodeOutput) => o.id === handleId)
                     .definition
-                const typeId = nodeDefinition.outputs[outputDefinitionId].type
-                return DataTypeDefinitions.get(typeId)
+                return nodeDefinition.outputs[outputDefinitionId]
             }
         }
 
-        const sourceType = getType(params.source!, params.sourceHandle!)
-        const targetType = getType(params.target!, params.targetHandle!)
+        const sourceDef = getDefinition(params.source!, params.sourceHandle!)
+        const targetDef = getDefinition(params.target!, params.targetHandle!)
 
         const connect = (forced = false) => {
             rf.addEdges({
                 ...params,
                 data: { forced },
-                id: uniqueId(PREFIX.EDGE),
+                id: createRandomId(IdNamespace.Edge),
             } as Edge)
         }
 
-        // TODO: Implement a function that checks if the types match
-        const anyType = "https://data-types.workflow.dog/basic/any"
-        const areTypesCompatible = !!sourceType && !!targetType && (
-            sourceType.id === targetType.id
-            || sourceType.id === anyType
-            || targetType.id === anyType
-            || sourceType.compatibleWith?.includes(targetType.id)
-            || targetType.compatibleWith?.includes(sourceType.id)
-        )
+        const areTypesCompatible = sourceDef?.schema && targetDef?.schema
+            ? areSchemasCompatible(sourceDef.schema, targetDef.schema)
+            : false
 
         connect(!areTypesCompatible)
-        console.debug(`Connected ${sourceType?.name} to ${targetType?.name}`, sourceType, targetType)
+
+        const sourceTypeLabel = sourceDef?.schema
+            ? createTypeLabel(sourceDef.schema)
+            : "Unknown"
+        const targetTypeLabel = targetDef?.schema
+            ? createTypeLabel(targetDef.schema)
+            : "Unknown"
+        console.debug(`Connected ${sourceTypeLabel} to ${targetTypeLabel}`, sourceDef, targetDef)
 
         if (!areTypesCompatible)
-            toast(`You conneced a ${sourceType?.name || "Unknown"} output to a ${targetType?.name || "Unknown"} input.`, {
+            toast(`You conneced a ${sourceTypeLabel} output to a ${targetTypeLabel} input.`, {
                 description: "Since the types don't match, this could lead to unexpected behavior."
             })
     }, [])

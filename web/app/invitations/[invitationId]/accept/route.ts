@@ -1,5 +1,5 @@
 import { db } from "@web/lib/server/db"
-import { requireLogin } from "@web/lib/server/supabase"
+import { requireLogin } from "@web/lib/server/router"
 import { revalidatePath } from "next/cache"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
@@ -10,7 +10,7 @@ export async function GET(
     _: NextRequest,
     { params: { invitationId } }: { params: { invitationId: string } }
 ) {
-    const user = await requireLogin({
+    const { email } = await requireLogin({
         beforeRedirect: () => {
             const cookieStore = cookies()
             cookieStore.set("accepting_invitation", invitationId)
@@ -26,8 +26,8 @@ export async function GET(
     if (!invitation)
         return redirect("/projects?tm=That invitation was invalid")
 
-    if (invitation.invitee_email !== user.email)
-        return redirect(`/projects?tm=That invitation was not for you (${user.email})`)
+    if (invitation.invitee_email !== email)
+        return redirect(`/projects?tm=That invitation was not for you (${email})`)
 
     await db.insertInto("projects_users")
         .values(({ selectFrom }) => ({

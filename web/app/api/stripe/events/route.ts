@@ -1,7 +1,9 @@
+import { db } from "@web/lib/server/db"
 import { errorResponse } from "@web/lib/server/router"
 import { getStripe } from "@web/lib/server/stripe"
-import { supabaseServerAdmin } from "@web/lib/server/supabase"
+import { sql } from "kysely"
 import { NextRequest, NextResponse } from "next/server"
+import { type BillingPlan } from "shared/db"
 import Stripe from "stripe"
 
 
@@ -43,16 +45,18 @@ const EventHandlers: EventHandlersRecord = {
 }
 
 
-async function setBillingPlan(projectId: string, billing_plan: string | null, updateStartDate: boolean) {
-    const supabase = await supabaseServerAdmin()
-    await supabase
-        .from("teams")
-        .update({
-            billing_plan: billing_plan as any,
+async function setBillingPlan(
+    projectId: string,
+    billingPlan: BillingPlan | null,
+    updateStartDate: boolean,
+) {
+    await db.updateTable("projects")
+        .set({
+            billing_plan: billingPlan,
             ...updateStartDate && {
-                billing_start_date: new Date().toISOString().split("T")[0],
+                billing_start_date: sql`current_date`,
             },
         })
-        .eq("id", projectId)
-        .throwOnError()
+        .where("id", "=", projectId)
+        .executeTakeFirstOrThrow()
 }

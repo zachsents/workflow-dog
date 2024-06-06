@@ -80,6 +80,7 @@
         "sonner": "^1.4.41",
         "stringify-object": "^5.0.0",
         "stripe": "^15.1.0",
+        "superjson": "^2.2.1",
         "tailwind-merge": "^2.2.2",
         "tailwindcss-animate": "^1.0.7",
         "zod": "^3.22.4",

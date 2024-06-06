@@ -10,6 +10,7 @@ import {
     TableOptions,
     flexRender,
     getCoreRowModel,
+    getFilteredRowModel,
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
@@ -51,6 +52,7 @@ export function DataTable<TData, TValue>({
         columns,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
         ...tableOptions,
     })
 

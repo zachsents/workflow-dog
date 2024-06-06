@@ -110,7 +110,12 @@ export default function NodeToolbar() {
                 <ToolbarSeparator />
 
                 {isSingleNode && modList.map(modType =>
-                    <ModifierButton {...modType} key={modType.id} />
+                    <ModifierButton
+                        id={modType.id}
+                        name={modType.interfaceDefinition.name}
+                        icon={modType.icon}
+                        key={modType.id}
+                    />
                 )}
             </Card>
         </div>

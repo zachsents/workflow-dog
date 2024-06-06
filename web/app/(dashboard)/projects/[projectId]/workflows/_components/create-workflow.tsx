@@ -1,28 +1,47 @@
 "use client"
 
 import { Button } from "@ui/button"
+import Loader from "@web/components/loader"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@web/components/ui/dialog"
 import { Input } from "@web/components/ui/input"
-import { useAction } from "@web/lib/client/actions"
-import { TbPlus } from "react-icons/tb"
-import { createWorkflow as createWorkflowAction } from "../../../../actions"
-import Loader from "@web/components/loader"
-import { useRouter } from "next/navigation"
 import { useCurrentProjectId } from "@web/lib/client/hooks"
+import { trpc } from "@web/lib/client/trpc"
+import { useRouter } from "next/navigation"
+import { TbPlus } from "react-icons/tb"
+import { toast } from "sonner"
 
 
 export default function CreateWorkflow() {
 
     const projectId = useCurrentProjectId()
-
-    const [createWorkflow, { isPending }] = useAction(
-        createWorkflowAction.bind(null, projectId),
-        {
-            successToast: "Workflow created!",
-            showErrorToast: true,
-        }
-    )
     const router = useRouter()
+
+    const {
+        mutate: createWorkflow,
+        isPending,
+        isSuccess,
+    } = trpc.workflows.create.useMutation({
+        onSuccess: ({ id }) => {
+            toast.success("Workflow created!")
+            router.push(`/workflows/${id}/edit`)
+        },
+        onError: (err) => {
+            console.debug(err)
+            toast.error(err.data?.message)
+        },
+    })
+
+    const handleSubmit = (ev: React.FormEvent<HTMLFormElement>) => {
+        ev.preventDefault()
+        const workflowName = new FormData(ev.currentTarget).get("workflowName")?.toString()
+        if (workflowName)
+            createWorkflow({
+                name: workflowName,
+                projectId,
+            })
+    }
+
+    const showLoading = isPending || isSuccess
 
     return (
         <Dialog>
@@ -42,25 +61,24 @@ export default function CreateWorkflow() {
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={ev => {
-                    ev.preventDefault()
-                    const workflowName = new FormData(ev.currentTarget).get("workflowName")
-                    createWorkflow(workflowName)
-                        .then(({ id }) => router.push(`/workflows/${id}/edit?select_trigger`))
-                }}>
+                <form onSubmit={handleSubmit}>
                     <Input
                         name="workflowName"
-                        placeholder="Workflow Name"
+                        placeholder="Route customer support requests based on topic"
                         required
                     />
 
                     <DialogFooter className="mt-4">
                         <Button
                             type="submit"
-                            disabled={isPending}
+                            disabled={showLoading}
                         >
-                            {isPending && <Loader mr />}
-                            Create Workflow
+                            {showLoading
+                                ? <>
+                                    <Loader mr />
+                                    Creating workflow...
+                                </>
+                                : "Create Workflow"}
                         </Button>
                     </DialogFooter>
                 </form>

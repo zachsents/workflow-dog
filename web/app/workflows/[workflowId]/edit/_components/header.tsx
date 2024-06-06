@@ -1,5 +1,6 @@
 "use client"
 
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useClickOutside } from "@react-hookz/web"
 import { Button } from "@ui/button"
 import {
@@ -11,47 +12,85 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@ui/dropdown-menu"
+import { Form, FormControl, FormField, FormItem } from "@ui/form"
 import { Input } from "@ui/input"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@ui/tooltip"
 import Loader from "@web/components/loader"
+import SimpleTooltip from "@web/components/simple-tooltip"
+import { useBooleanState, useCurrentProjectId, useCurrentWorkflowId } from "@web/lib/client/hooks"
+import { trpc } from "@web/lib/client/trpc"
 import { cn } from "@web/lib/utils"
-import { useSupabaseMutation } from "@web/modules/db"
-import { useSyncToState } from "@web/modules/util"
 import { useEditorSettings } from "@web/modules/workflow-editor/settings"
+import { useEditorStore } from "@web/modules/workflow-editor/store"
 import { useWorkflow } from "@web/modules/workflows"
 import { toPng } from "html-to-image"
 import Link from "next/link"
-import { useRef, useState } from "react"
-import { TbArrowLeft, TbDots, TbExternalLink, TbGridPattern, TbHeart, TbMap, TbPhoto } from "react-icons/tb"
+import { useRef } from "react"
+import { useForm } from "react-hook-form"
+import { TbArrowLeft, TbBellRinging, TbDots, TbExternalLink, TbGridPattern, TbHeart, TbMap, TbPhoto, TbRun, TbVectorBezier2 } from "react-icons/tb"
+import { toast } from "sonner"
 import colors from "tailwindcss/colors"
-import HeaderContainer from "./header-container"
-import { PastRuns, RunManually } from "./run-controls/run-controls"
+import { z } from "zod"
+import { MostRecentRun, PastRuns } from "./run-controls/run-controls"
 import TriggerControl from "./trigger-control"
 import WorkflowStatusBadge from "./workflow-status-badge"
-import { useEditorStore } from "@web/modules/workflow-editor/store"
+
+
+const headerBoxClassnames = "text-primary-foreground bg-slate-900/80 backdrop-blur-sm py-1 rounded-md shadow-lg pointer-events-auto"
 
 
 export default function EditWorkflowHeader() {
+    const projectId = useCurrentProjectId("workflow")
+
     return (
-        <HeaderContainer className="gap-4 rounded-lg px-6">
-            <BackButton />
-            <div className="mx-10">
-                <EditableTitle />
+        <div className="w-screen flex justify-between items-stretch gap-2 p-2 flex-nowrap">
+            <div className={cn(headerBoxClassnames, "px-1")} >
+                <SimpleTooltip
+                    tooltip="Back to project dashboard"
+                    triggerProps={{ asChild: true }}
+                    contentProps={{
+                        side: "bottom", align: "start",
+                        sideOffset: 10, alignOffset: -4
+                    }}
+                >
+                    <Button variant="ghost" size="icon" asChild>
+                        <Link href={projectId ? `/projects/${projectId}/workflows` : "#"}>
+                            <TbArrowLeft />
+                        </Link>
+                    </Button>
+                </SimpleTooltip>
             </div>
 
-            <SavingIndicator />
-
-            <div className="mx-2">
-                <WorkflowStatusBadge />
+            <div className={cn(
+                headerBoxClassnames,
+                "grow pl-4 pr-2 flex justify-between items-center gap-4",
+            )}>
+                <div className="flex center gap-2 grow">
+                    <TbVectorBezier2 className="text-lg" />
+                    <EditableTitle />
+                </div>
+                <div className="flex center gap-4">
+                    <SavingIndicator />
+                    <WorkflowStatusBadge />
+                    <HeaderMenu />
+                </div>
             </div>
-            <TriggerControl />
-            <RunManually />
-            <PastRuns />
-            <HeaderMenu />
+
+            <div className={cn(headerBoxClassnames, "flex center gap-2 pl-4 pr-2")}>
+                <TbBellRinging className="text-lg" />
+                <TriggerControl />
+            </div>
+
+
+            <div className={cn(headerBoxClassnames, "flex center gap-2 pl-4 pr-2")}>
+                <TbRun className="text-lg" />
+                {/* <RunManually /> */}
+                <MostRecentRun />
+                <PastRuns />
+            </div>
 
             {/* TODO: Implement UsersOnline component with Supabase Realtime */}
             {/* <UsersOnline /> */}
-        </HeaderContainer>
+        </div >
     )
 }
 
@@ -63,31 +102,6 @@ function SavingIndicator() {
         <p className="w-20 text-xs opacity-50 text-center">
             {isSaving ? "Saving..." : "Saved"}
         </p>
-    )
-}
-
-
-function BackButton() {
-
-    const projectId = useWorkflow().data?.team_id
-
-    return (
-        <TooltipProvider delayDuration={0}>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" asChild>
-                        <Link href={projectId ? `/projects/${projectId}/workflows` : "#"}>
-                            <TbArrowLeft />
-                        </Link>
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" align="start">
-                    <p>
-                        Back to project dashboard
-                    </p>
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
     )
 }
 
@@ -127,7 +141,7 @@ function HeaderMenu() {
                 align="center" side="bottom" sideOffset={10}
             >
                 <DropdownMenuItem asChild disabled={!hasWorkflowLoaded}>
-                    <Link href={`/projects/${workflow?.team_id}/workflows`}>
+                    <Link href={`/projects/${workflow?.project_id}/workflows`}>
                         <TbArrowLeft className="mr-2" />
                         Back to Workflows
                     </Link>
@@ -175,69 +189,122 @@ function HeaderMenu() {
 }
 
 
+const titleFormSchema = z.object({
+    workflowName: z.string(),
+})
+
 function EditableTitle() {
 
+    const utils = trpc.useUtils()
+
+    const workflowId = useCurrentWorkflowId()
     const { data: workflow } = useWorkflow()
 
-    const [tempName, setTempName] = useState(workflow?.name ?? "")
-    const resetName = () => void setTempName(workflow?.name ?? "")
-    useSyncToState(workflow?.name, setTempName)
+    const form = useForm<z.infer<typeof titleFormSchema>>({
+        resolver: zodResolver(titleFormSchema),
+        values: {
+            workflowName: workflow?.name ?? "",
+        },
+    })
 
-    const updateName = useSupabaseMutation(
-        (supabase) => supabase
-            .from("workflows")
-            .update({ name: tempName })
-            .eq("id", workflow?.id!) as any,
-        {
-            enabled: !!workflow && tempName !== workflow.name,
-            invalidateKey: ["workflow", workflow?.id],
-        }
+    const {
+        mutateAsync: rename,
+        isPending,
+    } = trpc.workflows.rename.useMutation({
+        onSuccess: () => {
+            utils.workflows.list.invalidate()
+            utils.workflows.byId.invalidate({ id: workflowId })
+            toast.success("Workflow renamed!")
+        },
+        onError: (err) => {
+            console.debug(err)
+            toast.error(err.data?.message)
+            form.reset()
+        },
+    })
+
+    async function onSubmit(values: z.infer<typeof titleFormSchema>) {
+        if (form.getFieldState("workflowName").isDirty)
+            await rename({
+                workflowId,
+                name: values.workflowName,
+            })
+    }
+
+    const inputRef = useRef<HTMLInputElement>(null)
+    const formRef = useRef<HTMLFormElement>(null)
+    useClickOutside(
+        formRef,
+        () => void formRef.current?.requestSubmit(),
+        ["pointerdown"],
     )
 
-    const nameInputRef = useRef<HTMLInputElement>(null)
-    const [nameInputWidth, setNameInputWidth] = useState(0)
-    useClickOutside(nameInputRef, () => void updateName.mutate(null))
+    const [isFocused, focus, blur] = useBooleanState()
 
-    /* TODO: change to form with onSubmit for accessibility */
     return (
-        <div className="relative">
-            <Input
-                className="border-none hover:bg-white/10 focus:bg-white/75 focus:text-foreground text-center max-w-xl text-ellipsis focus:text-clip"
-                style={{ width: nameInputWidth + 65 }}
-                value={tempName}
-                onChange={ev => setTempName(ev.currentTarget.value)}
-                onFocus={ev => ev.currentTarget.select()}
-                onKeyDown={ev => {
-                    switch (ev.key) {
-                        case "Enter": updateName.mutate(null)
-                            break
-                        case "Escape": resetName()
-                            break
-                        default: return
-                    }
-                    ev.preventDefault()
-                    ev.currentTarget.blur()
-                }}
-                ref={nameInputRef}
-            />
+        <SimpleTooltip
+            tooltip={<div className="max-w-md text-center">
+                <p>Editing workflow "{workflow?.name ?? "Untitled workflow"}"</p>
+                <p className="text-xs text-muted-foreground">
+                    Click to edit workflow name
+                </p>
+            </div>}
+            triggerProps={{ className: "grow" }}
+            contentProps={{ side: "bottom", align: "center", sideOffset: 10 }}
+        >
+            <Form {...form}>
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className={cn(
+                        "rounded-md flex items-center cursor-text transition-colors",
+                        isFocused ? "bg-white/75" : "hover:bg-white/10",
+                    )}
+                    onClick={() => void inputRef.current?.focus()}
+                    ref={formRef}
+                >
+                    <FormField
+                        control={form.control}
+                        name="workflowName"
+                        render={({ field }) => (
+                            <FormItem className="space-y-0 flex-1">
+                                <FormControl>
+                                    <Input
+                                        className="border-none focus:text-foreground text-ellipsis focus:text-clip"
+                                        style={{ boxShadow: "none" }}
+                                        placeholder="Workflow name"
+                                        {...field}
+                                        onFocus={ev => {
+                                            ev.currentTarget.select()
+                                            focus()
+                                        }}
+                                        onBlur={blur}
+                                        onKeyDown={ev => {
+                                            if (ev.key === "Escape") {
+                                                ev.preventDefault()
+                                                ev.currentTarget.blur()
+                                                form.reset()
+                                            }
+                                        }}
+                                        ref={inputRef}
+                                    />
+                                </FormControl>
+                            </FormItem>
+                        )}
+                        disabled={isPending}
+                    />
 
-            <div className={cn(
-                "absolute top-1/2 left-full -translate-y-1/2 px-2",
-                updateName.isPending ? "opacity-100" : "opacity-0",
-            )}>
-                <Loader className={cn(!updateName.isPending && "!animate-none")} />
-            </div>
-
-            <p
-                className="absolute pointer-events-none opacity-0 text-sm"
-                ref={el => {
-                    if (!el) return
-                    setNameInputWidth(el.offsetWidth)
-                }}
-            >
-                {tempName}
-            </p>
-        </div>
+                    <div className="pointer-events-none px-4">
+                        {isPending
+                            ? <Loader />
+                            : isFocused
+                                ? <p className="text-xs text-muted-foreground">
+                                    Press Esc to cancel
+                                </p>
+                                : null}
+                    </div>
+                </form>
+            </Form>
+        </SimpleTooltip>
     )
 }
 

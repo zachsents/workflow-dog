@@ -1,13 +1,13 @@
 import { useDebouncedCallback } from "@react-hookz/web"
-import { DotPath, stringHash, uniqueId } from "@web/modules/util"
+import { DotPath, stringHash } from "@web/modules/util"
 import Color from "color"
 import _ from "lodash"
 import { NodeDefinitions } from "packages/client"
 import { useCallback, useEffect, useMemo } from "react"
 import type { Edge, Node as RFNode, ReactFlowInstance, ReactFlowState } from "reactflow"
 import { internalsSymbol, useNodeId, useReactFlow, useStore, useUpdateNodeInternals } from "reactflow"
-import { PREFIX } from "shared/prefixes"
 import type { Node } from "shared/types"
+import { IdNamespace, createRandomId } from "shared/utils"
 import colors from "tailwindcss/colors"
 import { ActionNode } from "../types"
 
@@ -95,7 +95,7 @@ export function useNodeProperty<T>(nodeId = useNodeId()!, path: NodeDotPath, {
 
 export function createInput(inputDefinitionId: string, extra = {}) {
     return {
-        id: uniqueId({ prefix: PREFIX.INPUT }),
+        id: createRandomId(IdNamespace.InputHandle),
         definition: inputDefinitionId,
         // mode: inputDefinition.defaultMode || "handle",
         ...extra,
@@ -104,7 +104,7 @@ export function createInput(inputDefinitionId: string, extra = {}) {
 
 export function createOutput(outputDefinitionId: string, extra = {}) {
     return {
-        id: uniqueId({ prefix: PREFIX.OUTPUT }),
+        id: createRandomId(IdNamespace.OutputHandle),
         definition: outputDefinitionId,
         ...extra,
     }
@@ -152,7 +152,7 @@ export function useCreateActionNode() {
             throw new Error(`Definition ${definitionId} not found`)
 
         const newNode: ActionNode = {
-            id: uniqueId({ prefix: PREFIX.NODE }),
+            id: createRandomId(IdNamespace.ActionNode),
             type: "action",
             position,
             data: _.merge({
@@ -198,7 +198,7 @@ export function useCreateActionNode() {
             rf.addNodes(newNode)
 
         const newEdges = connect.map(params => ({
-            id: uniqueId({ prefix: PREFIX.EDGE }),
+            id: createRandomId(IdNamespace.Edge),
             ..._.omit(params, ["sourceHandleType", "targetHandleType"]),
             ..."source" in params && {
                 target: newNode.id,

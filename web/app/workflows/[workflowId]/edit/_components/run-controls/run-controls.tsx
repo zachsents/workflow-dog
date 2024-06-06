@@ -3,12 +3,13 @@
 import { Badge } from "@web/components/ui/badge"
 import { Button } from "@web/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@web/components/ui/popover"
-import { useDialogState } from "@web/lib/client/hooks"
+import { useCurrentWorkflowId, useDialogState } from "@web/lib/client/hooks"
+import { trpc } from "@web/lib/client/trpc"
 import { useEditorStoreState } from "@web/modules/workflow-editor/store"
-import { useSelectedWorkflowRun, useWorkflow, useWorkflowRuns } from "@web/modules/workflows"
+import { useSelectedWorkflowRun, useWorkflow } from "@web/modules/workflows"
 import { TbChevronDown, TbClockPlay, TbPlayerPlay, TbX } from "react-icons/tb"
 import PastRunsTable from "./past-runs-table"
-import RunManuallyForm from "./run-manually-form"
+// import RunManuallyForm from "./run-manually-form"
 
 
 export function RunManually() {
@@ -33,7 +34,8 @@ export function RunManually() {
                 className="w-[28rem] max-h-[40rem] overflow-y-auto p-3 mx-2"
                 side="bottom" sideOffset={10} align="center"
             >
-                <RunManuallyForm onClose={popover.close} />
+                Coming Soon
+                {/* <RunManuallyForm onClose={popover.close} /> */}
             </PopoverContent>
         </Popover>
     )
@@ -65,9 +67,11 @@ export function PastRuns() {
 }
 
 
-function MostRecentRun() {
-    const { data: runs } = useWorkflowRuns(undefined)
-    const mostRecentRun = runs?.[0]
+export function MostRecentRun() {
+    const workflowId = useCurrentWorkflowId()
+    const { data: mostRecentRun } = trpc.workflows.runs.mostRecent.useQuery({
+        workflowId
+    })
 
     const [, setSelectedRunId] = useEditorStoreState<string | null>("selectedRunId")
 
@@ -83,7 +87,7 @@ function MostRecentRun() {
             >
                 <Badge variant="secondary">Latest Run</Badge>
                 <span>
-                    #{mostRecentRun.count}
+                    #{mostRecentRun.numeric_id}
                 </span>
                 <span className="text-muted-foreground">
                     {new Date(mostRecentRun.created_at).toLocaleString(undefined, {
@@ -104,7 +108,7 @@ export function CurrentRunInfo() {
     return (
         <>
             <p className="text-xs text-muted-foreground">
-                Currently Viewing Run #{selectedRun?.count}
+                Currently Viewing Run #{selectedRun?.numeric_id}
             </p>
             <Button
                 size="sm" variant="ghost"

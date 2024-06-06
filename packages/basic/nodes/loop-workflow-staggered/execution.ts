@@ -1,4 +1,4 @@
-import { assertArgProvided } from "@pkg/_lib"
+import { assertArgProvided } from "@pkg/lib"
 import { createExecutionNodeDefinition } from "@pkg/types"
 import axios from "axios"
 import pLimit from "p-limit"

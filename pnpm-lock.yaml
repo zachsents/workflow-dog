@@ -116,6 +116,9 @@ importers:
       '@types/react':
         specifier: '*'
         version: 18.2.73
+      kysely:
+        specifier: ^0.27.3
+        version: 0.27.3
       monaco-editor:
         specifier: '*'
         version: 0.47.0
@@ -339,6 +342,9 @@ importers:
       stripe:
         specifier: ^15.1.0
         version: 15.1.0
+      superjson:
+        specifier: ^2.2.1
+        version: 2.2.1
       tailwind-merge:
         specifier: ^2.2.2
         version: 2.2.2
@@ -414,6 +420,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.39.3
         version: 2.41.1
+      '@trpc/client':
+        specifier: 11.0.0-rc.382
+        version: 11.0.0-rc.382(@trpc/server@11.0.0-rc.382)
       axios:
         specifier: ^1.6.8
         version: 1.6.8
@@ -429,6 +438,9 @@ importers:
       googleapis:
         specifier: ^134.0.0
         version: 134.0.0
+      kysely:
+        specifier: ^0.27.3
+        version: 0.27.3
       mimetext:
         specifier: ^3.0.24
         version: 3.0.24
@@ -438,19 +450,31 @@ importers:
       p-limit:
         specifier: ^5.0.0
         version: 5.0.0
+      pg:
+        specifier: ^8.11.5
+        version: 8.11.5
       shared:
         specifier: workspace:*
         version: link:../shared
+      superjson:
+        specifier: ^2.2.1
+        version: 2.2.1
       typescript:
         specifier: ^5.0.0
         version: 5.4.3
     devDependencies:
+      '@trpc/server':
+        specifier: 11.0.0-rc.382
+        version: 11.0.0-rc.382
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
       '@types/morgan':
         specifier: ^1.9.9
         version: 1.9.9
+      web:
+        specifier: workspace:*
+        version: link:../web
 
 packages:
 
@@ -4117,6 +4141,14 @@ packages:
       '@trpc/server': 11.0.0-rc.364
     dev: false
 
+  /@trpc/client@11.0.0-rc.382(@trpc/server@11.0.0-rc.382):
+    resolution: {integrity: sha512-O+MSRed5r8AJJ+j3peZkd/b7WINEkhKaFilRuPH8VQsrlMZToxUzQl9aShPIgnOhhQGxvWqdh2lXwUvrFCea/A==}
+    peerDependencies:
+      '@trpc/server': 11.0.0-rc.382+94f198fec
+    dependencies:
+      '@trpc/server': 11.0.0-rc.382
+    dev: false
+
   /@trpc/react-query@11.0.0-rc.364(@tanstack/react-query@5.32.1)(@trpc/client@11.0.0-rc.364)(@trpc/server@11.0.0-rc.364)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-updB1uOVHS/1NK+hclt8OK/Im0GYD8mIRTxs96hZhfaT6tqUhij/wWWG0U6OofxPGC/MZs75ojQeq8Uag9Tr5g==}
     peerDependencies:
@@ -4136,6 +4168,9 @@ packages:
   /@trpc/server@11.0.0-rc.364:
     resolution: {integrity: sha512-sGlrb2jSCiU74TrJ+N+WxIcJIUDyo0WOy0y30vIArw6oHFXjeithgxjvIu+PbN+VWt/Gt4ee8kVhnmxCW4X/Qw==}
     dev: false
+
+  /@trpc/server@11.0.0-rc.382:
+    resolution: {integrity: sha512-a3A0osTgFhbClRjE+fZ3nA3TEjupnWM23L4hidjecg3xN+QghwYTjwXJcYXPsdKyT6PhFtzWBKJxShmsZRElZw==}
 
   /@trysound/sax@0.2.0:
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
@@ -5651,6 +5686,13 @@ packages:
   /cookie@0.6.0:
     resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
     engines: {node: '>= 0.6'}
+
+  /copy-anything@3.0.5:
+    resolution: {integrity: sha512-yCEafptTtb4bk7GLEQoM8KVJpxAfdBJYaXyzQEgQQQgYrZiDp8SJmGKlYza6CYjEDNstAdNdKA3UuoULlEbS6w==}
+    engines: {node: '>=12.13'}
+    dependencies:
+      is-what: 4.1.16
+    dev: false
 
   /copy-descriptor@0.1.1:
     resolution: {integrity: sha512-XgZ0pFcakEUlbwQEVNg3+QAis1FyTL3Qel9FYy8pSkQqoG3PNoT0bOCQtOXcOkur21r2Eq2kI+IE+gsmAEVlYw==}
@@ -11641,6 +11683,13 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /superjson@2.2.1:
+    resolution: {integrity: sha512-8iGv75BYOa0xRJHK5vRLEjE2H/i4lulTjzpUXic3Eg8akftYjkmQDa8JARQ42rlczXyFR3IeRoeFCc7RxHsYZA==}
+    engines: {node: '>=16'}
+    dependencies:
+      copy-anything: 3.0.5
+    dev: false
 
   /supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}

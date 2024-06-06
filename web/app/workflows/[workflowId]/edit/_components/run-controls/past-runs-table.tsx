@@ -1,23 +1,26 @@
 "use client"
 
-import type { ColumnDef, Getter } from "@tanstack/react-table"
+import { createColumnHelper, type ColumnDef } from "@tanstack/react-table"
 import Loader from "@web/components/loader"
 import { Button } from "@web/components/ui/button"
 import { DataTable, DataTableRow } from "@web/components/ui/data-table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import { useCurrentWorkflowId } from "@web/lib/client/hooks"
-import { Database } from "@web/lib/types/db"
+import { trpc } from "@web/lib/client/trpc"
+import { RouterOutput } from "@web/lib/types/trpc"
 import { cn } from "@web/lib/utils"
 import { useEditorStoreState } from "@web/modules/workflow-editor/store"
-import { useRunWorkflowMutation, useWorkflowRuns } from "@web/modules/workflows"
+import { useRunWorkflowMutation } from "@web/modules/workflows"
 import { TbEye, TbRotateClockwise2 } from "react-icons/tb"
 import StatusIcon from "./status-icon"
 
 
-type WorkflowRun = Database["public"]["Tables"]["workflow_runs"]["Row"]
+type WorkflowRun = RouterOutput["workflows"]["runs"]["list"][0]
 
-const createColumns = (onClose: () => void): ColumnDef<Partial<WorkflowRun>>[] => [
-    {
+const columnHelper = createColumnHelper<WorkflowRun>()
+
+const createColumns = (onClose: () => void): ColumnDef<WorkflowRun>[] => [
+    columnHelper.display({
         id: "viewing",
         cell: ({ row }) =>
             <div className={cn(
@@ -28,58 +31,57 @@ const createColumns = (onClose: () => void): ColumnDef<Partial<WorkflowRun>>[] =
             )}>
                 <TbEye />
             </div>
-    },
-    {
-        accessorKey: "count",
+    }),
+    columnHelper.accessor("numeric_id", {
         header: "#",
         enableSorting: true,
-        cell: ({ getValue }: { getValue: Getter<number> }) =>
+        cell: ({ getValue }) =>
             <p>
                 <span className="text-muted-foreground">#</span>
                 <span className="font-bold">{getValue()}</span>
             </p>
-    },
-    {
-        id: "created_at",
+    }),
+    columnHelper.accessor("created_at", {
         header: "Date & Time",
-        accessorFn: row => new Date(row.created_at as string),
         enableSorting: true,
         sortingFn: "datetime",
         sortDescFirst: true,
-        cell: ({ getValue }: { getValue: Getter<Date> }) =>
+        cell: ({ getValue }) =>
             getValue().toLocaleString(undefined, {
                 dateStyle: "medium",
                 timeStyle: "short",
             }),
-    },
-    {
-        id: "duration",
-        header: "Duration",
-        accessorFn: row => ["completed", "failed"].includes(row.status!)
-            ? Math.abs(new Date(row.scheduled_for || row.created_at!).valueOf() - new Date(row.finished_at!).valueOf())
+    }),
+    columnHelper.accessor(
+        row => ["completed", "failed"].includes(row.status!)
+            ? Math.abs((row.scheduled_for || row.created_at!).valueOf() - row.finished_at!.valueOf())
             : null,
-        enableSorting: true,
-        sortingFn: "basic",
-        sortUndefined: -1,
-        cell: ({ getValue }) => {
-            const val = getValue<number | null>()
-            return val == null
-                ? "-"
-                : `${Math.round(val / 100) / 10}s`
-        },
-    },
-    {
-        accessorKey: "status",
+        {
+            id: "duration",
+            header: "Duration",
+            enableSorting: true,
+            sortingFn: "basic",
+            sortUndefined: -1,
+            cell: ({ getValue }) => {
+                const val = getValue()
+                return val == null
+                    ? "-"
+                    : `${Math.round(val / 100) / 10}s`
+            },
+        }
+    ),
+    columnHelper.accessor("status", {
         header: "Status",
         enableSorting: true,
-        cell: ({ row, getValue }) =>
+        cell: ({ row, getValue }) => {
             <StatusIcon
-                status={getValue<string>()}
+                status={getValue()}
                 errorCount={row.original.error_count}
                 hasErrors={row.original.has_errors}
             />
-    },
-    {
+        }
+    }),
+    columnHelper.display({
         id: "actions",
         header: "Actions",
         cell: ({ row }) => {
@@ -116,7 +118,7 @@ const createColumns = (onClose: () => void): ColumnDef<Partial<WorkflowRun>>[] =
                 </TooltipProvider>
             )
         }
-    }
+    })
 ]
 
 
@@ -126,7 +128,10 @@ interface PastRunsTableProps {
 
 export default function PastRunsTable({ onClose }: PastRunsTableProps) {
 
-    const { data: runs, isLoading } = useWorkflowRuns()
+    const workflowId = useCurrentWorkflowId()
+    const { data: runs, isLoading } = trpc.workflows.runs.list.useQuery({
+        workflowId,
+    })
 
     const [selectedRunId, setSelectedRunId] = useEditorStoreState<string | null>("selectedRunId")
 

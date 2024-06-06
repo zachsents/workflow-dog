@@ -1,10 +1,8 @@
 "use client"
 
-import { Button } from "@web/components/ui/button"
 import { Card } from "@web/components/ui/card"
 import { cn } from "@web/lib/utils"
 import { useDefinition, useNodeColors, useUpdateInternalsWhenNecessary } from "@web/modules/workflow-editor/graph/nodes"
-import { TbChevronDown } from "react-icons/tb"
 import { NodeProps } from "reactflow"
 import HandleRenderer from "./handle-renderer"
 import ModifierWrapper from "./modifier-wrapper"
@@ -60,19 +58,6 @@ export default function ActionNode({ id, selected }: NodeProps): React.JSX.Eleme
                                             <HandleRenderer type="input" />}
                                         {definition.renderBody &&
                                             <definition.renderBody id={id} />}
-                                        {/* WIP */}
-                                        {definition.renderOptions &&
-                                            <Button
-                                                variant="ghost"
-                                                className={cn(
-                                                    "w-auto h-auto px-2 py-1 text-muted-foreground text-xs flex center gap-2 relative top-2 opacity-0 group-hover/node:opacity-100",
-                                                    selected && "opacity-100",
-                                                )}
-                                            >
-                                                {/* <TbSettings /> */}
-                                                Options
-                                                <TbChevronDown />
-                                            </Button>}
                                     </div>
                                 </div>
 

@@ -1,20 +1,13 @@
 "use client"
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect } from "react"
+import { useSearchParamEffect } from "@web/lib/client/hooks"
 import { toast } from "sonner"
 
 export default function ParamToaster() {
-    const router = useRouter()
-    const pathname = usePathname()
-    const message = useSearchParams().get("tm")
-
-    useEffect(() => {
-        if (message) {
-            router.replace(pathname)
-            toast.info(message, { id: "param-toaster" })
-        }
-    }, [message])
-
+    useSearchParamEffect("tm", message => {
+        toast.info(message, { id: "param-toaster" })
+    }, {
+        clearAfterEffect: true,
+    })
     return null
 }

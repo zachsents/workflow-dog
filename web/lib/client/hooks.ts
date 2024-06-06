@@ -1,13 +1,24 @@
+import { RealtimePostgresChangesFilter } from "@supabase/supabase-js"
+import { useWorkflow } from "@web/modules/workflows"
 import "client-only"
-import { useParams, usePathname } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import type { IFuseOptions } from "fuse.js"
+import Fuse from "fuse.js"
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { useSupabaseBrowser } from "./supabase"
 
 
-export function useCurrentProjectId() {
-    const params = useParams()
-    return Array.isArray(params?.projectId)
-        ? params.projectId[0]
-        : params?.projectId
+export function useCurrentProjectId(mode: "url" | "workflow" = "url") {
+    switch (mode) {
+        case "url":
+            const params = useParams()
+            return Array.isArray(params?.projectId)
+                ? params.projectId[0]
+                : params?.projectId
+        case "workflow":
+            const { data: workflow } = useWorkflow()
+            return workflow?.project_id
+    }
 }
 
 
@@ -132,4 +143,94 @@ export function useLocationHref() {
     }, [])
 
     return href
+}
+
+
+/**
+ * Search hook using Fuse
+ */
+export function useSearch<T, M>(list: T[], {
+    mapFn = x => x as unknown as M,
+    idKey = "id",
+    ...fuseOptions
+}: {
+    mapFn?: (item: T) => M
+    idKey?: string
+} & IFuseOptions<M>) {
+    const [query, setQuery] = useState("")
+
+    const fuseIndex = useMemo(
+        () => new Fuse(list.map(mapFn), fuseOptions),
+        [list]
+    )
+
+    const filtered = useMemo(() => {
+        const trimmedQuery = query.trim()
+        if (!trimmedQuery)
+            return list
+        return fuseIndex.search(trimmedQuery)
+            .map(r => list.find(item => item[idKey] === r.item[idKey]))
+            .filter(Boolean) as T[]
+    }, [query, list, fuseIndex])
+
+    return {
+        query,
+        setQuery,
+        clear: () => setQuery(""),
+        filtered,
+    }
+}
+
+
+interface UseSearchParamEffectOptions {
+    clearAfterEffect?: boolean
+}
+
+/**
+ * Hook that runs an effect based on the presence of a query parameter.
+ */
+export function useSearchParamEffect(key: string, cb: (value: string) => void, {
+    clearAfterEffect = true,
+}: UseSearchParamEffectOptions = {}) {
+    const router = useRouter()
+    const pathname = usePathname()
+    const params = useSearchParams()
+    const value = params.get(key)
+
+    useEffect(() => {
+        if (value != null) {
+            cb(value)
+
+            if (clearAfterEffect) {
+                const newParams = new URLSearchParams(Object.fromEntries(params.entries()))
+                newParams.delete(key)
+                router.replace(`${pathname}?${newParams.toString()}`)
+            }
+        }
+    }, [value])
+}
+
+
+/**
+ * Hook for listening to database changes.
+ */
+export function useOnDatabaseChange<T extends "*" | "INSERT" | "UPDATE" | "DELETE">(
+    postgresFilterOptions: RealtimePostgresChangesFilter<T>,
+    callback: (newRow: Record<string, any>, oldRow: Record<string, any>) => void,
+) {
+    const supabase = useSupabaseBrowser()
+
+    useEffect(() => {
+        const channel = supabase
+            .channel("realtime-db-query")
+            // seems like there's a bug in the types
+            .on("postgres_changes" as any, postgresFilterOptions, (payload) => {
+                callback(payload.new, payload.old)
+            })
+            .subscribe()
+
+        return () => void channel.unsubscribe()
+    }, [
+        JSON.stringify(postgresFilterOptions),
+    ])
 }

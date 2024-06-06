@@ -2,7 +2,6 @@ import { useNodePropertyValue } from "@web/modules/workflow-editor/graph/nodes"
 import { list as modifiersList } from "@web/modules/workflow-editor/modifiers"
 import { ControlModifier } from "@web/modules/workflow-editor/types"
 import { useMemo } from "react"
-import { PREFIX } from "shared/prefixes"
 import ActionNodeHandle from "./handle"
 
 
@@ -33,9 +32,9 @@ export default function ModifierWrapper({ children }: { children: any }) {
         <div className="flex flex-col items-start gap-1 -translate-x-5">
             {controlInputs.map(control =>
                 <ActionNodeHandle
-                    id={`${PREFIX.CONTROL_INPUT}:${control.id}`}
+                    id={control.id}
                     type="input"
-                    definition={control}
+                    definition={control.interfaceDefinition}
                     withBorder
                     key={control.id}
                 />
@@ -46,9 +45,9 @@ export default function ModifierWrapper({ children }: { children: any }) {
         <div className="flex flex-col items-end gap-1 translate-x-5">
             {controlOutputs.map(control =>
                 <ActionNodeHandle
-                    id={`${PREFIX.CONTROL_OUTPUT}:${control.id}`}
+                    id={control.id}
                     type="output"
-                    definition={control}
+                    definition={control.interfaceDefinition}
                     withBorder
                     key={control.id}
                 />

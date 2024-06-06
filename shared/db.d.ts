@@ -30,6 +30,8 @@ export type ProjectPermission = "read" | "write";
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export type WorkflowRunStatus = "cancelled" | "completed" | "failed" | "pending" | "running" | "scheduled";
+
 export interface AuthUsers {
   aud: string | null;
   banned_until: Timestamp | null;
@@ -88,6 +90,11 @@ export interface Projects {
   name: Generated<string>;
 }
 
+export interface ProjectsServiceAccounts {
+  project_id: string;
+  service_account_id: string;
+}
+
 export interface ProjectsUsers {
   permissions: Generated<ArrayType<ProjectPermission>>;
   project_id: string;
@@ -98,13 +105,13 @@ export interface ServiceAccounts {
   created_at: Generated<Timestamp>;
   creator: string | null;
   display_name: string | null;
+  encrypted_token: string;
   id: Generated<string>;
   profile: Json | null;
   refresh_token: string | null;
   scopes: string[] | null;
   service_def_id: string | null;
   service_user_id: string | null;
-  token: Json | null;
 }
 
 export interface Triggers {
@@ -120,9 +127,53 @@ export interface Triggers {
   workflow_id: string;
 }
 
+export interface UserMeta {
+  created_at: Generated<Timestamp>;
+  id: string;
+  personal_project_created: Generated<boolean>;
+  personal_project_id: string | null;
+}
+
+export interface WorkflowGraphs {
+  created_at: Generated<Timestamp>;
+  edges: Generated<Json>;
+  id: Generated<string>;
+  nodes: Generated<Json>;
+  workflow_id: string | null;
+}
+
+export interface WorkflowRunNodeOutputs {
+  created_at: Generated<Timestamp>;
+  handle_id: string;
+  id: Generated<string>;
+  node_id: string;
+  type_meta_id: string | null;
+  value: Json | null;
+  workflow_run_id: string;
+}
+
+export interface WorkflowRuns {
+  created_at: Generated<Timestamp>;
+  finished_at: Timestamp | null;
+  global_errors: Generated<Json>;
+  global_outputs: Generated<Json>;
+  id: Generated<string>;
+  node_errors: Generated<Json>;
+  node_outputs: Generated<Json>;
+  numeric_id: number | null;
+  scheduled_for: Timestamp | null;
+  started_at: Timestamp | null;
+  status: Generated<WorkflowRunStatus>;
+  trigger_id: string | null;
+  trigger_payload: Generated<Json>;
+  workflow_graph_id: string;
+  workflow_id: string;
+}
+
 export interface Workflows {
   created_at: Generated<Timestamp>;
   creator: string | null;
+  current_graph_id: string | null;
   id: Generated<string>;
   is_enabled: Generated<boolean>;
   last_edited_at: Timestamp | null;
@@ -131,12 +182,25 @@ export interface Workflows {
   project_id: string | null;
 }
 
+export interface WorkflowsUsageRecords {
+  billing_period_id: string;
+  id: Generated<string>;
+  run_count: Generated<number>;
+  workflow_id: string;
+}
+
 export interface DB {
   "auth.users": AuthUsers;
   project_invitations: ProjectInvitations;
   projects: Projects;
+  projects_service_accounts: ProjectsServiceAccounts;
   projects_users: ProjectsUsers;
   service_accounts: ServiceAccounts;
   triggers: Triggers;
+  user_meta: UserMeta;
+  workflow_graphs: WorkflowGraphs;
+  workflow_run_node_outputs: WorkflowRunNodeOutputs;
+  workflow_runs: WorkflowRuns;
   workflows: Workflows;
+  workflows_usage_records: WorkflowsUsageRecords;
 }

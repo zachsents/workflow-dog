@@ -1,3 +1,4 @@
+import { ClientNodeInterfaceExport } from "@pkg/types/client"
 import {
     Dialog,
     DialogClose,
@@ -17,17 +18,14 @@ import {
 import { Button, ButtonProps } from "@web/components/ui/button"
 import { Input } from "@web/components/ui/input"
 import { useDialogState, useHover } from "@web/lib/client/hooks"
+import { createTypeLabel } from "@web/lib/client/type-meta-utils"
 import { cn } from "@web/lib/utils"
 import { useCreateActionNode, useHandleRect, useIsHandleConnectable, useIsHandleConnectableWhileConnecting, useIsHandleConnected, useIsHandleConnectedEdgeSelected } from "@web/modules/workflow-editor/graph/nodes"
-import { useSelectedWorkflowRun } from "@web/modules/workflows"
 import { produce } from "immer"
-import { DataTypeDefinitions, NodeDefinitions } from "packages/client"
-import React, { forwardRef, useMemo, useRef, useState } from "react"
+import { NodeDefinitions } from "packages/client"
+import React, { forwardRef, useRef, useState } from "react"
 import { TbPencil, TbSparkles, TbX } from "react-icons/tb"
 import { EdgeLabelRenderer, HandleType, Position, Handle as RFHandle, useNodeId, useReactFlow, useStore } from "reactflow"
-import PropertySelector from "./property-selector"
-import stringifyObject from "stringify-object"
-import { OmniPreview, OmniViewer } from "@web/components/omni-viewer"
 
 
 type Recommendation = {
@@ -40,14 +38,7 @@ interface ActionNodeHandleProps {
     id: string
     name?: string
     type: FlexibleHandleType
-    definition: {
-        type: string
-        group?: boolean
-        named?: boolean
-        name: string
-        bullet?: boolean
-        recommendedNode?: Recommendation
-    }
+    definition: ClientNodeInterfaceExport
     withBorder?: boolean
 }
 
@@ -67,22 +58,17 @@ export default function ActionNodeHandle({
 
     const ref = useRef<HTMLDivElement>(null)
 
-    const nodeId = useNodeId()
+    const displayName = name ||
+        (definition.groupType === "record"
+            ? "<none>"
+            : definition.groupType === "list"
+                ? (definition.singular ?? definition.name)
+                : definition.name)
 
-    const displayName = name
-        || (definition.named ? "<none>" : definition?.name)
-        || <>&nbsp;</>
+    // const { isSuccess: hasSelectedRun } = useSelectedWorkflowRun()
+    const hasSelectedRun = false
 
-    const { data: selectedRun, isSuccess: hasSelectedRun } = useSelectedWorkflowRun()
-    const [hasRunValue, runValue] = useMemo(() => {
-        const runState = selectedRun?.state as any
-        const handleValues = runState?.outputs?.[nodeId!] ?? {}
-        return [id in handleValues, handleValues[id]] as const
-    }, [selectedRun, nodeId, id])
-    const isShowingRunValue = hasSelectedRun && isOutput(type) && hasRunValue
-
-    const dataType = DataTypeDefinitions.get(definition.type)
-    const isDataTypeSelectable = (dataType?.schema as any)?.shape != null
+    const typeLabel = createTypeLabel(definition.schema)
 
     const [hoverRef, isHovered] = useHover<HTMLDivElement>()
 
@@ -119,7 +105,7 @@ export default function ActionNodeHandle({
                         {displayName}
                     </p>
                     <p className="text-xs text-muted-foreground font-bold">
-                        {dataType?.name}
+                        {typeLabel}
                     </p>
                 </div>
 
@@ -127,14 +113,12 @@ export default function ActionNodeHandle({
                     <ValueDisplay runValue={runValue} dataTypeId={definition.type} />} */}
             </RFHandle>
 
-            {/* WILO: Moving the value display into an EdgeLabelRenderer as well */}
-
             <EdgeLabelRenderer>
                 <div
                     className={cn(
                         "absolute -translate-y-1/2 flex center gap-1 z-[1002] nodrag nopan pointer-events-none transition-opacity hover:opacity-100 hover:pointer-events-auto p-2",
                         isInput(type) ? "-translate-x-full flex-row-reverse" : "translate-x-0",
-                        ((isHovered && !isConnectingAnywhere) || isShowingRunValue)
+                        (isHovered && !isConnectingAnywhere)
                             ? "opacity-100 pointer-events-auto"
                             : "opacity-0",
                     )}
@@ -144,23 +128,23 @@ export default function ActionNodeHandle({
                     }}
                 >
                     {hasSelectedRun
-                        ? isShowingRunValue
-                            ? <ValueDisplay runValue={runValue} dataTypeId={definition.type} />
-                            : null
+                        ? null
                         : <>
-                            {definition.named &&
+                            {definition.groupType === "record" &&
                                 <EditNamedHandleButton
                                     handleId={id}
                                     handleType={type}
                                     handleName={name!}
-                                    dataTypeId={definition.type}
                                 />}
-                            {definition.group &&
+
+                            {(definition.groupType === "list" || definition.groupType === "record") &&
                                 <DeleteGroupHandleButton handleId={id} handleType={type} />}
-                            {isOutput(type) &&
+
+                            {/* {isOutput(type) &&
                                 // (definition as WebNodeDefinitionOutput).selectable &&
                                 isDataTypeSelectable &&
-                                <PropertySelector handleId={id} dataTypeId={definition.type} />}
+                                <PropertySelector handleId={id} dataTypeId={definition.type} />} */}
+
                             {!isConnected && definition?.recommendedNode &&
                                 <RecommendedNodeButton
                                     handleId={id}
@@ -269,12 +253,10 @@ function EditNamedHandleButton({
     handleId,
     handleType,
     handleName,
-    dataTypeId,
 }: {
     handleId: string
     handleName: string
     handleType: FlexibleHandleType
-    dataTypeId: string
 }) {
     const rf = useReactFlow()
     const nodeId = useNodeId()
@@ -293,10 +275,6 @@ function EditNamedHandleButton({
     }
 
     const [propertyName, setPropertyName] = useState(handleName)
-
-    // I don't thik this works how i originally thought 
-    const dataType = DataTypeDefinitions.get(dataTypeId)
-    const properties = Object.keys((dataType?.schema as any).shape ?? {})
 
     const dialog = useDialogState()
 
@@ -334,7 +312,7 @@ function EditNamedHandleButton({
                         onChange={ev => setPropertyName(ev.currentTarget.value)}
                     />
 
-                    <div className="flex flex-wrap gap-1">
+                    {/* <div className="flex flex-wrap gap-1">
                         {properties.map(property => (
                             <Button
                                 variant="secondary"
@@ -344,7 +322,7 @@ function EditNamedHandleButton({
                                 {property}
                             </Button>
                         ))}
-                    </div>
+                    </div> */}
 
                     <DialogFooter className="gap-2">
                         <DialogClose asChild>
@@ -427,48 +405,48 @@ const WrapInDialogTrigger = forwardRef<React.ElementRef<typeof DialogTrigger>, R
 )
 
 
-function ValueDisplay({ runValue, dataTypeId }: { runValue: any, dataTypeId: string }) {
+// function ValueDisplay({ runValue, dataTypeId }: { runValue: any, dataTypeId: string }) {
 
-    const dataType = DataTypeDefinitions.get(dataTypeId)
+//     const dataType = DataTypeDefinitions.get(dataTypeId)
 
-    const dialog = useDialogState()
+//     const dialog = useDialogState()
 
-    return (
-        <>
-            <TooltipProvider delayDuration={0}>
-                <Tooltip open>
-                    <TooltipTrigger asChild>
-                        <div />
-                    </TooltipTrigger>
-                    <TooltipContent
-                        side="right" avoidCollisions={false}
-                        className={cn(
-                            "max-w-[12rem] max-h-[12rem] *:truncate transition-opacity cursor-pointer hover:opacity-90",
-                        )}
-                        onClick={dialog.open}
-                    >
-                        {dataType?.renderPreview
-                            ? <dataType.renderPreview value={runValue} />
-                            : <OmniPreview>{runValue}</OmniPreview>}
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
+//     return (
+//         <>
+//             <TooltipProvider delayDuration={0}>
+//                 <Tooltip open>
+//                     <TooltipTrigger asChild>
+//                         <div />
+//                     </TooltipTrigger>
+//                     <TooltipContent
+//                         side="right" avoidCollisions={false}
+//                         className={cn(
+//                             "max-w-[12rem] max-h-[12rem] *:truncate transition-opacity cursor-pointer hover:opacity-90",
+//                         )}
+//                         onClick={dialog.open}
+//                     >
+//                         {dataType?.renderPreview
+//                             ? <dataType.renderPreview value={runValue} />
+//                             : <OmniPreview>{runValue}</OmniPreview>}
+//                     </TooltipContent>
+//                 </Tooltip>
+//             </TooltipProvider>
 
-            <Dialog {...dialog.dialogProps}>
-                <DialogContent className="max-h-[calc(100vh-6rem)] overflow-scroll !w-auto min-w-[32rem] max-w-[calc(100vw-10rem)]">
-                    <DialogHeader>
-                        <DialogTitle>
-                            Value from selected run
-                        </DialogTitle>
-                    </DialogHeader>
+//             <Dialog {...dialog.dialogProps}>
+//                 <DialogContent className="max-h-[calc(100vh-6rem)] overflow-scroll !w-auto min-w-[32rem] max-w-[calc(100vw-10rem)]">
+//                     <DialogHeader>
+//                         <DialogTitle>
+//                             Value from selected run
+//                         </DialogTitle>
+//                     </DialogHeader>
 
-                    {dataType?.renderExpanded
-                        ? <dataType.renderExpanded value={runValue} />
-                        : (dataType?.renderPreview && !dataType?.useNativeExpanded)
-                            ? <dataType.renderPreview value={runValue} />
-                            : <OmniViewer>{runValue}</OmniViewer>}
-                </DialogContent>
-            </Dialog>
-        </>
-    )
-}
+//                     {dataType?.renderExpanded
+//                         ? <dataType.renderExpanded value={runValue} />
+//                         : (dataType?.renderPreview && !dataType?.useNativeExpanded)
+//                             ? <dataType.renderPreview value={runValue} />
+//                             : <OmniViewer>{runValue}</OmniViewer>}
+//                 </DialogContent>
+//             </Dialog>
+//         </>
+//     )
+// }

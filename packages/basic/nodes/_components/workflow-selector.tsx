@@ -7,8 +7,9 @@ import {
 } from "@ui/select"
 import { Button } from "@web/components/ui/button"
 import { useCurrentWorkflowId } from "@web/lib/client/hooks"
+import { trpc } from "@web/lib/client/trpc"
 import { useNodeProperty } from "@web/modules/workflow-editor/graph/nodes"
-import { useRunnableWorkflows } from "@web/modules/workflows"
+import { useWorkflow } from "@web/modules/workflows"
 import { TbExclamationCircle, TbThumbUpFilled } from "react-icons/tb"
 
 
@@ -16,7 +17,13 @@ export default function WorkflowSelector() {
 
     const [workflowId, setWorkflowId] = useNodeProperty<string>(undefined, "data.state.workflow")
 
-    const { data: workflows, isLoading } = useRunnableWorkflows()
+    const projectId = useWorkflow().data?.project_id
+    const { data: workflows, isLoading } = trpc.workflows.list.useQuery({
+        projectId: projectId!,
+        onlyRunnable: true,
+    }, {
+        enabled: !!projectId,
+    })
 
     const currentWorkflowId = useCurrentWorkflowId()
     const [loopWarningDismissed, setLoopWarningDismissed] = useNodeProperty(undefined, "data.state.loopWarningDismissed", {

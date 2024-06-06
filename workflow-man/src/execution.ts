@@ -1,145 +1,180 @@
+import BooleanType from "@pkg/data/type-meta/boolean.shared"
+import StringType from "@pkg/data/type-meta/string.shared"
+import type { Insertable, Selectable } from "kysely"
 import { NodeDefinitions } from "packages/execution"
-import type { Node, Workflow, WorkflowRun, WorkflowRunState } from "shared/types"
-import { fetchIntegrationToken } from "./db"
+import type { WorkflowGraphs, WorkflowRunNodeOutputs, WorkflowRuns, Workflows } from "shared/db"
+import { TypeMetaWrapper } from "shared/type-meta-wrapper"
+import type { Edge, Node } from "shared/types"
+import { IdNamespace, createSubspaceId } from "shared/utils"
+import { trpcClient } from "./trpc-client"
 
 
-enum ControlModifierId {
-    Conditional = "control-input:conditional",
-    WaitFor = "control-input:waitFor",
-    Delay = "control-input:delay",
-    Finished = "control-output:finished",
-    Error = "control-output:error",
+const ControlModifierId = {
+    Conditional: createSubspaceId(IdNamespace.ControlInputHandle, "conditional"),
+    WaitFor: createSubspaceId(IdNamespace.ControlInputHandle, "wait-for"),
+    Delay: createSubspaceId(IdNamespace.ControlInputHandle, "delay"),
+    Finished: createSubspaceId(IdNamespace.ControlOutputHandle, "finished"),
+    Error: createSubspaceId(IdNamespace.ControlOutputHandle, "error"),
 }
 
 
-export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
+interface RunWorkflowOptions {
+    run: Pick<Selectable<WorkflowRuns>, "id" | "trigger_payload">
+    workflow: Selectable<Workflows>
+    graph: Selectable<WorkflowGraphs>
+}
 
-    const triggerData = run.trigger_data || {}
+export async function runWorkflow({ workflow, run, graph }: RunWorkflowOptions) {
 
-    const { nodes, edges } = workflow.graph
-
-    const runState: WorkflowRunState = { errors: {}, outputs: {} }
+    const triggerData = run.trigger_payload ?? null
+    const nodes = graph.nodes as Node[]
+    const edges = graph.edges as Edge[]
 
     const startingNodes = nodes.filter(node =>
         edges.every(edge => edge.target !== node.id)
     )
 
-    const runNode = async (node: Node, inputValues: Record<string, any>) => {
+    const nodeOutputs: Insertable<WorkflowRunNodeOutputs>[] = []
+    const nodeErrors: Record<string, string> = {}
+
+    async function runNode(node: Node, inputValues: Record<string, any>) {
 
         console.debug("Running node", node.id, `(${node.data.definition})`)
 
         const definition = NodeDefinitions.get(node.data.definition)
-        runState.outputs![node.id] ??= {}
+        if (!definition)
+            throw new Error(`Node definition not found: ${node.data.definition}`)
 
-        const callAction = async () => {
-            if (!definition)
-                throw new Error(`Node definition not found: ${node.data.definition}`)
+        if (definition.requiredService && !node.data.serviceAccount)
+            throw new Error(`Must link a service account`)
 
-            if (definition.requiredService && !node.data.serviceAccount)
-                throw new Error(`Must link a service account`)
-
-            return definition?.action(inputValues, {
-                node,
-                triggerData,
-                runState,
-                token: node.data.serviceAccount
-                    ? await fetchIntegrationToken(node.data.serviceAccount)
-                    : {},
-                projectId: workflow.team_id,
-                workflowId: run.workflow_id,
+        function addOutput(output: Omit<Insertable<WorkflowRunNodeOutputs>, "id" | "created_at" | "node_id" | "workflow_run_id">) {
+            nodeOutputs.push({
+                node_id: node.id,
+                workflow_run_id: run.id,
+                ...output,
             })
         }
 
-        const normalizedOutputs = {}
-
-        const actionOutputs = await callAction()
-            .then((outputs: any) => {
-                if (node.data.controlModifiers?.finished) {
-                    normalizedOutputs[ControlModifierId.Finished] = true
-                }
-                return outputs
+        Promise.resolve(
+            definition.action(inputValues, {
+                node,
+                triggerData,
+                ...node.data.serviceAccount && {
+                    token: await trpcClient.serviceAccounts.getToken.query({
+                        accountId: node.data.serviceAccount!,
+                        requestingWorkflowId: workflow.id,
+                    })
+                },
+                projectId: workflow.project_id!,
+                workflowId: workflow.id,
             })
-            .catch((err: Error) => {
-                runState.errors![node.id] = err.message
+        ).then(outputs => {
+            if (node.data.controlModifiers?.finished)
+                addOutput({
+                    handle_id: ControlModifierId.Finished,
+                    type_meta_id: BooleanType.id,
+                    value: true,
+                })
 
-                console.debug(`Error in node ${node.id}:`, err.message)
+            Object.entries(outputs || {}).forEach(([outputDefId, rawValue]) => {
+                const outputDef = definition.outputs?.[outputDefId]
 
-                if (node.data.controlModifiers?.error) {
-                    normalizedOutputs[ControlModifierId.Error] = err.message
-                    normalizedOutputs[ControlModifierId.Finished] = false
+                if (!outputDef) {
+                    console.warn(`Node (${node.id}) returned output that doesn't have a matching definition (Output key: ${outputDefId})`)
+                    return
                 }
+
+                node.data.outputs.filter(o => o.definition === outputDefId)
+                    .forEach((output, i) => {
+                        const pickedRawValue = outputDef.groupType === "list"
+                            ? rawValue?.[i]
+                            : outputDef.groupType === "record"
+                                ? rawValue?.[output.name || ""]
+                                : rawValue
+
+                        addOutput({
+                            handle_id: output.id,
+                            ...TypeMetaWrapper.from(pickedRawValue).toRow()
+                        })
+                    })
             })
+        }).catch(err => {
+            nodeErrors[node.id] = err.message
 
-        Object.entries(actionOutputs || {}).forEach(([outputDefinitionId, rawOutputValue]) => {
-            const outputDefinition = definition?.outputs[outputDefinitionId]
+            if (node.data.controlModifiers?.error)
+                addOutput({
+                    handle_id: ControlModifierId.Error,
+                    type_meta_id: StringType.id,
+                    value: err.message,
+                })
 
-            if (!outputDefinition) {
-                console.warn(`Node (${node.id}) returned output that doesn't have a matching definition (Output key: ${outputDefinitionId})`)
-                return
-            }
-
-            node.data.outputs
-                .filter(output => output.definition === outputDefinitionId)
-                .forEach((output, i) => {
-                    normalizedOutputs[output.id] = outputDefinition.group
-                        ? outputDefinition.named
-                            // named group: use name as object key
-                            ? rawOutputValue?.[output.name || ""]
-                            // unnamed group: use index as array key
-                            : rawOutputValue?.[i]
-                        // single output: use raw value
-                        : rawOutputValue
+            if (node.data.controlModifiers?.finished)
+                addOutput({
+                    handle_id: ControlModifierId.Finished,
+                    type_meta_id: BooleanType.id,
+                    value: false,
                 })
         })
 
         await Promise.all(
-            Object.entries(normalizedOutputs).map(async ([outputId, outputValue]) => {
-                runState.outputs![node.id][outputId] = outputValue
-
-                const outgoingEdges = edges.filter(edge =>
-                    edge.source === node.id
-                    && edge.sourceHandle === outputId
-                )
-
-                // using a set to avoid duplicate runs
-                const targetedNodeIds = Array.from(new Set(
-                    outgoingEdges.map(edge => edge.target)
-                ))
-
-                const targetExecutions = targetedNodeIds.map(
-                    nodeId => checkIfNodeCanRun(nodeId).catch(err => {
+            nodeOutputs
+                .filter(o => o.node_id === node.id)
+                .map(o => Promise.all(
+                    // using a set to avoid duplicate runs
+                    Array.from(new Set(
+                        edges
+                            .filter(edge =>
+                                edge.source === node.id
+                                && edge.sourceHandle === o.id
+                            )
+                            .map(edge => edge.target)
+                    )).map(nodeId => checkIfNodeCanRun(nodeId).catch(err => {
                         console.error(err)
-                        runState.errors![nodeId] = err.message
-                    })
-                )
-
-                await Promise.all(targetExecutions)
-            })
+                        nodeErrors[nodeId] = err.message
+                    }))
+                ))
         )
     }
 
-    const checkIfNodeCanRun = async (nodeId: string) => {
-        const node = nodes.find(node => node.id === nodeId)!
+    async function checkIfNodeCanRun(nodeId: string) {
+        const node = nodes.find(n => n.id === nodeId)!
 
         if (node.data.disabled)
             return
 
-        const getAttachedEdge = (handle: string) => edges.find(edge => edge.target === nodeId && edge.targetHandle === handle)
+        const getAttachedEdge = (handle: string) => edges.find(
+            edge => edge.target === nodeId
+                && edge.targetHandle === handle
+        )
 
-        const getEdgeOutputValue = (attachedEdge: { source: string, sourceHandle: string }) => runState.outputs![attachedEdge.source]?.[attachedEdge.sourceHandle]
+        const getEdgeOutputValue = (attachedEdge: {
+            source: string
+            sourceHandle: string
+        }) => nodeOutputs.find(
+            o => o.node_id === attachedEdge.source
+                && o.handle_id === attachedEdge.sourceHandle
+        )?.value
 
-        const allInputsAvailable = [
-            ...node.data.inputs,
-            ...node.data.controlModifiers?.conditional ? [{ id: ControlModifierId.Conditional }] : [],
-            ...node.data.controlModifiers?.waitFor ? [{ id: ControlModifierId.WaitFor }] : [],
-            ...node.data.controlModifiers?.delay ? [{ id: ControlModifierId.Delay }] : []
-        ].every(input => {
-            const attachedEdge = getAttachedEdge(input.id)
+        const inputsToCheck: {
+            id: string
+            [key: string]: any
+        }[] = [...node.data.inputs]
 
-            if (!attachedEdge)
-                return true
+        if (node.data.controlModifiers?.conditional)
+            inputsToCheck.push({ id: ControlModifierId.Conditional })
 
-            return getEdgeOutputValue(attachedEdge) !== undefined
+        if (node.data.controlModifiers?.waitFor)
+            inputsToCheck.push({ id: ControlModifierId.WaitFor })
+
+        if (node.data.controlModifiers?.delay)
+            inputsToCheck.push({ id: ControlModifierId.Delay })
+
+        const allInputsAvailable = inputsToCheck.every(i => {
+            const attachedEdge = getAttachedEdge(i.id)
+            return attachedEdge
+                ? getEdgeOutputValue(attachedEdge) !== undefined
+                : true
         })
 
         if (!allInputsAvailable)
@@ -156,10 +191,10 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
         if (!nodeDefinition)
             throw new Error(`Node definition not found: ${node.data.definition}`)
 
-        const inputValues = Object.fromEntries(
-            Object.entries(nodeDefinition.inputs).map(([inputDefinitionId, inputDefinition]) => {
+        const inputEntries = Object.entries(nodeDefinition.inputs ?? {})
+            .map(([inputDefId, inputDef]) => {
                 const inputs = node.data.inputs
-                    .filter(input => input.definition === inputDefinitionId)
+                    .filter(i => i.definition === inputDefId)
 
                 const currentInputValues = inputs.map(input => {
                     const attachedEdge = getAttachedEdge(input.id)
@@ -168,30 +203,36 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
                         : undefined
                 })
 
-                const convertedInputs = inputDefinition.group
-                    ? inputDefinition.named
+                const convertedInputs = inputDef.groupType === "list"
+                    ? currentInputValues
+                    : inputDef.groupType === "record"
                         ? inputs.reduce((acc, input, i) => {
                             const val = currentInputValues[i]
                             if (val !== undefined && typeof input.name === "string")
                                 acc[input.name] = val
                             return acc
                         }, {})
-                        : currentInputValues
-                    : currentInputValues[0]
+                        : currentInputValues[0]
 
-                return [inputDefinitionId, convertedInputs]
+                return [inputDefId, convertedInputs]
             })
-        )
+
+        const inputValues = Object.fromEntries(inputEntries)
 
         // check for delay control modifier
         if (node.data.controlModifiers?.delay) {
             const attachedEdge = getAttachedEdge(ControlModifierId.Delay)
 
             if (attachedEdge) {
-                const delayValue = parseFloat(getEdgeOutputValue(attachedEdge))
+                const delayValue = parseFloat(
+                    getEdgeOutputValue(attachedEdge)?.toString() ?? ""
+                )
 
                 if (delayValue < 0 || delayValue > 5000)
                     throw new Error("Delay must be between 0 and 5000")
+
+                if (isNaN(delayValue))
+                    throw new Error("Delay value must be a valid number")
 
                 await new Promise(resolve => setTimeout(resolve, delayValue))
             }
@@ -202,5 +243,5 @@ export async function runWorkflow(run: WorkflowRun, workflow: Workflow) {
 
     await Promise.all(startingNodes.map(node => checkIfNodeCanRun(node.id)))
 
-    return runState
+    return { nodeOutputs, nodeErrors }
 }

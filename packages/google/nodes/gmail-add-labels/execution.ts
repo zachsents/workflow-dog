@@ -1,4 +1,4 @@
-import { assertArgProvided } from "@pkg/_lib"
+import { assertArgProvided } from "@pkg/lib"
 import { createExecutionNodeDefinition } from "@pkg/types"
 import { google } from "googleapis"
 import shared from "./shared"
@@ -24,8 +24,6 @@ export default createExecutionNodeDefinition(shared, {
                 || new RegExp(search, "i").test(label.name!)
             )?.id)
             .filter(Boolean) as string[]
-
-        console.log(labelIds)
 
         if (labelIds.length > 0)
             await gmail.users.messages.modify({

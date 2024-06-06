@@ -94,7 +94,7 @@ function intervalToCron(interval: IntervalValue): string {
 }
 
 
-interface ScheduleTrigger extends WorkflowTrigger {
+interface ScheduleTrigger {
     config: {
         intervals: {
             id: string

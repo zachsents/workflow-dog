@@ -23,9 +23,8 @@ import Loader from "@web/components/loader"
 import { useDialogState } from "@web/lib/client/hooks"
 import { trpc } from "@web/lib/client/trpc"
 import { Schemas } from "@web/lib/iso/schemas"
-import Link from "next/link"
 import { useForm } from "react-hook-form"
-import { TbStar, TbUserPlus } from "react-icons/tb"
+import { TbUserPlus } from "react-icons/tb"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -34,43 +33,9 @@ interface InviteMemberProps {
     projectId: string
 }
 
-export default function InviteMember({ projectId }: InviteMemberProps) {
-
-    const {
-        data: members,
-        isLoading: membersLoading,
-    } = trpc.projects.members.list.useQuery({ projectId })
-
-    const {
-        data: billing,
-        isLoading: billingLoading,
-    } = trpc.projects.billingInfo.useQuery({ id: projectId })
-
-    if (membersLoading || billingLoading)
-        return null
-
-    const hasReachedLimit = (members?.length ?? 0) >= (billing?.limits.teamMembers ?? 0)
-    if (hasReachedLimit)
-        return (
-            <Button asChild>
-                <Link
-                    href={`/projects/${projectId}/usage`}
-                    className="flex center gap-2"
-                >
-                    <TbStar />
-                    Upgrade to invite more members
-                </Link>
-            </Button>
-        )
-
-    return <InviteMemberButton projectId={projectId} />
-}
-
-
 type FormSchema = z.infer<typeof Schemas.Projects.InviteMember>
 
-
-function InviteMemberButton({ projectId }: InviteMemberProps) {
+export default function InviteMember({ projectId }: InviteMemberProps) {
 
     const dialog = useDialogState()
 

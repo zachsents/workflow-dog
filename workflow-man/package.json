@@ -4,20 +4,26 @@
     "type": "module",
     "dependencies": {
         "@supabase/supabase-js": "^2.39.3",
+        "@trpc/client": "11.0.0-rc.382",
         "axios": "^1.6.8",
         "dotenv": "^16.4.5",
         "express": "^4.18.2",
         "google-auth-library": "^9.7.0",
         "googleapis": "^134.0.0",
+        "kysely": "^0.27.3",
         "mimetext": "^3.0.24",
         "morgan": "^1.10.0",
         "p-limit": "^5.0.0",
         "packages": "workspace:*",
-        "shared": "workspace:*"
+        "pg": "^8.11.5",
+        "shared": "workspace:*",
+        "superjson": "^2.2.1"
     },
     "devDependencies": {
+        "@trpc/server": "11.0.0-rc.382",
         "@types/express": "^4.17.21",
-        "@types/morgan": "^1.9.9"
+        "@types/morgan": "^1.9.9",
+        "web": "workspace:*"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"

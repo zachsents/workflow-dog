@@ -1,5 +1,5 @@
 import { Button } from "@ui/button"
-import { supabaseServer } from "@web/lib/server/supabase"
+import { getVerifiedSession } from "@web/lib/server/supabase"
 import Logo from "@web/public/logo.svg"
 import Link from "next/link"
 import { redirect } from "next/navigation"
@@ -9,11 +9,9 @@ import { GoogleSignIn } from "./_components/google-signin"
 
 export default async function LoginPage() {
 
-    const supabase = supabaseServer()
-    const { data } = await supabase.auth.getUser()
-
-    if (data?.user)
-        redirect("/projects")
+    const session = await getVerifiedSession()
+    if (session)
+        return redirect("/projects")
 
     return (
         <div className="w-screen h-screen flex items-stretch p-4 bg-slate-200 bg-dots">

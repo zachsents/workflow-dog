@@ -4,17 +4,19 @@ import Link from "next/link"
 import { TbArrowRight } from "react-icons/tb"
 
 
+const MAX_SHOW_USERS = 8
+
 export default function ProjectCard({
     project
 }: {
     project: RouterOutput["projects"]["list"]["0"]
 }) {
 
-    const userInitials = project.members.map(u => u.email?.[0].toUpperCase() ?? "?")
-
     const creationDate = new Date(project.created_at!).toLocaleDateString(undefined, {
         dateStyle: "medium"
     })
+
+    const userInitials = project.members.map(u => u.email?.[0].toUpperCase() ?? "?")
 
     return (
         <Link href={`/projects/${project.id}`}>
@@ -26,7 +28,21 @@ export default function ProjectCard({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <UserDots initials={userInitials} max={8} />
+                    <div className="flex items-center">
+                        {userInitials.slice(0, MAX_SHOW_USERS).map((letter, i) =>
+                            <div
+                                key={i}
+                                className="flex center aspect-square h-[1.75em] bg-primary text-xs text-primary-foreground outline outline-white outline-2 rounded-full -ml-1 first:ml-0"
+                            >
+                                {letter}
+                            </div>
+                        )}
+
+                        {userInitials.length > MAX_SHOW_USERS &&
+                            <p className="text-muted-foreground text-xs ml-2">
+                                +{userInitials.length - MAX_SHOW_USERS}
+                            </p>}
+                    </div>
                     <p className="text-muted-foreground text-sm mt-1">
                         {project.members.length} members
                     </p>
@@ -39,27 +55,5 @@ export default function ProjectCard({
                 </CardFooter>
             </Card>
         </Link>
-    )
-}
-
-
-function UserDots({ initials, max }: { initials: string[], max: number }) {
-
-    return (
-        <div className="flex items-center">
-            {initials.slice(0, max).map((letter, i) =>
-                <div
-                    key={i}
-                    className="flex center aspect-square h-[1.75em] bg-primary text-xs text-primary-foreground outline outline-white outline-2 rounded-full -ml-1 first:ml-0"
-                >
-                    {letter}
-                </div>
-            )}
-
-            {initials.length > max &&
-                <p className="text-muted-foreground text-xs ml-2">
-                    +{initials.length - max}
-                </p>}
-        </div>
     )
 }

@@ -9,5 +9,8 @@ export const Schemas = {
             email: z.string().email(),
         }),
         Permissions: z.enum(["read", "write"]),
-    }
+    },
+    Workflows: {
+        Name: z.string().min(1).max(120),
+    },
 }

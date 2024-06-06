@@ -1,48 +1,43 @@
+import { ServiceDefinitions } from "@pkg/server"
+import { type OAuth2Config } from "@pkg/types/server"
+import { oauth2RedirectUrl } from "@web/lib/server/internal/service-accounts"
 import { errorResponse } from "@web/lib/server/router"
 import { randomBytes } from "crypto"
 import _ from "lodash"
 import { cookies } from "next/headers"
-import { NextResponse, type NextRequest } from "next/server"
-import { ServiceDefinitions } from "packages/server"
-import type { OAuth2Config } from "packages/types"
-import { defaultOAuth2AccountConfig, getOAuthClientForService, redirectUri } from "./_util"
+import { redirect } from "next/navigation"
+import { type NextRequest } from "next/server"
 
 
 export async function GET(
     req: NextRequest,
-    { params: { serviceId: safeServiceId } }: { params: { serviceId: string } }
+    { params: { serviceId: serviceDefId } }: { params: { serviceId: string } }
 ) {
-    const searchParams = req.nextUrl.searchParams
-    const service = ServiceDefinitions.resolve(safeServiceId)
+    const params = req.nextUrl.searchParams
 
-    if (!service)
+    const serviceDef = ServiceDefinitions.get(serviceDefId)
+    if (!serviceDef)
         return errorResponse("Service not found", 404)
 
-    const teamId = searchParams.get("t") as string
-    if (!teamId)
-        return errorResponse("Missing team ID", 400)
+    const projectId = params.get("p") as string
+    if (!projectId)
+        return errorResponse("Missing project ID", 400)
 
     const cookieStore = cookies()
-    cookieStore.set("oauth_team", teamId)
+    cookieStore.set("oauth_project", projectId)
 
-    const oauthConfig = _.merge({}, defaultOAuth2AccountConfig, service.authAcquisition) as OAuth2Config
-
-    const { clientId } = await getOAuthClientForService(service.id, false)
+    const oauthConfig = (serviceDef as any).oauth2Config as OAuth2Config
 
     const url = new URL(oauthConfig.authUrl)
-    url.searchParams.append("client_id", clientId)
-    url.searchParams.append("redirect_uri", redirectUri(safeServiceId))
+    url.searchParams.append("client_id", oauthConfig.clientId)
+    url.searchParams.append("redirect_uri", oauth2RedirectUrl(serviceDefId))
     url.searchParams.append("response_type", "code")
 
-    const scopes = Array.from(new Set(
-        oauthConfig.allowAdditionalScopes
-            ? [
-                ...oauthConfig.scopes,
-                ...((searchParams.get("scopes") as string)
-                    ?.split(/[\s,]+/) || [])
-            ]
-            : oauthConfig.scopes
-    ))
+    const passedScopes = (oauthConfig.allowAdditionalScopes && params.has("scopes"))
+        ? params.get("scopes")!.split(/[\s,]+/)
+        : []
+
+    const scopes = Array.from(new Set([...oauthConfig.scopes, ...passedScopes]))
     url.searchParams.set("scope", scopes.join(oauthConfig.scopeDelimiter))
 
     if (oauthConfig.state === true)
@@ -50,7 +45,7 @@ export async function GET(
     else if (typeof oauthConfig.state === "number")
         url.searchParams.set("state", randomBytes(oauthConfig.state).toString("hex"))
     else if (oauthConfig.state === "request")
-        url.searchParams.set("state", searchParams.get("state") as string)
+        url.searchParams.set("state", params.get("state") as string)
     else if (typeof oauthConfig.state === "string")
         url.searchParams.set("state", oauthConfig.state)
 
@@ -58,28 +53,25 @@ export async function GET(
         cookieStore.set("oauth_state", url.searchParams.get("state")!)
 
     if (oauthConfig.additionalParams) {
-        Object.entries(oauthConfig.additionalParams).forEach(([key, value]) => {
-            url.searchParams.set(key, value as string)
+        Object.entries(oauthConfig.additionalParams).forEach(([k, v]) => {
+            url.searchParams.set(k, v)
         })
     }
 
     if (oauthConfig.allowAdditionalParams) {
-        Array.from(searchParams.entries())
-            .filter(([key]) => {
-                if (["t", "scopes", "state", "redirect_uri", "scope", "response_type", "client_id", "code"].includes(key))
-                    return false
+        const cleanedParams = _.omit(
+            Object.fromEntries(params.entries()),
+            ["t", "scopes", "state", "redirect_uri", "scope", "response_type", "client_id", "code"]
+        )
 
-                if (Array.isArray(oauthConfig.allowAdditionalParams))
-                    return oauthConfig.allowAdditionalParams.includes(key)
+        const paramObj = Array.isArray(oauthConfig.allowAdditionalParams)
+            ? _.pick(cleanedParams, oauthConfig.allowAdditionalParams)
+            : cleanedParams
 
-                return true
-            })
-            .forEach(([key, value]) => {
-                url.searchParams.set(key, value)
-            })
+        _.mapValues(paramObj, (v, k) => void url.searchParams.set(k, v))
     }
 
-    return NextResponse.redirect(url.toString())
+    return redirect(url.toString())
 }
 
 

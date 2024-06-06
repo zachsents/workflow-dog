@@ -3,7 +3,7 @@
     "module": "index.ts",
     "type": "module",
     "scripts": {
-        "build": "node _build/build.js"
+        "build": "node build/build.js"
     },
     "dependencies": {
         "@supabase/supabase-js": "^2.43.0",
@@ -19,6 +19,7 @@
         "@tabler/icons-react": "*",
         "@types/lodash": "^4.17.0",
         "@types/react": "*",
+        "kysely": "^0.27.3",
         "monaco-editor": "*",
         "react": "*",
         "react-icons": "*"

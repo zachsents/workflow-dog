@@ -3,27 +3,28 @@
 import { Badge } from "@ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@ui/tooltip"
 import Loader from "@web/components/loader"
+import { useCurrentWorkflowId } from "@web/lib/client/hooks"
+import { trpc } from "@web/lib/client/trpc"
 import { cn } from "@web/lib/utils"
-import { useSupabaseMutation } from "@web/modules/db"
 import { useWorkflow } from "@web/modules/workflows"
 
 export default function WorkflowStatusBadge() {
 
+    const workflowId = useCurrentWorkflowId()
     const { data: workflow, isSuccess: hasWorkflowLoaded } = useWorkflow()
     const isEnabled = workflow?.is_enabled || false
 
-    const setEnabled = useSupabaseMutation(
-        (supabase) => supabase
-            .from("workflows")
-            .update({ is_enabled: !isEnabled })
-            .eq("id", workflow?.id!) as any,
-        {
-            enabled: !!workflow,
-            invalidateKey: ["workflow", workflow?.id],
-        }
-    )
+    const utils = trpc.useUtils()
 
-    const { isPending } = setEnabled
+    const { mutate, isPending } = trpc.workflows.setEnabled.useMutation({
+        onSuccess: () => void utils.workflows.byId.invalidate({
+            id: workflowId,
+        }),
+    })
+    const toggleEnabled = () => mutate({
+        workflowId,
+        isEnabled: !isEnabled,
+    })
 
     return (
         <TooltipProvider>
@@ -37,7 +38,7 @@ export default function WorkflowStatusBadge() {
                             isPending && "opacity-50 pointer-events-none cursor-not-allowed",
                             !hasWorkflowLoaded && "text-transparent",
                         )}
-                        onClick={() => void setEnabled.mutate(null)}
+                        onClick={toggleEnabled}
                         aria-disabled={isPending}
                     >
                         {isPending && <Loader mr />}

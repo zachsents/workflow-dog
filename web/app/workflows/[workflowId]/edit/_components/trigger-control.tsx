@@ -1,7 +1,5 @@
 "use client"
 
-import type { WorkflowTrigger } from "@pkg/types"
-import { useDebouncedCallback } from "@react-hookz/web"
 import {
     DialogContent,
     DialogDescription,
@@ -14,47 +12,43 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Dialog } from "@web/components/ui/dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@web/components/ui/popover"
 import { Separator } from "@web/components/ui/separator"
-import { Skeleton } from "@web/components/ui/skeleton"
-import { useAction } from "@web/lib/client/actions"
-import { useCurrentWorkflowId, useDialogState } from "@web/lib/client/hooks"
+import { useCurrentWorkflowId, useDialogState, useSearch, useSearchParamEffect } from "@web/lib/client/hooks"
+import { trpc } from "@web/lib/client/trpc"
 import { plural } from "@web/modules/grammar"
 import { useWorkflow } from "@web/modules/workflows"
-import Fuse from "fuse.js"
 import _ from "lodash"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { TriggerDefinitions } from "packages/client"
-import React, { forwardRef, useEffect, useMemo, useState } from "react"
+import React, { forwardRef } from "react"
 import { TbChevronDown, TbPlus, TbX } from "react-icons/tb"
-import { assignNewTrigger as assignNewTriggerAction, updateTriggerConfig as updateTriggerConfigAction } from "../actions"
+import { toast } from "sonner"
 
 
 export default function TriggerControl() {
 
     const workflowId = useCurrentWorkflowId()
-    const { data: workflow, isSuccess: hasWorkflowLoaded } = useWorkflow()
+    const { data: workflow } = useWorkflow()
 
-    const trigger = workflow?.trigger as WorkflowTrigger | undefined
+    const trigger = workflow?.triggers[0]
     const hasTrigger = Boolean(trigger)
-    const triggerDefinition = TriggerDefinitions.get(trigger?.type!)
+    const triggerDefinition = TriggerDefinitions.get(trigger?.def_id)
 
     const popover = useDialogState()
     const dialog = useDialogState()
 
-    const [updateConfig, updateMutation] = useAction(
-        updateTriggerConfigAction.bind(null, workflowId),
-        {
-            showLoadingToast: true,
-            showErrorToast: true,
-            successToast: "Trigger updated!",
-            invalidateKey: ["workflow", workflowId],
-        }
-    )
+    useSearchParamEffect("select_trigger", dialog.open, {
+        clearAfterEffect: true,
+    })
 
-    useSelectTriggerParam(dialog.open)
+    const utils = trpc.useUtils()
 
-    if (!hasWorkflowLoaded) return (
-        <Skeleton className="w-64 h-6" />
-    )
+    const {
+        mutateAsync: _updateTrigger,
+        isPending,
+    } = trpc.workflows.triggers.update.useMutation({
+        onSettled: () => {
+            utils.workflows.byId.invalidate({ id: workflowId })
+        },
+    })
 
     return (<>
         {hasTrigger ?
@@ -98,16 +92,32 @@ export default function TriggerControl() {
                     <Separator />
 
                     <div className="flex-v items-stretch gap-4 p-2">
+                        <p className="text-sm text-muted-foreground">
+                            {triggerDefinition?.description}
+                        </p>
+
                         <p className="font-bold">
                             Configure Trigger
                         </p>
 
                         {triggerDefinition?.renderConfig ?
                             <triggerDefinition.renderConfig
-                                workflowId={workflow?.id!}
-                                workflow={workflow as any}
-                                updateConfig={config => updateConfig({ config })}
-                                isUpdating={updateMutation.isPending}
+                                workflowId={workflowId}
+                                workflow={workflow!}
+                                updateConfig={(data) => {
+                                    const promise = _updateTrigger({
+                                        triggerId: trigger?.id!,
+                                        ...data,
+                                    })
+                                    toast.promise(promise, {
+                                        loading: "Updating trigger. This may take a few seconds...",
+                                        success: "Trigger updated!",
+                                        error: (err) => err.data?.message || "Failed to update trigger.",
+                                    })
+                                    popover.close()
+                                    return promise
+                                }}
+                                isUpdating={isPending}
                                 onClose={popover.close}
                             /> :
                             <p className="text-sm text-muted-foreground text-center">
@@ -117,9 +127,8 @@ export default function TriggerControl() {
                 </PopoverContent>
             </Popover> :
             <Button
-                variant="default" size="sm"
+                size="sm"
                 onClick={dialog.open}
-                className="pointer-events-auto shadow-lg"
             >
                 <TbPlus className="mr-2" />
                 Add Trigger
@@ -148,45 +157,37 @@ function TriggerDialog(props: React.ComponentProps<typeof Dialog>) {
 
     const workflowId = useCurrentWorkflowId()
     const { data: workflow } = useWorkflow()
-    const currentTriggerId = (workflow?.trigger as any)?.type
+    const currentTriggerDefId = workflow?.triggers[0]?.def_id
 
-    const [assignNewTrigger, newTriggerMutation] = useAction(
-        assignNewTriggerAction.bind(null, workflowId),
-        {
-            showLoadingToast: true,
-            showErrorToast: true,
-            successToast: "Trigger updated!",
-            invalidateKey: ["workflow", workflowId],
-        }
-    )
-    const setTrigger = (type: string) => assignNewTrigger({ type })
-        .then(() => props.onOpenChange!(false))
+    const utils = trpc.useUtils()
 
+    const {
+        mutateAsync: assignTrigger,
+        isPending,
+    } = trpc.workflows.triggers.assignNew.useMutation({
+        onSettled: () => {
+            utils.workflows.byId.invalidate({ id: workflowId })
+        },
+        onSuccess: () => {
+            props.onOpenChange?.(false)
+        },
+    })
 
-    const fuseIndex = useMemo(() => new Fuse(TriggerDefinitions.asArray, {
-        includeScore: true,
+    const search = useSearch(TriggerDefinitions.asArray, {
         keys: ["name", "whenName", "description"],
-    }), [])
-
-    const [hasQuery, setHasQuery] = useState(false)
-    const [searchResults, setSearchResults] = useState<typeof TriggerDefinitions.asArray>([])
-
-    const onSearchChange = useDebouncedCallback((query: string) => {
-        setHasQuery(Boolean(query.trim()))
-        setSearchResults(
-            fuseIndex.search(query, { limit: 8 })
-                .map(result => result.item)
-        )
-    }, [fuseIndex], 200)
+    })
 
     const triggerItemProps = (definition: typeof TriggerDefinitions.asArray[0]): TriggerSearchResultItemProps => ({
         trigger: definition,
         onSelect: () => {
-            if (currentTriggerId !== definition.id)
-                setTrigger(definition.id)
+            if (currentTriggerDefId !== definition.id)
+                assignTrigger({
+                    workflowId,
+                    definitionId: definition.id,
+                })
         },
-        disabled: newTriggerMutation.isPending,
-        current: currentTriggerId === definition.id,
+        disabled: isPending,
+        current: currentTriggerDefId === definition.id,
     })
 
     return (
@@ -207,15 +208,16 @@ function TriggerDialog(props: React.ComponentProps<typeof Dialog>) {
                         <Command shouldFilter={false}>
                             <CommandInput
                                 placeholder={`Search ${totalTriggers || 0} ${plural("trigger", totalTriggers)}`}
-                                onValueChange={onSearchChange}
+                                value={search.query}
+                                onValueChange={search.setQuery}
                             />
                             <CommandList className="mt-4">
                                 <CommandEmpty>
                                     No triggers found.
                                 </CommandEmpty>
 
-                                {hasQuery ?
-                                    searchResults.map(definition =>
+                                {!!search.query ?
+                                    search.filtered.map(definition =>
                                         <TriggerSearchResultItem
                                             {...triggerItemProps(definition)}
                                             key={definition.id}
@@ -280,16 +282,3 @@ const TriggerSearchResultItem = forwardRef<React.ElementRef<typeof CommandItem>,
             </Badge>}
     </CommandItem>
 )
-
-
-function useSelectTriggerParam(openDialog: () => void) {
-    const router = useRouter()
-    const pathname = usePathname()
-    const shouldSelectTrigger = useSearchParams().has("select_trigger")
-    useEffect(() => {
-        if (shouldSelectTrigger) {
-            router.replace(pathname)
-            openDialog()
-        }
-    }, [shouldSelectTrigger])
-}

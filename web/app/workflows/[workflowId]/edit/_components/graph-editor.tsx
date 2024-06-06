@@ -112,6 +112,10 @@ export default function WorkflowGraphEditor({
                     "w-full h-full bg-slate-50",
                     props.className
                 )}
+                style={{
+                    perspectiveOrigin: "center",
+                    perspective: "10cm",
+                }}
 
                 onCopy={onCopy}
                 onPaste={() => onPaste()}
@@ -145,12 +149,12 @@ export default function WorkflowGraphEditor({
                 <NodeToolbar />
                 <ContextMenu />
 
-                <Panel position="bottom-center" className="!pointer-events-none">
-                    <EditorToolbar />
+                <Panel position="top-center" className="!m-0 !pointer-events-none">
+                    <EditWorkflowHeader />
                 </Panel>
 
-                <Panel position="top-center" className="!m-2 !pointer-events-none">
-                    <EditWorkflowHeader />
+                <Panel position="bottom-center" className="!pointer-events-none">
+                    <EditorToolbar />
                 </Panel>
             </ReactFlow>
             <GhostBuster />

@@ -16,9 +16,9 @@ import {
 import Kbd from "@web/components/kbd"
 import { Badge } from "@web/components/ui/badge"
 import { useCurrentProjectId, useDialogState } from "@web/lib/client/hooks"
+import { getPlanData } from "@web/lib/client/plans"
 import { trpc } from "@web/lib/client/trpc"
 import { cn } from "@web/lib/utils"
-import { PlanData } from "@web/modules/plans"
 import { usePathname, useRouter } from "next/navigation"
 import { useHotkeys } from "react-hotkeys-hook"
 import { TbCheck, TbChevronDown } from "react-icons/tb"
@@ -80,13 +80,13 @@ export default function ProjectSelector() {
                         <CommandEmpty>No project found.</CommandEmpty>
                         {projects?.map(project => {
 
-                            const plan = PlanData[project.billing_plan || "free"]
+                            const plan = getPlanData(project.billing_plan)
 
                             return (
                                 <CommandItem
                                     key={project.id}
-                                    value={project.name}
-                                    onSelect={goToProject(project.id)}
+                                    value={project.name!}
+                                    onSelect={goToProject(project.id!)}
                                     className="flex between py-3"
                                 >
                                     <div className="flex items-center gap-2">

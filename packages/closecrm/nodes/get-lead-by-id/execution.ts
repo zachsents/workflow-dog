@@ -1,4 +1,4 @@
-import { assertArgProvided } from "@pkg/_lib"
+import { assertArgProvided } from "@pkg/lib"
 import { getClient } from "@pkg/closecrm/lib"
 import { createExecutionNodeDefinition } from "@pkg/types"
 import shared from "./shared"

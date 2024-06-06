@@ -16,7 +16,7 @@ import { ServiceDefinitions } from "packages/client"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import Loader from "@web/components/loader"
-import { useAction } from "@web/lib/client/actions"
+// import { useAction } from "@web/lib/client/actions"
 import { addApiKeyAccount as addApiKeyAccountAction } from "../../actions"
 import { useWorkflow } from "@web/modules/workflows"
 import { useEffect } from "react"
@@ -35,15 +35,15 @@ export default function APIKeyDialog({ serviceId, ...props }: APIKeyDialogProps)
     const { data: workflow } = useWorkflow()
     const service = ServiceDefinitions.get(serviceId)
 
-    const [addAccount] = useAction(
-        addApiKeyAccountAction.bind(null, workflow?.team_id, serviceId),
-        {
-            invalidateKey: ["integrationAccountsForWorkflow", workflow?.id, serviceId],
-            showErrorToast: true,
-            showLoadingToast: true,
-            successToast: "Account connected!",
-        }
-    )
+    // const [addAccount] = useAction(
+    //     addApiKeyAccountAction.bind(null, workflow?.team_id, serviceId),
+    //     {
+    //         invalidateKey: ["integrationAccountsForWorkflow", workflow?.id, serviceId],
+    //         showErrorToast: true,
+    //         showLoadingToast: true,
+    //         successToast: "Account connected!",
+    //     }
+    // )
 
     const form = useForm<z.infer<typeof apiKeySchema>>({
         resolver: zodResolver(apiKeySchema),

@@ -7,7 +7,7 @@ export default createEmailTemplate<{
 }>({
     subject: ({ projectName }) => `WorkflowDog - You've been invited to work on "${projectName}"`,
     react: ({ invitationId, projectName }) => {
-        const href = `${process.env.APP_URL}/invitations/${invitationId}/accept`
+        const href = `${process.env.WEBAPP_URL}/invitations/${invitationId}/accept`
         return (
             <div style={{
                 maxWidth: "70ch",
@@ -42,7 +42,7 @@ You've been invited to a project on WorkflowDog!
 
 Project: ${projectName}
 
-Accept Invitation: ${process.env.APP_URL}/invitations/${invitationId}/accept
+Accept Invitation: ${process.env.WEBAPP_URL}/invitations/${invitationId}/accept
 `.trim(),
 })
 

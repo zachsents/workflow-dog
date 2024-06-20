@@ -54,18 +54,22 @@ export default function ProjectSelector() {
                     role="combobox"
                     aria-expanded={popover.isOpen}
                     className={cn(
-                        "w-[220px] justify-between",
+                        "w-[360px] justify-between gap-4",
                         !activeProjectId && "text-muted-foreground"
                     )}
                     disabled={isLoading}
                 >
-                    <span className="truncate">
+                    {activeProjectId ? <p className="text-xs text-muted-foreground">
+                        Current Project
+                    </p> : null}
+
+                    <p className="truncate grow text-left">
                         {isLoading
                             ? "Loading projects..."
                             : activeProjectId
                                 ? (projects!.find(p => p.id === activeProjectId)?.name ?? "Unknown project")
                                 : "Select projects..."}
-                    </span>
+                    </p>
 
                     <div className="flex center gap-2 shrink-0 text-sm text-muted-foreground">
                         <Kbd>P</Kbd>
@@ -73,7 +77,7 @@ export default function ProjectSelector() {
                     </div>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="min-w-[260px] p-0">
+            <PopoverContent className="min-w-[360px] p-0">
                 <Command>
                     <CommandInput placeholder="Search project..." />
                     <CommandList>

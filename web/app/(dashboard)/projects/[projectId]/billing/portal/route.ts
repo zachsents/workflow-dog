@@ -21,7 +21,7 @@ export async function GET(
 
     const { url } = await stripe.billingPortal.sessions.create({
         customer: customerId,
-        return_url: `${process.env.APP_URL}/projects/${projectId}/usage`,
+        return_url: `${process.env.WEBAPP_URL}/projects/${projectId}/usage`,
     })
 
     return redirect(url)

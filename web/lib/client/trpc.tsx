@@ -4,8 +4,8 @@ import type { QueryClient } from "@tanstack/react-query"
 import { createTRPCReact, httpBatchLink } from "@trpc/react-query"
 import "client-only"
 import { useState } from "react"
-import type { AppRouter } from "../types/trpc"
 import SuperJSON from "superjson"
+import type { AppRouter } from "../types/trpc"
 
 
 export const trpc = createTRPCReact<AppRouter>()
@@ -19,7 +19,7 @@ export function TRPCProvider({ queryClient, children }: { queryClient: QueryClie
                     url: `${process.env.NEXT_PUBLIC_API_URL}/trpc`,
                     async headers() {
                         return {
-                            // authorization: getAuthCookie(),
+                            // authorization: ,
                         }
                     },
                     transformer: SuperJSON,

@@ -1,16 +1,15 @@
-import Logo from "@web/public/logo.svg"
-import Link from "next/link"
-import AccountMenu from "./account-menu"
-import DashboardHeaderNav from "./header-nav"
-import ProjectSelector from "./project-selector"
-import { TbExternalLink, TbHeart, TbListDetails, TbStack2 } from "react-icons/tb"
 import { Button } from "@web/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
+import Logo from "@web/public/logo.svg"
+import Link from "next/link"
+import { TbExternalLink, TbHeart, TbListDetails } from "react-icons/tb"
+import AccountMenu from "./account-menu"
+import ProjectSelector from "./project-selector"
 
 
 export default function DashboardHeader() {
     return (
-        <header className="flex between gap-10 px-10 py-4 border bg-white">
+        <header className="flex between gap-10 px-10 py-4">
             <div className="flex items-center gap-10">
                 <Link href="https://workflow.dog" className="h-10 hover:scale-110 transition-transform">
                     <Logo className="w-auto h-full" />
@@ -21,7 +20,7 @@ export default function DashboardHeader() {
                     <ProjectSelector />
                 </div>
 
-                <DashboardHeaderNav />
+                {/* <DashboardHeaderNav /> */}
             </div>
             <div className="flex items-center gap-10">
                 <Button asChild variant="secondary" size="sm">

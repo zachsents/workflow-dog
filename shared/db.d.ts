@@ -14,6 +14,8 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
+export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
+
 export type Json = JsonValue;
 
 export type JsonArray = JsonValue[];
@@ -32,45 +34,40 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export type WorkflowRunStatus = "cancelled" | "completed" | "failed" | "pending" | "running" | "scheduled";
 
+export interface AuthAccounts {
+  access_token: string | null;
+  expires_at: Int8 | null;
+  id: Generated<string>;
+  id_token: string | null;
+  provider: string;
+  providerAccountId: string;
+  refresh_token: string | null;
+  scope: string | null;
+  session_state: string | null;
+  token_type: string | null;
+  type: string;
+  userId: string;
+}
+
+export interface AuthSessions {
+  expires: Timestamp;
+  id: Generated<string>;
+  sessionToken: string;
+  userId: string;
+}
+
 export interface AuthUsers {
-  aud: string | null;
-  banned_until: Timestamp | null;
-  confirmation_sent_at: Timestamp | null;
-  confirmation_token: string | null;
-  confirmed_at: Generated<Timestamp | null>;
-  created_at: Timestamp | null;
-  deleted_at: Timestamp | null;
-  email: string | null;
-  email_change: string | null;
-  email_change_confirm_status: Generated<number | null>;
-  email_change_sent_at: Timestamp | null;
-  email_change_token_current: Generated<string | null>;
-  email_change_token_new: string | null;
-  email_confirmed_at: Timestamp | null;
-  encrypted_password: string | null;
-  id: string;
-  instance_id: string | null;
-  invited_at: Timestamp | null;
-  is_anonymous: Generated<boolean>;
-  /**
-   * Auth: Set this column to true when the account comes from SSO. These accounts can have duplicate emails.
-   */
-  is_sso_user: Generated<boolean>;
-  is_super_admin: boolean | null;
-  last_sign_in_at: Timestamp | null;
-  phone: Generated<string | null>;
-  phone_change: Generated<string | null>;
-  phone_change_sent_at: Timestamp | null;
-  phone_change_token: Generated<string | null>;
-  phone_confirmed_at: Timestamp | null;
-  raw_app_meta_data: Json | null;
-  raw_user_meta_data: Json | null;
-  reauthentication_sent_at: Timestamp | null;
-  reauthentication_token: Generated<string | null>;
-  recovery_sent_at: Timestamp | null;
-  recovery_token: string | null;
-  role: string | null;
-  updated_at: Timestamp | null;
+  email: string;
+  emailVerified: Timestamp | null;
+  id: Generated<string>;
+  image: string | null;
+  name: string | null;
+}
+
+export interface AuthVerificationToken {
+  expires: Timestamp;
+  identifier: string;
+  token: string;
 }
 
 export interface ProjectInvitations {
@@ -190,7 +187,10 @@ export interface WorkflowsUsageRecords {
 }
 
 export interface DB {
+  "auth.accounts": AuthAccounts;
+  "auth.sessions": AuthSessions;
   "auth.users": AuthUsers;
+  "auth.verification_token": AuthVerificationToken;
   project_invitations: ProjectInvitations;
   projects: Projects;
   projects_service_accounts: ProjectsServiceAccounts;

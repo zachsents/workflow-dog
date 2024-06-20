@@ -128,12 +128,6 @@ export async function getVerifiedSession() {
 }
 
 
-export async function getCurrentUser() {
-    const supabase = supabaseServer()
-    return supabase.auth.getUser()
-        .then(res => res.data.user)
-}
-
 type SupabaseJWTRole = "authenticated" | "anon" | "service_role"
 
 type SupabaseJWTPayload = {

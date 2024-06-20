@@ -3,7 +3,6 @@ import { sql, type Selectable } from "kysely"
 import morgan from "morgan"
 import type { WorkflowGraphs, WorkflowRuns, Workflows } from "shared/db"
 import { db } from "./db"
-import "./env"
 import { runWorkflow } from "./execution"
 
 

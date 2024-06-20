@@ -33,19 +33,11 @@ module.exports = {
 
         return config
     },
-
-    async redirects() {
-        return [
-            {
-                source: "/",
-                destination: "/projects",
-                permanent: false,
-            },
-            {
-                source: "/feedback",
-                destination: "https://forms.gle/SwmPPmUg45LnJ2nx7",
-                permanent: false,
-            },
-        ]
-    },
+    redirects: async () => [
+        {
+            source: "/",
+            destination: "/projects",
+            permanent: false,
+        },
+    ],
 }

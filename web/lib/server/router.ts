@@ -1,20 +1,12 @@
-import "server-only"
 import { redirect } from "next/navigation"
 import { NextResponse } from "next/server"
+import "server-only"
 import { getVerifiedSession } from "./supabase"
 
 
-export function errorRedirect(message: string, {
-    nextResponse,
-}: {
-    nextResponse?: boolean
-} = {}) {
+export function errorRedirect(message: string) {
     const url = `/error?${new URLSearchParams({ msg: message })}`
-
-    if (nextResponse)
-        return NextResponse.redirect(url)
-    else
-        redirect(url)
+    redirect(url)
 }
 
 

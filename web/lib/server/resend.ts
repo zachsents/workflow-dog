@@ -1,8 +1,12 @@
 import InviteMemberTemplate from "@web/components/email-templates/invite-member"
 import { Resend } from "resend"
+import { useEnvVars } from "./utils"
 
 
-export const resend = new Resend(process.env.RESEND_KEY)
+const { RESEND_KEY } = useEnvVars("RESEND_KEY", "RESEND_GENERAL_AUDIENCE_ID")
+
+
+export const resend = new Resend(RESEND_KEY)
 
 
 export type EmailTemplate<T extends Record<string, any>> = {

@@ -12,7 +12,7 @@ import { userHasProjectPermission } from "../../auth-checks"
 import { db } from "../../db"
 import { WorkflowRunLimitExceededError, enrichWorkflowRunRow, queueWorkflow } from "../../internal"
 import { assertAuthenticated, forbidden } from "../assertions"
-import { t } from "../trpc"
+import { t } from "../setup"
 
 
 export default {

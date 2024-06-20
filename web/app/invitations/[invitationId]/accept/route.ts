@@ -12,8 +12,9 @@ export async function GET(
 ) {
     const { email } = await requireLogin({
         beforeRedirect: () => {
-            const cookieStore = cookies()
-            cookieStore.set("accepting_invitation", invitationId)
+            cookies().set("login_return_to", `/invitations/${invitationId}/accept`, {
+                maxAge: 120,
+            })
         },
         params: { tm: "You need to log in first" },
     })

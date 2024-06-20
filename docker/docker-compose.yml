@@ -1,0 +1,111 @@
+name: workflow-dog
+
+services:
+  nginx:
+    container_name: wfd-proxy
+    build:
+      context: ../
+      dockerfile: ./docker/nginx/Dockerfile
+      args:
+        HTUSER: ${DASHBOARD_USERNAME}
+        HTPASS: ${DASHBOARD_PASSWORD}
+    ports:
+      - "8080:80"
+      - "8443:443"
+      # - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    restart: unless-stopped
+    healthcheck:
+      test: curl -f http://localhost:80/health || exit 1
+      interval: 20s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+      start_interval: 1s
+    depends_on:
+      db:
+        condition: service_healthy
+      webapp:
+        condition: service_healthy
+
+  webapp:
+    container_name: wfd-webapp
+    image: sunny0183/nextjs-docker
+    # build:
+    #   context: ../
+    #   dockerfile: ./web/Dockerfile
+    restart: unless-stopped
+    healthcheck:
+      test: wget --spider -q http://127.0.0.1:3000 || exit 1
+      interval: 20s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+      start_interval: 1s
+    environment:
+      PORT: 3000
+
+  db:
+    container_name: wfd-db
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    build:
+      context: ../
+      dockerfile: ./docker/db/Dockerfile
+    restart: unless-stopped
+    healthcheck:
+      test: pg_isready -U postgres -h localhost
+      interval: 20s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+      start_interval: 1s
+    environment:
+      # PGx vs. POSTGRES_x - PGx is for the container, POSTGRES_x is for the actual pg service
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      PGPORT: ${POSTGRES_PORT}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  workflow-runner:
+    container_name: wfd-workflow-runner
+    build:
+      context: ../
+      dockerfile: ./workflow-man/Dockerfile
+    restart: unless-stopped
+    healthcheck:
+      test: bash -c 'cat < /dev/null > /dev/tcp/localhost/${WORKFLOW_RUNNER_PORT}'
+      interval: 20s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+      start_interval: 1s
+    environment:
+      PORT: ${WORKFLOW_RUNNER_PORT}
+      API_SERVER_URL: https://nginx/api
+      WFD_ADMIN_KEY: ${WFD_ADMIN_KEY}
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/postgres
+
+  realtime:
+    container_name: wfd-realtime
+    build:
+      context: ../realtime
+      dockerfile: ./Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: bash -c 'cat < /dev/null > /dev/tcp/localhost/${REALTIME_SERVER_PORT}'
+      interval: 20s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+      start_interval: 1s
+    environment:
+      PORT: ${REALTIME_SERVER_PORT}
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/postgres
+
+volumes:
+  db-data:

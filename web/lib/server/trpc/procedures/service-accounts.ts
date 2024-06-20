@@ -3,7 +3,7 @@ import { z } from "zod"
 import { db } from "../../db"
 import { getServiceAccountToken } from "../../internal/service-accounts"
 import { assertAdmin } from "../assertions"
-import { t } from "../trpc"
+import { t } from "../setup"
 
 
 export default {

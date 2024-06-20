@@ -8,5 +8,6 @@
     "editor.quickSuggestions": {
         "strings": true
     },
-    "editor.inlineSuggest.enabled": true
+    "editor.inlineSuggest.enabled": true,
+    "CodeGPT.apiKey": "CodeGPT Plus Beta"
 }

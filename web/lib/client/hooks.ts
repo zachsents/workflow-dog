@@ -1,10 +1,10 @@
 import { RealtimePostgresChangesFilter } from "@supabase/supabase-js"
 import { useWorkflow } from "@web/modules/workflows"
-import "client-only"
 import type { IFuseOptions } from "fuse.js"
 import Fuse from "fuse.js"
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
+import type { RealtimeChannel, RealtimeChannelParams } from "realtime"
 import { useSupabaseBrowser } from "./supabase"
 
 
@@ -233,4 +233,33 @@ export function useOnDatabaseChange<T extends "*" | "INSERT" | "UPDATE" | "DELET
     }, [
         JSON.stringify(postgresFilterOptions),
     ])
+}
+
+
+/**
+ * Currently unused.
+ * Hooks into our custom-made realtime server. We'll create a channel
+ * for each new thing we need to listen to. Don't need it currently.
+ */
+export function useRealtimeChannelCallback<T extends RealtimeChannel>(
+    channelName: T,
+    params: RealtimeChannelParams<T>,
+    callback: (data: any) => void,
+    { enabled }: { enabled?: boolean } = {},
+) {
+    // const wsUrl = process.env.NEXT_PUBLIC_API_URL!.replace(/^https?:/, "ws:")
+    useEffect(() => {
+        if (!enabled) return
+
+        // TO DO: convert this to use env var
+        const socket = new WebSocket(`ws://localhost:8080/api/ws/${channelName}?${new URLSearchParams(params).toString()}`)
+
+        socket.onmessage = (event) => {
+            let data = event.data
+            try { data = JSON.parse(data) } catch (err) { }
+            callback(data)
+        }
+
+        return () => void socket.close()
+    }, [channelName, JSON.stringify(params), enabled])
 }

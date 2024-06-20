@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server"
-import { TRPCContext } from "./trpc"
 import assert from "node:assert"
+import type { TRPCContext } from "./setup"
 
 
 export function assertAuthenticated(ctx: TRPCContext) {

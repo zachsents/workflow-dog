@@ -5,18 +5,20 @@ interface SimpleTooltipProps {
     tooltip: string | React.ReactNode
     triggerProps?: React.ComponentProps<typeof TooltipTrigger>
     contentProps?: React.ComponentProps<typeof TooltipContent>
+    delay?: number
 }
 
 export default function SimpleTooltip({
     children,
     tooltip,
     triggerProps,
-    contentProps
+    contentProps,
+    delay = 0,
 }: SimpleTooltipProps) {
     return (
-        <TooltipProvider delayDuration={0}>
+        <TooltipProvider delayDuration={delay}>
             <Tooltip>
-                <TooltipTrigger {...triggerProps}>
+                <TooltipTrigger asChild {...triggerProps}>
                     {children}
                 </TooltipTrigger>
                 <TooltipContent {...contentProps}>

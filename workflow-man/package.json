@@ -22,8 +22,7 @@
     "devDependencies": {
         "@trpc/server": "11.0.0-rc.382",
         "@types/express": "^4.17.21",
-        "@types/morgan": "^1.9.9",
-        "web": "workspace:*"
+        "@types/morgan": "^1.9.9"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"

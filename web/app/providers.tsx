@@ -1,9 +1,9 @@
 "use client"
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { SupabaseSetup } from "@web/lib/client/supabase"
 import { TRPCProvider } from "@web/lib/client/trpc"
 import { useState } from "react"
+import { SessionProvider } from "next-auth/react"
 
 export function Providers({ children }: { children: React.ReactNode }) {
 
@@ -21,11 +21,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
     )
 
     return (
-        <TRPCProvider queryClient={queryClient}>
-            <QueryClientProvider client={queryClient}>
-                {children}
-                <SupabaseSetup />
-            </QueryClientProvider>
-        </TRPCProvider>
+        <SessionProvider>
+            <TRPCProvider queryClient={queryClient}>
+                <QueryClientProvider client={queryClient}>
+                    {children}
+                </QueryClientProvider>
+            </TRPCProvider>
+        </SessionProvider>
     )
 }

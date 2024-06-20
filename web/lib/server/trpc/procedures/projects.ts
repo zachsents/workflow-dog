@@ -8,7 +8,7 @@ import { db } from "../../db"
 import { countProjectMembers, getProjectBilling } from "../../internal"
 import { sendEmailFromTemplate } from "../../resend"
 import { assertAuthenticated, forbidden } from "../assertions"
-import { t } from "../trpc"
+import { t } from "../setup"
 
 
 export default {
@@ -22,7 +22,7 @@ export default {
                 .selectAll("projects")
                 .select([
                     sql<string[]>`array_agg(user_id)`.as("member_ids"),
-                    sql<string[]>`array_agg(auth.users.raw_user_meta_data->>name)`.as("member_names"),
+                    sql<string[]>`array_agg(auth.users.name)`.as("member_names"),
                     sql<string[]>`array_agg(auth.users.email)`.as("member_emails"),
                 ])
                 .where("user_id", "=", ctx.userId!)
@@ -146,7 +146,7 @@ export default {
                     .select([
                         "auth.users.id",
                         "auth.users.email",
-                        sql<string>`auth.users.raw_user_meta_data->'name'`.as("name"),
+                        "auth.users.name",
                         "permissions",
                     ])
                     .where("project_id", "=", input.projectId)

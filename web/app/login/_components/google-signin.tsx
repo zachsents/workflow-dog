@@ -2,40 +2,24 @@
 
 import { useMutation } from "@tanstack/react-query"
 import { Button } from "@ui/button"
-import { useErrorRedirect } from "@web/lib/client/router"
-import { useSupabaseBrowser } from "@web/lib/client/supabase"
+import { signIn } from "next-auth/react"
 import { TbBrandGoogleFilled, TbLoader3 } from "react-icons/tb"
-
 
 export function GoogleSignIn() {
 
-    const errorRedirect = useErrorRedirect()
-    const supabase = useSupabaseBrowser()
-
-    const googleSignInMutation = useMutation({
-        mutationFn: async () => {
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider: "google",
-                options: {
-                    redirectTo: location.protocol + '//' + location.host + "/login/callback",
-                },
-            })
-
-            if (error)
-                errorRedirect(error.message)
-        },
+    const { mutate: startGoogleSignIn, isPending, isSuccess } = useMutation({
+        mutationFn: () => signIn("google", { callbackUrl: "/projects" }),
     })
-
-    const isLoading = googleSignInMutation.isPending || googleSignInMutation.isSuccess
 
     return (
         <Button
             variant="outline" type="button"
-            onClick={() => googleSignInMutation.mutate()}
+            onClick={() => void startGoogleSignIn()}
+            className="flex center gap-2"
         >
-            {isLoading
-                ? <TbLoader3 className="animate-spin mr-2" />
-                : <TbBrandGoogleFilled className="mr-2" />}
+            {(isPending || isSuccess)
+                ? <TbLoader3 className="animate-spin" />
+                : <TbBrandGoogleFilled />}
             Sign in with Google
         </Button>
     )

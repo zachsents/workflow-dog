@@ -2,7 +2,7 @@
     "private": true,
     "scripts": {
         "gentypes-supabase": "supabase gen types typescript --project-id vewsmenzeqceyczoobfx > web/lib/types/db.ts",
-        "gentypes-kysely": "kysely-codegen --dialect postgres --include-pattern=\"@(public.*)|@(auth.users)\" --env-file web/.env --out-file shared/db.d.ts",
+        "gentypes-kysely": "kysely-codegen --dialect postgres --include-pattern=\"@(public.*)|@(auth.*)\" --env-file web/.env --out-file shared/db.d.ts",
         "gentypes": "pnpm run gentypes-kysely"
     },
     "devDependencies": {

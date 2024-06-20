@@ -1,15 +1,16 @@
-import { supabaseServer } from "@web/lib/server/supabase"
+import { getUser } from "@web/lib/server/auth"
 import AccountMenuClient from "./client"
 
 
 export default async function AccountMenu() {
 
-    const { data: { user } } = await supabaseServer().auth.getUser()
+    const user = await getUser()
 
-    const fallback = (user?.user_metadata?.name as string || user?.email)
+    const fallback = (user?.name || user?.email)
         ?.match(/(?<!\w)./g)?.slice(0, 2).join("").toUpperCase() ?? "?"
 
-    const photoSrc = user?.user_metadata?.avatar_url || user?.user_metadata?.picture
-
-    return <AccountMenuClient {...{ fallback, photoSrc }} />
+    return <AccountMenuClient
+        fallback={fallback}
+        photoSrc={user?.image!}
+    />
 }

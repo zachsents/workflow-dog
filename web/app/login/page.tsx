@@ -1,5 +1,5 @@
 import { Button } from "@ui/button"
-import { getVerifiedSession } from "@web/lib/server/supabase"
+import { getSession } from "@web/lib/server/auth"
 import Logo from "@web/public/logo.svg"
 import Link from "next/link"
 import { redirect } from "next/navigation"
@@ -9,8 +9,7 @@ import { GoogleSignIn } from "./_components/google-signin"
 
 export default async function LoginPage() {
 
-    const session = await getVerifiedSession()
-    if (session)
+    if (await getSession())
         return redirect("/projects")
 
     return (

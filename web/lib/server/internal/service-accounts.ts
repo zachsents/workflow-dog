@@ -7,10 +7,10 @@ import _ from "lodash"
 import { type ServiceAccounts } from "shared/db"
 import { db } from "../db"
 import { decryptJSON, encryptJSON } from "../encryption"
+import { useEnvVars } from "../utils"
 
 
-if (!process.env.SERVICE_ACCOUNT_ENCRYPTION_KEY)
-    throw new Error("SERVICE_ACCOUNT_ENCRYPTION_KEY not set")
+const { SERVICE_ACCOUNT_ENCRYPTION_KEY } = useEnvVars("SERVICE_ACCOUNT_ENCRYPTION_KEY")
 
 
 export async function getServiceAccountToken(accountId: string) {
@@ -28,7 +28,7 @@ export async function getServiceAccountToken(accountId: string) {
     if (!serviceDef)
         throw new Error("Service definition not found")
 
-    const token = decryptJSON(account.encrypted_token, process.env.SERVICE_ACCOUNT_ENCRYPTION_KEY!)
+    const token = decryptJSON(account.encrypted_token, SERVICE_ACCOUNT_ENCRYPTION_KEY)
 
     switch (serviceDef.authorizationMethod) {
         case "oauth2":
@@ -45,7 +45,7 @@ export async function getFreshOAuth2AccessToken(account: Selectable<ServiceAccou
 
     const decryptedToken = decryptJSON(
         account.encrypted_token,
-        process.env.SERVICE_ACCOUNT_ENCRYPTION_KEY!
+        SERVICE_ACCOUNT_ENCRYPTION_KEY
     )
 
     // If the token is not expired, return it. Includes a 2 minute buffer.
@@ -95,7 +95,7 @@ export async function getFreshOAuth2AccessToken(account: Selectable<ServiceAccou
             .set({
                 encrypted_token: encryptJSON(
                     _.merge({}, decryptedToken, newToken),
-                    process.env.SERVICE_ACCOUNT_ENCRYPTION_KEY!
+                    SERVICE_ACCOUNT_ENCRYPTION_KEY
                 ),
                 profile,
                 display_name: oauthConfig.getDisplayName(profile, newToken),

@@ -36,14 +36,7 @@ if (options.external)
 
 await $`rm -rf build`
 
-const tasks = [
+await Promise.all([
     Bun.build(buildOptions),
-    $`cp ./.env build/.env`,
-    $`cp ./service-account.json ./build/service-account.json`,
     Bun.write("./build/package.json", `{"type":"module"}`),
-]
-
-if (options.dev)
-    tasks.push($`cp ./.env.development build/.env.development`)
-
-await Promise.all(tasks)
+])

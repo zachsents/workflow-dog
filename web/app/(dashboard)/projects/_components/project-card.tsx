@@ -20,7 +20,7 @@ export default function ProjectCard({
 
     return (
         <Link href={`/projects/${project.id}`}>
-            <Card className="group hover:shadow-md transition">
+            <Card className="group shadow-none hover:shadow-md hover:scale-[1.02] transition">
                 <CardHeader>
                     <CardTitle>{project.name}</CardTitle>
                     <CardDescription>

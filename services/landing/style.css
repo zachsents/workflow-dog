@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    .flex-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .flex-v {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .debug {
+        @apply border-dashed border-4 border-red-600;
+    }
+
+    .section-md {
+        @apply max-w-6xl w-full mx-auto px-6 sm:px-10;
+    }
+
+    .section-sm {
+        @apply max-w-4xl w-full mx-auto px-6 sm:px-10;
+    }
+}
+
+
+html {
+    font-family: 'DM Sans', sans-serif;
+}
+
+body {
+    background-image:
+        linear-gradient(white, transparent),
+        radial-gradient(circle, var(--color-gray-200) 0%, var(--color-gray-200) 8%, transparent 9%);
+    background-size: 100% 150vh, 2rem 2rem;
+    background-repeat: no-repeat, repeat;
+}
+
+.ti {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.fun-button {
+    @apply rounded-md px-[1em] py-[0.35em] font-bold hover:scale-105 active:scale-95 transition shadow-md hover:shadow-lg active:shadow-sm;
+}
+
+.load-in {
+    @apply data-[loaded]:scale-100 data-[loaded]:opacity-100 scale-110 opacity-0 transition duration-500;
+}

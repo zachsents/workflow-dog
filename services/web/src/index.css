@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+html,
+body {
+    padding: 0;
+    margin: 0;
+    scroll-behavior: smooth;
+    height: 100%;
+    /* Don't need this -- covered in root layout */
+    /* font-family: "DM Sans", sans-serif; */
+}
+
+.grid-bg {
+    --width: 5%;
+    --color: theme("colors.gray.100");
+    --scale: 20px;
+    background-image: linear-gradient(var(--color) 0%, var(--color) var(--width), transparent var(--width), transparent 100%),
+        linear-gradient(90deg, var(--color) 0%, var(--color) var(--width), transparent var(--width), transparent 100%);
+    background-size: var(--scale) var(--scale);
+    background-position: calc(var(--scale) / 2) calc(var(--scale) / 2);
+}
+
+
+@layer base {
+    :root {
+        --background: 0 0% 100%;
+        --foreground: 224 71.4% 4.1%;
+
+        --card: 0 0% 100%;
+        --card-foreground: 224 71.4% 4.1%;
+
+        --popover: 0 0% 100%;
+        --popover-foreground: 224 71.4% 4.1%;
+
+        /* --primary: 220.9 39.3% 11%; */
+        --primary: 262 83% 58%;
+        --primary-foreground: 210 20% 98%;
+
+        --secondary: 220 14.3% 95.9%;
+        --secondary-foreground: 220.9 39.3% 11%;
+
+        --muted: 220 14.3% 95.9%;
+        --muted-foreground: 220 8.9% 46.1%;
+
+        --accent: 220 14.3% 95.9%;
+        --accent-foreground: 220.9 39.3% 11%;
+
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 210 20% 98%;
+
+        --border: 220 13% 91%;
+        --input: 220 13% 91%;
+        --ring: 224 71.4% 4.1%;
+
+        --radius: 0.5rem;
+    }
+
+    .dark {
+        --background: 224 71.4% 4.1%;
+        --foreground: 210 20% 98%;
+
+        --card: 224 71.4% 4.1%;
+        --card-foreground: 210 20% 98%;
+
+        --popover: 224 71.4% 4.1%;
+        --popover-foreground: 210 20% 98%;
+
+        --primary: 210 20% 98%;
+        --primary-foreground: 220.9 39.3% 11%;
+
+        --secondary: 215 27.9% 16.9%;
+        --secondary-foreground: 210 20% 98%;
+
+        --muted: 215 27.9% 16.9%;
+        --muted-foreground: 217.9 10.6% 64.9%;
+
+        --accent: 215 27.9% 16.9%;
+        --accent-foreground: 210 20% 98%;
+
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 210 20% 98%;
+
+        --border: 215 27.9% 16.9%;
+        --input: 215 27.9% 16.9%;
+        --ring: 216 12.2% 83.9%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+
+@layer components {
+    .debug {
+        @apply outline-red-500 outline-dashed;
+    }
+
+    .debug-div {
+        @apply w-4 aspect-square outline-red-500 outline-dashed bg-red-200;
+    }
+
+    .flex-v {
+        @apply flex flex-col;
+    }
+
+    .flex-center {
+        @apply flex items-center justify-center;
+    }
+
+    .flex-between {
+        @apply flex justify-between items-center;
+    }
+
+    .hack-center-x {
+        @apply left-1/2 -translate-x-1/2;
+    }
+
+    .hack-center-y {
+        @apply top-1/2 -translate-y-1/2;
+    }
+
+    .hack-center {
+        @apply hack-center-x hack-center-y;
+    }
+}
+
+
+.bg-dots {
+    background-image:
+        linear-gradient(to right, transparent 2px, var(--dots-color, white) var(--dot-size, 1px)),
+        linear-gradient(to bottom, transparent 2px, var(--dots-color, white) var(--dot-size, 1px));
+    background-size: var(--bg-size, 24px) var(--bg-size, 24px);
+    background-position: 0 0, calc(var(--bg-size, 24px) / 2) calc(var(--bg-size, 24px) / 2);
+}
+
+.react-flow__edges {
+    z-index: 1001 !important;
+}

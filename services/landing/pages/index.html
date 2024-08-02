@@ -1,0 +1,246 @@
+<html>
+
+<include src="head.html">
+    { "title": "WorkflowDog - Build powerful automations in seconds" }
+</include>
+
+<body class="min-h-screen bg-gray-50 load-in">
+    <include src="header.html"></include>
+
+    <section class="section-sm pt-[12vh] pb-24 flex-v items-center gap-6 text-center">
+        <h1
+            class="text-5xl sm:text-7xl font-bold">
+            <span id="h1-before">Launch</span>
+            <span
+                  id="h1-gradient"
+                  class="block bg-gradient-to-r from-violet-600 via-pink-600 to-yellow-500 bg-clip-text text-transparent">
+                powerful automations
+            </span>
+            <span id="h1-after">without coding</span>
+        </h1>
+
+        <p id="hero-subtitle" class="text-xl sm:text-2xl text-balance">
+            It's now fast, fun, and easy to build powerful automated systems.
+        </p>
+
+        <a href="/projects" class="self-center mt-10">
+            <button
+                    class="bg-primary-700 hover:bg-primary-800 text-white fun-button text-xl sm:text-xl text-left flex-center gap-4 group">
+                <span>Start Building</span>
+                <img src="/icons/run.svg"
+                     class="invert group-hover:translate-x-2 transition" />
+            </button>
+        </a>
+    </section>
+
+    <section class="section-md pb-16 sm:pb-24">
+        <figure class="flex-center flex-col gap-4">
+            <div
+                 class="flex-center flex-col gap-4 p-4 rounded-3xl shadow-xl bg-cover bg-gray-300">
+                <div class="rounded-xl overflow-clip relative group">
+                    <video autoplay loop muted controls controlslist="nodownload"
+                           class="-mt-[20px] sm:-mt-[29px] -mb-[3px] min-h-[400px] object-cover">
+                        <source src="/media/demo.mp4" type="video/mp4" />
+                    </video>
+                    <figcaption
+                                class="hidden sm:block absolute bottom-14 left-1/2 -translate-x-1/2 text-center px-4 py-1 bg-neutral-900/75 rounded-md text-sm text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                        This workflow detects interested leads in your Gmail inbox and sends you a notification.
+                    </figcaption>
+                </div>
+            </div>
+
+            <p class="sm:hidden text-center px-4 py-1 bg-neutral-900/75 rounded-md text-sm text-white">
+                This workflow detects interested leads in your Gmail inbox and sends you a notification.
+            </p>
+        </figure>
+    </section>
+
+    <section id="examples" class="section-md pb-24 flex-v items-stretch gap-10">
+        <h3 class="font-bold text-4xl text-center">
+            Examples
+        </h3>
+
+        <ul class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" x-data="examples">
+            <template x-for="eg in examples">
+                <li class="rounded-xl overflow-clip bg-white shadow-md relative group">
+                    <a :href="eg.href || 'javascript:;'" :target="eg.href ? '_blank' : '_self'"
+                       :class="!eg.href && 'cursor-default'">
+                        <div class="bg-gray-200 aspect-video relative">
+                            <img :src="eg.thumbnail"
+                                 class="w-full h-auto object-cover group-hover:saturate-150 transition"
+                                 x-show="eg.thumbnail" />
+
+                            <div
+                                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex-center bg-gray-200 p-4 shadow-lg border-solid border-2 border-gray-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                 x-show="eg.href">
+                                <img src="/icons/player-play.svg"
+                                     class="h-8 opacity-50" />
+                            </div>
+                        </div>
+
+                        <div class="text-center px-4 py-2">
+                            <p class="font-bold h-[3em]" x-text="eg.title"></p>
+                            <p class="text-gray-500 text-sm" x-text="eg.subtitle"></p>
+                        </div>
+
+                        <img src="/icons/external-link.svg"
+                             class="h-6 absolute top-4 right-4 opacity-0 group-hover:opacity-50 transition-opacity"
+                             x-show="eg.href" />
+
+
+                    </a>
+                </li>
+            </template>
+        </ul>
+
+        <p class="text-gray-500 text-center">
+            More examples coming soon!
+        </p>
+    </section>
+
+
+    <section id="pricing" class="section-md pb-36 flex-v items-stretch gap-10">
+        <h3 class="font-bold text-4xl text-center">
+            Pricing
+        </h3>
+
+        <div class="flex flex-col items-center sm:flex-row sm:items-stretch justify-center gap-10" x-data="features">
+            <div class="bg-white rounded-xl max-w-sm p-8 shadow-lg flex-v items-center gap-4">
+                <p class="text-2xl font-bold text-center">Free</p>
+                <p class="text-balance text-center">
+                    See what it feels like to run your tasks in the background.
+                </p>
+
+                <a href="/projects">
+                    <button class="fun-button bg-gray-400 hover:bg-gray-500 text-white my-2">
+                        Start for free
+                    </button>
+                </a>
+
+                <ul class="text-md flex-v gap-2 mt-6">
+                    <template x-for="feat in free">
+                        <li class="flex items-center gap-2">
+                            <img src="/icons/circle-dashed-check.svg" />
+                            <span x-text="feat"></span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+
+            <div
+                 class="bg-white rounded-xl max-w-sm p-8 shadow-xl flex-v items-center gap-4 outline outline-primary-300 outline-4 overflow-clip">
+                <div class="relative font-bold text-center self-stretch">
+                    <p
+                       class="text-6xl uppercase italic absolute text-primary-500 opacity-15 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none text-nowrap -rotate-6">
+                        Pro Pro Pro
+                    </p>
+                    <p class="text-3xl uppercase italic relative">Pro</p>
+                </div>
+
+                <p class="text-center font-bold">$47 / month</p>
+
+                <p class="text-balance text-center">
+                    You're a professional. Build like one.
+                </p>
+
+                <a href="/projects">
+                    <button class="fun-button bg-primary-700 hover:bg-primary-800 text-white my-2 text-xl">
+                        Sign up now
+                    </button>
+                </a>
+
+                <ul class="text-md flex-v gap-2 mt-6">
+                    <template x-for="feat in pro">
+                        <li class="flex items-center gap-2">
+                            <img src="/icons/circle-dashed-check.svg" />
+                            <span x-text="feat"></span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
+
+        <div class="max-w-3xl flex flex-col items-center gap-4 sm:flex-row sm:flex-between sm:gap-20 self-center mt-10">
+            <div class="text-center sm:text-left">
+                <p class="text-2xl font-bold">Need more?</p>
+                <p>
+                    Reach out for a custom plan. We're happy to provide more runs, more team members, and even
+                    automation assistance.
+                </p>
+            </div>
+
+            <a href="mailto:info@workflow.dog?subject=Request for a custom plan" class="shrink-0">
+                <button class="fun-button bg-white outline outline-2 outline-gray-200 hover:bg-gray-200 text-nowrap">
+                    Send us an email
+                </button>
+            </a>
+        </div>
+    </section>
+
+    <section class="section-md mb-24">
+        <div
+             class="rounded-xl flex flex-col items-center gap-6 sm:flex-row sm:flex-between bg-gradient-to-br from-violet-700 via-pink-700 to-yellow-400 p-10">
+            <p class="text-3xl sm:text-4xl font-bold text-white text-center sm:text-left">
+                You're ready to create.
+            </p>
+            <a href="/projects" class="shrink-0">
+                <button class="fun-button bg-white text-xl text-nowrap">
+                    Start Building
+                </button>
+            </a>
+        </div>
+    </section>
+
+    <include src="footer.html"></include>
+</body>
+
+<script src="https://dirtab.com/dirtab.js" id="dirt-ab-site-script" data-site-id="bqqj6BOkU1lvxAgHPuDW"></script>
+
+<script>
+
+    window.onload = (ev) => {
+        Array.from(document.querySelectorAll(".load-in")).forEach(el => {
+            el.style.transformOrigin = `50% ${window.scrollY}px`
+            el.dataset.loaded = true
+        })
+    }
+
+    document.addEventListener("alpine:init", () => {
+        Alpine.data("examples", () => ({
+            examples: [
+                {
+                    title: "AI chatbot inside Gmail",
+                    subtitle: "5 min",
+                    href: "https://www.youtube.com/watch?v=7Qb0Z56-bDY",
+                    thumbnail: "/images/thumbnails/ai-chatbot-inside-email-thumb.webp"
+                },
+                {
+                    title: "Periodically follow up with leads",
+                    subtitle: "Coming soon",
+                },
+                {
+                    title: "Serve data from a Google Sheet as an API",
+                    subtitle: "Coming soon",
+                },
+            ],
+        }))
+
+        Alpine.data("features", () => ({
+            free: [
+                "100 workflow runs",
+                "Up to 3 team members",
+                "Unlimited workflows",
+                "Unlimited app integrations",
+            ],
+            pro: [
+                "10,000 workflow runs",
+                "Up to 20 team members",
+                "Unlimited workflows",
+                "Unlimited app integrations",
+                "Join the Discord channel for direct support",
+            ],
+        }))
+    })
+</script>
+
+</html>

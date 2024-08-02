@@ -1,0 +1,30 @@
+{
+	email info@workflow.dog
+}
+
+{$APP_ORIGIN}
+
+root /www
+
+@static {
+	file {path} {path}/ {path}.html
+}
+
+@api {
+	path /api/* /auth/*
+}
+
+# Directive order in Caddy is funky
+# See https://caddyserver.com/docs/caddyfile/directives#directive-order
+# Putting everything in a route block forces the order we want
+route {
+	redir /feedback "https://forms.gle/SwmPPmUg45LnJ2nx7"
+	respond /__proxy_health "healthy\n" 200
+
+	reverse_proxy @api http://api:{$API_PORT}
+
+	rewrite @static {file_match.relative}
+	file_server @static
+
+	reverse_proxy http://webapp:5173
+}

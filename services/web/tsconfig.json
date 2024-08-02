@@ -1,0 +1,13 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "paths": {
+            "@web/*": [
+                "./src/*"
+            ],
+            "@ui/*": [
+                "./src/components/ui/*"
+            ],
+        },
+    }
+}

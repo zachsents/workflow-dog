@@ -1,0 +1,14 @@
+{
+    "name": "core",
+    "type": "module",
+    "dependencies": {
+        "lodash": "^4.17.21",
+        "nanoid": "^5.0.7",
+        "nanoid-dictionary": "^4.3.0",
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "@types/lodash": "^4.17.5",
+        "@types/nanoid-dictionary": "^4.2.3"
+    }
+}

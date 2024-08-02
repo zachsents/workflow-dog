@@ -1,0 +1,43 @@
+services:
+  proxy:
+    ports: !override
+      - ${APP_PORT:-8080}:${APP_PORT:-8080}
+    develop:
+      watch:
+        - path: ./services/proxy
+          target: /etc/caddy
+          ignore:
+            - "*"
+            - "!Caddyfile"
+          action: sync+restart
+        - path: ./services/landing
+          action: rebuild
+
+  webapp:
+    image: !reset "null"
+    build:
+      target: base
+      args: !reset []
+    working_dir: /app/services/web
+    command: bun run dev --host
+    volumes:
+      - .:/app
+    environment:
+      - VITE_APP_ORIGIN=${APP_ORIGIN}
+
+  api:
+    image: !reset "null"
+    build:
+      target: base
+    working_dir: /app/services/api
+    command: bun --watch .
+    ports:
+      - ${API_PORT}:${API_PORT}
+    environment:
+      - DEV
+    volumes:
+      - .:/app
+
+  supertokens:
+    ports:
+      - ${SUPERTOKENS_PORT}:${SUPERTOKENS_PORT}

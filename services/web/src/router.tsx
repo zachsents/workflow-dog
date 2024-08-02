@@ -1,0 +1,82 @@
+import { isLoggedIn } from "@web/lib/auth"
+import { createBrowserRouter } from "react-router-dom"
+import ErrorPage from "./components/error-page"
+import LoginCallback from "./routes/login-callback"
+import LoginIndex from "./routes/login-index"
+import LoginRoot from "./routes/login-root"
+import ProjectRoot from "./routes/project-root"
+import ProjectsList from "./routes/projects-list"
+import Root from "./routes/root"
+import EditTest from "./routes/edit-test"
+
+export const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <Root />,
+        errorElement: <ErrorPage />,
+        children: [
+            {
+                index: true,
+                loader: async () => {
+                    window.location.replace("/")
+                    return null
+                },
+            },
+            {
+                path: "/login",
+                element: <LoginRoot />,
+                children: [
+                    {
+                        index: true,
+                        element: <LoginIndex />,
+                    },
+                    {
+                        path: "callback",
+                        element: <LoginCallback />,
+                    },
+                ]
+            },
+            {
+                path: "/projects",
+                children: [
+                    {
+                        index: true,
+                        path: "create?",
+                        element: <ProjectsList />,
+                        loader: loginLoader,
+                    },
+                    {
+                        path: ":projectId",
+                        element: <ProjectRoot />,
+                    },
+                ],
+            },
+            {
+                path: "/edit-test",
+                element: <EditTest />,
+            }
+        ],
+    },
+])
+
+
+async function loginLoader() {
+    return await isLoggedIn() ? null : replace("/login")
+}
+
+
+/**
+ * Replaces instead of redirecting to avoid the back button.
+ * For use inside a loader function. Little hack to avoid
+ * flickering the original page and keep loading indicator 
+ * before replacing.
+ */
+function replace(location: string | URL) {
+    const promise = new Promise<null>(resolve => {
+        window.addEventListener("pagehide", () => resolve(null), {
+            once: true,
+        })
+    })
+    window.location.replace(location)
+    return promise
+}

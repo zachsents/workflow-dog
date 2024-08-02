@@ -1,0 +1,91 @@
+x-std-healthcheck: &std_healthcheck
+  interval: 20s
+  timeout: 3s
+  retries: 3
+  start_period: 10s
+  start_interval: 1s
+
+services:
+  proxy:
+    container_name: proxy
+    image: registry.digitalocean.com/workflow-dog/proxy
+    build:
+      target: proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+    healthcheck:
+      <<: *std_healthcheck
+      test: curl -f http://localhost/__proxy_health || exit 1
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      - APP_ORIGIN
+      - API_PORT
+
+  db:
+    container_name: db
+    image: postgres
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    restart: unless-stopped
+    healthcheck:
+      <<: *std_healthcheck
+      test: pg_isready -U postgres -h localhost
+    environment:
+      # PGx vs. POSTGRES_x - PGx is for the container, POSTGRES_x is for the actual pg service
+      - POSTGRES_PORT
+      - PGPORT=${POSTGRES_PORT}
+      - POSTGRES_PASSWORD
+      - PGPASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  webapp:
+    container_name: webapp
+    image: registry.digitalocean.com/workflow-dog/web
+    build:
+      target: web-prod
+      args:
+        - APP_ORIGIN=${APP_ORIGIN}
+    restart: unless-stopped
+
+  api:
+    container_name: api
+    image: registry.digitalocean.com/workflow-dog/api
+    build:
+      target: api
+    restart: unless-stopped
+    healthcheck:
+      <<: *std_healthcheck
+      test: bun -e 'await fetch("http://localhost:${API_PORT}/api/health").then(r => !r.ok && Promise.reject(r.statusText))' || exit 1
+    environment:
+      - PORT=${API_PORT}
+      - APP_ORIGIN
+      - APP_NAME
+      - DATABASE_URL
+      - SUPERTOKENS_CORE_URL
+      - SUPERTOKENS_API_KEY
+      - AUTH_GOOGLE_CLIENT_ID
+      - AUTH_GOOGLE_CLIENT_SECRET
+      - RESEND_KEY
+      - RESEND_GENERAL_AUDIENCE_ID
+
+  supertokens:
+    container_name: supertokens
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:9.0.2
+    restart: unless-stopped
+    healthcheck:
+      <<: *std_healthcheck
+      test: >
+        bash -c 'exec 3<>/dev/tcp/127.0.0.1/${SUPERTOKENS_PORT} && echo -e "GET /hello HTTP/1.1\r\nhost: 127.0.0.1:3567\r\nConnection: close\r\n\r\n" >&3 && cat <&3 | grep "Hello"'
+    environment:
+      - POSTGRESQL_CONNECTION_URI=${DATABASE_URL}
+      - API_KEYS=${SUPERTOKENS_API_KEY}
+      - SUPERTOKENS_PORT
+      - POSTGRESQL_TABLE_SCHEMA=auth
+
+volumes:
+  db-data:

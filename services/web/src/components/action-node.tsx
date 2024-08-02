@@ -2,31 +2,11 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Portal as HoverCardPortal } from "@radix-ui/react-hover-card"
 import { IconBracketsContain, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
 import { Button } from "@ui/button"
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "@ui/dialog"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@ui/dropdown-menu"
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormMessage
-} from "@ui/form"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@ui/dropdown-menu"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from "@ui/form"
 import { Card } from "@web/components/ui/card"
-import { useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType, type Node } from "@web/lib/graph-builder"
+import { getDefinitionPackageName, useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType, type Node } from "@web/lib/graph-builder"
 import { useDialogState, useElementChangeRef, useStateChange } from "@web/lib/hooks"
 import { cn, getOffsetRelativeTo, type RequiredExcept } from "@web/lib/utils"
 import React, { useEffect, useRef, useState } from "react"
@@ -60,6 +40,9 @@ export function StandardNode({ children }: {
     const isSelected = gbx.useStore(s => s.selection.has(id))
     const showSelectHoverOutline = gbx.useStore(s => !s.connection && !s.boxSelection)
 
+    const packageDisplayName = getDefinitionPackageName(n.definitionId)
+    const isColorHexCode = def.color.startsWith("#")
+
     return (
         <Card className={cn(
             "select-none outline-primary outline-2 outline-offset-2",
@@ -67,35 +50,28 @@ export function StandardNode({ children }: {
                 ? "outline"
                 : (showSelectHoverOutline && "hover:outline-dashed")
         )}>
-            <div className="font-bold px-4 py-1 text-center bg-gray-600 text-white m-1 mb-4 rounded-t-lg rounded-b-sm flex justify-center items-center gap-2">
+            <div
+                className={cn(
+                    "font-bold px-4 py-1 text-center text-white m-1 mb-4 rounded-t-lg rounded-b-sm flex justify-center items-center gap-2",
+                    !isColorHexCode && `bg-${def.color}-600`,
+                )}
+                style={isColorHexCode ? { backgroundColor: def.color } : undefined}
+            >
                 <def.icon />
                 <span>{def.name}</span>
+
+                {packageDisplayName &&
+                    <span className="bg-white/30 px-2 py-0.5 rounded-sm ml-3 text-xs font-medium leading-none">
+                        {packageDisplayName}
+                    </span>}
             </div>
 
             <div className="flex items-start justify-between gap-4 pb-4">
                 <div className="flex flex-col items-stretch gap-2">
                     {inputs}
-                    {/* {Object.entries(def.inputs).map(([inputDefId, inputDef]) =>
-                        inputDef.allowMultiple
-                            ? <div className="flex flex-col items-stretch gap-1 py-1 pr-1 rounded-r-md border-y border-r" key={inputDefId}>
-                                {Array(inputStates[inputDefId]?.amount ?? inputDef.min).fill(null).map((_, i) =>
-                                    <Handle type="input" definition={inputDefId} index={i} key={i} />
-                                )}
-                            </div>
-                            : <Handle type="input" definition={inputDefId} key={inputDefId} />
-                    )} */}
                 </div>
                 <div className="flex flex-col items-stretch gap-2">
                     {outputs}
-                    {/* {Object.entries(def.outputs).flatMap(([outputDefId, outputDef]) =>
-                        outputDef.allowMultiple
-                            ? <div className="flex flex-col items-stretch gap-1 py-1 pl-1 rounded-l-md border-y border-l" key={outputDefId}>
-                                {Array(inputStates[outputDefId]?.amount ?? outputDef.min).fill(null).map((_, i) =>
-                                    <Handle type="output" definition={outputDefId} index={i} key={i} />
-                                )}
-                            </div>
-                            : <Handle type="output" definition={outputDefId} key={outputDefId} />
-                    )} */}
                 </div>
             </div>
         </Card>
@@ -114,9 +90,27 @@ interface MultiHandleProps {
     displayName?: string
     min?: number
     max?: number
+    defaultAmount?: number
+    /**
+     * Whether to allow naming the individual handles. On the backend, this will
+     * cause the handle to be an object indexed by the name.
+     * @default false
+     */
     allowNaming?: boolean
+    /**
+     * Whether to allow adding/removing handles.
+     * @default true
+     */
     allowAdding?: boolean
+    /** 
+     * Allows a multi-handle to be changed to a single handle that takes in a list.
+     * @default true
+     */
     allowSingleMode?: boolean
+    /**
+     * When single mode is allowed, whether to default to single mode.
+     * @default false 
+     */
     defaultSingleMode?: boolean
     itemDisplayName?: string
     itemValueType?: ValueTypeUsage
@@ -130,6 +124,7 @@ function MultiHandle(passedProps: MultiHandleProps) {
     const props: MultiHandlePropsWithDefaults = {
         min: 0,
         max: Infinity,
+        defaultAmount: passedProps.min ?? 0,
         allowNaming: false,
         allowAdding: true,
         allowSingleMode: true,
@@ -154,8 +149,8 @@ function MultiHandle(passedProps: MultiHandleProps) {
             s.nodes.get(nodeId)!.handleStates[props.name] = {
                 listMode: props.defaultSingleMode ? "single" : "multi",
                 multi: {
-                    amount: props.min,
-                    ...props.allowNaming && { names: Array(props.min).fill("") },
+                    amount: props.defaultAmount,
+                    ...props.allowNaming && { names: Array(props.defaultAmount).fill("") },
                 },
             }
         })
@@ -443,7 +438,9 @@ interface HandleProps {
 
 // #region Handle
 function Handle({
-    type, name, indexingId = name, displayName = name, valueType,
+    type, name, indexingId = name,
+    displayName = name.replaceAll(/(?<!\w)[a-z]/g, c => c.toUpperCase()),
+    valueType,
     allowNaming, onNameClick,
 }: HandleProps) {
     const isInput = type === "input"
@@ -541,13 +538,20 @@ function Handle({
                     onPointerDownCapture={e => e.stopPropagation()}
                 >
                     {displayNameComponent}
+                    <p className="text-sm text-muted-foreground italic">
+                        {isInput ? "Input" : "Output"}
+                    </p>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <span className="mr-1">Type:</span>
-                        {valueTypeDef &&
-                            <TI><valueTypeDef.icon /></TI>}
-                        <span>
-                            {valueTypeDef?.name ?? "Any"}
-                        </span>
+                        {valueTypeDef
+                            ? <>
+                                <TI><valueTypeDef.icon /></TI>
+                                <span>
+                                    {valueTypeDef.specificName?.(...valueType.genericParams) ?? valueTypeDef.name}
+                                </span>
+                            </>
+                            : <span>Any</span>}
+
                     </div>
                 </HoverCardContent>
             </HoverCardPortal>
@@ -626,3 +630,36 @@ export function Node({ id, definitionId }: Node) {
         </Card>
     )
 }
+
+
+
+
+
+/*
+
+So tailwind loads these colors:
+
+bg-slate-600
+bg-gray-600
+bg-zinc-600
+bg-neutral-600
+bg-stone-600
+bg-red-600
+bg-orange-600
+bg-amber-600
+bg-yellow-600
+bg-lime-600
+bg-green-600
+bg-emerald-600
+bg-teal-600
+bg-cyan-600
+bg-sky-600
+bg-blue-600
+bg-indigo-600
+bg-violet-600
+bg-purple-600
+bg-fuchsia-600
+bg-pink-600
+bg-rose-600
+
+*/

@@ -1,0 +1,17 @@
+{
+    "name": "workflow-packages",
+    "module": "index.ts",
+    "type": "module",
+    "dependencies": {
+        "workflow-types": "workspace:*",
+        "web": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0",
+        "react": "*",
+        "@tabler/icons-react": "*"
+    }
+}

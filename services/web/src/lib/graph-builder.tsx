@@ -1,14 +1,19 @@
+import { Anchor as PopoverAnchor } from "@radix-ui/react-popover"
 import { IconX } from "@tabler/icons-react"
+import SearchInput from "@web/components/search-input"
 import TI from "@web/components/tabler-icon"
 import { Button } from "@web/components/ui/button"
 import { Card } from "@web/components/ui/card"
-import { useBooleanState, useKeyState, useMotionValueState } from "@web/lib/hooks"
+import { Popover, PopoverContent } from "@web/components/ui/popover"
+import { useBooleanState, useDialogState, useKeyState, useMotionValueState, useSearch } from "@web/lib/hooks"
 import { cn } from "@web/lib/utils"
 import { createRandomId, IdNamespace } from "core/ids"
-import { motion, motionValue, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion"
+import { motion, motionValue, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion"
 import { produce } from "immer"
 import React, { createContext, useContext, useEffect, useRef } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
+import ClientNodeDefinitions from "workflow-packages/client-nodes"
+import type { ClientNodeDefinition } from "workflow-packages/helpers/react"
 import { createStore, useStore } from "zustand"
 import { useShallow } from "zustand/react/shallow"
 
@@ -48,6 +53,9 @@ function GraphRenderer({ children, ...props }: React.ComponentProps<"div">) {
                     )
                 })}
             </Viewport>
+            <div className="absolute hack-center-x bottom-4">
+                <MainToolbar />
+            </div>
             {children}
         </div>
     )
@@ -57,6 +65,7 @@ function GraphRenderer({ children, ...props }: React.ComponentProps<"div">) {
 /**
  * Handles panning, zooming, etc.
  */
+// #region Viewport
 function Viewport({ children }: { children: React.ReactNode }) {
 
     const gbx = useGraphBuilder()
@@ -173,6 +182,123 @@ function Viewport({ children }: { children: React.ReactNode }) {
             {/* Debug */}
             <Debug />
         </motion.div>
+    )
+}
+
+const nodeDefinitionsList = Object.entries(ClientNodeDefinitions).map(([id, def]) => ({
+    id,
+    name: def.name,
+    package: getDefinitionPackageName(id),
+}))
+
+// #region MainToolbar
+function MainToolbar() {
+
+    const resultsPopover = useDialogState()
+
+    const search = useSearch(nodeDefinitionsList, {
+        keys: ["name", "package"],
+        threshold: 0.4,
+    })
+
+    const searchInputRef = useRef<HTMLInputElement>(null)
+    useHotkeys("/", () => void searchInputRef.current?.focus())
+
+    return (<>
+        <Card className="flex items-stretch justify-center gap-1 p-1">
+            <DraggableNodeButton
+                definitionId="primitives/text" variant="outline"
+                className="flex-center gap-2 h-auto"
+            />
+            <DraggableNodeButton
+                definitionId="primitives/number" variant="outline"
+                className="flex-center gap-2 h-auto"
+            />
+
+            <div className="w-[1px] bg-gray-200 mx-1 -my-1" />
+
+            <Popover {...resultsPopover.dialogProps}>
+                <PopoverAnchor>
+                    <SearchInput
+                        value={search.query} onValueChange={search.setQuery}
+                        className="bg-white shadow-none rounded-md"
+                        withHotkey noun="action" quantity={nodeDefinitionsList.length}
+                        onFocus={resultsPopover.open}
+                    // ref={searchInputRef}
+                    />
+                </PopoverAnchor>
+                <PopoverContent
+                    side="top" sideOffset={12}
+                    onOpenAutoFocus={e => e.preventDefault()}
+                    onFocusOutside={e => e.preventDefault()}
+                    className="flex flex-col-reverse items-stretch p-1"
+                >
+                    {search.filtered.length > 0
+                        ? search.filtered.slice(0, 20).map((result) => {
+                            return (
+                                <DraggableNodeButton
+                                    key={result.id}
+                                    definitionId={result.id}
+                                    variant="ghost"
+                                    className="flex items-center justify-start gap-2 font-normal h-auto py-1 w-full"
+                                    tabIndex={-1}
+                                    onAdd={resultsPopover.close}
+                                />
+                            )
+                        })
+                        : <p className="text-sm text-muted-foreground text-center py-6">
+                            No results found.
+                        </p>}
+                </PopoverContent>
+            </Popover>
+        </Card>
+    </>)
+}
+
+function DraggableNodeButton({
+    definitionId,
+    onAdd,
+    motionProps = {},
+    ...props
+}: {
+    definitionId: string
+    onAdd?: () => void
+    motionProps?: React.ComponentProps<typeof motion.div>
+} & React.ComponentProps<typeof Button>) {
+    const gbx = useGraphBuilder()
+    const def = gbx.getNodeDefinition(definitionId)
+
+    const animationControls = useAnimationControls()
+
+    return (
+        <motion.div
+            {...motionProps}
+            drag dragMomentum={false}
+            animate={animationControls}
+            onDragEnd={(event, info) => {
+                const point = gbx.toGraphPoint(info.point.x, info.point.y, true)
+                gbx.addNode({
+                    definitionId,
+                    position: {
+                        x: point.x - 140,
+                        y: point.y - 40,
+                    },
+                })
+                animationControls.set({ x: 0, y: 0 })
+                motionProps.onDragEnd?.(event, info)
+                onAdd?.()
+            }}
+        >
+            <motion.div onTap={() => {
+                gbx.addNodeAtCenter({ definitionId })
+                onAdd?.()
+            }}>
+                <Button {...props}>
+                    <TI><def.icon /></TI>
+                    <span>{def.name}</span>
+                </Button>
+            </motion.div>
+        </motion.div >
     )
 }
 
@@ -637,17 +763,37 @@ class GraphBuilder {
         return this.useStore(useShallow(s => Array.from(s.nodes.values())))
     }
 
-    addNode(node: Partial<Omit<Node, "definitionId">> & { definitionId: string }): Node {
+    addNode(
+        node: Partial<Omit<Node, "definitionId" | "position">> & {
+            definitionId: string
+            position?: { x: number, y: number }
+        }
+    ): Node {
         const newNode: Node = {
             id: createRandomId(IdNamespace.ActionNode),
-            position: { x: motionValue(0), y: motionValue(0) },
             handleStates: {},
             ...node,
+            position: {
+                x: motionValue(node.position?.x ?? 0),
+                y: motionValue(node.position?.y ?? 0),
+            },
         }
         this.store.setState(s => ({
             nodes: new Map([...s.nodes, [newNode.id, newNode]]),
         }))
         return newNode
+    }
+
+    addNodeAtCenter(node: Omit<Parameters<typeof GraphBuilder.prototype["addNode"]>[0], "position">) {
+        const rect = this.state.viewportElement!.getBoundingClientRect()
+        const center = this.toGraphPoint(rect.width / 2, rect.height / 2, false)
+        return this.addNode({
+            ...node,
+            position: {
+                x: center.x - 140,
+                y: center.y - 40,
+            },
+        })
     }
 
     deleteNode(id: string) {
@@ -747,7 +893,12 @@ class GraphBuilder {
         return true
     }
 
-    toGraphPoint(x: number, y: number) {
+    toGraphPoint(x: number, y: number, accountForViewportPosition = false) {
+        if (accountForViewportPosition) {
+            const rect = this.state.viewportElement!.getBoundingClientRect()
+            x -= rect.x
+            y -= rect.y
+        }
         return {
             x: (x - this.state.pan.x.get()) / this.state.zoom.get(),
             y: (y - this.state.pan.y.get()) / this.state.zoom.get(),
@@ -836,11 +987,7 @@ function createEdgeId(source: string, sourceHandle: string, target: string, targ
     return `${IdNamespace.Edge}:${source}_${sourceHandle}--${target}_${targetHandle}`
 }
 
-export interface NodeDefinition {
-    name: string
-    icon: React.ComponentType
-    component: React.ComponentType
-}
+export type NodeDefinition = ClientNodeDefinition
 
 export type HandleState = {
     listMode: ListHandleMode
@@ -913,4 +1060,13 @@ function EdgeLabel({
 
 export function handleIndexingId(name: string, index?: number) {
     return `${name}${index != null ? `.${index}` : ""}`
-}   
+}
+
+export function getDefinitionPackageName(definitionId: string) {
+    const segments = definitionId.split("/")
+    return segments.length > 1
+        ? segments[0].toLowerCase()
+            .replaceAll(/[^A-Za-z0-9]+/g, " ")
+            .replaceAll(/(?<!\w)[a-z]/g, c => c.toUpperCase())
+        : undefined
+}

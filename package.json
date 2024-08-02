@@ -1,28 +1,31 @@
 {
-    "name": "workflow-dog",
-    "type": "module",
-    "scripts": {
-        "gentypes": "bash scripts/gen_db_types.sh",
-        "dev": "zenv -e dev run -- docker compose -f compose.yml -f compose.dev.yml",
-        "prod": "zenv -e prod run -- docker compose"
-    },
-    "workspaces": [
-        "packages/*",
-        "services/*"
-    ],
-    "devDependencies": {
-        "@types/bun": "latest",
-        "@zachsents/env": "^1.0.2",
-        "kysely-codegen": "^0.15.0",
-        "pg": "^8.12.0"
-    },
-    "peerDependencies": {
-        "typescript": "^5.5.2"
-    },
-    "overrides": {
-        "superjson": "^2.2.1",
-        "zod": "^3.23.8",
-        "@trpc/server": "11.0.0-rc.417",
-        "@tabler/icons-react": "*"
-    }
+  "name": "workflow-dog",
+  "type": "module",
+  "scripts": {
+    "gentypes": "bash scripts/gen_db_types.sh",
+    "dev": "zenv -e dev run -- docker compose -f compose.yml -f compose.dev.yml",
+    "prod": "zenv -e prod run -- docker compose"
+  },
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@zachsents/env": "^1.0.2",
+    "kysely-codegen": "^0.15.0",
+    "pg": "^8.12.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.5.2"
+  },
+  "overrides": {
+    "superjson": "^2.2.1",
+    "zod": "^3.23.8",
+    "@trpc/server": "11.0.0-rc.417",
+    "@tabler/icons-react": "*"
+  },
+  "dependencies": {
+    "@tabler/icons-react": "^3.6.0"
+  }
 }

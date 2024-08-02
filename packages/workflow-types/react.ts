@@ -1,5 +1,10 @@
 import { IconBraces, IconBracketsContain, IconFile, IconHash, IconPhoto, IconTextSize, type Icon } from "@tabler/icons-react"
 
+/* ------------------------------------------------------ */
+/* Definitions                                            */
+/* ------------------------------------------------------ */
+// #region Definitions
+
 export const ValueTypeDefinitions = {
     string: createTypeDef({
         name: "String",
@@ -24,6 +29,11 @@ export const ValueTypeDefinitions = {
         jsType: "array",
         icon: IconBracketsContain,
         genericParams: 1,
+        specificName: (t): string => {
+            if (!t) return "List"
+            const tDef = getValueTypeDefinition(t.typeDefinitionId)
+            return tDef ? `List of ${tDef.name}s` : "List"
+        },
     }),
     record: createTypeDef({
         name: "Record",
@@ -46,6 +56,7 @@ export const ValueTypeDefinitions = {
 /* ------------------------------------------------------ */
 /* Types                                                  */
 /* ------------------------------------------------------ */
+// #region Types
 
 type TypeDefinitionID = keyof typeof ValueTypeDefinitions
 
@@ -57,6 +68,7 @@ type ValueTypeDefinition = {
     extends: string[]
     genericParams: number
     icon: Icon
+    specificName?: (...genericParams: ValueTypeUsage[]) => string
 }
 
 export type ValueTypeUsage = {
@@ -68,6 +80,13 @@ export type ValueTypeUsage = {
 /* ------------------------------------------------------ */
 /* Helpers                                                */
 /* ------------------------------------------------------ */
+// #region Helpers
+
+export function getValueTypeDefinition(typeDefinitionId: string): ValueTypeDefinition | undefined {
+    return typeDefinitionId in ValueTypeDefinitions
+        ? ValueTypeDefinitions[typeDefinitionId as TypeDefinitionID]
+        : undefined
+}
 
 function createTypeDef(opts: Partial<ValueTypeDefinition>): ValueTypeDefinition {
     return {

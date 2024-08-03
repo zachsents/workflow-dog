@@ -466,6 +466,8 @@ interface HandleProps {
     displayName?: string
     allowNaming?: boolean
     onNameClick?: (event: React.MouseEvent<HTMLSpanElement>) => void
+    /** Handles are required by default. This option is ignored for outputs. */
+    optional?: boolean
 }
 
 // #region Handle
@@ -473,7 +475,8 @@ function Handle({
     type, name, indexingId = name,
     displayName = name.replaceAll(/(?<!\w)[a-z]/g, c => c.toUpperCase()),
     valueType,
-    allowNaming, onNameClick,
+    allowNaming = false, onNameClick,
+    optional = false,
 }: HandleProps) {
     const isInput = type === "input"
     const gbx = useGraphBuilder()
@@ -511,7 +514,7 @@ function Handle({
     })
 
     const {
-        isConnectingAtAll, isConnectingToUs, canConnectToUs,
+        isConnectingAtAll, isConnectingToUs, canConnectToUs, isConnected,
         onPointerDownCapture, ...eventHandlers
     } = useRegisterHandle(indexingId, { type, x: handleX, y: handleY })
 
@@ -550,13 +553,25 @@ function Handle({
                         className={cn(
                             "absolute hack-center-y rounded-full aspect-square p-2 transition-opacity",
                             isInput ? "left-0 -translate-x-1/2" : "right-0 translate-x-1/2",
-                            !isConnectingAtAll && "hover:bg-blue-400/50 cursor-crosshair",
+                            !isConnectingAtAll && `${isInput
+                                ? isConnected
+                                    ? "hover:bg-green-400/50"
+                                    : optional ? "hover:bg-yellow-400/50" : "hover:bg-red-400/50"
+                                : "hover:bg-blue-400/50"
+                            } cursor-crosshair`,
                             (isConnectingAtAll && !canConnectToUs) && "opacity-0",
                         )}
                         ref={childRef}
                         onPointerDownCapture={onPointerDownCapture}
                     >
-                        <div className="rounded-full w-2 aspect-square bg-blue-500" />
+                        <div className={cn(
+                            "rounded-full w-2 aspect-square transition-colors",
+                            isInput
+                                ? isConnected
+                                    ? "bg-green-600"
+                                    : optional ? "bg-yellow-500" : "bg-red-500"
+                                : "bg-blue-500",
+                        )} />
                     </div>
                 </div>
             </HoverCardTrigger>

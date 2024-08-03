@@ -201,9 +201,6 @@ function MainToolbar() {
         threshold: 0.4,
     })
 
-    const searchInputRef = useRef<HTMLInputElement>(null)
-    useHotkeys("/", () => void searchInputRef.current?.focus())
-
     return (<>
         <Card className="flex items-stretch justify-center gap-1 p-1">
             <DraggableNodeButton
@@ -224,7 +221,7 @@ function MainToolbar() {
                         className="bg-white shadow-none rounded-md"
                         withHotkey noun="action" quantity={nodeDefinitionsList.length}
                         onFocus={resultsPopover.open}
-                    // ref={searchInputRef}
+                        onChange={resultsPopover.open}
                     />
                 </PopoverAnchor>
                 <PopoverContent
@@ -455,6 +452,7 @@ export function useRegisterHandle(indexingId: string, { x, y, type }: {
 }) {
     const gbx = useGraphBuilder()
     const nodeId = useNodeId()
+    const isInput = type === "input"
 
     // Store handle position in node state
     useEffect(() => {
@@ -484,12 +482,15 @@ export function useRegisterHandle(indexingId: string, { x, y, type }: {
         && s.connection?.th === indexingId
     )
     const canConnectToUs = gbx.useStore(() => gbx.canConnectTo(nodeId, indexingId, type))
+    const isConnected = gbx.useStore(s => Array.from(s.edges.values()).some(
+        e => e[isInput ? "t" : "s"] === nodeId
+            && e[isInput ? "th" : "sh"] === indexingId
+    ))
 
     // event handlers
     const onPointerEnter = () => {
         if (!canConnectToUs) return
         gbx.mutateState(s => {
-            const isInput = type === "input"
             s.connection![isInput ? "t" : "s"] = nodeId
             s.connection![isInput ? "th" : "sh"] = indexingId
         })
@@ -498,7 +499,6 @@ export function useRegisterHandle(indexingId: string, { x, y, type }: {
     const onPointerLeave = () => {
         if (!isConnectingToUs) return
         gbx.mutateState(s => {
-            const isInput = type === "input"
             delete s.connection![isInput ? "t" : "s"]
             delete s.connection![isInput ? "th" : "sh"]
         })
@@ -512,13 +512,29 @@ export function useRegisterHandle(indexingId: string, { x, y, type }: {
 
     const onPointerDownCapture = (ev: React.PointerEvent<HTMLDivElement>) => {
         ev.stopPropagation()
-        gbx.mutateState(s => {
-            s.connection = {} as any
-            const isInput = type === "input"
-            s.connection![isInput ? "t" : "s"] = nodeId
-            s.connection![isInput ? "th" : "sh"] = indexingId
-            s.connection!.startType = type
-        })
+
+        const inputConnectedEdge = isInput
+            ? Array.from(gbx.state.edges.values()).find(e => e.t === nodeId && e.th === indexingId)
+            : undefined
+
+        if (inputConnectedEdge) {
+            gbx.mutateState(s => {
+                s.edges.delete(inputConnectedEdge.id)
+                s.connection = {
+                    startType: "output",
+                    s: inputConnectedEdge.s,
+                    sh: inputConnectedEdge.sh,
+                }
+            })
+        } else {
+            gbx.store.setState({
+                connection: {
+                    startType: type,
+                    [isInput ? "t" : "s"]: nodeId,
+                    [isInput ? "th" : "sh"]: indexingId,
+                }
+            })
+        }
 
         window.addEventListener("pointerup", () => {
             gbx.store.setState({ connection: null })
@@ -529,6 +545,7 @@ export function useRegisterHandle(indexingId: string, { x, y, type }: {
         isConnectingAtAll,
         isConnectingToUs,
         canConnectToUs,
+        isConnected,
         onPointerEnter,
         onPointerLeave,
         onPointerUp,

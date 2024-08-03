@@ -42,9 +42,12 @@ export default function SearchInput({
                     ? `Search ${quantity} ${plural(noun, quantity)}`
                     : `Search ${noun}`}
                 value={value}
-                onChange={ev => onValueChange(ev.currentTarget.value)}
                 ref={ref}
                 {...props}
+                onChange={ev => {
+                    onValueChange(ev.currentTarget.value)
+                    props.onChange?.(ev)
+                }}
                 className={cn("bg-white px-10 rounded-full peer", props.className)}
             />
             <TI>

@@ -789,6 +789,7 @@ class GraphBuilder {
         const newNode: Node = {
             id: createRandomId(IdNamespace.ActionNode),
             handleStates: {},
+            config: {},
             ...node,
             position: {
                 x: motionValue(node.position?.x ?? 0),
@@ -973,6 +974,8 @@ export type Node = {
 
     definitionId: string
     handleStates: Record<string, HandleState>
+
+    config: Record<string, any>
 }
 
 export type Edge = {

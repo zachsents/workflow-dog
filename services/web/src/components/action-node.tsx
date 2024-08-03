@@ -635,16 +635,45 @@ function HandleDisplayName({ children, allowNaming, onClick, ...props }: HandleD
 
 
 interface ConfigProps {
+    /** @default `value` */
+    id?: string
     label: string
-    children: React.ReactNode
+    children: React.ComponentType<{
+        id: string
+        value: any
+        onChange: (value: any) => void
+    }>
+    defaultValue?: any
 }
 
 // #region Config
-function Config({ children, label }: ConfigProps) {
+function Config({ children: Child, id = "value", label, defaultValue }: ConfigProps) {
+
+    const gbx = useGraphBuilder()
+    const nodeId = useNodeId()
+    const value = gbx.useStore(s => {
+        const val = s.nodes.get(nodeId)!.config[id]
+        return val === undefined ? defaultValue : val
+    })
+    const onChange = (newValue: any) => {
+        gbx.mutateState(s => {
+            s.nodes.get(nodeId)!.config[id] = newValue
+        })
+    }
+
+    useEffect(() => {
+        if (value === undefined && defaultValue !== undefined)
+            onChange(defaultValue)
+    }, [value, defaultValue])
+
     return (
         <div className="flex flex-col items-stretch gap-2">
             <Label>{label}</Label>
-            {children}
+            <Child
+                id={id}
+                value={value}
+                onChange={onChange}
+            />
         </div>
     )
 }

@@ -377,14 +377,15 @@ const stdVariadicInput = (name: string, itemDisplayName: string = "Number") =>
     />
 
 const angleUnitConfig = () =>
-    <StandardNode.Config label="Angle Unit">
-        <Select defaultValue="radians">
-            <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Angle Unit" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="radians">Radians</SelectItem>
-                <SelectItem value="degrees">Degrees</SelectItem>
-            </SelectContent>
-        </Select>
+    <StandardNode.Config id="angleUnit" label="Angle Unit" defaultValue="radians">
+        {({ value, onChange }) =>
+            <Select value={value} onValueChange={onChange}>
+                <SelectTrigger className="w-[160px]">
+                    <SelectValue placeholder="Angle Unit" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="radians">Radians</SelectItem>
+                    <SelectItem value="degrees">Degrees</SelectItem>
+                </SelectContent>
+            </Select>}
     </StandardNode.Config>

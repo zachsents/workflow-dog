@@ -2,6 +2,14 @@ import { IconBorderSides, IconDivide, IconEqual, IconLetterESmall, IconMath1Divi
 import { StandardNode } from "web/src/components/action-node"
 import { useValueType } from "workflow-types/react"
 import { clientNodeHelper, prefixDefinitionIds } from "../../helpers/react"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "web/src/components/ui/select"
+
 
 const createDef = clientNodeHelper({ color: "gray" })
 
@@ -318,6 +326,7 @@ export default prefixDefinitionIds("math", {
                 name="result"
                 valueType={useValueType("number")}
             />
+            {angleUnitConfig()}
         </StandardNode>
     }),
     cos: createDef({
@@ -334,6 +343,7 @@ export default prefixDefinitionIds("math", {
                 name="result"
                 valueType={useValueType("number")}
             />
+            {angleUnitConfig()}
         </StandardNode>
     }),
     tan: createDef({
@@ -350,6 +360,7 @@ export default prefixDefinitionIds("math", {
                 name="result"
                 valueType={useValueType("number")}
             />
+            {angleUnitConfig()}
         </StandardNode>
     }),
 
@@ -364,3 +375,16 @@ const stdVariadicInput = (name: string, itemDisplayName: string = "Number") =>
         itemDisplayName={itemDisplayName}
         itemValueType={useValueType("number")}
     />
+
+const angleUnitConfig = () =>
+    <StandardNode.Config label="Angle Unit">
+        <Select defaultValue="radians">
+            <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Angle Unit" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="radians">Radians</SelectItem>
+                <SelectItem value="degrees">Degrees</SelectItem>
+            </SelectContent>
+        </Select>
+    </StandardNode.Config>

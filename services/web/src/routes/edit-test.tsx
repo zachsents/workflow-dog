@@ -1,54 +1,29 @@
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger
-} from "@ui/dropdown-menu"
-import TI from "@web/components/tabler-icon"
-import { Button } from "@web/components/ui/button"
-import { GBRoot, useGraphBuilder } from "@web/lib/graph-builder"
+import { GBRoot } from "@web/lib/graph-builder"
 import ClientNodeDefinitions from "workflow-packages/client-nodes"
 
 export default function EditTest() {
     return (
-        <div className="w-screen h-screen p-4">
+        <div
+            className="w-screen h-screen grid bg-gray-700"
+            style={{
+                gridTemplateRows: "auto 1fr auto",
+                gridTemplateColumns: "auto 1fr auto",
+            }}
+        >
+            <div className="col-span-full">Header</div>
+            <div className="text-center text-white font-medium px-0.5 text-xs" style={{ writingMode: "sideways-lr" }}>
+                Workflow Inputs
+            </div>
             <GBRoot
-                className="w-full h-full outline outline-black outline-4 rounded-lg"
+                className="w-full h-full border border-gray-900 rounded-lg overflow-clip"
                 options={{
                     resolveNodeDefinition: (nodeDefId) => ClientNodeDefinitions[nodeDefId],
                 }}
             >
-                <div className="absolute z-50 top-0 left-0 w-full p-2 border-b bg-gray-100/50">
-                    <AddButton />
-                </div>
             </GBRoot>
+            <div className="text-center" style={{ writingMode: "sideways-rl" }}>Right</div>
+            <div className="col-span-full">Footer</div>
         </div>
     )
 }
 
-function AddButton() {
-
-    const gbx = useGraphBuilder()
-
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button>
-                    Add Node
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="max-h-[80vh] overflow-scroll">
-                {Object.entries(ClientNodeDefinitions).map(([defId, def]) =>
-                    <DropdownMenuItem
-                        key={defId}
-                        onSelect={() => gbx.addNode({ definitionId: defId })}
-                        className="flex items-center gap-2"
-                    >
-                        <TI><def.icon /></TI>
-                        {def.name}
-                    </DropdownMenuItem>
-                )}
-            </DropdownMenuContent>
-        </DropdownMenu>
-    )
-}

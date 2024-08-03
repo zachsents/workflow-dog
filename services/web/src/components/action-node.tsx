@@ -1,12 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Portal as HoverCardPortal } from "@radix-ui/react-hover-card"
-import { IconBracketsContain, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
+import { IconBracketsContain, IconChevronDown, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
 import { Button } from "@ui/button"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@ui/dropdown-menu"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from "@ui/form"
 import { Card } from "@web/components/ui/card"
-import { getDefinitionPackageName, useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType, type Node } from "@web/lib/graph-builder"
+import { getDefinitionPackageName, useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "@web/lib/graph-builder"
 import { useDialogState, useElementChangeRef, useStateChange } from "@web/lib/hooks"
 import { cn, getOffsetRelativeTo, type RequiredExcept } from "@web/lib/utils"
 import React, { useEffect, useRef, useState } from "react"
@@ -16,15 +16,18 @@ import { z } from "zod"
 import TI from "./tabler-icon"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card"
 import { Input } from "./ui/input"
+import { Label } from "./ui/label"
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 
 
-
-type StandardNodeChild = React.ReactElement<HandleProps, typeof Handle>
-    | React.ReactElement<MultiHandleProps, typeof MultiHandle>
 
 // #region StandardNode
-export function StandardNode({ children }: {
-    children: StandardNodeChild | StandardNodeChild[]
+export function StandardNode({
+    children = [],
+    withPackageBadge = true,
+}: {
+    children?: StandardNodeChild | StandardNodeChild[]
+    withPackageBadge?: boolean
 }) {
     const gbx = useGraphBuilder()
     const id = useNodeId()
@@ -32,10 +35,12 @@ export function StandardNode({ children }: {
     const def = gbx.getNodeDefinition(n.definitionId)
 
     if (!Array.isArray(children)) children = [children]
-    const inputs = children
-        .filter(c => validHandleComponents.has(c.type.name) && c.props.type === "input")
-    const outputs = children
-        .filter(c => validHandleComponents.has(c.type.name) && c.props.type === "output")
+    const handleFilter = (handleType: HandleType) => (c: StandardNodeChild) =>
+        validHandleComponents.includes(c.type.name)
+        && (c.props as HandleProps | MultiHandleProps).type === handleType
+    const inputs = children.filter(handleFilter("input"))
+    const outputs = children.filter(handleFilter("output"))
+    const configItems = children.filter(c => c.type.name === Config.name)
 
     const isSelected = gbx.useStore(s => s.selection.has(id))
     const showSelectHoverOutline = gbx.useStore(s => !s.connection && !s.boxSelection)
@@ -45,14 +50,14 @@ export function StandardNode({ children }: {
 
     return (
         <Card className={cn(
-            "select-none outline-primary outline-2 outline-offset-2",
+            "select-none outline-primary outline-2 outline-offset-2 flex flex-col items-stretch gap-4 py-1",
             isSelected
                 ? "outline"
                 : (showSelectHoverOutline && "hover:outline-dashed")
         )}>
             <div
                 className={cn(
-                    "font-bold px-4 py-1 text-center text-white m-1 mb-4 rounded-t-lg rounded-b-sm flex justify-center items-center gap-2",
+                    "font-bold px-4 py-1 text-center text-white mx-1 rounded-t-lg rounded-b-sm flex justify-center items-center gap-2",
                     !isColorHexCode && `bg-${def.color}-600`,
                 )}
                 style={isColorHexCode ? { backgroundColor: def.color } : undefined}
@@ -60,13 +65,13 @@ export function StandardNode({ children }: {
                 <def.icon />
                 <span>{def.name}</span>
 
-                {packageDisplayName &&
+                {withPackageBadge && packageDisplayName &&
                     <span className="bg-white/30 px-2 py-0.5 rounded-sm ml-3 text-xs font-medium leading-none">
                         {packageDisplayName}
                     </span>}
             </div>
 
-            <div className="flex items-start justify-between gap-4 pb-4">
+            <div className="flex items-start justify-between gap-4 last:mb-3">
                 <div className="flex flex-col items-stretch gap-2">
                     {inputs}
                 </div>
@@ -74,14 +79,41 @@ export function StandardNode({ children }: {
                     {outputs}
                 </div>
             </div>
+
+            {configItems.length > 0 &&
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            size="sm" variant="ghost"
+                            className="self-center h-auto py-0.5 rounded-sm flex-center gap-1 text-muted-foreground text-[0.5rem]"
+                        >
+                            Configure {configItems.length} option{configItems.length > 1 && "s"}
+                            <TI><IconChevronDown /></TI>
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                        side="bottom" sideOffset={16}
+                        className="px-2 py-4 flex flex-col items-stretch gap-2"
+                    >
+                        {configItems}
+                    </PopoverContent>
+                </Popover>}
         </Card>
     )
 }
 
 StandardNode.Handle = Handle
 StandardNode.MultiHandle = MultiHandle
+StandardNode.Config = Config
 
-const validHandleComponents = new Set([Handle.name, MultiHandle.name])
+
+type ReactElementFromFn<T extends React.ElementType> = React.ReactElement<React.ComponentProps<T>, T>
+
+type StandardNodeChild = ReactElementFromFn<typeof Handle>
+    | ReactElementFromFn<typeof MultiHandle>
+    | ReactElementFromFn<typeof Config>
+
+const validHandleComponents = [Handle.name, MultiHandle.name]
 
 
 interface MultiHandleProps {
@@ -584,54 +616,23 @@ function HandleDisplayName({ children, allowNaming, onClick, ...props }: HandleD
         </span>
     )
 }
+// #endregion Handle
 
-// #region Node
-export function Node({ id, definitionId }: Node) {
 
-    const gbx = useGraphBuilder()
-    const def = gbx.getNodeDefinition(definitionId)
-    const isSelected = gbx.useStore(s => s.selection.has(id))
-    const isConnecting = gbx.useStore(s => !!s.connection)
-
-    return (
-        <Card className={cn(
-            "select-none outline-primary outline-2 outline-offset-2",
-            isSelected
-                ? "outline"
-                : isConnecting ? "" : "hover:outline-dashed"
-        )}>
-            <p className="font-bold px-4 py-1 text-center bg-gray-600 text-white m-1 mb-4 rounded-t-lg rounded-b-sm">
-                {def.name}
-            </p>
-            <div className="flex items-start justify-between gap-4 pb-4">
-                <div className="flex flex-col items-stretch gap-2">
-                    {/* {Object.entries(def.inputs).map(([inputDefId, inputDef]) =>
-                        inputDef.allowMultiple
-                            ? <div className="flex flex-col items-stretch gap-1 py-1 pr-1 rounded-r-md border-y border-r" key={inputDefId}>
-                                {Array(inputStates[inputDefId]?.amount ?? inputDef.min).fill(null).map((_, i) =>
-                                    <Handle type="input" definition={inputDefId} index={i} key={i} />
-                                )}
-                            </div>
-                            : <Handle type="input" definition={inputDefId} key={inputDefId} />
-                    )} */}
-                </div>
-                <div className="flex flex-col items-stretch gap-2">
-                    {/* {Object.entries(def.outputs).flatMap(([outputDefId, outputDef]) =>
-                        outputDef.allowMultiple
-                            ? <div className="flex flex-col items-stretch gap-1 py-1 pl-1 rounded-l-md border-y border-l" key={outputDefId}>
-                                {Array(inputStates[outputDefId]?.amount ?? outputDef.min).fill(null).map((_, i) =>
-                                    <Handle type="output" definition={outputDefId} index={i} key={i} />
-                                )}
-                            </div>
-                            : <Handle type="output" definition={outputDefId} key={outputDefId} />
-                    )} */}
-                </div>
-            </div>
-        </Card>
-    )
+interface ConfigProps {
+    label: string
+    children: React.ReactNode
 }
 
-
+// #region Config
+function Config({ children, label }: ConfigProps) {
+    return (
+        <div className="flex flex-col items-stretch gap-2">
+            <Label>{label}</Label>
+            {children}
+        </div>
+    )
+}
 
 
 

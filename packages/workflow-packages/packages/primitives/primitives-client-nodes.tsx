@@ -10,14 +10,14 @@ export default prefixDefinitionIds("primitives", {
     text: createDef({
         name: "Text",
         icon: IconTextSize,
-        component: () => <StandardNode>
+        component: () => <StandardNode withPackageBadge={false}>
             <StandardNode.Handle type="output" name="text" valueType={useValueType("string")} displayName=" " />
         </StandardNode>,
     }),
     number: createDef({
         name: "Number",
         icon: IconHash,
-        component: () => <StandardNode>
+        component: () => <StandardNode withPackageBadge={false}>
             <StandardNode.Handle type="output" name="number" valueType={useValueType("number")} displayName=" " />
         </StandardNode>,
     }),

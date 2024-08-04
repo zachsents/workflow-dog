@@ -987,7 +987,7 @@ class GraphBuilder {
         })
     }
 
-    setNodeState(id: string = useNodeId(), data: Partial<Node>) {
+    setNodeState(id: string, data: Partial<Node>) {
         if (!this.state.nodes.has(id))
             throw new Error(`Node with ID ${id} does not exist.`)
         this.store.setState(s => ({
@@ -996,6 +996,16 @@ class GraphBuilder {
                 ...data,
             }] as const]),
         }))
+    }
+
+    mutateNodeState(id: string, recipe: (node: Node) => void) {
+        if (!this.state.nodes.has(id))
+            throw new Error(`Node with ID ${id} does not exist.`)
+        this.mutateState(s => void recipe(s.nodes.get(id)!))
+    }
+
+    useNodeState<T>(id: string, selector: (node: Node) => T) {
+        return this.useStore(s => selector(s.nodes.get(id)!))
     }
 
     getNodeDefinition(definitionId: string) {

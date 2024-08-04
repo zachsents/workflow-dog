@@ -41,6 +41,7 @@ export function StandardNode({
     const inputs = children.filter(handleFilter("input"))
     const outputs = children.filter(handleFilter("output"))
     const configItems = children.filter(c => c.type.name === Config.name)
+    const contentItems = children.filter(c => c.type.name === NodeContent.name)
 
     const isSelected = gbx.useStore(s => s.selection.has(id))
     const showSelectHoverOutline = gbx.useStore(s => !s.connection && !s.boxSelection)
@@ -75,6 +76,10 @@ export function StandardNode({
                 <div className="flex flex-col items-stretch gap-2">
                     {inputs}
                 </div>
+                {contentItems.length > 0 &&
+                    <div>
+                        {contentItems}
+                    </div>}
                 <div className="flex flex-col items-stretch gap-2">
                     {outputs}
                 </div>
@@ -105,6 +110,7 @@ export function StandardNode({
 StandardNode.Handle = Handle
 StandardNode.MultiHandle = MultiHandle
 StandardNode.Config = Config
+StandardNode.Content = NodeContent
 
 
 type ReactElementFromFn<T extends React.ElementType> = React.ReactElement<React.ComponentProps<T>, T>
@@ -112,6 +118,7 @@ type ReactElementFromFn<T extends React.ElementType> = React.ReactElement<React.
 type StandardNodeChild = ReactElementFromFn<typeof Handle>
     | ReactElementFromFn<typeof MultiHandle>
     | ReactElementFromFn<typeof Config>
+    | ReactElementFromFn<typeof NodeContent>
 
 const validHandleComponents = [Handle.name, MultiHandle.name]
 
@@ -656,8 +663,8 @@ function Config({ children: Child, id = "value", label, defaultValue }: ConfigPr
         return val === undefined ? defaultValue : val
     })
     const onChange = (newValue: any) => {
-        gbx.mutateState(s => {
-            s.nodes.get(nodeId)!.config[id] = newValue
+        gbx.mutateNodeState(nodeId, n => {
+            n.config[id] = newValue
         })
     }
 
@@ -676,6 +683,18 @@ function Config({ children: Child, id = "value", label, defaultValue }: ConfigPr
             />
         </div>
     )
+}
+
+
+interface NodeContentProps {
+    children: React.ReactNode
+}
+
+// #region NodeContent
+function NodeContent({
+    children
+}: NodeContentProps) {
+    return children
 }
 
 

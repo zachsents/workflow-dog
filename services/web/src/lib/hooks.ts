@@ -1,6 +1,6 @@
 import { useMotionValue, useMotionValueEvent, type MotionValue } from "framer-motion"
 import Fuse, { type IFuseOptions } from "fuse.js"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useHotkeys, type Options as HotKeysOptions } from "react-hotkeys-hook"
 import { useSearchParams } from "react-router-dom"
 
@@ -190,4 +190,19 @@ export function useMouseMotionValue() {
     }, [x, y])
 
     return { x, y }
+}
+
+
+/**
+ * Hook that uses ResizeObserver to trigger a callback.
+ */
+export function useResizeObserver(callback: (entry: ResizeObserverEntry) => void, callbackDeps: any[] = []) {
+    const cb = useCallback(callback, callbackDeps)
+    const { current: observer } = useRef<ResizeObserver>(new ResizeObserver(entries => {
+        entries.forEach(cb)
+    }))
+    return useElementChangeRef((prev, current) => {
+        if (prev) observer.unobserve(prev)
+        observer.observe(current)
+    })
 }

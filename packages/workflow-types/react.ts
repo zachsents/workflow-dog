@@ -1,4 +1,4 @@
-import { IconBraces, IconBracketsContain, IconFile, IconHash, IconPhoto, IconTextSize, type Icon } from "@tabler/icons-react"
+import { IconBraces, IconBracketsContain, IconFile, IconHash, IconPhoto, IconTextSize, IconToggleLeftFilled, type Icon } from "@tabler/icons-react"
 
 /* ------------------------------------------------------ */
 /* Definitions                                            */
@@ -19,6 +19,7 @@ export const ValueTypeDefinitions = {
     boolean: createTypeDef({
         name: "Boolean",
         jsType: "boolean",
+        icon: IconToggleLeftFilled,
     }),
     object: createTypeDef({
         name: "Object",

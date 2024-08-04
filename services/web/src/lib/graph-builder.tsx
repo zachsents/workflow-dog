@@ -1,10 +1,15 @@
 import { Anchor as PopoverAnchor } from "@radix-ui/react-popover"
+import { useLocalStorageValue } from "@react-hookz/web"
 import { IconFlame, IconPin, IconPinnedOff, IconX } from "@tabler/icons-react"
+import Kbd from "@web/components/kbd"
 import SearchInput from "@web/components/search-input"
+import SimpleTooltip from "@web/components/simple-tooltip"
 import TI from "@web/components/tabler-icon"
 import { Button } from "@web/components/ui/button"
 import { Card } from "@web/components/ui/card"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@web/components/ui/dropdown-menu"
 import { Popover, PopoverContent } from "@web/components/ui/popover"
+import VerticalDivider from "@web/components/vertical-divider"
 import { useBooleanState, useDialogState, useKeyState, useMotionValueState, useSearch } from "@web/lib/hooks"
 import { cn } from "@web/lib/utils"
 import { createRandomId, IdNamespace } from "core/ids"
@@ -16,11 +21,6 @@ import ClientNodeDefinitions from "workflow-packages/client-nodes"
 import type { ClientNodeDefinition } from "workflow-packages/helpers/react"
 import { createStore, useStore } from "zustand"
 import { useShallow } from "zustand/react/shallow"
-import { useLocalStorageValue } from "@react-hookz/web"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@web/components/ui/dropdown-menu"
-import Kbd from "@web/components/kbd"
-import VerticalDivider from "@web/components/vertical-divider"
-import SimpleTooltip from "@web/components/simple-tooltip"
 
 
 /**
@@ -355,13 +355,10 @@ const DraggableNodeButton = forwardRef<HTMLDivElement, DraggableNodeButtonProps 
                     drag dragMomentum={false}
                     animate={animationControls}
                     onDragEnd={(event, info) => {
-                        const point = gbx.toGraphPoint(info.point.x, info.point.y, true)
                         gbx.addNode({
                             definitionId,
-                            position: {
-                                x: point.x - 140,
-                                y: point.y - 40,
-                            },
+                            position: gbx.toGraphPoint(info.point.x, info.point.y, true),
+                            _shouldCenterSelf: true,
                         })
                         animationControls.set({ x: 0, y: 0 })
                         motionProps.onDragEnd?.(event, info)
@@ -486,8 +483,20 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
                 )}
                 style={{ x: n.position.x, y: n.position.y }}
                 ref={el => {
-                    if (el && n._element !== el)
-                        gbx.setNodeState(n.id, { _element: el })
+                    if (!el) return
+                    const updates: Partial<Node> = {}
+
+                    if (n._element !== el) {
+                        updates._element = el
+                    }
+                    if (n._shouldCenterSelf) {
+                        n.position.x.set(n.position.x.get() - el.offsetWidth / 2)
+                        n.position.y.set(n.position.y.get() - el.offsetHeight / 2)
+                        updates._shouldCenterSelf = false
+                    }
+
+                    if (Object.keys(updates).length > 0)
+                        gbx.setNodeState(n.id, updates)
                 }}
 
                 onPanStart={startDrag}
@@ -924,18 +933,16 @@ class GraphBuilder {
         const center = this.toGraphPoint(rect.width / 2, rect.height / 2, false)
         return this.addNode({
             ...node,
-            position: {
-                x: center.x - 140,
-                y: center.y - 40,
-            },
+            position: center,
+            _shouldCenterSelf: true,
         })
     }
 
     addNodeAtMouse(node: Omit<Parameters<typeof GraphBuilder.prototype["addNode"]>[0], "position">) {
-        const { x, y } = this.graphMousePosition
         return this.addNode({
             ...node,
-            position: { x: x - 140, y: y - 40 },
+            position: this.graphMousePosition,
+            _shouldCenterSelf: true,
         })
     }
 
@@ -1105,6 +1112,8 @@ export type Node = {
     handleStates: Record<string, HandleState>
 
     config: Record<string, any>
+
+    _shouldCenterSelf?: boolean
 }
 
 export type Edge = {

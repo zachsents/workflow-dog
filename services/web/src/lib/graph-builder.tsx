@@ -1,5 +1,5 @@
 import { Anchor as PopoverAnchor } from "@radix-ui/react-popover"
-import { IconX } from "@tabler/icons-react"
+import { IconFlame, IconPin, IconPinnedOff, IconX } from "@tabler/icons-react"
 import SearchInput from "@web/components/search-input"
 import TI from "@web/components/tabler-icon"
 import { Button } from "@web/components/ui/button"
@@ -10,12 +10,17 @@ import { cn } from "@web/lib/utils"
 import { createRandomId, IdNamespace } from "core/ids"
 import { motion, motionValue, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion"
 import { produce } from "immer"
-import React, { createContext, useContext, useEffect, useRef } from "react"
+import React, { createContext, forwardRef, useContext, useEffect, useRef } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import ClientNodeDefinitions from "workflow-packages/client-nodes"
 import type { ClientNodeDefinition } from "workflow-packages/helpers/react"
 import { createStore, useStore } from "zustand"
 import { useShallow } from "zustand/react/shallow"
+import { useLocalStorageValue } from "@react-hookz/web"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@web/components/ui/dropdown-menu"
+import Kbd from "@web/components/kbd"
+import VerticalDivider from "@web/components/vertical-divider"
+import SimpleTooltip from "@web/components/simple-tooltip"
 
 
 /**
@@ -41,6 +46,15 @@ function GraphRenderer({ children, ...props }: React.ComponentProps<"div">) {
     const gbx = useGraphBuilder()
     const nodes = gbx.useNodes()
 
+    useEffect(() => {
+        const ac = new AbortController()
+        window.addEventListener("pointermove", e => {
+            gbx.state.screenMousePosition.x.set(e.clientX)
+            gbx.state.screenMousePosition.y.set(e.clientY)
+        }, { signal: ac.signal })
+        return () => ac.abort()
+    }, [])
+
     return (
         <div {...props} className={cn("relative w-full h-full", props.className)}>
             <Viewport>
@@ -53,7 +67,7 @@ function GraphRenderer({ children, ...props }: React.ComponentProps<"div">) {
                     )
                 })}
             </Viewport>
-            <div className="absolute hack-center-x bottom-4">
+            <div className="absolute hack-center-x bottom-4 px-4 max-w-full">
                 <MainToolbar />
             </div>
             {children}
@@ -90,6 +104,15 @@ function Viewport({ children }: { children: React.ReactNode }) {
         gbx.store.setState({ selection: new Set(gbx.state.nodes.keys()) })
     })
 
+    const [hotslot, setHotslot] = useHotSlot()
+    useHotkeys("z", () => {
+        if (gbx.state.currentlyHoveredNodeDefId)
+            setHotslot(gbx.state.currentlyHoveredNodeDefId)
+        else if (hotslot)
+            gbx.addNodeAtMouse({ definitionId: hotslot })
+    })
+    useHotkeys("shift+z", () => setHotslot(null))
+
     return (
         <motion.div
             className={cn(
@@ -99,7 +122,6 @@ function Viewport({ children }: { children: React.ReactNode }) {
                 if (gbx.state.viewportElement !== el)
                     gbx.store.setState({ viewportElement: el })
             }}
-
             onWheel={(e) => {
                 const newZoom = Math.min(5, Math.max(0.2,
                     zoom.get() * (1 + e.deltaY * -0.001)
@@ -184,6 +206,8 @@ function Viewport({ children }: { children: React.ReactNode }) {
         </motion.div>
     )
 }
+// #endregion Viewport
+
 
 const nodeDefinitionsList = Object.entries(ClientNodeDefinitions).map(([id, def]) => ({
     id,
@@ -201,24 +225,55 @@ function MainToolbar() {
         threshold: 0.4,
     })
 
+    const [pinnedNodes] = usePinnedNodes()
+    const [hotslot] = useHotSlot()
+
     return (<>
         <Card className="flex items-stretch justify-center gap-1 p-1">
-            <DraggableNodeButton
-                definitionId="primitives/text" variant="outline"
-                className="flex-center gap-2 h-auto"
-            />
-            <DraggableNodeButton
-                definitionId="primitives/number" variant="outline"
-                className="flex-center gap-2 h-auto"
-            />
+            <SimpleTooltip delay={500} tooltip={<div className="flex flex-col items-stretch gap-2">
+                <b className="text-orange-700 flex-center gap-1 font-bold text-center">Hot Slot <TI><IconFlame /></TI></b>
+                <p>Press <Kbd>Z</Kbd> over an action to put it in the hot slot.</p>
+                <p>Press <Kbd>Z</Kbd> somewhere else to place one of those actions.</p>
+                <p>Press <Kbd>Shift+Z</Kbd> to clear the slot.</p>
+            </div>}>
+                {hotslot
+                    ? <DraggableNodeButton
+                        definitionId={hotslot} variant="outline"
+                        className="flex-center gap-2 h-auto shadow-none bg-orange-100 border-orange-300 text-orange-700 text-xs"
+                    >
+                        <TI><IconFlame /></TI>
+                        <Kbd>Z</Kbd>
+                    </DraggableNodeButton>
+                    : <Button
+                        variant="outline"
+                        className="flex-center gap-2 h-auto shadow-none bg-orange-100 border-orange-300 text-orange-700 hover:bg-orange-100 hover:text-orange-700"
+                    >
+                        <p className="text-xs">No action</p>
+                        <TI><IconFlame /></TI>
+                        <Kbd>Z</Kbd>
+                    </Button>}
+            </SimpleTooltip>
 
-            <div className="w-[1px] bg-gray-200 mx-1 -my-1" />
+            <VerticalDivider className="mx-1 -my-1" />
+
+            <div className="flex-center gap-1 flex-wrap w-max max-w-[600px]">
+                {pinnedNodes.map((nodeDefId, i) =>
+                    <DraggableNodeButton
+                        key={nodeDefId}
+                        definitionId={nodeDefId} variant="outline"
+                        className="flex-center gap-2 h-auto shadow-none text-xs"
+                        hotkey={i < 9 ? `${i + 1}` : undefined}
+                    />
+                )}
+            </div>
+
+            <VerticalDivider className="mx-1 -my-1" />
 
             <Popover {...resultsPopover.dialogProps}>
-                <PopoverAnchor>
+                <PopoverAnchor className="shrink-0 w-[300px]">
                     <SearchInput
                         value={search.query} onValueChange={search.setQuery}
-                        className="bg-white shadow-none rounded-md"
+                        className="bg-white shadow-none rounded-md w-full"
                         withHotkey noun="action" quantity={nodeDefinitionsList.length}
                         onFocus={resultsPopover.open}
                         onChange={resultsPopover.open}
@@ -239,7 +294,10 @@ function MainToolbar() {
                                     variant="ghost"
                                     className="flex items-center justify-start gap-2 font-normal h-auto py-1 w-full"
                                     tabIndex={-1}
-                                    onAdd={resultsPopover.close}
+                                    onAdd={() => {
+                                        resultsPopover.close();
+                                        (document.activeElement as any)?.blur?.()
+                                    }}
                                 />
                             )
                         })
@@ -252,52 +310,102 @@ function MainToolbar() {
     </>)
 }
 
-function DraggableNodeButton({
-    definitionId,
-    onAdd,
-    motionProps = {},
-    ...props
-}: {
+
+interface DraggableNodeButtonProps {
     definitionId: string
+    hotkey?: string
     onAdd?: () => void
     motionProps?: React.ComponentProps<typeof motion.div>
-} & React.ComponentProps<typeof Button>) {
+}
+
+const DraggableNodeButton = forwardRef<HTMLDivElement, DraggableNodeButtonProps & React.ComponentProps<typeof Button>>(({
+    definitionId,
+    hotkey,
+    onAdd,
+    motionProps = {},
+    children,
+    ...props
+}, ref) => {
     const gbx = useGraphBuilder()
     const def = gbx.getNodeDefinition(definitionId)
 
     const animationControls = useAnimationControls()
 
+    const contextMenu = useDialogState()
+    const [pinnedNodes, addPinnedNode, removePinnedNode] = usePinnedNodes()
+    const isPinned = pinnedNodes.includes(definitionId)
+
+    useHotkeys(hotkey ?? "", () => {
+        if (hotkey) {
+            gbx.addNodeAtMouse({ definitionId })
+            onAdd?.()
+        }
+    })
+
     return (
-        <motion.div
-            {...motionProps}
-            drag dragMomentum={false}
-            animate={animationControls}
-            onDragEnd={(event, info) => {
-                const point = gbx.toGraphPoint(info.point.x, info.point.y, true)
-                gbx.addNode({
-                    definitionId,
-                    position: {
-                        x: point.x - 140,
-                        y: point.y - 40,
-                    },
-                })
-                animationControls.set({ x: 0, y: 0 })
-                motionProps.onDragEnd?.(event, info)
-                onAdd?.()
+        <DropdownMenu
+            open={contextMenu.isOpen}
+            onOpenChange={open => {
+                if (!open) contextMenu.close()
             }}
         >
-            <motion.div onTap={() => {
-                gbx.addNodeAtCenter({ definitionId })
-                onAdd?.()
-            }}>
-                <Button {...props}>
-                    <TI><def.icon /></TI>
-                    <span>{def.name}</span>
-                </Button>
-            </motion.div>
-        </motion.div >
+            <DropdownMenuTrigger asChild>
+                <motion.div
+                    {...motionProps}
+                    drag dragMomentum={false}
+                    animate={animationControls}
+                    onDragEnd={(event, info) => {
+                        const point = gbx.toGraphPoint(info.point.x, info.point.y, true)
+                        gbx.addNode({
+                            definitionId,
+                            position: {
+                                x: point.x - 140,
+                                y: point.y - 40,
+                            },
+                        })
+                        animationControls.set({ x: 0, y: 0 })
+                        motionProps.onDragEnd?.(event, info)
+                        onAdd?.()
+                    }}
+                    onContextMenu={ev => {
+                        ev.preventDefault()
+                        contextMenu.open()
+                    }}
+                    ref={ref}
+                >
+                    <motion.div onTap={() => {
+                        gbx.addNodeAtCenter({ definitionId })
+                        onAdd?.()
+                    }}>
+                        <Button {...props}>
+                            <TI><def.icon /></TI>
+                            <span>{def.name}</span>
+                            {children}
+                            {hotkey &&
+                                <Kbd>{hotkey}</Kbd>}
+                        </Button>
+                    </motion.div>
+                </motion.div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top">
+                <DropdownMenuItem
+                    className="flex-center gap-2"
+                    onSelect={() => isPinned ? removePinnedNode(definitionId) : addPinnedNode(definitionId)}
+                >
+                    {isPinned ? <>
+                        <TI><IconPinnedOff /></TI>
+                        <span>Unpin from toolbar</span>
+                    </> : <>
+                        <TI><IconPin /></TI>
+                        <span>Pin to toolbar</span>
+                    </>}
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
-}
+})
+// #endregion MainToolbar
+
 
 // #region SelectionBox
 function SelectionBox() {
@@ -404,6 +512,8 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
                     tapControls.registerPanEnd(e, info)
                     endDrag()
                 }}
+                onPointerEnter={() => gbx.store.setState({ currentlyHoveredNodeDefId: n.definitionId })}
+                onPointerLeave={() => gbx.store.setState({ currentlyHoveredNodeDefId: null })}
             >
                 {children}
             </motion.div>
@@ -760,12 +870,19 @@ class GraphBuilder {
 
         boxSelection: null,
         connection: null,
+
+        screenMousePosition: { x: motionValue(0), y: motionValue(0) },
+        currentlyHoveredNodeDefId: null,
     }))
 
     constructor(public options: GraphBuilderOptions) { }
 
     get state() {
         return this.store.getState()
+    }
+
+    get graphMousePosition() {
+        return this.toGraphPoint(this.state.screenMousePosition.x.get(), this.state.screenMousePosition.y.get(), true)
     }
 
     mutateState(recipe: (state: GraphBuilderStoreState) => void) {
@@ -811,6 +928,14 @@ class GraphBuilder {
                 x: center.x - 140,
                 y: center.y - 40,
             },
+        })
+    }
+
+    addNodeAtMouse(node: Omit<Parameters<typeof GraphBuilder.prototype["addNode"]>[0], "position">) {
+        const { x, y } = this.graphMousePosition
+        return this.addNode({
+            ...node,
+            position: { x: x - 140, y: y - 40 },
         })
     }
 
@@ -943,6 +1068,7 @@ class GraphBuilder {
     }
 }
 
+// #region Store State
 export type GraphBuilderStoreState = {
     nodes: Map<string, Node>
     edges: Map<string, Edge>
@@ -959,6 +1085,9 @@ export type GraphBuilderStoreState = {
     }
 
     connection: null | Connection
+
+    screenMousePosition: MotionCoordPair
+    currentlyHoveredNodeDefId: string | null
 }
 
 /**
@@ -1089,4 +1218,23 @@ export function getDefinitionPackageName(definitionId: string) {
             .replaceAll(/[^A-Za-z0-9]+/g, " ")
             .replaceAll(/(?<!\w)[a-z]/g, c => c.toUpperCase())
         : undefined
+}
+
+function usePinnedNodes() {
+    const pinnedNodes = useLocalStorageValue("graph-builder-pinned-nodes", {
+        defaultValue: ["primitives/text", "primitives/number"],
+        initializeWithValue: true,
+    })
+    const addPinnedNode = (defId: string) => pinnedNodes.set(Array.from(new Set([...pinnedNodes.value, defId])))
+    const removePinnedNode = (defId: string) => pinnedNodes.set(pinnedNodes.value.filter(id => id !== defId))
+    return [pinnedNodes.value, addPinnedNode, removePinnedNode] as const
+}
+
+function useHotSlot() {
+    const hotSlot = useLocalStorageValue("graph-builder-hot-slot", {
+        defaultValue: "",
+        initializeWithValue: true,
+    })
+    const setHotSlot = (slot: string | null) => hotSlot.set(slot ?? "")
+    return [hotSlot.value || null, setHotSlot] as const
 }

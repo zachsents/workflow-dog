@@ -579,8 +579,9 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
                         updates._shouldCenterSelf = false
                     }
 
-                    if (Object.keys(updates).length > 0)
+                    if (Object.keys(updates).length > 0) {
                         gbx.setNodeState(n.id, updates)
+                    }
                 }}
 
                 onPanStart={startDrag}
@@ -648,19 +649,15 @@ function EdgeRenderer() {
     )
 }
 
-export function useRegisterHandle(indexingId: string, { x, y, type }: {
+export function useRegisterHandle(indexingId: string, { type }: {
     type: HandleType
-    x: number | undefined
-    y: number | undefined
 }) {
     const gbx = useGraphBuilder()
     const nodeId = useNodeId()
     const isInput = type === "input"
 
-    // Store handle position in node state
-    useEffect(() => {
-        if (x == null || y == null) return
-
+    // Create setter to put handle position in node state
+    const updateInternalHandlePosition = (x: number, y: number) => {
         const hp = gbx.state.nodes.get(nodeId)?._handlePositions
         if (hp?.[indexingId]) {
             hp[indexingId].x.set(x)
@@ -672,7 +669,7 @@ export function useRegisterHandle(indexingId: string, { x, y, type }: {
                 n._handlePositions[indexingId] ??= { x: motionValue(x), y: motionValue(y) }
             })
         }
-    }, [x, y])
+    }
 
     // connection states
     const isConnectingAtAll = gbx.useStore(s => !!s.connection)
@@ -745,6 +742,7 @@ export function useRegisterHandle(indexingId: string, { x, y, type }: {
     }
 
     return {
+        updateInternalHandlePosition,
         isConnectingAtAll,
         isConnectingToUs,
         canConnectToUs,

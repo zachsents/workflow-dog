@@ -1,11 +1,11 @@
+import useResizeObserver from "@react-hook/resize-observer"
 import { IconHash, IconTextSize, IconToggleLeftFilled } from "@tabler/icons-react"
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
 import { StandardNode } from "web/src/components/action-node"
 import { Input } from "web/src/components/ui/input"
 import { Switch } from "web/src/components/ui/switch"
 import { Textarea } from "web/src/components/ui/textarea"
 import { useGraphBuilder, useNodeId } from "web/src/lib/graph-builder"
-import { useResizeObserver } from "web/src/lib/hooks"
 import { useValueType } from "workflow-types/react"
 import { clientNodeHelper, prefixDefinitionIds } from "../../helpers/react"
 
@@ -28,7 +28,8 @@ export default prefixDefinitionIds("primitives", {
                 return { width: c._textareaWidth as number, height: c._textareaHeight as number }
             }, [])
 
-            const resizeRef = useResizeObserver(entry => {
+            const resizeRef = useRef<HTMLTextAreaElement>(null)
+            useResizeObserver(resizeRef, entry => {
                 try {
                     gbx.mutateNodeState(nodeId, n => {
                         n.config._textareaWidth = Math.round(entry.contentRect.width)

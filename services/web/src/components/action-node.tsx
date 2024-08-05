@@ -1,15 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Portal as HoverCardPortal } from "@radix-ui/react-hover-card"
+import useResizeObserver from "@react-hook/resize-observer"
 import { IconBracketsContain, IconChevronDown, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
 import { Button } from "@ui/button"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@ui/dropdown-menu"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from "@ui/form"
+import { Popover, PopoverContent, PopoverTrigger } from "@ui/popover"
 import { Card } from "@web/components/ui/card"
 import { getDefinitionPackageName, useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "@web/lib/graph-builder"
-import { useDialogState, useElementChangeRef, useStateChange } from "@web/lib/hooks"
+import { useDialogState } from "@web/lib/hooks"
 import { cn, getOffsetRelativeTo, type RequiredExcept } from "@web/lib/utils"
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { useValueType, ValueTypeDefinitions, type ValueTypeUsage } from "workflow-types/react"
 import { z } from "zod"
@@ -17,7 +19,6 @@ import TI from "./tabler-icon"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
-import { Popover, PopoverContent, PopoverTrigger } from "@ui/popover"
 
 
 
@@ -487,43 +488,27 @@ function Handle({
 }: HandleProps) {
     const isInput = type === "input"
     const gbx = useGraphBuilder()
-
     const nodeId = useNodeId()
-    const nodeElement = gbx.useStore(s => s.nodes.get(nodeId)!._element)
-
-    const childRef = useRef<HTMLDivElement>(null)
-    const [handleX, setHandleX] = useState<number | undefined>()
-    const [handleY, setHandleY] = useState<number | undefined>()
-
-    function recalculateChildPosition() {
-        if (!childRef.current || !nodeElement)
-            return
-        const { x, y } = getOffsetRelativeTo(childRef.current, nodeElement)
-        setHandleX(x + (isInput ? 0 : childRef.current.offsetWidth))
-        setHandleY(y)
-    }
-
-    const { current: observer } = useRef<ResizeObserver>(new ResizeObserver(() => {
-        recalculateChildPosition()
-    }))
-
-    const parentRef = useElementChangeRef((prev, current) => {
-        if (prev) observer.unobserve(prev)
-        observer.observe(current)
-    })
-
-    useStateChange(nodeElement, (prev, current) => {
-        if (prev) observer.unobserve(prev)
-        if (current) {
-            observer.observe(current)
-            recalculateChildPosition()
-        }
-    })
 
     const {
+        updateInternalHandlePosition,
         isConnectingAtAll, isConnectingToUs, canConnectToUs, isConnected,
         onPointerDownCapture, ...eventHandlers
-    } = useRegisterHandle(indexingId, { type, x: handleX, y: handleY })
+    } = useRegisterHandle(indexingId, { type })
+
+    const childRef = useRef<HTMLDivElement>(null)
+    const parentRef = useRef<HTMLDivElement>(null)
+    const nodeElement = gbx.useNodeState(nodeId, n => n._element)
+
+    function recalculateChildPosition() {
+        if (!childRef.current || !parentRef.current || !nodeElement)
+            return
+        const { x, y } = getOffsetRelativeTo(childRef.current, nodeElement)
+        updateInternalHandlePosition(x + (isInput ? 0 : childRef.current.offsetWidth), y)
+    }
+
+    useResizeObserver(parentRef, recalculateChildPosition)
+    useResizeObserver(nodeElement!, recalculateChildPosition)
 
     const valueTypeDef = valueType && ValueTypeDefinitions[valueType.typeDefinitionId]
 

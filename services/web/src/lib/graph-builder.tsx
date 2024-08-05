@@ -16,12 +16,13 @@ import { cn } from "@web/lib/utils"
 import { createRandomId, IdNamespace } from "core/ids"
 import { AnimatePresence, motion, motionValue, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, type Transition, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion"
 import { produce } from "immer"
-import React, { createContext, forwardRef, useContext, useEffect, useMemo, useRef } from "react"
+import React, { forwardRef, useContext, useEffect, useMemo, useRef } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import ClientNodeDefinitions from "workflow-packages/client-nodes"
 import type { ClientNodeDefinition } from "workflow-packages/helpers/react"
 import { createStore, useStore } from "zustand"
 import { useShallow } from "zustand/react/shallow"
+import { GraphBuilderContext, NodeContext } from "./graph-builder-ctx"
 
 
 /**
@@ -538,8 +539,6 @@ function SelectionBox() {
 }
 
 
-const NodeContext = createContext<string | null>(null)
-
 // #region NodeContainer
 function NodeContainer({ node: n, children }: { node: Node, children: React.ReactNode }) {
 
@@ -919,9 +918,6 @@ function Debug() {
 }
 
 
-
-const GraphBuilderContext = createContext<GraphBuilder | null>(null)
-
 /**
  * Provides a GraphBuilder instance to the component tree. If GBRoot is
  * used singularly, this provider will be automatically created. If you
@@ -950,7 +946,7 @@ export interface GraphBuilderOptions {
     resolveNodeDefinition: (nodeDefinitionId: string) => NodeDefinition
 }
 
-class GraphBuilder {
+export class GraphBuilder {
 
     public store = createStore<GraphBuilderStoreState>(() => ({
         nodes: new Map(),
@@ -1092,7 +1088,11 @@ class GraphBuilder {
     }
 
     useNodeState<T>(id: string, selector: (node: Node) => T) {
-        return this.useStore(s => selector(s.nodes.get(id)!))
+        return this.useStore(s => {
+            const n = s.nodes.get(id)
+            if (!n) throw new Error(`Node with ID ${id} does not exist.`)
+            return selector(n)
+        })
     }
 
     getNodeDefinition(definitionId: string) {

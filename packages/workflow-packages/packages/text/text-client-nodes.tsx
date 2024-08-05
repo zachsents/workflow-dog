@@ -1,7 +1,7 @@
 import { IconLetterCaseLower, IconLetterCaseUpper } from "@tabler/icons-react"
-import { clientNodeHelper, prefixDefinitionIds } from "../../helpers/react"
 import { StandardNode } from "web/src/components/action-node"
 import { useValueType } from "workflow-types/react"
+import { clientNodeHelper, prefixDefinitionIds } from "../../helpers/react"
 
 
 const createDef = clientNodeHelper({})

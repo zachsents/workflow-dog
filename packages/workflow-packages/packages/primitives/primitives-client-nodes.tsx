@@ -32,8 +32,8 @@ export default prefixDefinitionIds("primitives", {
             useResizeObserver(resizeRef, entry => {
                 try {
                     gbx.mutateNodeState(nodeId, n => {
-                        n.config._textareaWidth = Math.round(entry.contentRect.width)
-                        n.config._textareaHeight = Math.round(entry.contentRect.height)
+                        n.config._textareaWidth = Math.round(entry.borderBoxSize[0].inlineSize)
+                        n.config._textareaHeight = Math.round(entry.borderBoxSize[0].blockSize)
                     })
                 } catch (err) {
                     console.warn("Error resizing textarea. If this happened during deletion, it's expected.")
@@ -49,7 +49,7 @@ export default prefixDefinitionIds("primitives", {
                             onChange={e => gbx.mutateNodeState(nodeId, n => n.config.value = e.currentTarget.value)}
                             placeholder="Type something..."
                             onPointerDownCapture={(e) => e.stopPropagation()}
-                            className="resize"
+                            className="resize box-border"
                             style={textareaSize}
                             ref={resizeRef}
                         />

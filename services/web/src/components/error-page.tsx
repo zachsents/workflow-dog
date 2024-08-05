@@ -15,12 +15,16 @@ export default function ErrorPage() {
                 Looks like something went wrong.
             </p>
             <Card className="font-mono text-sm p-4 max-w-sm w-full text-red-700">
-                <p className="font-semibold">
-                    {error.statusText}
-                </p>
-                <p>
-                    {error.data}
-                </p>
+                {(error.statusText || error.data) && <>
+                    <p className="font-semibold">
+                        {error.statusText}
+                    </p>
+                    <p>
+                        {error.data}
+                    </p>
+                </>}
+
+                {error.message && <p>{error.message}</p>}
             </Card>
             <Button
                 className="flex-center gap-2"

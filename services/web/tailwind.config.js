@@ -5,7 +5,7 @@ export default {
         "./src/routes/**/*.{ts,tsx}",
         "./src/components/**/*.{ts,tsx}",
         "./src/**/*.tsx",
-        "../packages/**/*.tsx",
+        "../../packages/**/*.tsx",
     ],
     prefix: "",
     theme: {

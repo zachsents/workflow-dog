@@ -858,7 +858,10 @@ function GraphBuilderProvider({ children, ...opts }: { children: React.ReactNode
 }
 
 export function useGraphBuilder() {
-    return useContext(GraphBuilderContext)!
+    const gbx = useContext(GraphBuilderContext)!
+    if (!gbx)
+        throw new Error("useGraphBuilder must be used within a GraphBuilderProvider.")
+    return gbx
 }
 
 export interface GraphBuilderOptions {

@@ -9,7 +9,7 @@ import { Card } from "@web/components/ui/card"
 import { getDefinitionPackageName, useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "@web/lib/graph-builder"
 import { useDialogState, useElementChangeRef, useStateChange } from "@web/lib/hooks"
 import { cn, getOffsetRelativeTo, type RequiredExcept } from "@web/lib/utils"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useValueType, ValueTypeDefinitions, type ValueTypeUsage } from "workflow-types/react"
 import { z } from "zod"
@@ -24,10 +24,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 // #region StandardNode
 export function StandardNode({
     children = [],
-    withPackageBadge = true,
+    hidePackageBadge = false,
 }: {
     children?: StandardNodeChild | StandardNodeChild[]
-    withPackageBadge?: boolean
+    hidePackageBadge?: boolean
 }) {
     const gbx = useGraphBuilder()
     const id = useNodeId()
@@ -66,7 +66,7 @@ export function StandardNode({
                 <def.icon />
                 <span>{def.name}</span>
 
-                {withPackageBadge && packageDisplayName &&
+                {!hidePackageBadge && packageDisplayName &&
                     <span className="bg-white/30 px-2 py-0.5 rounded-sm ml-3 text-xs font-medium leading-none">
                         {packageDisplayName}
                     </span>}
@@ -641,28 +641,28 @@ function HandleDisplayName({ children, allowNaming, onClick, ...props }: HandleD
 // #endregion Handle
 
 
-interface ConfigProps {
+interface ConfigProps<T> {
     /** @default `value` */
     id?: string
     label: string
     children: React.ComponentType<{
         id: string
-        value: any
-        onChange: (value: any) => void
+        value: T | undefined
+        onChange: (value: T) => void
     }>
-    defaultValue?: any
+    defaultValue?: T
 }
 
 // #region Config
-function Config({ children: Child, id = "value", label, defaultValue }: ConfigProps) {
+function Config<T = any>({ children: Child, id = "value", label, defaultValue }: ConfigProps<T>) {
 
     const gbx = useGraphBuilder()
     const nodeId = useNodeId()
     const value = gbx.useStore(s => {
-        const val = s.nodes.get(nodeId)!.config[id]
+        const val = s.nodes.get(nodeId)!.config[id] as T | undefined
         return val === undefined ? defaultValue : val
     })
-    const onChange = (newValue: any) => {
+    const onChange = (newValue: T) => {
         gbx.mutateNodeState(nodeId, n => {
             n.config[id] = newValue
         })
@@ -673,14 +673,12 @@ function Config({ children: Child, id = "value", label, defaultValue }: ConfigPr
             onChange(defaultValue)
     }, [value, defaultValue])
 
+    const MemoizedChild = useMemo(() => Child, [id, gbx])
+
     return (
         <div className="flex flex-col items-stretch gap-2">
             <Label>{label}</Label>
-            <Child
-                id={id}
-                value={value}
-                onChange={onChange}
-            />
+            <MemoizedChild id={id} value={value} onChange={onChange} />
         </div>
     )
 }

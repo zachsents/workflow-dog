@@ -40,7 +40,7 @@ export default prefixDefinitionIds("primitives", {
             })
 
             return (
-                <StandardNode withPackageBadge={false}>
+                <StandardNode hidePackageBadge>
                     <StandardNode.Handle type="output" name="text" valueType={useValueType("string")} displayName=" " />
                     <StandardNode.Content>
                         <Textarea
@@ -48,10 +48,8 @@ export default prefixDefinitionIds("primitives", {
                             onChange={e => gbx.mutateNodeState(nodeId, n => n.config.value = e.currentTarget.value)}
                             placeholder="Type something..."
                             onPointerDownCapture={(e) => e.stopPropagation()}
-                            style={{
-                                resize: "both",
-                                ...textareaSize,
-                            }}
+                            className="resize"
+                            style={textareaSize}
                             ref={resizeRef}
                         />
                     </StandardNode.Content>
@@ -68,7 +66,7 @@ export default prefixDefinitionIds("primitives", {
             const value = gbx.useNodeState<string>(nodeId, n => n.config.value ? `${n.config.value}` : "")
 
             return (
-                <StandardNode withPackageBadge={false}>
+                <StandardNode hidePackageBadge>
                     <StandardNode.Handle type="output" name="number" valueType={useValueType("number")} displayName=" " />
                     <StandardNode.Content>
                         <Input
@@ -97,7 +95,7 @@ export default prefixDefinitionIds("primitives", {
             const nodeId = useNodeId()
             const value = gbx.useNodeState<boolean>(nodeId, n => n.config.value ?? false)
             return (
-                <StandardNode withPackageBadge={false}>
+                <StandardNode hidePackageBadge>
                     <StandardNode.Handle type="output" name="boolean" valueType={useValueType("boolean")} displayName=" " />
                     <StandardNode.Content>
                         <Switch

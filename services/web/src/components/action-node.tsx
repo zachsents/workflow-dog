@@ -17,7 +17,7 @@ import TI from "./tabler-icon"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "@ui/popover"
 
 
 
@@ -77,7 +77,7 @@ export function StandardNode({
                     {inputs}
                 </div>
                 {contentItems.length > 0 &&
-                    <div>
+                    <div className="grow flex flex-col items-stretch">
                         {contentItems}
                     </div>}
                 <div className="flex flex-col items-stretch gap-2">
@@ -658,10 +658,7 @@ function Config<T = any>({ children: Child, id = "value", label, defaultValue }:
 
     const gbx = useGraphBuilder()
     const nodeId = useNodeId()
-    const value = gbx.useStore(s => {
-        const val = s.nodes.get(nodeId)!.config[id] as T | undefined
-        return val === undefined ? defaultValue : val
-    })
+    const value = gbx.useStore(s => s.nodes.get(nodeId)!.config[id] as T | undefined)
     const onChange = (newValue: T) => {
         gbx.mutateNodeState(nodeId, n => {
             n.config[id] = newValue
@@ -674,11 +671,12 @@ function Config<T = any>({ children: Child, id = "value", label, defaultValue }:
     }, [value, defaultValue])
 
     const MemoizedChild = useMemo(() => Child, [id, gbx])
+    const passedValue = value === undefined ? defaultValue : value
 
     return (
         <div className="flex flex-col items-stretch gap-2">
             <Label>{label}</Label>
-            <MemoizedChild id={id} value={value} onChange={onChange} />
+            <MemoizedChild id={id} value={passedValue} onChange={onChange} />
         </div>
     )
 }

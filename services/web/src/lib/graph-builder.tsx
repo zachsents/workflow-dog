@@ -1,6 +1,7 @@
 import { Anchor as PopoverAnchor } from "@radix-ui/react-popover"
 import { useLocalStorageValue } from "@react-hookz/web"
 import { IconFlame, IconPin, IconPinnedOff, IconX } from "@tabler/icons-react"
+import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@ui/command"
 import Kbd from "@web/components/kbd"
 import SearchInput from "@web/components/search-input"
 import SimpleTooltip from "@web/components/simple-tooltip"
@@ -13,9 +14,9 @@ import VerticalDivider from "@web/components/vertical-divider"
 import { useBooleanState, useDialogState, useKeyState, useMotionValueState, useSearch } from "@web/lib/hooks"
 import { cn } from "@web/lib/utils"
 import { createRandomId, IdNamespace } from "core/ids"
-import { motion, motionValue, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion"
+import { AnimatePresence, motion, motionValue, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, type Transition, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion"
 import { produce } from "immer"
-import React, { createContext, forwardRef, useContext, useEffect, useRef } from "react"
+import React, { createContext, forwardRef, useContext, useEffect, useMemo, useRef } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import ClientNodeDefinitions from "workflow-packages/client-nodes"
 import type { ClientNodeDefinition } from "workflow-packages/helpers/react"
@@ -70,6 +71,8 @@ function GraphRenderer({ children, ...props }: React.ComponentProps<"div">) {
             <div className="absolute hack-center-x bottom-4 px-4 max-w-full">
                 <MainToolbar />
             </div>
+            <ContextMenu />
+
             {children}
         </div>
     )
@@ -183,6 +186,10 @@ function Viewport({ children }: { children: React.ReactNode }) {
                 onPanEnd={(e, info) => {
                     gbx.store.setState({ boxSelection: null })
                     tapControls.registerPanEnd(e, info)
+                }}
+                onContextMenu={e => {
+                    e.preventDefault()
+                    gbx.store.setState({ contextMenuPosition: { x: e.clientX, y: e.clientY } })
                 }}
             />
 
@@ -402,6 +409,83 @@ const DraggableNodeButton = forwardRef<HTMLDivElement, DraggableNodeButtonProps 
     )
 })
 // #endregion MainToolbar
+
+
+// #region ContextMenu
+function ContextMenu() {
+
+    const gbx = useGraphBuilder()
+    const position = gbx.useStore(s => s.contextMenuPosition)
+    const popoverKey = useMemo(() => Math.random().toString(16).slice(2), [position])
+
+    const search = useSearch(nodeDefinitionsList, {
+        keys: ["name", "package"],
+        threshold: 0.4,
+    })
+
+    const closePopover = () => gbx.store.setState({ contextMenuPosition: null })
+
+    const exitTransition: Transition = { duration: 0.1 }
+
+    return (
+        <AnimatePresence>
+            {!!position && <Popover
+                key={popoverKey}
+                open onOpenChange={isOpen => {
+                    if (!isOpen)
+                        closePopover()
+                }}
+            >
+                <PopoverAnchor asChild>
+                    <motion.div
+                        className="fixed pointer-events-none"
+                        style={{ top: position.y, left: position.x }}
+                        exit={{ opacity: 0, transition: exitTransition }}
+                    >
+                        <div className="w-3 h-3 bg-primary rounded-full -translate-x-1/2 -translate-y-1/2" />
+                    </motion.div>
+                </PopoverAnchor>
+                <PopoverContent className="w-[300px] p-0" asChild>
+                    <motion.div exit={{ opacity: 0, scale: 0.95, transition: exitTransition }}>
+                        <Command shouldFilter={false}>
+                            <CommandInput
+                                placeholder="Search actions..."
+                                value={search.query}
+                                onValueChange={search.setQuery}
+                            />
+                            <CommandList>
+                                {search.filtered.map(result => {
+                                    const def = gbx.getNodeDefinition(result.id)
+                                    return (
+                                        <CommandItem
+                                            key={result.id}
+                                            value={result.id}
+                                            onSelect={() => {
+                                                gbx.addNode({
+                                                    definitionId: result.id,
+                                                    position: gbx.toGraphPoint(position.x, position.y, true),
+                                                    _shouldCenterSelf: true,
+                                                })
+                                                closePopover()
+                                            }}
+                                            className="flex items-center gap-2 px-4"
+                                        // style={{ color: definition.color }}
+                                        >
+                                            <TI><def.icon /></TI>
+                                            <span>{def.name}</span>
+                                        </CommandItem>
+                                    )
+                                })}
+                                <CommandEmpty>No actions found.</CommandEmpty>
+                            </CommandList>
+                        </Command>
+                    </motion.div>
+                </PopoverContent>
+            </Popover>}
+        </AnimatePresence>
+    )
+}
+// endregion ContextMenu
 
 
 // #region SelectionBox
@@ -885,6 +969,8 @@ class GraphBuilder {
 
         screenMousePosition: { x: motionValue(0), y: motionValue(0) },
         currentlyHoveredNodeDefId: null,
+
+        contextMenuPosition: null,
     }))
 
     constructor(public options: GraphBuilderOptions) { }
@@ -1108,6 +1194,8 @@ export type GraphBuilderStoreState = {
 
     screenMousePosition: MotionCoordPair
     currentlyHoveredNodeDefId: string | null
+
+    contextMenuPosition: { x: number, y: number } | null
 }
 
 /**

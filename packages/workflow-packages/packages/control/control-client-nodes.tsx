@@ -35,8 +35,8 @@ export default prefixDefinitionIds("control", {
         name: "Passthrough",
         icon: IconSquare,
         component: () => <StandardNode>
-            <StandardNode.Handle type="input" name="value" />
-            <StandardNode.Handle type="output" name="value" />
+            <StandardNode.Handle type="input" name="valueIn" displayName="Value" />
+            <StandardNode.Handle type="output" name="valueOut" displayName="Value" />
         </StandardNode>,
     }),
     isNull: createDef({
@@ -66,7 +66,7 @@ export default prefixDefinitionIds("control", {
                         />}
                     </StandardNode.Config>
                     <StandardNode.Config<TextAlign>
-                        id="align" label="Text Align" defaultValue="left"
+                        id="align" label="Text Align" defaultValue="center"
                     >
                         {({ value, onChange }) =>
                             <ToggleGroup
@@ -97,7 +97,9 @@ export default prefixDefinitionIds("control", {
                             >
                                 {commentValue}
                             </p>
-                            : <p className="text-sm text-muted-foreground">No comment</p>}
+                            : <p className="text-sm text-muted-foreground text-center">
+                                No comment
+                            </p>}
                     </StandardNode.Content>
                 </StandardNode>
             )

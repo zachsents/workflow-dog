@@ -2,7 +2,7 @@ import { Anchor as PopoverAnchor } from "@radix-ui/react-popover"
 import useMergedRef from "@react-hook/merged-ref"
 import useResizeObserver from "@react-hook/resize-observer"
 import { useLocalStorageValue } from "@react-hookz/web"
-import { IconFlame, IconPin, IconPinnedOff, IconX } from "@tabler/icons-react"
+import { IconClipboard, IconConfettiOff, IconCopy, IconFlame, IconPin, IconPinnedOff, IconTrash, IconX } from "@tabler/icons-react"
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@ui/command"
 import Kbd from "@web/components/kbd"
 import SearchInput from "@web/components/search-input"
@@ -12,6 +12,7 @@ import { Button } from "@web/components/ui/button"
 import { Card } from "@web/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@web/components/ui/dropdown-menu"
 import { Popover, PopoverContent } from "@web/components/ui/popover"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import VerticalDivider from "@web/components/vertical-divider"
 import { useBooleanState, useDialogState, useKeyState, useMotionValueState, useSearch } from "@web/lib/hooks"
 import { cn } from "@web/lib/utils"
@@ -73,11 +74,11 @@ function GraphRenderer({ children, ...props }: React.ComponentProps<"div">) {
                     )
                 })}
             </Viewport>
-            <div className="absolute hack-center-x bottom-4 px-4 max-w-full">
+            <div className="absolute hack-center-x z-20 bottom-4 px-4 max-w-full">
                 <MainToolbar />
             </div>
             <ContextMenu />
-            {/* <SelectionToolbar /> */}
+            <SelectionToolbar />
 
             {children}
         </div>
@@ -97,7 +98,7 @@ function Viewport({ children }: { children: React.ReactNode }) {
     const zoom = gbx.useStore(s => s.zoom)
 
     const tapControls = useTapControls((e) => {
-        if (!e.shiftKey)
+        if (!e.shiftKey && gbx.state.selection.size > 0)
             gbx.store.setState({ selection: new Set<string>() })
     })
 
@@ -122,7 +123,6 @@ function Viewport({ children }: { children: React.ReactNode }) {
     })
     useHotkeys("shift+z", () => setHotslot(null))
 
-    useHotkeys("ctrl+c", (e) => gbx.copySelectionToClipboard(), { preventDefault: true })
     useHotkeys("ctrl+v", (e) => gbx.pasteFromClipboard(), { preventDefault: true })
 
     return (
@@ -201,7 +201,8 @@ function Viewport({ children }: { children: React.ReactNode }) {
                 // For detecting tap's that aren't part of a pan
                 onTap={tapControls.registerTap}
                 onPanEnd={(e, info) => {
-                    gbx.store.setState({ boxSelection: null })
+                    if (gbx.state.boxSelection)
+                        gbx.store.setState({ boxSelection: null })
                     tapControls.registerPanEnd(e, info)
                 }}
                 onContextMenu={e => {
@@ -452,7 +453,7 @@ function ContextMenu() {
             >
                 <PopoverAnchor asChild>
                     <motion.div
-                        className="fixed pointer-events-none"
+                        className="fixed z-20 pointer-events-none"
                         style={{ top: position.y, left: position.x }}
                         exit={{ opacity: 0, transition: exitTransition }}
                     >
@@ -461,7 +462,7 @@ function ContextMenu() {
                 </PopoverAnchor>
                 <PopoverContent
                     side="bottom" sideOffset={22} asChild
-                    className="w-[300px] p-0"
+                    className="w-[300px] p-0 z-20"
                 >
                     <motion.div exit={{ opacity: 0, scale: 0.95, transition: exitTransition }}>
                         <Command shouldFilter={false}>
@@ -563,52 +564,124 @@ function SelectionToolbar() {
     const zoom = gbx.useStore(s => s.zoom)
 
     const selection = gbx.useStore(s => s.selection)
-    const [selectionXs, selectionYs] = useMemo(() => {
+
+    const [xs, ys, widths, heights] = useMemo(() => {
         const xs: MotionValue<number>[] = []
         const ys: MotionValue<number>[] = []
+        const widths: MotionValue<number>[] = []
+        const heights: MotionValue<number>[] = []
         selection.forEach(id => {
             const n = gbx.state.nodes.get(id)
             if (!n) return
             xs.push(n.position.x)
             ys.push(n.position.y)
+            widths.push(n._width)
+            heights.push(n._height)
         })
-        return [xs, ys] as const
+        return [xs, ys, widths, heights] as const
     }, [gbx, selection])
 
-    // WILO: make sure I'm doing this the smart way
-    // also might reimplement handle positioning to 
-    // store widths/heights in node states and put
-    // resize observer for nodes in themselves
 
-    const minX = useTransform(() => Math.min(...selectionXs.map(x => x.get())))
-    const minY = useTransform(() => Math.min(...selectionYs.map(y => y.get())))
-    const maxX = useTransform(() => Math.max(...selectionXs.map(x => x.get())))
-    const maxY = useTransform(() => Math.max(...selectionYs.map(y => y.get())))
+    const minX = useTransform(() => Math.min(...xs.map(x => x.get())))
+    const minY = useTransform(() => Math.min(...ys.map(y => y.get())))
+    const maxX = useTransform(() => Math.max(...xs.map((x, i) => x.get() + widths[i].get())))
+    const maxY = useTransform(() => Math.max(...ys.map((y, i) => y.get() + heights[i].get())))
 
-    const x = useTransform(() => minX.get() * zoom.get() + pan.x.get())
-    const y = useTransform(() => minY.get() * zoom.get() + pan.y.get())
-    const width = useTransform(() => (maxX.get() - minX.get()) * zoom.get())
-    const height = useTransform(() => (maxY.get() - minY.get()) * zoom.get())
+    const boxStyle = {
+        x: useTransform(() => minX.get() * zoom.get() + pan.x.get()),
+        y: useTransform(() => minY.get() * zoom.get() + pan.y.get()),
+        width: useTransform(() => (maxX.get() - minX.get()) * zoom.get()),
+        height: useTransform(() => (maxY.get() - minY.get()) * zoom.get()),
+    }
 
-    // useEffect(() => console.log(selectionXs), [selectionXs])
-    // useMotionValueEvent(minX, "change", console.log)
-    // useMotionValueEvent(maxX, "change", console.log)
+    return (
+        <TooltipProvider delayDuration={0}>
+            <motion.div
+                className={cn(
+                    "absolute top-0 left-0 z-[19] rounded-sm pointer-events-none",
+                    selection.size === 0 && "hidden",
+                    selection.size > 1 && "outline-dashed outline-1 outline-gray-600 outline-offset-8",
+                )}
+                style={boxStyle}
+            >
+                <Card className="flex-center p-1 absolute hack-center-x bottom-full mb-5 pointer-events-auto">
+                    <SelectionToolbarButton
+                        label="Disable"
+                        action={() => {
 
-    return selection.size > 0
-        ? <Popover open>
-            <PopoverAnchor asChild>
-                <motion.div
-                    className="absolute top-0 left-0 bg-red-500/50"
-                    style={{ x, y, width, height }}
-                />
-            </PopoverAnchor>
-            <PopoverContent>
-                Hello
-            </PopoverContent>
-        </Popover>
-        : null
+                        }}
+                        icon={IconConfettiOff}
+                        hotkey="ctrl+shift+e"
+                        shortcut={["\u2318", "\u21e7", "E"]}
+                    />
+                    <VerticalDivider className="mx-1" />
+                    <SelectionToolbarButton
+                        label="Copy"
+                        action={() => gbx.copySelectionToClipboard()}
+                        icon={IconClipboard}
+                        hotkey="ctrl+c"
+                        shortcut={["\u2318", "C"]}
+                    />
+                    <SelectionToolbarButton
+                        label="Duplicate"
+                        action={() => {
+                            gbx.pasteFromString(gbx.serializeSelection(), {
+                                offset: { x: 60, y: 60 },
+                                select: true,
+                            })
+                        }}
+                        icon={IconCopy}
+                        hotkey="ctrl+d"
+                        shortcut={["\u2318", "D"]}
+                    />
+                    <SelectionToolbarButton
+                        label="Delete"
+                        action={() => void gbx.deleteNodes(Array.from(selection))}
+                        icon={IconTrash}
+                        shortcut={["Del"]}
+                    />
+                </Card>
+            </motion.div>
+        </TooltipProvider>
+    )
 }
 
+const SelectionToolbarButton = forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button> & {
+    icon: React.ComponentType
+    label: string
+    shortcut?: string[]
+    hotkey?: string
+    action: () => void
+}>(({ icon: Icon, label, shortcut, hotkey, action, ...props }, ref) => {
+
+    const hasHotkey = useMemo(() => !!hotkey, [])
+    if (hasHotkey) useHotkeys(hotkey!, action, { preventDefault: true })
+
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <Button
+                    size="sm" variant="ghost"
+                    {...props}
+                    className={cn("text-lg aspect-square h-[2.25em] p-0 flex-center", props.className)}
+                    onClick={ev => {
+                        action()
+                        props.onClick?.(ev)
+                    }}
+                    ref={ref}
+                >
+                    <TI><Icon /></TI>
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="flex-center gap-2">
+                <span>{label}</span>
+                {shortcut && <div className="flex-center gap-1">
+                    {shortcut.map((key, i) => <Kbd key={i}>{key}</Kbd>)}
+                </div>}
+            </TooltipContent>
+        </Tooltip>
+    )
+})
 
 
 // #region NodeContainer
@@ -1243,10 +1316,7 @@ export class GraphBuilder {
         return [{ x: mx, y: my }, ready] as const
     }
 
-    copySelectionToClipboard() {
-        if (this.state.selection.size === 0)
-            return
-
+    serializeSelection() {
         const nodes = Array.from(this.state.selection)
             .map(id => this.state.nodes.get(id)).filter(n => !!n)
 
@@ -1263,27 +1333,37 @@ export class GraphBuilder {
         const content = SuperJSON.stringify(stripUnderscoredProperties({
             nodes, edges, center,
         } satisfies ClipboardContent))
+        return content
+    }
+
+    copySelectionToClipboard() {
+        if (this.state.selection.size === 0)
+            return
+
+        const content = this.serializeSelection()
         localStorage.setItem("workflow-clipboard", content)
         // console.debug("Copied to clipboard:", content)
         toast.success("Copied to clipboard!")
     }
 
-    pasteFromClipboard() {
-        const content = localStorage.getItem("workflow-clipboard")
-        if (!content) return
-
+    pasteFromString(content: string, { position, offset: passedOffset, select }: {
+        position?: { x: number, y: number }
+        offset?: { x: number, y: number }
+        select?: boolean
+    } = {}) {
         const { nodes: nodesData, edges, center } = SuperJSON.parse(content) as ClipboardContent
-        const graphMousePos = this.graphMousePosition
-        const offsetX = graphMousePos.x - center.x
-        const offsetY = graphMousePos.y - center.y
+        const offset = position ? {
+            x: position.x - center.x,
+            y: position.y - center.y,
+        } : passedOffset ?? { x: 0, y: 0 }
 
         const nodeIdMap = new Map<string, string>()
         const nodes = nodesData.map(({ id: oldId, ...n }) => {
             const newNode = createNode({
                 ...n,
                 position: {
-                    x: n.position.x.get() + offsetX,
-                    y: n.position.y.get() + offsetY,
+                    x: n.position.x.get() + offset.x,
+                    y: n.position.y.get() + offset.y,
                 },
             })
             nodeIdMap.set(oldId, newNode.id)
@@ -1298,7 +1378,15 @@ export class GraphBuilder {
         this.mutateState(s => {
             nodes.forEach(n => s.nodes.set(n.id, n))
             edges.forEach(e => s.edges.set(e.id, e))
+            if (select)
+                s.selection = new Set(nodes.map(n => n.id))
         })
+    }
+
+    pasteFromClipboard() {
+        const content = localStorage.getItem("workflow-clipboard")
+        if (!content) return
+        this.pasteFromString(content, { position: this.graphMousePosition })
     }
 }
 

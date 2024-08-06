@@ -1,4 +1,6 @@
 import { Anchor as PopoverAnchor } from "@radix-ui/react-popover"
+import useMergedRef from "@react-hook/merged-ref"
+import useResizeObserver from "@react-hook/resize-observer"
 import { useLocalStorageValue } from "@react-hookz/web"
 import { IconFlame, IconPin, IconPinnedOff, IconX } from "@tabler/icons-react"
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@ui/command"
@@ -14,7 +16,7 @@ import VerticalDivider from "@web/components/vertical-divider"
 import { useBooleanState, useDialogState, useKeyState, useMotionValueState, useSearch } from "@web/lib/hooks"
 import { cn } from "@web/lib/utils"
 import { createRandomId, IdNamespace } from "core/ids"
-import { AnimatePresence, motion, motionValue, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, type Transition, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion"
+import { AnimatePresence, isMotionValue, motion, motionValue, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, type Transition, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion"
 import { produce } from "immer"
 import React, { forwardRef, useContext, useEffect, useMemo, useRef } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
@@ -75,6 +77,7 @@ function GraphRenderer({ children, ...props }: React.ComponentProps<"div">) {
                 <MainToolbar />
             </div>
             <ContextMenu />
+            {/* <SelectionToolbar /> */}
 
             {children}
         </div>
@@ -552,6 +555,62 @@ function SelectionBox() {
 }
 
 
+// #region SelectionToolbar
+function SelectionToolbar() {
+
+    const gbx = useGraphBuilder()
+    const pan = gbx.useStore(s => s.pan)
+    const zoom = gbx.useStore(s => s.zoom)
+
+    const selection = gbx.useStore(s => s.selection)
+    const [selectionXs, selectionYs] = useMemo(() => {
+        const xs: MotionValue<number>[] = []
+        const ys: MotionValue<number>[] = []
+        selection.forEach(id => {
+            const n = gbx.state.nodes.get(id)
+            if (!n) return
+            xs.push(n.position.x)
+            ys.push(n.position.y)
+        })
+        return [xs, ys] as const
+    }, [gbx, selection])
+
+    // WILO: make sure I'm doing this the smart way
+    // also might reimplement handle positioning to 
+    // store widths/heights in node states and put
+    // resize observer for nodes in themselves
+
+    const minX = useTransform(() => Math.min(...selectionXs.map(x => x.get())))
+    const minY = useTransform(() => Math.min(...selectionYs.map(y => y.get())))
+    const maxX = useTransform(() => Math.max(...selectionXs.map(x => x.get())))
+    const maxY = useTransform(() => Math.max(...selectionYs.map(y => y.get())))
+
+    const x = useTransform(() => minX.get() * zoom.get() + pan.x.get())
+    const y = useTransform(() => minY.get() * zoom.get() + pan.y.get())
+    const width = useTransform(() => (maxX.get() - minX.get()) * zoom.get())
+    const height = useTransform(() => (maxY.get() - minY.get()) * zoom.get())
+
+    // useEffect(() => console.log(selectionXs), [selectionXs])
+    // useMotionValueEvent(minX, "change", console.log)
+    // useMotionValueEvent(maxX, "change", console.log)
+
+    return selection.size > 0
+        ? <Popover open>
+            <PopoverAnchor asChild>
+                <motion.div
+                    className="absolute top-0 left-0 bg-red-500/50"
+                    style={{ x, y, width, height }}
+                />
+            </PopoverAnchor>
+            <PopoverContent>
+                Hello
+            </PopoverContent>
+        </Popover>
+        : null
+}
+
+
+
 // #region NodeContainer
 function NodeContainer({ node: n, children }: { node: Node, children: React.ReactNode }) {
 
@@ -570,6 +629,27 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
         }))
     })
 
+
+    const resizeRef = useRef<HTMLDivElement>(null)
+    useResizeObserver(resizeRef, entry => {
+        n._width.set(entry.contentRect.width)
+        n._height.set(entry.contentRect.height)
+    })
+
+    const ref = useMergedRef(resizeRef, (el) => {
+        if (!el) return
+
+        const updates: Partial<Node> = {}
+        if (n._element !== el) updates._element = el
+        if (n._shouldCenterSelf) {
+            n.position.x.set(n.position.x.get() - el.offsetWidth / 2)
+            n.position.y.set(n.position.y.get() - el.offsetHeight / 2)
+            updates._shouldCenterSelf = false
+        }
+        if (Object.keys(updates).length > 0)
+            gbx.setNodeState(n.id, updates)
+    })
+
     return (
         <NodeContext.Provider value={n.id}>
             <motion.div
@@ -578,23 +658,7 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
                     isDragging ? "cursor-grabbing" : "cursor-pointer",
                 )}
                 style={{ x: n.position.x, y: n.position.y }}
-                ref={el => {
-                    if (!el) return
-                    const updates: Partial<Node> = {}
-
-                    if (n._element !== el) {
-                        updates._element = el
-                    }
-                    if (n._shouldCenterSelf) {
-                        n.position.x.set(n.position.x.get() - el.offsetWidth / 2)
-                        n.position.y.set(n.position.y.get() - el.offsetHeight / 2)
-                        updates._shouldCenterSelf = false
-                    }
-
-                    if (Object.keys(updates).length > 0) {
-                        gbx.setNodeState(n.id, updates)
-                    }
-                }}
+                ref={ref}
 
                 onPanStart={startDrag}
                 onPan={(e, info) => {
@@ -1002,25 +1066,11 @@ export class GraphBuilder {
         return this.useStore(useShallow(s => Array.from(s.nodes.values())))
     }
 
-    addNode(
-        node: Partial<Omit<Node, "definitionId" | "position">> & {
-            definitionId: string
-            position?: { x: number, y: number }
-        }
-    ): Node {
-        const newNode: Node = {
-            id: createRandomId(IdNamespace.ActionNode),
-            handleStates: {},
-            config: {},
-            ...node,
-            position: {
-                x: motionValue(node.position?.x ?? 0),
-                y: motionValue(node.position?.y ?? 0),
-            },
-        }
-        this.store.setState(s => ({
-            nodes: new Map([...s.nodes, [newNode.id, newNode]]),
-        }))
+    addNode(nodeData: Parameters<typeof createNode>[0]) {
+        const newNode = createNode(nodeData)
+        this.mutateState(s => {
+            s.nodes.set(newNode.id, newNode)
+        })
         return newNode
     }
 
@@ -1122,14 +1172,6 @@ export class GraphBuilder {
         return this.options.resolveNodeDefinition(this.state.nodes.get(nodeId)!.definitionId)
     }
 
-    // getInputDefinition(nodeId: string, inputDefId: string) {
-    //     return this.getNodeDefinition(nodeId).inputs[inputDefId]
-    // }
-
-    // getOutputDefinition(nodeId: string, outputDefId: string) {
-    //     return this.getNodeDefinition(nodeId).outputs[outputDefId]
-    // }
-
     canConnectTo(nodeId: string, handleId: string, type: HandleType) {
         const conn = this.state.connection
         if (!conn) return false
@@ -1148,7 +1190,7 @@ export class GraphBuilder {
         if (type === "output" && edges.some(e => e.t === conn.t && e.th === conn.th))
             return false
 
-        // wilo: checking value types
+        // todo: checking value types
         // bc types are defined as component props, we don't have direct access
         // to them. however, we can pass the type in the connection object and
         // in the useRegisterHandle hook, we can check if the types match.
@@ -1167,6 +1209,19 @@ export class GraphBuilder {
             x: (x - this.state.pan.x.get()) / this.state.zoom.get(),
             y: (y - this.state.pan.y.get()) / this.state.zoom.get(),
         }
+    }
+
+    toScreenPoint(x: number, y: number, accountForViewportPosition = false) {
+        const p = {
+            x: x * this.state.zoom.get() + this.state.pan.x.get(),
+            y: y * this.state.zoom.get() + this.state.pan.y.get(),
+        }
+        if (accountForViewportPosition) {
+            const rect = this.state.viewportElement!.getBoundingClientRect()
+            p.x += rect.x
+            p.y += rect.y
+        }
+        return p
     }
 
     usePointerPosition() {
@@ -1198,24 +1253,15 @@ export class GraphBuilder {
         const edges = Array.from(this.state.edges.values())
             .filter(e => this.state.selection.has(e.s) && this.state.selection.has(e.t))
 
-        const bounds = nodes.reduce((acc, n) => {
-            const x1 = n.position.x.get()
-            const y1 = n.position.y.get()
-            const x2 = x1 + n._element!.offsetWidth
-            const y2 = y1 + n._element!.offsetHeight
-            if (x1 < acc.minX) acc.minX = x1
-            if (x2 > acc.maxX) acc.maxX = x2
-            if (y1 < acc.minY) acc.minY = y1
-            if (y2 > acc.maxY) acc.maxY = y2
-            return acc
-        }, { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity })
+        const center = {
+            x: (Math.min(...nodes.map(n => n.position.x.get()))
+                + Math.max(...nodes.map(n => n.position.x.get() + n._width.get()))) / 2,
+            y: (Math.min(...nodes.map(n => n.position.y.get()))
+                + Math.max(...nodes.map(n => n.position.y.get() + n._height.get()))) / 2,
+        }
 
         const content = SuperJSON.stringify(stripUnderscoredProperties({
-            nodes, edges,
-            center: {
-                x: (bounds.minX + bounds.maxX) / 2,
-                y: (bounds.minY + bounds.maxY) / 2,
-            },
+            nodes, edges, center,
         } satisfies ClipboardContent))
         localStorage.setItem("workflow-clipboard", content)
         // console.debug("Copied to clipboard:", content)
@@ -1226,18 +1272,22 @@ export class GraphBuilder {
         const content = localStorage.getItem("workflow-clipboard")
         if (!content) return
 
-        const { nodes, edges, center } = SuperJSON.parse(content) as ClipboardContent
+        const { nodes: nodesData, edges, center } = SuperJSON.parse(content) as ClipboardContent
         const graphMousePos = this.graphMousePosition
         const offsetX = graphMousePos.x - center.x
         const offsetY = graphMousePos.y - center.y
 
         const nodeIdMap = new Map<string, string>()
-        nodes.forEach(n => {
-            const newId = createRandomId(IdNamespace.ActionNode)
-            nodeIdMap.set(n.id, newId)
-            n.id = newId
-            n.position.x.set(n.position.x.get() + offsetX)
-            n.position.y.set(n.position.y.get() + offsetY)
+        const nodes = nodesData.map(({ id: oldId, ...n }) => {
+            const newNode = createNode({
+                ...n,
+                position: {
+                    x: n.position.x.get() + offsetX,
+                    y: n.position.y.get() + offsetY,
+                },
+            })
+            nodeIdMap.set(oldId, newNode.id)
+            return newNode
         })
         edges.forEach(e => {
             e.s = nodeIdMap.get(e.s) ?? e.s
@@ -1245,10 +1295,10 @@ export class GraphBuilder {
             e.id = createEdgeId(e.s, e.sh, e.t, e.th)
         })
 
-        this.store.setState(s => ({
-            nodes: new Map([...s.nodes, ...nodes.map(n => [n.id, n] as const)]),
-            edges: new Map([...s.edges, ...edges.map(e => [e.id, e] as const)]),
-        }))
+        this.mutateState(s => {
+            nodes.forEach(n => s.nodes.set(n.id, n))
+            edges.forEach(e => s.edges.set(e.id, e))
+        })
     }
 }
 
@@ -1285,6 +1335,8 @@ export type Node = {
     // definition: string
     position: MotionCoordPair
     _element?: HTMLElement
+    _width: MotionValue<number>
+    _height: MotionValue<number>
     _handlePositions?: Record<string, MotionCoordPair>
 
     definitionId: string
@@ -1294,6 +1346,25 @@ export type Node = {
 
     _shouldCenterSelf?: boolean
 }
+
+export function createNode(
+    data: Omit<Partial<AllowPrimitivesForMotionValues<Node>>, "definitionId"> & { definitionId: string },
+): Node {
+    const { id, position, _width, _height, ...rest } = data
+    return {
+        handleStates: {},
+        config: {},
+        ...rest,
+        id: id ?? createRandomId(IdNamespace.ActionNode),
+        position: {
+            x: shouldBeMotionValue(position?.x ?? 0),
+            y: shouldBeMotionValue(position?.y ?? 0),
+        },
+        _width: shouldBeMotionValue(_width ?? 0),
+        _height: shouldBeMotionValue(_height ?? 0),
+    }
+}
+
 
 export type Edge = {
     id: string
@@ -1454,4 +1525,18 @@ export function serializeGraphObject(obj: any) {
 
 export function deserializeGraphObject(str: string) {
     return SuperJSON.parse(str)
+}
+
+export function shouldBeMotionValue<T>(value: T | MotionValue<T>) {
+    return (isMotionValue(value) ? value : motionValue(value)) as MotionValue<T>
+}
+
+type AllowPrimitiveForMotionValue<T extends MotionValue> = T extends MotionValue<infer R> ? MotionValue<R> | R : T
+
+export type AllowPrimitivesForMotionValues<T extends { [key: string]: any }> = {
+    [K in keyof T]: T[K] extends MotionValue
+    ? AllowPrimitiveForMotionValue<T[K]>
+    : T[K] extends { [key: string]: any }
+    ? AllowPrimitivesForMotionValues<T[K]>
+    : T[K]
 }

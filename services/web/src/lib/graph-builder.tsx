@@ -18,11 +18,13 @@ import { AnimatePresence, motion, motionValue, type MotionValue, type PanHandler
 import { produce } from "immer"
 import React, { forwardRef, useContext, useEffect, useMemo, useRef } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
+import SuperJSON from "superjson"
 import ClientNodeDefinitions from "workflow-packages/client-nodes"
 import type { ClientNodeDefinition } from "workflow-packages/helpers/react"
 import { createStore, useStore } from "zustand"
 import { useShallow } from "zustand/react/shallow"
 import { GraphBuilderContext, NodeContext } from "./graph-builder-ctx"
+import { toast } from "sonner"
 
 
 /**
@@ -106,7 +108,7 @@ function Viewport({ children }: { children: React.ReactNode }) {
 
     useHotkeys("ctrl+a", () => {
         gbx.store.setState({ selection: new Set(gbx.state.nodes.keys()) })
-    })
+    }, { preventDefault: true })
 
     const [hotslot, setHotslot] = useHotSlot()
     useHotkeys("z", () => {
@@ -116,6 +118,9 @@ function Viewport({ children }: { children: React.ReactNode }) {
             gbx.addNodeAtMouse({ definitionId: hotslot })
     })
     useHotkeys("shift+z", () => setHotslot(null))
+
+    useHotkeys("ctrl+c", (e) => gbx.copySelectionToClipboard(), { preventDefault: true })
+    useHotkeys("ctrl+v", (e) => gbx.pasteFromClipboard(), { preventDefault: true })
 
     return (
         <motion.div
@@ -143,6 +148,14 @@ function Viewport({ children }: { children: React.ReactNode }) {
                 zoom.set(newZoom)
                 pan.x.set(mouseX + zoomRatio * (pan.x.get() - mouseX))
                 pan.y.set(mouseY + zoomRatio * (pan.y.get() - mouseY))
+            }}
+            onCopy={e => {
+                e.preventDefault()
+                gbx.copySelectionToClipboard()
+            }}
+            onPaste={e => {
+                e.preventDefault()
+                gbx.pasteFromClipboard()
             }}
         >
             {/* Background / Interaction Box */}
@@ -1170,6 +1183,69 @@ export class GraphBuilder {
         }, [mx, my])
         return [{ x: mx, y: my }, ready] as const
     }
+
+    copySelectionToClipboard() {
+        if (this.state.selection.size === 0)
+            return
+
+        const nodes = Array.from(this.state.selection)
+            .map(id => this.state.nodes.get(id)).filter(n => !!n)
+
+        const edges = Array.from(this.state.edges.values())
+            .filter(e => this.state.selection.has(e.s) && this.state.selection.has(e.t))
+
+        const bounds = nodes.reduce((acc, n) => {
+            const x1 = n.position.x.get()
+            const y1 = n.position.y.get()
+            const x2 = x1 + n._element!.offsetWidth
+            const y2 = y1 + n._element!.offsetHeight
+            if (x1 < acc.minX) acc.minX = x1
+            if (x2 > acc.maxX) acc.maxX = x2
+            if (y1 < acc.minY) acc.minY = y1
+            if (y2 > acc.maxY) acc.maxY = y2
+            return acc
+        }, { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity })
+
+        const content = SuperJSON.stringify(stripUnderscoredProperties({
+            nodes, edges,
+            center: {
+                x: (bounds.minX + bounds.maxX) / 2,
+                y: (bounds.minY + bounds.maxY) / 2,
+            },
+        } satisfies ClipboardContent))
+        localStorage.setItem("workflow-clipboard", content)
+        // console.debug("Copied to clipboard:", content)
+        toast.success("Copied to clipboard!")
+    }
+
+    pasteFromClipboard() {
+        const content = localStorage.getItem("workflow-clipboard")
+        if (!content) return
+
+        const { nodes, edges, center } = SuperJSON.parse(content) as ClipboardContent
+        const graphMousePos = this.graphMousePosition
+        const offsetX = graphMousePos.x - center.x
+        const offsetY = graphMousePos.y - center.y
+
+        const nodeIdMap = new Map<string, string>()
+        nodes.forEach(n => {
+            const newId = createRandomId(IdNamespace.ActionNode)
+            nodeIdMap.set(n.id, newId)
+            n.id = newId
+            n.position.x.set(n.position.x.get() + offsetX)
+            n.position.y.set(n.position.y.get() + offsetY)
+        })
+        edges.forEach(e => {
+            e.s = nodeIdMap.get(e.s) ?? e.s
+            e.t = nodeIdMap.get(e.t) ?? e.t
+            e.id = createEdgeId(e.s, e.sh, e.t, e.th)
+        })
+
+        this.store.setState(s => ({
+            nodes: new Map([...s.nodes, ...nodes.map(n => [n.id, n] as const)]),
+            edges: new Map([...s.edges, ...edges.map(e => [e.id, e] as const)]),
+        }))
+    }
 }
 
 // #region Store State
@@ -1255,8 +1331,13 @@ export type HandleState = {
 }
 
 export type HandleType = "input" | "output"
-
 export type ListHandleMode = "multi" | "single"
+
+export type ClipboardContent = {
+    nodes: any[]
+    edges: any[]
+    center: { x: number, y: number }
+}
 
 function useEdgePath(
     sx: MotionValue<number>, sy: MotionValue<number>,
@@ -1345,4 +1426,28 @@ function useHotSlot() {
     })
     const setHotSlot = (slot: string | null) => hotSlot.set(slot ?? "")
     return [hotSlot.value || null, setHotSlot] as const
+}
+
+
+function stripUnderscoredProperties(obj: any): any {
+    if (typeof obj === "object" && obj !== null) {
+        if (Array.isArray(obj))
+            return obj.map(stripUnderscoredProperties)
+
+        const newObj = Object.create(Object.getPrototypeOf(obj))
+        Object.entries(obj).forEach(([k, v]) => {
+            if (!k.startsWith("_"))
+                newObj[k] = stripUnderscoredProperties(v)
+        })
+        return newObj
+    }
+    return obj
+}
+
+export function serializeGraphObject(obj: any) {
+    return SuperJSON.stringify(stripUnderscoredProperties(obj))
+}
+
+export function deserializeGraphObject(str: string) {
+    return SuperJSON.parse(str)
 }

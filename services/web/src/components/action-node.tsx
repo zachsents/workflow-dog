@@ -11,7 +11,7 @@ import { Card } from "@web/components/ui/card"
 import { getDefinitionPackageName, useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "@web/lib/graph-builder"
 import { useDialogState } from "@web/lib/hooks"
 import { cn, getOffsetRelativeTo, type RequiredExcept } from "@web/lib/utils"
-import React, { useEffect, useMemo, useRef } from "react"
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { useValueType, ValueTypeDefinitions, type ValueTypeUsage } from "workflow-types/react"
 import { z } from "zod"
@@ -509,6 +509,10 @@ function Handle({
 
     useResizeObserver(parentRef, recalculateChildPosition)
     useResizeObserver(nodeElement!, recalculateChildPosition)
+
+    useLayoutEffect(() => {
+        recalculateChildPosition()
+    }, [nodeElement])
 
     const valueTypeDef = valueType && ValueTypeDefinitions[valueType.typeDefinitionId]
 

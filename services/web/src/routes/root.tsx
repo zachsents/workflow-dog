@@ -10,6 +10,7 @@ export default function Root() {
         </Providers>
         <Toaster toastOptions={{
             descriptionClassName: "text-muted-foreground",
+            duration: 3000,
         }} />
         <ParamToaster />
     </>)

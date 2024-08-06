@@ -18,13 +18,13 @@ import { AnimatePresence, motion, motionValue, type MotionValue, type PanHandler
 import { produce } from "immer"
 import React, { forwardRef, useContext, useEffect, useMemo, useRef } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
+import { toast } from "sonner"
 import SuperJSON from "superjson"
 import ClientNodeDefinitions from "workflow-packages/client-nodes"
 import type { ClientNodeDefinition } from "workflow-packages/helpers/react"
 import { createStore, useStore } from "zustand"
 import { useShallow } from "zustand/react/shallow"
 import { GraphBuilderContext, NodeContext } from "./graph-builder-ctx"
-import { toast } from "sonner"
 
 
 /**
@@ -445,10 +445,7 @@ function ContextMenu() {
         <AnimatePresence>
             {!!position && <Popover
                 key={popoverKey}
-                open onOpenChange={isOpen => {
-                    if (!isOpen)
-                        closePopover()
-                }}
+                open onOpenChange={isOpen => void (!isOpen && closePopover())}
             >
                 <PopoverAnchor asChild>
                     <motion.div
@@ -456,10 +453,13 @@ function ContextMenu() {
                         style={{ top: position.y, left: position.x }}
                         exit={{ opacity: 0, transition: exitTransition }}
                     >
-                        <div className="w-3 h-3 bg-primary rounded-full -translate-x-1/2 -translate-y-1/2" />
+                        <div className="w-3 h-3 bg-primary rounded-full absolute hack-center" />
                     </motion.div>
                 </PopoverAnchor>
-                <PopoverContent className="w-[300px] p-0" asChild>
+                <PopoverContent
+                    side="bottom" sideOffset={22} asChild
+                    className="w-[300px] p-0"
+                >
                     <motion.div exit={{ opacity: 0, scale: 0.95, transition: exitTransition }}>
                         <Command shouldFilter={false}>
                             <CommandInput
@@ -1049,12 +1049,16 @@ export class GraphBuilder {
                 if (e.s === id || e.t === id)
                     s.edges.delete(e.id)
             })
+            s.selection.delete(id)
         })
     }
 
     deleteNodes(ids: string[]) {
         this.mutateState(s => {
-            ids.forEach(id => s.nodes.delete(id))
+            ids.forEach(id => {
+                s.nodes.delete(id)
+                s.selection.delete(id)
+            })
             s.edges.forEach(e => {
                 if (ids.includes(e.s) || ids.includes(e.t))
                     s.edges.delete(e.id)

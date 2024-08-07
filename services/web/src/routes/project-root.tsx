@@ -1,180 +1,145 @@
-import { IconBook, IconChartLine, IconExternalLink, IconHammer, IconPlus, IconPuzzle, IconReport, IconUsers, IconVectorBezier2 } from "@tabler/icons-react"
-import DashboardHeader from "@web/components/dashboard-header"
-import SimpleTooltip from "@web/components/simple-tooltip"
+import { IconBook, IconChartLine, IconExternalLink, IconMoneybag, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconUsers } from "@tabler/icons-react"
+import AccountMenu from "@web/components/account-menu"
+import { BrandLink, FeedbackButton } from "@web/components/dashboard-header"
+import ProjectSelector from "@web/components/project-selector"
+import SpinningLoader from "@web/components/spinning-loader"
 import TI from "@web/components/tabler-icon"
-import { Separator } from "@web/components/ui/separator"
+import { Button } from "@web/components/ui/button"
+import { useCurrentProjectId } from "@web/lib/hooks"
+import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
-import { useEffect } from "react"
-import { Link, Outlet, useLocation, useParams } from "react-router-dom"
+import { forwardRef, useEffect } from "react"
+import { NavLink, Outlet } from "react-router-dom"
 
 
 export default function ProjectRoot() {
-    const { projectId } = useParams() as { projectId: string }
-
-    const relativeUrl = (path: string = "") => `/projects/${projectId}${path}`
+    const projectId = useCurrentProjectId()
 
     useEffect(() => {
-
-
         localStorage.setItem("currentProjectId", projectId)
     }, [projectId])
 
+    const { isLoading, isSuccess } = trpc.projects.byId.useQuery({ id: projectId })
+
     return (
-        <div className="grid h-screen place-items-stretch bg-gray-100 p-2 gap-2" style={{
+        <div className="grid h-screen place-items-stretch" style={{
             gridTemplateRows: "auto 1fr",
-            gridTemplateColumns: "260px 1fr",
+            gridTemplateColumns: "auto 1fr",
         }}>
-            <Link
-                to="/"
-                className="group justify-self-start flex-center gap-2 font-bold hover:text-primary transition-colors px-2"
-            >
-                <span>WorkflowDog</span>
-            </Link>
-            <DashboardHeader />
-
-            <div className="flex-v items-stretch gap-2 pt-6">
-                <div className="flex-v items-stretch gap-1">
-                    <NavItemButton big href={relativeUrl()}>
-                        <TI><IconReport /></TI>
-                        Project Overview
-                    </NavItemButton>
+            <div className="row-span-full border-r grid grid-flow-row auto-rows-auto gap-10" style={{
+                gridTemplateRows: "auto 1fr",
+            }}>
+                <div className="flex-center p-4">
+                    <BrandLink withTitle href="/projects" className="text-lg" />
                 </div>
 
-                <Separator className="bg-gray-300 mt-4" />
+                <nav className="flex flex-col items-stretch w-[240px]">
+                    <NavGroup>
+                        <NavButton to="" icon={IconReport}>
+                            Project Overview
+                        </NavButton>
+                    </NavGroup>
+                    <NavGroup title="Build">
+                        <NavButton to="workflows" icon={IconRouteSquare2}>
+                            Workflows
+                        </NavButton>
+                        <NavButton to="integrations" icon={IconPuzzle}>
+                            Integrations
+                        </NavButton>
+                    </NavGroup>
+                    <NavGroup title="Learn">
+                        <NavButton to="https://learn.workflow.dog" icon={IconBook} external>
+                            Getting Started
+                        </NavButton>
+                        <NavButton to="https://learn.workflow.dog" icon={IconScript} external>
+                            Docs
+                        </NavButton>
+                    </NavGroup>
+                    <NavGroup title="Settings">
+                        <NavButton to="team" icon={IconUsers}>
+                            Team
+                        </NavButton>
+                        <NavButton to="usage" icon={IconChartLine}>
+                            Usage
+                        </NavButton>
+                        <NavButton to="billing" icon={IconMoneybag}>
+                            Billing
+                        </NavButton>
+                    </NavGroup>
+                </nav>
 
-                <div className="flex-v items-stretch gap-1">
-                    <NavSectionHeader
-                        icon={<TI><IconVectorBezier2 /></TI>}
-                        href="https://learn.workflow.dog/essentials/workflows"
-                        learnAbout="Workflows"
-                    >
-                        Workflows
-                    </NavSectionHeader>
-
-                    {/* <WorkflowsList projectId={projectId} /> */}
-                </div>
-
-                <Separator className="bg-gray-300 mt-4" />
-
-                <div className="flex-v items-stretch gap-1">
-                    <NavSectionHeader
-                        icon={<TI><IconHammer /></TI>}
-                        href="https://learn.workflow.dog/essentials/custom-actions"
-                        learnAbout="Custom Actions"
-                    >
-                        Custom Actions
-                    </NavSectionHeader>
-                    <p className="text-xs text-muted-foreground text-center">
-                        Custom Actions are a way to reuse common tasks in your workflows. Coming soon!
-                    </p>
-                </div>
-
-                <Separator className="bg-gray-300 mt-4" />
-
-                <div className="flex-v items-stretch gap-1 mt-4">
-                    <NavItemButton
-                        big
-                        href={relativeUrl("/integrations")}
-                        tooltip="Connect your project to external services"
-                    >
-                        <TI><IconPuzzle /></TI>
-                        Connected Accounts
-                    </NavItemButton>
-                    <NavItemButton
-                        big
-                        href={relativeUrl("/team")}
-                        tooltip="Invite your team members to collaborate"
-                    >
-                        <TI><IconUsers /></TI>
-                        Team
-                    </NavItemButton>
-                    <NavItemButton
-                        big
-                        href={relativeUrl("/usage")}
-                        tooltip="See your project's usage and upgrade your plan"
-                    >
-                        <TI><IconChartLine /></TI>
-                        Usage & Billing
-                    </NavItemButton>
-                </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-8 border">
-                <Outlet />
-            </div>
-        </div>
-    )
-}
-
-
-function NavSectionHeader({ children, icon, href, learnAbout }: {
-    children: any,
-    icon: React.ReactNode,
-    href: string,
-    learnAbout: string
-}) {
-    const btnClasses = "aspect-square p-2 hover:bg-gray-400/50 rounded-sm text-muted-foreground"
-
-    return (
-        <div className="flex justify-between items-center gap-2 text-sm pl-2">
-            {icon}
-            <span className="grow">
-                {children}
-            </span>
-            <div className="flex items-center gap-1">
-                <SimpleTooltip tooltip="Create a new Workflow">
-                    <button className={btnClasses}>
-                        <TI><IconPlus /></TI>
-                    </button>
-                </SimpleTooltip>
-                <SimpleTooltip tooltip={
-                    <div className="flex place-items-center gap-2">
-                        <span>{`Learn about ${learnAbout}`}</span>
+                <p className="text-muted-foreground text-xs text-center p-2 mb-4">
+                    🔥 Made by{" "}
+                    <a href="https://x.com/ZachSents" target="_blank" className="inline-flex items-center gap-1 hover:underline">
+                        Zach Sents
                         <TI><IconExternalLink /></TI>
-                    </div>
-                }>
-                    <a className={btnClasses} href={href} target="_blank">
-                        <TI><IconBook /></TI>
                     </a>
-                </SimpleTooltip>
+                </p>
+            </div>
+
+            <div className="flex items-stretch justify-between p-2 border-b">
+                <ProjectSelector />
+
+                <div className="flex items-center justify-end gap-6">
+                    <FeedbackButton />
+                    <AccountMenu />
+                </div>
+            </div>
+
+            {isLoading
+                ? <div className="flex-center text-xl gap-2">
+                    <SpinningLoader />
+                </div>
+                : isSuccess
+                    ? <div>
+                        <Outlet />
+                    </div>
+                    : <div className="flex-center text-center text-muted-foreground">
+                        <p>There was a problem loading your project.</p>
+                    </div>}
+        </div>
+    )
+}
+
+
+function NavGroup({ children, title, withBorder = false }: { children: any, title?: string, withBorder?: boolean }) {
+    return (
+        <div>
+            {title &&
+                <p className="text-left uppercase font-bold text-xs bg-gray-200 text-muted-foreground px-2 py-1">
+                    {title}
+                </p>}
+            <div className={cn("flex flex-col items-stretch gap-1 p-2", withBorder && "border-b")}>
+                {children}
             </div>
         </div>
     )
 }
 
 
-function NavItemButton({ children, href, big, tooltip }: {
+interface NavButtonProps {
+    icon: React.ComponentType
     children: any
-    href: string
-    big?: boolean
-    tooltip?: string
-}) {
-    const { pathname } = useLocation()
-    const isActive = pathname === href
-
-    const linkComp =
-        <Link
-            to={href}
-            className={cn(
-                "text-sm text-left truncate rounded-sm px-2 py-1 flex items-center gap-2",
-                isActive
-                    ? "text-violet-700 bg-violet-300/50 font-bold"
-                    : "hover:bg-gray-400/30",
-                (big || isActive)
-                    ? "py-2"
-                    : "py-1"
-            )}
-        >
-            {children}
-        </Link>
-
-    return tooltip
-        ? <SimpleTooltip
-            tooltip={<p className="max-w-36">{tooltip}</p>}
-            contentProps={{ side: "right" }}
-            delay={500}
-        >
-            {linkComp}
-        </SimpleTooltip>
-        : linkComp
+    external?: boolean
 }
+
+const NavButton = forwardRef<HTMLAnchorElement, NavButtonProps & React.ComponentProps<typeof NavLink>>(({
+    icon: Icon,
+    external,
+    children,
+    ...props
+}, ref) =>
+    <Button
+        variant="ghost" size="default" asChild
+        className="justify-start text-md items-center gap-2 h-auto py-1.5 [&.active]:bg-primary [&.active]:text-primary-foreground [&.active]:font-bold transition-colors"
+    >
+        <NavLink {...props} target={props.target ?? (external ? "_blank" : undefined)} ref={ref}>
+            <TI className="text-[1.15em] shrink-0"><Icon /></TI>
+            <div className="grow text-wrap">
+                {children}
+            </div>
+            {external && <TI className="shrink-0 text-muted-foreground"><IconExternalLink /></TI>}
+        </NavLink>
+    </Button>
+)
+

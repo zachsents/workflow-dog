@@ -8,68 +8,68 @@ import LoginRoot from "./routes/login-root"
 import ProjectRoot from "./routes/project-root"
 import ProjectsList from "./routes/projects-list"
 import Root from "./routes/root"
+import ProjectOverview from "./routes/project-overview"
 
 export const router = createBrowserRouter([
     {
         path: "/",
         element: <Root />,
         errorElement: <ErrorPage />,
-        children: [
-            {
+        children: [{
+            index: true,
+            loader: async () => {
+                window.location.replace("/")
+                return null
+            },
+        }, {
+            path: "/login",
+            element: <LoginRoot />,
+            children: [{
                 index: true,
-                loader: async () => {
-                    window.location.replace("/")
-                    return null
-                },
+                element: <LoginIndex />,
+            }, {
+                path: "callback",
+                element: <LoginCallback />,
+            },]
+        }, {
+            path: "/app",
+            loader: async () => {
+                if (!(await isLoggedIn()))
+                    return replace("/login")
+                const projectId = window.localStorage.getItem("currentProjectId")
+                if (projectId)
+                    return replace(`/projects/${projectId}`)
+                return replace("/projects")
             },
-            {
-                path: "/login",
-                element: <LoginRoot />,
-                children: [
-                    {
-                        index: true,
-                        element: <LoginIndex />,
-                    },
-                    {
-                        path: "callback",
-                        element: <LoginCallback />,
-                    },
-                ]
-            },
-            {
-                path: "/projects",
-                children: [
-                    {
-                        index: true,
-                        path: "create?",
-                        element: <ProjectsList />,
-                        loader: loginLoader,
-                    },
-                    {
-                        path: ":projectId",
-                        element: <ProjectRoot />,
-                    },
-                ],
-            },
-            {
-                path: "/workflows/:workflowId",
-                element: <WorkflowRoot />,
-                children: [
-                    {
-                        path: "edit",
-                        element: <WorkflowEdit />,
-                    },
-                    {
-                        path: "trigger",
-                        element: <div></div>,
-                    },
-                    {
-                        path: "history",
-                        element: <div></div>,
-                    },
-                ]
-            },
-        ],
+        }, {
+            path: "/projects",
+            children: [{
+                index: true,
+                path: "create?",
+                element: <ProjectsList />,
+                loader: loginLoader,
+            }, {
+                path: ":projectId",
+                element: <ProjectRoot />,
+                children: [{
+                    index: true,
+                    element: <ProjectOverview />,
+                }]
+            },],
+        }, {
+            path: "/workflows/:workflowId",
+            element: <WorkflowRoot />,
+            children: [{
+                path: "edit",
+                element: <WorkflowEdit />,
+            }, {
+                path: "trigger",
+                element: <div></div>,
+            }, {
+                path: "history",
+                element: <div></div>,
+            },]
+        },],
     },
 ])
 

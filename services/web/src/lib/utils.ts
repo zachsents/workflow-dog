@@ -1,11 +1,11 @@
 import { clsx, type ClassValue } from "clsx"
-import _ from "lodash"
 import { twMerge } from "tailwind-merge"
 
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
+
 
 export function getOffsetRelativeTo(child: HTMLElement, parent: HTMLElement = document.body) {
     let x = 0, y = 0
@@ -68,17 +68,4 @@ export function stripUnderscoredProperties(obj: any): any {
     }
 
     return obj
-
-    // if (typeof obj === "object" && obj !== null) {
-    //     if (Array.isArray(obj))
-    //         return obj.map(stripUnderscoredProperties)
-
-    //     const newObj = Object.create(Object.getPrototypeOf(obj))
-    //     Object.entries(obj).forEach(([k, v]) => {
-    //         if (!k.startsWith("_"))
-    //             newObj[k] = stripUnderscoredProperties(v)
-    //     })
-    //     return newObj
-    // }
-    // return obj
 }

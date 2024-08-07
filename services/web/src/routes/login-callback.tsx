@@ -10,7 +10,7 @@ export default function LoginCallback() {
         handleGoogleCallback()
             .then(async user => {
                 console.debug("User signed in:", user.emails[0], user)
-                window.location.replace("/projects")
+                window.location.replace("/app")
             })
             .catch(err => {
                 console.error(err)

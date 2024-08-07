@@ -2,7 +2,8 @@ import { useMotionValue, useMotionValueEvent, type MotionValue } from "framer-mo
 import Fuse, { type IFuseOptions } from "fuse.js"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useHotkeys, type Options as HotKeysOptions } from "react-hotkeys-hook"
-import { useSearchParams } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
+import { trpc } from "./trpc"
 
 interface UseSearchParamEffectOptions {
     clearAfterEffect?: boolean
@@ -190,4 +191,24 @@ export function useMouseMotionValue() {
     }, [x, y])
 
     return { x, y }
+}
+
+
+/**
+ * Hook for getting the current project ID from the URL.
+ */
+export function useCurrentProjectId() {
+    const { projectId } = useParams<{ projectId: string }>()
+    if (!projectId)
+        throw new Error("No projectId found in params.")
+    return projectId
+}
+
+/**
+ * Hook for getting the current project using the project ID
+ * from the URL.
+ */
+export function useCurrentProject() {
+    const projectId = useCurrentProjectId()
+    return trpc.projects.byId.useQuery({ id: projectId })
 }

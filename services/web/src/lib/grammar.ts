@@ -4,7 +4,7 @@ export function aOrAn(word: string) {
 }
 
 export function plural(word: string, q: number) {
-    return q === 1 ? word : word + "s"
+    return q == 1 ? word : word + "s"
 }
 
 export function singular(word: string) {

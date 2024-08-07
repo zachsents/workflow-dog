@@ -58,6 +58,40 @@ export default {
             return queryResult
         }),
 
+    overview: authenticatedProcedure
+        .input(z.object({ id: z.string().uuid() }))
+        .query(async ({ input, ctx }) => {
+            assert(
+                await userHasProjectPermission(ctx.user.id, "read")
+                    .byProjectId(input.id),
+                forbidden()
+            )
+
+            /*
+             * Postgres returns bigint for count fn, so it gets cast to string
+             * @see https://stackoverflow.com/questions/47843370/postgres-sequelize-raw-query-to-get-count-returns-string-value
+             */
+
+            const [workflowCount, memberCount] = await Promise.all([
+                db.selectFrom("workflows")
+                    .select(({ fn }) => [fn.countAll<string>().as("count")])
+                    .where("project_id", "=", input.id)
+                    .executeTakeFirstOrThrow()
+                    .then(r => parseInt(r.count)),
+
+                db.selectFrom("projects_users")
+                    .select(({ fn }) => [fn.countAll<string>().as("count")])
+                    .where("project_id", "=", input.id)
+                    .executeTakeFirstOrThrow()
+                    .then(r => parseInt(r.count)),
+            ])
+
+            return {
+                workflowCount,
+                memberCount,
+            }
+        }),
+
     create: authenticatedProcedure
         .input(z.object({
             name: z.string().min(1).max(120),

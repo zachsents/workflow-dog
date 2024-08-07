@@ -35,11 +35,10 @@ export default function LoginRoot() {
                 </div>
 
                 <Button
-                    asChild
-                    variant="link"
-                    className="absolute top-2 left-0 text-primary-foreground opacity-75 hover:opacity-100 transition-opacity text-xs"
+                    variant="link" asChild
+                    className="absolute top-2 left-0 text-primary-foreground opacity-75 hover:opacity-100 transition-opacity text-xs gap-2"
                 >
-                    <a href="/" className="flex-center gap-2">
+                    <a href="/">
                         <TI><IconArrowLeft /></TI>
                         Back to landing page
                     </a>

@@ -22,11 +22,8 @@ export default function DashboardHeader({
                 </a>
             </div>
             <div className="flex items-center gap-10">
-                <Button asChild variant="outline" size="sm">
-                    <a
-                        href="/feedback" target="_blank"
-                        className="group flex-center gap-2"
-                    >
+                <Button asChild variant="outline" size="sm" className="group gap-2">
+                    <a href="/feedback" target="_blank">
                         <TI>
                             <IconHeart className="group-hover:scale-125 group-hover:fill-red-500 transition" />
                         </TI>

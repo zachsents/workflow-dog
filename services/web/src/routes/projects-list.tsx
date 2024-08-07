@@ -35,11 +35,8 @@ export default function ProjectsList() {
                     <h1 className="text-2xl font-bold">
                         Select a project
                     </h1>
-                    <Button asChild>
-                        <Link
-                            to="/projects/create" replace preventScrollReset
-                            className="flex-center gap-2"
-                        >
+                    <Button asChild className="gap-2">
+                        <Link to="/projects/create" replace preventScrollReset>
                             <TI><IconPlus /></TI>
                             Create a project
                         </Link>
@@ -199,9 +196,8 @@ function CreateProjectDialog() {
 
                     <DialogFooter>
                         <Button
-                            type="submit"
-                            disabled={showLoading}
-                            className="flex-center gap-2"
+                            type="submit" disabled={showLoading}
+                            className="gap-2"
                         >
                             {showLoading ? <>
                                 <SpinningLoader />

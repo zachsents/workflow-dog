@@ -1,3 +1,6 @@
+import { IconArrowLeft } from "@tabler/icons-react"
+import TI from "@web/components/tabler-icon"
+import { Button } from "@web/components/ui/button"
 import { GBRoot } from "@web/lib/graph-builder"
 import ClientNodeDefinitions from "workflow-packages/client-nodes"
 
@@ -10,7 +13,15 @@ export default function EditTest() {
                 gridTemplateColumns: "auto 1fr auto",
             }}
         >
-            <div className="col-span-full">Header</div>
+            <div className="col-span-full text-white p-1 flex items-center gap-1">
+                <Button
+                    variant="ghost" size="compact"
+                    className="gap-2"
+                >
+                    <TI><IconArrowLeft /></TI>
+                    Back to Workflows
+                </Button>
+            </div>
             <div className="text-center text-white font-medium px-0.5 text-xs" style={{ writingMode: "sideways-lr" }}>
                 Workflow Inputs
             </div>

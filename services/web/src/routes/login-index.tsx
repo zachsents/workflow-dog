@@ -34,7 +34,7 @@ export default function LoginIndex() {
                     || !isSessionLoaded
                 }
                 onClick={() => void signIn.mutate()}
-                className="flex-center gap-2"
+                className="gap-2"
             >
                 <TI>
                     {(signIn.isPending || signIn.isSuccess)

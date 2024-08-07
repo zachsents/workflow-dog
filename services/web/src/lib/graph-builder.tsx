@@ -271,14 +271,14 @@ function MainToolbar() {
                 {hotslot
                     ? <DraggableNodeButton
                         definitionId={hotslot} variant="outline"
-                        className="flex-center gap-2 h-auto shadow-none bg-orange-100 border-orange-300 text-orange-700 text-xs"
+                        className="gap-2 h-auto shadow-none bg-orange-100 border-orange-300 text-orange-700 text-xs"
                     >
                         <TI><IconFlame /></TI>
                         <Kbd>Z</Kbd>
                     </DraggableNodeButton>
                     : <Button
                         variant="outline"
-                        className="flex-center gap-2 h-auto shadow-none bg-orange-100 border-orange-300 text-orange-700 hover:bg-orange-100 hover:text-orange-700"
+                        className="gap-2 h-auto shadow-none bg-orange-100 border-orange-300 text-orange-700 hover:bg-orange-100 hover:text-orange-700"
                     >
                         <p className="text-xs">No action</p>
                         <TI><IconFlame /></TI>
@@ -293,7 +293,7 @@ function MainToolbar() {
                     <DraggableNodeButton
                         key={nodeDefId}
                         definitionId={nodeDefId} variant="outline"
-                        className="flex-center gap-2 h-auto shadow-none text-xs"
+                        className="gap-2 h-auto shadow-none text-xs"
                         hotkey={i < 9 ? `${i + 1}` : undefined}
                     />
                 )}

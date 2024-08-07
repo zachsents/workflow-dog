@@ -90,8 +90,8 @@ export function StandardNode({
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
-                            size="sm" variant="ghost"
-                            className="self-center h-auto py-0.5 rounded-sm flex-center gap-1 text-muted-foreground text-[0.5rem]"
+                            size="compact" variant="ghost"
+                            className="self-center gap-1 text-[0.5rem] text-muted-foreground"
                         >
                             Configure {configItems.length} option{configItems.length > 1 && "s"}
                             <TI><IconChevronDown /></TI>
@@ -213,8 +213,8 @@ function MultiHandle(passedProps: MultiHandleProps) {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
-                            size="sm" variant="ghost"
-                            className="flex-center gap-1 h-[1.75em] px-0 aspect-square text-xs rounded-full"
+                            size="icon" variant="ghost"
+                            className="text-xs rounded-full"
                         >
                             <TI><IconDots /></TI>
                         </Button>
@@ -274,11 +274,11 @@ function MultiHandle(passedProps: MultiHandleProps) {
 
                 {props.allowAdding && multiState.amount < props.max &&
                     <Button
-                        size="sm" variant="ghost"
+                        size="compact" variant="ghost"
                         onClick={() => gbx.mutateState(s => {
                             s.nodes.get(nodeId)!.handleStates[props.name].multi!.amount++
                         })}
-                        className="flex-center gap-1 h-[1.75em] px-2 mx-2 text-xs"
+                        className="gap-1 mx-2 text-xs"
                         onPointerDownCapture={e => e.stopPropagation()}
                     >
                         <span>

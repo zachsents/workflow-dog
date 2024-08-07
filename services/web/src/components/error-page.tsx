@@ -27,7 +27,7 @@ export default function ErrorPage() {
                 {error.message && <p>{error.message}</p>}
             </Card>
             <Button
-                className="flex-center gap-2"
+                className="gap-2"
                 onClick={() => void window.history.back()}
             >
                 <TI>

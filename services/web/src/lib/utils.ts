@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx"
+import _ from "lodash"
 import { twMerge } from "tailwind-merge"
 
 
@@ -19,3 +20,65 @@ export function getOffsetRelativeTo(child: HTMLElement, parent: HTMLElement = do
 
 export type PartialRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
 export type RequiredExcept<T, K extends keyof T> = Required<Omit<T, K>> & Pick<T, K>
+
+
+export function recursivelyReplaceInObject(
+    obj: any,
+    fixConditions: [
+        (v: any, k?: string) => boolean | null | undefined,
+        (v: any) => any
+    ][] = [],
+    key?: string,
+): any {
+    const fix = fixConditions.find(([condition]) => condition(obj, key))
+    if (fix)
+        return recursivelyReplaceInObject(fix[1](obj), fixConditions)
+
+    if (Array.isArray(obj))
+        return obj.map((v, i) => recursivelyReplaceInObject(v, fixConditions, i.toString()))
+            .filter(v => v !== undefined)
+
+    if (typeof obj === "object" && obj !== null && obj.constructor === Object)
+        return Object.fromEntries(
+            Object.entries(obj)
+                .map(([k, v]) => [k, recursivelyReplaceInObject(v, fixConditions, k)])
+                .filter(([, v]) => v !== undefined)
+        )
+
+    return obj
+}
+
+
+export function stripUnderscoredProperties(obj: any): any {
+
+    if (typeof obj === "object" && obj !== null) {
+        if (Array.isArray(obj))
+            return obj.map(stripUnderscoredProperties)
+        if (obj instanceof Map)
+            return new Map(Array.from(obj.entries()).map(([k, v]) => [k, stripUnderscoredProperties(v)]))
+        if (obj instanceof Set)
+            return new Set(Array.from(obj).map(stripUnderscoredProperties))
+
+        if (obj.constructor === Object)
+            return Object.fromEntries(
+                Object.entries(obj)
+                    .filter(([k]) => !k.startsWith("_"))
+                    .map(([k, v]) => [k, stripUnderscoredProperties(v)])
+            )
+    }
+
+    return obj
+
+    // if (typeof obj === "object" && obj !== null) {
+    //     if (Array.isArray(obj))
+    //         return obj.map(stripUnderscoredProperties)
+
+    //     const newObj = Object.create(Object.getPrototypeOf(obj))
+    //     Object.entries(obj).forEach(([k, v]) => {
+    //         if (!k.startsWith("_"))
+    //             newObj[k] = stripUnderscoredProperties(v)
+    //     })
+    //     return newObj
+    // }
+    // return obj
+}

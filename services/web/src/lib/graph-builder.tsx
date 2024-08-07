@@ -1,8 +1,8 @@
 import { Anchor as PopoverAnchor } from "@radix-ui/react-popover"
 import useMergedRef from "@react-hook/merged-ref"
 import useResizeObserver from "@react-hook/resize-observer"
-import { useLocalStorageValue } from "@react-hookz/web"
-import { IconClipboard, IconConfettiOff, IconCopy, IconFlame, IconPin, IconPinnedOff, IconTrash, IconX } from "@tabler/icons-react"
+import { useDebouncedCallback, useLocalStorageValue } from "@react-hookz/web"
+import { IconArrowLeftSquare, IconArrowRightSquare, IconClipboard, IconConfettiOff, IconCopy, IconFlame, IconPin, IconPinnedOff, IconTrash, IconX } from "@tabler/icons-react"
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@ui/command"
 import Kbd from "@web/components/kbd"
 import SearchInput from "@web/components/search-input"
@@ -15,16 +15,18 @@ import { Popover, PopoverContent } from "@web/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import VerticalDivider from "@web/components/vertical-divider"
 import { useBooleanState, useDialogState, useKeyState, useMotionValueState, useSearch } from "@web/lib/hooks"
-import { cn } from "@web/lib/utils"
+import { cn, stripUnderscoredProperties } from "@web/lib/utils"
 import { createRandomId, IdNamespace } from "core/ids"
 import { AnimatePresence, isMotionValue, motion, motionValue, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, type Transition, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion"
 import { produce } from "immer"
+import _ from "lodash"
 import React, { forwardRef, useContext, useEffect, useMemo, useRef } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import { toast } from "sonner"
 import SuperJSON from "superjson"
 import ClientNodeDefinitions from "workflow-packages/client-nodes"
 import type { ClientNodeDefinition } from "workflow-packages/helpers/react"
+import { z } from "zod"
 import { createStore, useStore } from "zustand"
 import { useShallow } from "zustand/react/shallow"
 import { GraphBuilderContext, NodeContext } from "./graph-builder-ctx"
@@ -61,6 +63,11 @@ function GraphRenderer({ children, ...props }: React.ComponentProps<"div">) {
         }, { signal: ac.signal })
         return () => ac.abort()
     }, [])
+
+    useUndoRedoSetup()
+    const { undo, redo } = useUndoRedo()
+    useHotkeys("mod+z", undo, { preventDefault: true })
+    useHotkeys("mod+y", redo, { preventDefault: true })
 
     return (
         <div {...props} className={cn("relative w-full h-full", props.className)}>
@@ -606,12 +613,43 @@ function SelectionToolbar() {
             >
                 <Card className="flex-center p-1 absolute hack-center-x bottom-full mb-5 pointer-events-auto">
                     <SelectionToolbarButton
+                        label="Select Incomers"
+                        action={() => {
+                            gbx.mutateState(s => {
+                                selection.forEach(nid => {
+                                    gbx.state.edges.forEach(edge => {
+                                        if (edge.t === nid) s.selection.add(edge.s)
+                                    })
+                                })
+                            })
+                        }}
+                        icon={IconArrowLeftSquare}
+                        hotkey="shift+ArrowLeft"
+                        shortcut={["\u21e7", "\u2190"]}
+                    />
+                    <SelectionToolbarButton
+                        label="Select Outgoers"
+                        action={() => {
+                            gbx.mutateState(s => {
+                                selection.forEach(nid => {
+                                    gbx.state.edges.forEach(edge => {
+                                        if (edge.s === nid) s.selection.add(edge.t)
+                                    })
+                                })
+                            })
+                        }}
+                        icon={IconArrowRightSquare}
+                        hotkey="shift+ArrowRight"
+                        shortcut={["\u21e7", "\u21e7"]}
+                    />
+                    <VerticalDivider className="mx-1" />
+                    <SelectionToolbarButton
                         label="Disable"
                         action={() => {
 
                         }}
                         icon={IconConfettiOff}
-                        hotkey="ctrl+shift+e"
+                        hotkey="mod+shift+e"
                         shortcut={["\u2318", "\u21e7", "E"]}
                     />
                     <VerticalDivider className="mx-1" />
@@ -619,7 +657,7 @@ function SelectionToolbar() {
                         label="Copy"
                         action={() => gbx.copySelectionToClipboard()}
                         icon={IconClipboard}
-                        hotkey="ctrl+c"
+                        hotkey="mod+c"
                         shortcut={["\u2318", "C"]}
                     />
                     <SelectionToolbarButton
@@ -631,7 +669,7 @@ function SelectionToolbar() {
                             })
                         }}
                         icon={IconCopy}
-                        hotkey="ctrl+d"
+                        hotkey="mod+d"
                         shortcut={["\u2318", "D"]}
                     />
                     <SelectionToolbarButton
@@ -1115,6 +1153,12 @@ export class GraphBuilder {
         currentlyHoveredNodeDefId: null,
 
         contextMenuPosition: null,
+
+        history: {
+            undoStack: [],
+            redoStack: [],
+            current: null,
+        },
     }))
 
     constructor(public options: GraphBuilderOptions) { }
@@ -1330,10 +1374,7 @@ export class GraphBuilder {
                 + Math.max(...nodes.map(n => n.position.y.get() + n._height.get()))) / 2,
         }
 
-        const content = SuperJSON.stringify(stripUnderscoredProperties({
-            nodes, edges, center,
-        } satisfies ClipboardContent))
-        return content
+        return SuperJSON.stringify(stripUnderscoredProperties({ nodes, edges, center } satisfies ClipboardContent))
     }
 
     copySelectionToClipboard() {
@@ -1412,6 +1453,12 @@ export type GraphBuilderStoreState = {
     currentlyHoveredNodeDefId: string | null
 
     contextMenuPosition: { x: number, y: number } | null
+
+    history: {
+        undoStack: string[]
+        redoStack: string[]
+        current: string | null
+    }
 }
 
 /**
@@ -1592,28 +1639,27 @@ function useHotSlot() {
 }
 
 
-function stripUnderscoredProperties(obj: any): any {
-    if (typeof obj === "object" && obj !== null) {
-        if (Array.isArray(obj))
-            return obj.map(stripUnderscoredProperties)
-
-        const newObj = Object.create(Object.getPrototypeOf(obj))
-        Object.entries(obj).forEach(([k, v]) => {
-            if (!k.startsWith("_"))
-                newObj[k] = stripUnderscoredProperties(v)
-        })
-        return newObj
-    }
-    return obj
+function serializeGraph(graph: Pick<GraphBuilderStoreState, "nodes" | "edges">) {
+    // console.log(stripUnderscoredProperties(graph))
+    return SuperJSON.stringify(stripUnderscoredProperties(graph))
 }
 
-export function serializeGraphObject(obj: any) {
-    return SuperJSON.stringify(stripUnderscoredProperties(obj))
+function deserializeGraph(content: string) {
+    const { nodes: parsedNodes, edges, ...rest } = z.object({
+        nodes: z.map(z.string(), z.object({
+            definitionId: z.string(),
+        }).passthrough()),
+        edges: z.map(z.string(), z.object({}).passthrough()),
+    }).passthrough().parse(SuperJSON.parse(content))
+
+    const nodes = new Map(
+        Array.from(parsedNodes.entries())
+            .map(([id, n]) => [id, createNode({ id, ...n })] as const)
+    )
+
+    return { nodes, edges: edges as Map<string, Edge>, ...rest }
 }
 
-export function deserializeGraphObject(str: string) {
-    return SuperJSON.parse(str)
-}
 
 export function shouldBeMotionValue<T>(value: T | MotionValue<T>) {
     return (isMotionValue(value) ? value : motionValue(value)) as MotionValue<T>
@@ -1627,4 +1673,88 @@ export type AllowPrimitivesForMotionValues<T extends { [key: string]: any }> = {
     : T[K] extends { [key: string]: any }
     ? AllowPrimitivesForMotionValues<T[K]>
     : T[K]
+}
+
+
+function useUndoRedoSetup() {
+    const gbx = useGraphBuilder()
+    const history = gbx.useStore(s => s.history)
+    const serialize = (state: GraphBuilderStoreState) => serializeGraph(_.pick(state, ["nodes", "edges"]))
+
+    useEffect(() => {
+        gbx.mutateState(s => {
+            s.history.current = serialize(s)
+        })
+    }, [])
+
+    const update = () => {
+        const serializedUpdate = serialize(gbx.state)
+        if (!history.current || serializedUpdate === history.current) return
+        gbx.store.setState({
+            history: {
+                undoStack: [...history.undoStack, history.current].slice(-20),
+                redoStack: [],
+                current: serializedUpdate,
+            }
+        })
+    }
+
+    const fastUpdate = useDebouncedCallback(update, [gbx, history], 25)
+    const slowUpdate = useDebouncedCallback(update, [gbx, history], 200)
+
+    useEffect(() => gbx.store.subscribe((state, prev) => {
+        if (state.nodes.size !== prev.nodes.size || state.edges.size !== prev.edges.size)
+            fastUpdate()
+        else
+            slowUpdate()
+    }), [gbx.store, slowUpdate, fastUpdate])
+
+    const positionValues = gbx.useStore(useShallow(s => {
+        return Array.from(s.nodes.values()).flatMap(n => [n.position.x, n.position.y])
+    }))
+
+    useEffect(() => {
+        const unsubs = positionValues.map(v => v.on("change", () => slowUpdate()))
+        return () => unsubs.forEach(u => u())
+    }, [positionValues, slowUpdate])
+}
+
+
+function useUndoRedo() {
+    const gbx = useGraphBuilder()
+    const history = gbx.useStore(s => s.history)
+
+    const serialize = () => serializeGraph(_.pick(gbx.state, ["nodes", "edges"]))
+
+    function undo() {
+        if (history.undoStack.length === 0)
+            return
+
+        const last = history.undoStack.at(-1)!
+        gbx.store.setState({
+            history: {
+                undoStack: history.undoStack.slice(0, -1),
+                redoStack: [...history.redoStack, serialize()],
+                current: last,
+            },
+            ...deserializeGraph(last),
+        })
+    }
+
+    function redo() {
+        if (history.redoStack.length === 0)
+            return
+
+        const last = history.redoStack.at(-1)!
+        gbx.store.setState({
+            history: {
+                undoStack: [...history.undoStack, serialize()],
+                redoStack: history.redoStack.slice(0, -1),
+                current: last,
+            },
+            ...deserializeGraph(last),
+        })
+    }
+
+    return { undo, redo }
 }

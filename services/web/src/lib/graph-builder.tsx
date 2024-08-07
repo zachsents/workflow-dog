@@ -527,6 +527,8 @@ function SelectionBox() {
     const handleBoxChange = () => {
         const viewportRect = gbx.state.viewportElement!.getBoundingClientRect()
         const includedNodeIds = Array.from(gbx.state.nodes.values()).filter(node => {
+            // TO DO: fix bug here. 
+            // node._element is undefined after ctrl+z undoing a deletion then trying to box select
             const nodeRect = node._element!.getBoundingClientRect()
             const nodeCenter = {
                 x: nodeRect.x + nodeRect.width / 2 - viewportRect.x,

@@ -1,13 +1,13 @@
 import { isLoggedIn } from "@web/lib/auth"
 import { createBrowserRouter } from "react-router-dom"
 import ErrorPage from "./components/error-page"
+import { WorkflowEdit, WorkflowRoot } from "./routes/edit-test"
 import LoginCallback from "./routes/login-callback"
 import LoginIndex from "./routes/login-index"
 import LoginRoot from "./routes/login-root"
 import ProjectRoot from "./routes/project-root"
 import ProjectsList from "./routes/projects-list"
 import Root from "./routes/root"
-import EditTest from "./routes/edit-test"
 
 export const router = createBrowserRouter([
     {
@@ -52,9 +52,23 @@ export const router = createBrowserRouter([
                 ],
             },
             {
-                path: "/edit-test",
-                element: <EditTest />,
-            }
+                path: "/workflows/:workflowId",
+                element: <WorkflowRoot />,
+                children: [
+                    {
+                        path: "edit",
+                        element: <WorkflowEdit />,
+                    },
+                    {
+                        path: "trigger",
+                        element: <div></div>,
+                    },
+                    {
+                        path: "history",
+                        element: <div></div>,
+                    },
+                ]
+            },
         ],
     },
 ])

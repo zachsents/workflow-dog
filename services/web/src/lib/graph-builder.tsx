@@ -601,12 +601,14 @@ function SelectionToolbar() {
         height: useTransform(() => (maxY.get() - minY.get()) * zoom.get()),
     }
 
+    const isWaitingOnWidths = useMotionValueState(useTransform(() => widths.some(w => w.get() === 0)))
+
     return (
         <TooltipProvider delayDuration={0}>
             <motion.div
                 className={cn(
                     "absolute top-0 left-0 z-[19] rounded-sm pointer-events-none",
-                    selection.size === 0 && "hidden",
+                    (selection.size === 0 || isWaitingOnWidths) && "hidden",
                     selection.size > 1 && "outline-dashed outline-1 outline-gray-600 outline-offset-8",
                 )}
                 style={boxStyle}
@@ -749,6 +751,8 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
 
     const ref = useMergedRef(resizeRef, (el) => {
         if (!el) return
+        n._width.set(el.offsetWidth)
+        n._height.set(el.offsetHeight)
 
         const updates: Partial<Node> = {}
         if (n._element !== el) updates._element = el

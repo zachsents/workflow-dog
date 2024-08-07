@@ -57,7 +57,7 @@ export default function SearchInput({
             </TI>
             <Button
                 size="icon" variant="ghost"
-                className="absolute right-0 hack-center-y rounded-full hidden peer-focus:flex group-hover:flex"
+                className="absolute right-0 hack-center-y h-full rounded-full hidden peer-focus:flex group-hover:flex"
                 onClick={() => {
                     onValueChange("")
                     ref.current?.focus()

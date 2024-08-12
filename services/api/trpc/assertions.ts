@@ -25,3 +25,7 @@ export function forbidden(message?: string) {
         ...message && { message },
     })
 }
+
+export function assertOrForbidden(condition: boolean, message?: string) {
+    return assert(condition, forbidden(message))
+}

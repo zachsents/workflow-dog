@@ -16,7 +16,7 @@ import { Link, useMatch, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
 
-export default function ProjectsList() {
+function Index() {
 
     useMustBeLoggedIn()
 
@@ -213,3 +213,7 @@ function CreateProjectDialog() {
         </Dialog>
     )
 }
+
+
+const Projects = { Index }
+export default Projects

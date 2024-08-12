@@ -204,11 +204,14 @@ export function useCurrentProjectId() {
     return projectId
 }
 
+
 /**
  * Hook for getting the current project using the project ID
  * from the URL.
  */
 export function useCurrentProject() {
     const projectId = useCurrentProjectId()
-    return trpc.projects.byId.useQuery({ id: projectId })
+    return trpc.projects.byId.useQuery({ projectId }, {
+        throwOnError: true,
+    })
 }

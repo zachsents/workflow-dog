@@ -14,14 +14,16 @@ export default function ErrorPage() {
             <p>
                 Looks like something went wrong.
             </p>
-            <Card className="font-mono text-sm p-4 max-w-sm w-full text-red-700">
+            <Card className="font-mono text-sm p-4 max-w-xl w-full text-red-700">
                 {(error.statusText || error.data) && <>
                     <p className="font-semibold">
                         {error.statusText}
                     </p>
-                    <p>
-                        {error.data}
-                    </p>
+                    {typeof error.data === "string"
+                        ? <p>{error.data}</p>
+                        : <p className="whitespace-pre-wrap text-left">
+                            {JSON.stringify(error.data, null, 2)}
+                        </p>}
                 </>}
 
                 {error.message && <p>{error.message}</p>}

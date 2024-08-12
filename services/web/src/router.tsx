@@ -1,80 +1,44 @@
 import { isLoggedIn } from "@web/lib/auth"
-import { createBrowserRouter } from "react-router-dom"
+import { createBrowserRouter, createRoutesFromElements, Route } from "react-router-dom"
 import ErrorPage from "./components/error-page"
-import { WorkflowEdit, WorkflowRoot } from "./routes/edit-test"
-import LoginCallback from "./routes/login-callback"
-import LoginIndex from "./routes/login-index"
-import LoginRoot from "./routes/login-root"
-import ProjectRoot from "./routes/project-root"
-import ProjectsList from "./routes/projects-list"
+import Login from "./routes/login"
+import Project from "./routes/project"
+import Projects from "./routes/projects"
 import Root from "./routes/root"
-import ProjectOverview from "./routes/project-overview"
-
-export const router = createBrowserRouter([
-    {
-        path: "/",
-        element: <Root />,
-        errorElement: <ErrorPage />,
-        children: [{
-            index: true,
-            loader: async () => {
-                window.location.replace("/")
-                return null
-            },
-        }, {
-            path: "/login",
-            element: <LoginRoot />,
-            children: [{
-                index: true,
-                element: <LoginIndex />,
-            }, {
-                path: "callback",
-                element: <LoginCallback />,
-            },]
-        }, {
-            path: "/app",
-            loader: async () => {
-                if (!(await isLoggedIn()))
-                    return replace("/login")
-                const projectId = window.localStorage.getItem("currentProjectId")
-                if (projectId)
-                    return replace(`/projects/${projectId}`)
-                return replace("/projects")
-            },
-        }, {
-            path: "/projects",
-            children: [{
-                index: true,
-                path: "create?",
-                element: <ProjectsList />,
-                loader: loginLoader,
-            }, {
-                path: ":projectId",
-                element: <ProjectRoot />,
-                children: [{
-                    index: true,
-                    element: <ProjectOverview />,
-                }]
-            },],
-        }, {
-            path: "/workflows/:workflowId",
-            element: <WorkflowRoot />,
-            children: [{
-                path: "edit",
-                element: <WorkflowEdit />,
-            }, {
-                path: "trigger",
-                element: <div></div>,
-            }, {
-                path: "history",
-                element: <div></div>,
-            },]
-        },],
-    },
-])
 
 
-async function loginLoader() {
+export const router = createBrowserRouter(createRoutesFromElements(
+    <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
+        <Route index loader={() => replace("/")} />
+        <Route path="app" loader={appLoader} />
+        <Route path="login" element={<Login.Layout />}>
+            <Route index element={<Login.Index />} />
+            <Route path="callback" element={<Login.Callback />} />
+        </Route>
+        <Route path="projects" loader={loggedInLoader}>
+            <Route index path="create?" element={<Projects.Index />} />
+            <Route path=":projectId" element={<Project.Layout />}>
+                <Route index element={<Project.Index />} />
+                <Route path="delete" element={<Project.Index deleting />} />
+            </Route>
+        </Route>
+    </Route>
+))
+
+
+async function appLoader() {
+    if (!(await isLoggedIn()))
+        return replace("/login")
+
+    const projectId = window.localStorage.getItem("currentProjectId")
+    if (projectId)
+        return replace(`/projects/${projectId}`)
+
+    return replace("/projects")
+}
+
+
+async function loggedInLoader() {
     return await isLoggedIn() ? null : replace("/login")
 }
 

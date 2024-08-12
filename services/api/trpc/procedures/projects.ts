@@ -1,17 +1,19 @@
+import { TRPCError } from "@trpc/server"
+import type { ProjectPermission } from "core/db"
+import { sql } from "kysely"
 import { z } from "zod"
 import { authenticatedProcedure } from ".."
-import { db } from "../../lib/db"
-import { sql } from "kysely"
-import assert from "node:assert"
 import { userHasProjectPermission } from "../../lib/auth-checks"
-import { forbidden } from "../assertions"
-import { TRPCError } from "@trpc/server"
+import { db } from "../../lib/db"
+import { assertOrForbidden } from "../assertions"
+
+
+const PROJECT_NAME_SCHEMA = z.string().min(1).max(120)
 
 
 export default {
     list: authenticatedProcedure
         .query(async ({ ctx }) => {
-
             const queryResult = await db.selectFrom("projects")
                 .fullJoin("projects_users", "projects.id", "project_id")
                 .fullJoin("user_meta", "user_meta.id", "user_id")
@@ -38,18 +40,11 @@ export default {
             return projects
         }),
 
-    byId: authenticatedProcedure
-        .input(z.object({ id: z.string().uuid() }))
-        .query(async ({ input, ctx }) => {
-            assert(
-                await userHasProjectPermission(ctx.user.id, "read")
-                    .byProjectId(input.id),
-                forbidden()
-            )
-
+    byId: projectPermissionProcedure("read")
+        .query(async ({ ctx }) => {
             const queryResult = await db.selectFrom("projects")
                 .selectAll()
-                .where("id", "=", input.id)
+                .where("id", "=", ctx.projectId)
                 .executeTakeFirst()
 
             if (!queryResult)
@@ -58,15 +53,8 @@ export default {
             return queryResult
         }),
 
-    overview: authenticatedProcedure
-        .input(z.object({ id: z.string().uuid() }))
+    overview: projectPermissionProcedure("read")
         .query(async ({ input, ctx }) => {
-            assert(
-                await userHasProjectPermission(ctx.user.id, "read")
-                    .byProjectId(input.id),
-                forbidden()
-            )
-
             /*
              * Postgres returns bigint for count fn, so it gets cast to string
              * @see https://stackoverflow.com/questions/47843370/postgres-sequelize-raw-query-to-get-count-returns-string-value
@@ -75,13 +63,13 @@ export default {
             const [workflowCount, memberCount] = await Promise.all([
                 db.selectFrom("workflows")
                     .select(({ fn }) => [fn.countAll<string>().as("count")])
-                    .where("project_id", "=", input.id)
+                    .where("project_id", "=", ctx.projectId)
                     .executeTakeFirstOrThrow()
                     .then(r => parseInt(r.count)),
 
                 db.selectFrom("projects_users")
                     .select(({ fn }) => [fn.countAll<string>().as("count")])
-                    .where("project_id", "=", input.id)
+                    .where("project_id", "=", ctx.projectId)
                     .executeTakeFirstOrThrow()
                     .then(r => parseInt(r.count)),
             ])
@@ -93,13 +81,11 @@ export default {
         }),
 
     create: authenticatedProcedure
-        .input(z.object({
-            name: z.string().min(1).max(120),
-        }))
+        .input(z.object({ name: PROJECT_NAME_SCHEMA }))
         .mutation(async ({ input, ctx }) => db.transaction().execute(async trx => {
             const newProject = await trx.insertInto("projects")
                 .values({
-                    name: input.name,
+                    name: input.name.trim(),
                     creator: ctx.user.id,
                 })
                 .returning("id")
@@ -114,6 +100,24 @@ export default {
 
             return newProject
         })),
+
+    rename: projectPermissionProcedure("write")
+        .input(z.object({ name: PROJECT_NAME_SCHEMA }))
+        .mutation(async ({ input, ctx }) => {
+            await db.updateTable("projects")
+                .set({ name: input.name.trim() })
+                .where("id", "=", ctx.projectId)
+                .executeTakeFirstOrThrow()
+        }),
+
+    delete: projectPermissionProcedure("write")
+        .mutation(async ({ ctx }) => {
+            await db.deleteFrom("projects")
+                .where("id", "=", ctx.projectId)
+                .executeTakeFirstOrThrow()
+
+            return { success: true, projectId: ctx.projectId }
+        }),
 
     // updateSettings: t.procedure
     //     .input(z.object({
@@ -370,4 +374,21 @@ export default {
     //                 .executeTakeFirstOrThrow()
     //         }),
     // })
+}
+
+
+export function projectPermissionProcedure(permission: ProjectPermission) {
+    return authenticatedProcedure
+        .input(z.object({ projectId: z.string().uuid() }))
+        .use(async ({ ctx, input, next }) => {
+            const hasPermission = await userHasProjectPermission(ctx.user.id, "read").byProjectId(input.projectId)
+            assertOrForbidden(hasPermission)
+            return next({
+                ctx: {
+                    ...ctx,
+                    projectId: input.projectId,
+                    projectPermission: permission,
+                }
+            })
+        })
 }

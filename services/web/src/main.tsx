@@ -1,11 +1,11 @@
+import { isMotionValue, motionValue, MotionValue } from "framer-motion"
+import { enableMapSet } from "immer"
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
 import { RouterProvider } from "react-router-dom"
+import SuperJSON from "superjson"
 import "./index.css"
 import { router } from "./router"
-import { enableMapSet } from "immer"
-import { isMotionValue, motionValue, MotionValue } from "framer-motion"
-import SuperJSON from "superjson"
 
 // Enable Map and Set support in Immer
 enableMapSet()

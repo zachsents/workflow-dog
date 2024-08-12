@@ -24,7 +24,6 @@ export const router = createBrowserRouter(createRoutesFromElements(
                     <Route index element={<Project.Workflows />} />
                     <Route path="create" element={<Project.CreateWorkflow />} />
                 </Route>
-
             </Route>
         </Route>
     </Route>

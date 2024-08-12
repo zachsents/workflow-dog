@@ -35,6 +35,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 import dayjs from "@web/lib/dayjs"
 import RenameWorkflowDialog from "@web/components/rename-workflow-dialog"
+import ConfirmDialog from "@web/components/confirm-dialog"
 
 
 // #region Layout
@@ -527,7 +528,7 @@ function Workflows() {
 
     const resultsByTrigger = useMemo(
         () => groupSearchSetting.value === "byTrigger"
-            ? _.groupBy(search.filtered, wf => wf.triggers[0]?.def_id ?? null)
+            ? _.groupBy(search.filtered, wf => wf.triggers[0]?.def_id ?? "")
             : {},
         [search.filtered, groupSearchSetting.value]
     )
@@ -587,7 +588,7 @@ function Workflows() {
                                             .map(([triggerId, workflows]) =>
                                                 <div key={triggerId} className="grid gap-4">
                                                     <h2 className="text-xl font-bold">
-                                                        {triggerId}
+                                                        {triggerId || "No trigger"}
                                                     </h2>
                                                     <div className="grid">
                                                         {workflows.map(workflow =>
@@ -605,6 +606,7 @@ function Workflows() {
                                             <WorkflowResultCard
                                                 key={workflow.id}
                                                 workflow={workflow}
+                                                withTrigger
                                             />
                                         )}
                                     </div>
@@ -623,9 +625,10 @@ function Workflows() {
 
 interface WorkflowResultCardProps {
     workflow: ApiRouterOutput["workflows"]["list"][number]
+    withTrigger?: boolean
 }
 
-function WorkflowResultCard({ workflow }: WorkflowResultCardProps) {
+function WorkflowResultCard({ workflow, withTrigger }: WorkflowResultCardProps) {
 
     const utils = trpc.useUtils()
 
@@ -642,6 +645,14 @@ function WorkflowResultCard({ workflow }: WorkflowResultCardProps) {
     })
 
     const renameDialog = useDialogState()
+    const deleteDialog = useDialogState()
+
+    const deleteWorkflow = trpc.workflows.delete.useMutation({
+        onSuccess: () => {
+            toast.success("Workflow deleted!")
+            utils.workflows.list.invalidate()
+        },
+    })
 
     return (<>
         <Link
@@ -669,7 +680,15 @@ function WorkflowResultCard({ workflow }: WorkflowResultCardProps) {
                         : <TI className="text-gray-600"><IconPlayerPauseFilled /></TI>}
             </SimpleTooltip>
 
-            <p className="font-medium">{workflow.name}</p>
+            <div>
+                <p className="font-medium">
+                    {workflow.name}
+                </p>
+                {withTrigger &&
+                    <p className="text-muted-foreground text-sm">
+                        {workflow.triggers[0]?.def_id || "No trigger"}
+                    </p>}
+            </div>
 
             <p className="text-muted-foreground text-sm px-2">
                 {workflow.last_edited_at && workflow.last_edited_at.getTime() > 0
@@ -723,7 +742,7 @@ function WorkflowResultCard({ workflow }: WorkflowResultCardProps) {
                         <TI><IconPencil /></TI>
                         Rename Workflow
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600">
+                    <DropdownMenuItem className="text-red-600" onSelect={deleteDialog.open}>
                         <TI><IconTrash /></TI>
                         Delete Workflow
                     </DropdownMenuItem>
@@ -731,6 +750,13 @@ function WorkflowResultCard({ workflow }: WorkflowResultCardProps) {
             </DropdownMenu>
         </Link>
         <RenameWorkflowDialog workflow={workflow} {...renameDialog.dialogProps} />
+        <ConfirmDialog
+            {...deleteDialog.dialogProps}
+            description="This will permanently delete your workflow and all associated runs, triggers, and other data. This action cannot be undone."
+            confirmText="Delete Workflow" confirmingText="Deleting" destructive
+            onConfirm={async () => void await deleteWorkflow.mutateAsync({ workflowId: workflow.id })}
+            isPending={deleteWorkflow.isPending || deleteWorkflow.isSuccess}
+        />
     </>)
 }
 
@@ -768,7 +794,10 @@ function CreateWorkflow() {
     })
 
     return (
-        <ProjectDashboardLayout currentSegment="Create a Workflow">
+        <ProjectDashboardLayout
+            currentSegment="Create a Workflow"
+            preceedingSegments={[{ label: "Workflows", href: `/projects/${projectId}/workflows` }]}
+        >
             <div className="flex flex-col items-stretch gap-8">
                 <div className="col-span-full flex items-center justify-between">
                     <h1 className="text-2xl font-medium">Create a Workflow</h1>

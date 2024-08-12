@@ -74,22 +74,13 @@ export default {
                 .executeTakeFirstOrThrow()
         }),
 
-    // "delete": t.procedure
-    //     .input(z.object({
-    //         workflowId: z.string().uuid(),
-    //     }))
-    //     .mutation(async ({ input, ctx }) => {
-    //         assertAuthenticated(ctx)
-    //         assert(
-    //             await userHasProjectPermission(ctx.userId!, "write")
-    //                 .byWorkflowId(input.workflowId),
-    //             forbidden()
-    //         )
-
-    //         await db.deleteFrom("workflows")
-    //             .where("id", "=", input.workflowId)
-    //             .executeTakeFirstOrThrow()
-    //     }),
+    "delete": projectPermissionByWorkflowProcedure("write")
+        .mutation(async ({ input, ctx }) => {
+            return db.deleteFrom("workflows")
+                .where("id", "=", input.workflowId)
+                .returning("id")
+                .executeTakeFirstOrThrow()
+        }),
 
     create: projectPermissionProcedure("write")
         .input(z.object({

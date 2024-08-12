@@ -21,7 +21,7 @@ export function ProjectDashboardLayout({
     const project = useCurrentProject().data!
 
     return (
-        <div className="p-8">
+        <div className="p-8 max-w-6xl w-full mx-auto">
             <Breadcrumb className="mb-6">
                 <BreadcrumbList>
                     <BreadcrumbItem>

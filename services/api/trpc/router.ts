@@ -2,10 +2,11 @@ import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server"
 import { authenticatedProcedure, t } from "."
 import supertokens from "supertokens-node"
 import projects from "./procedures/projects"
+import workflows from "./procedures/workflows"
 
 export const apiRouter = t.router({
     projects,
-    // workflows,
+    workflows,
     // serviceAccounts,
     auth: {
         user: authenticatedProcedure.query(async ({ ctx }) =>

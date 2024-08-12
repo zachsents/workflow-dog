@@ -1,31 +1,40 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { IconBook, IconChartLine, IconDots, IconExternalLink, IconMoneybag, IconPencil, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconTrash, IconUsers } from "@tabler/icons-react"
+import { useLocalStorageValue } from "@react-hookz/web"
+import { IconArrowRight, IconBook, IconChartLine, IconCheck, IconDots, IconExternalLink, IconMoneybag, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPlus, IconPointFilled, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconTrash, IconUsers } from "@tabler/icons-react"
 import { type ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@ui/chart"
 import AccountMenu from "@web/components/account-menu"
 import { BrandLink, FeedbackButton } from "@web/components/dashboard-header"
 import { ProjectDashboardLayout } from "@web/components/layouts/project-dashboard-layout"
 import ProjectSelector from "@web/components/project-selector"
+import SearchInput from "@web/components/search-input"
+import SimpleTooltip from "@web/components/simple-tooltip"
 import SpinningLoader from "@web/components/spinning-loader"
 import TI from "@web/components/tabler-icon"
 import { Badge } from "@web/components/ui/badge"
 import { Button } from "@web/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@web/components/ui/dialog"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@web/components/ui/dropdown-menu"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from "@web/components/ui/form"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@web/components/ui/dropdown-menu"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@web/components/ui/form"
 import { Input } from "@web/components/ui/input"
 import { Label } from "@web/components/ui/label"
+import { Tabs, TabsList, TabsTrigger } from "@web/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import { plural } from "@web/lib/grammar"
-import { useCurrentProject, useCurrentProjectId, useDialogState } from "@web/lib/hooks"
+import { useCurrentProject, useCurrentProjectId, useDialogState, useSearch } from "@web/lib/hooks"
 import { getPlanData } from "@web/lib/plans"
 import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
-import React, { forwardRef, useEffect, useState } from "react"
+import type { ApiRouterOutput } from "api/trpc/router"
+import { PROJECT_NAME_SCHEMA, WORKFLOW_NAME_SCHEMA } from "core/schemas"
+import _ from "lodash"
+import React, { forwardRef, useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 import { toast } from "sonner"
 import { z } from "zod"
+import dayjs from "@web/lib/dayjs"
+import RenameWorkflowDialog from "@web/components/rename-workflow-dialog"
 
 
 // #region Layout
@@ -52,7 +61,7 @@ function Layout() {
 
                 <nav className="flex flex-col items-stretch w-[240px]">
                     <NavGroup>
-                        <NavButton to="" icon={IconReport}>
+                        <NavButton to="" end icon={IconReport}>
                             Project Overview
                         </NavButton>
                     </NavGroup>
@@ -104,9 +113,7 @@ function Layout() {
             </div>
 
             {isLoading
-                ? <div className="flex-center text-xl gap-2">
-                    <SpinningLoader />
-                </div>
+                ? <SpinningLoader className="text-xl" />
                 : isSuccess
                     ? <div>
                         <Outlet />
@@ -228,28 +235,10 @@ function Index({ deleting }: { deleting?: boolean }) {
                     </DropdownMenu>
                 </div>
 
-                <div className="col-span-full bg-gradient-to-tr from-violet-600 to-pink-700 p-8 rounded-xl text-white flex flex-col gap-2">
-                    <h2 className="text-2xl font-bold">
-                        {hasNoWorkflows ? "Get started with Workflows" : "Create a Workflow"}
-                    </h2>
-                    <p>
-                        Workflows are the core of your project. They are a series of actions composing advanced logic that run in response to a trigger. They are powerful tools that can automate a wide range of tasks.
-                    </p>
-                    <div className="flex justify-between items-center gap-4 mt-4">
-                        <Button asChild variant="secondary" className="flex-center gap-2">
-                            <Link to="workflows/create">
-                                <TI><IconRouteSquare2 /></TI>
-                                Create a Workflow
-                            </Link>
-                        </Button>
-                        <Button asChild variant="link" className="flex-center gap-2 text-white opacity-75 hover:opacity-100">
-                            <a href="https://learn.workflow.dog/workflows" target="_blank">
-                                Learn more about Workflows
-                                <TI><IconExternalLink /></TI>
-                            </a>
-                        </Button>
-                    </div>
-                </div>
+                <GetStartedWithWorkflows
+                    hasNoWorkflows={hasNoWorkflows}
+                    className="col-span-full"
+                />
 
                 <div className="col-span-3 bg-gray-100 border rounded-xl p-8 flex flex-col gap-2">
                     <h3 className="font-medium text-xl">
@@ -370,7 +359,7 @@ function DeleteProjectDialog(props: React.ComponentProps<typeof Dialog>) {
 }
 
 const renameProjectSchema = z.object({
-    projectName: z.string().min(1).max(120),
+    projectName: PROJECT_NAME_SCHEMA,
 })
 
 function RenameProjectDialog(props: React.ComponentProps<typeof Dialog>) {
@@ -408,16 +397,13 @@ function RenameProjectDialog(props: React.ComponentProps<typeof Dialog>) {
                     <DialogTitle>
                         Rename Project
                     </DialogTitle>
-                    {/* <DialogDescription>
-                        This will permanently delete your project and all associated workflows, integrations, and other data. This action cannot be undone.
-                    </DialogDescription> */}
                 </DialogHeader>
                 <Form {...form}>
                     <form
                         className="grid gap-4"
                         onSubmit={form.handleSubmit(values => renameProject.mutateAsync({
                             projectId,
-                            name: values.projectName.trim(),
+                            name: values.projectName,
                         }))}
                     >
                         <FormField
@@ -523,5 +509,368 @@ function RecentActivityChart() {
 // #endregion Index
 
 
-const Project = { Layout, Index }
+// #region Workflows
+function Workflows() {
+
+    const projectId = useCurrentProjectId()
+    const { data: workflows, isPending } = trpc.workflows.list.useQuery({ projectId })
+
+    const search = useSearch(workflows ?? [], {
+        keys: ["name"],
+        threshold: 0.4,
+    })
+
+    const groupSearchSetting = useLocalStorageValue("workflowSearchGroupingSetting", {
+        defaultValue: "byTrigger",
+        initializeWithValue: true,
+    })
+
+    const resultsByTrigger = useMemo(
+        () => groupSearchSetting.value === "byTrigger"
+            ? _.groupBy(search.filtered, wf => wf.triggers[0]?.def_id ?? null)
+            : {},
+        [search.filtered, groupSearchSetting.value]
+    )
+
+    return (
+        <ProjectDashboardLayout currentSegment="Workflows">
+            <div className="flex flex-col items-stretch gap-8">
+                <div className="col-span-full flex items-center justify-between">
+                    <h1 className="text-2xl font-medium">Workflows</h1>
+                    {(workflows && workflows.length > 0) ?
+                        <Button asChild className="gap-2">
+                            <Link to="create">
+                                <TI><IconPlus /></TI>
+                                Create a workflow
+                            </Link>
+                        </Button> : null}
+                </div>
+
+                {isPending
+                    ? <SpinningLoader className="mx-auto my-10" />
+                    : workflows
+                        ? <>
+                            {workflows.length === 0 &&
+                                <GetStartedWithWorkflows hasNoWorkflows />}
+
+                            {(workflows.length > 0 || true) &&
+                                <div className="grid gap-2" style={{
+                                    gridTemplateColumns: "1fr auto",
+                                }}>
+                                    <SearchInput
+                                        value={search.query}
+                                        onValueChange={search.setQuery}
+                                        quantity={workflows.length}
+                                        noun="workflow"
+                                        withHotkey
+                                        className="shadow-none"
+                                    />
+                                    <Tabs
+                                        value={groupSearchSetting.value}
+                                        onValueChange={groupSearchSetting.set}
+                                    >
+                                        <TabsList className="grid grid-flow-col auto-cols-fr">
+                                            <TabsTrigger value="byTrigger">
+                                                By Trigger
+                                            </TabsTrigger>
+                                            <TabsTrigger value="all">
+                                                All
+                                            </TabsTrigger>
+                                        </TabsList>
+                                    </Tabs>
+                                </div>}
+
+                            {search.filtered.length > 0
+                                ? groupSearchSetting.value === "byTrigger"
+                                    ? <div className="grid gap-8">
+                                        {Object.entries(resultsByTrigger)
+                                            .map(([triggerId, workflows]) =>
+                                                <div key={triggerId} className="grid gap-4">
+                                                    <h2 className="text-xl font-bold">
+                                                        {triggerId}
+                                                    </h2>
+                                                    <div className="grid">
+                                                        {workflows.map(workflow =>
+                                                            <WorkflowResultCard
+                                                                key={workflow.id}
+                                                                workflow={workflow}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                    </div>
+                                    : <div className="grid">
+                                        {search.filtered.map(workflow =>
+                                            <WorkflowResultCard
+                                                key={workflow.id}
+                                                workflow={workflow}
+                                            />
+                                        )}
+                                    </div>
+                                : <p className="text-center text-sm text-muted-foreground">
+                                    No workflows found
+                                </p>}
+                        </>
+                        : <p className="text-center py-8 text-sm text-muted-foreground">
+                            There was a problem loading your workflows.
+                        </p>}
+            </div>
+        </ProjectDashboardLayout>
+    )
+}
+// #endregion Workflows
+
+interface WorkflowResultCardProps {
+    workflow: ApiRouterOutput["workflows"]["list"][number]
+}
+
+function WorkflowResultCard({ workflow }: WorkflowResultCardProps) {
+
+    const utils = trpc.useUtils()
+
+    const setEnabledMutation = trpc.workflows.setEnabled.useMutation({
+        onSuccess: ({ is_enabled }) => {
+            toast.success(is_enabled ? "Workflow enabled!" : "Workflow paused!")
+            utils.workflows.list.invalidate()
+            utils.workflows.byId.invalidate({ workflowId: workflow.id })
+        },
+    })
+    const setEnabled = (isEnabled?: boolean) => setEnabledMutation.mutate({
+        workflowId: workflow.id,
+        isEnabled,
+    })
+
+    const renameDialog = useDialogState()
+
+    return (<>
+        <Link
+            to={`/workflows/${workflow.id}`}
+            className="group p-3 grid items-center gap-2 shadow-none border-t border-x last:border-b first:rounded-t-lg last:rounded-b-lg"
+            style={{
+                gridTemplateColumns: "auto 1fr 180px auto auto",
+            }}
+        >
+            <SimpleTooltip
+                tooltip={setEnabledMutation.isPending
+                    ? "Loading..."
+                    : workflow.is_enabled
+                        ? "Live - Ready to run"
+                        : "Paused"}
+                triggerProps={{
+                    asChild: false,
+                    className: "w-[2em] flex-center py-2",
+                }}
+            >
+                {setEnabledMutation.isPending
+                    ? <SpinningLoader />
+                    : workflow.is_enabled
+                        ? <TI className="text-green-600"><IconPointFilled /></TI>
+                        : <TI className="text-gray-600"><IconPlayerPauseFilled /></TI>}
+            </SimpleTooltip>
+
+            <p className="font-medium">{workflow.name}</p>
+
+            <p className="text-muted-foreground text-sm px-2">
+                {workflow.last_edited_at && workflow.last_edited_at.getTime() > 0
+                    ? `Last ran ${dayjs(workflow.last_edited_at).fromNow()}`
+                    : "Never ran"}
+            </p>
+
+            <Button
+                size="compact" variant="secondary"
+                className="gap-1 group-hover:text-primary"
+            >
+                Open Workflow
+                <TI><IconArrowRight /></TI>
+            </Button>
+
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="ghost" size="icon"
+                        className="text-md"
+                        onClick={e => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                        }}
+                    >
+                        <TI><IconDots /></TI>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                    side="bottom" align="end"
+                    className="*:flex *:items-center *:gap-2 w-[240px]"
+                    onClick={e => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                    }}
+                >
+                    {!setEnabledMutation.isPending && (workflow.is_enabled
+                        ? <DropdownMenuItem onSelect={() => setEnabled(false)}>
+                            <TI><IconPlayerPauseFilled /></TI>
+                            Pause Workflow
+                        </DropdownMenuItem>
+                        : <DropdownMenuItem
+                            className="text-green-600"
+                            onSelect={() => setEnabled(true)}
+                        >
+                            <TI><IconPlayerPlayFilled /></TI>
+                            Enable Workflow
+                        </DropdownMenuItem>)}
+                    <DropdownMenuSeparator className="first:hidden" />
+                    <DropdownMenuItem onSelect={renameDialog.open}>
+                        <TI><IconPencil /></TI>
+                        Rename Workflow
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-600">
+                        <TI><IconTrash /></TI>
+                        Delete Workflow
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </Link>
+        <RenameWorkflowDialog workflow={workflow} {...renameDialog.dialogProps} />
+    </>)
+}
+
+
+
+// #region CreateWorkflow
+const createWorkflowSchema = z.object({
+    workflowName: WORKFLOW_NAME_SCHEMA,
+    // trigger: z.string(),
+})
+
+function CreateWorkflow() {
+
+    const projectId = useCurrentProjectId()
+    const utils = trpc.useUtils()
+    const navigate = useNavigate()
+
+    const form = useForm<z.infer<typeof createWorkflowSchema>>({
+        resolver: zodResolver(createWorkflowSchema),
+        defaultValues: {
+            workflowName: "",
+        },
+    })
+
+    const createWorkflow = trpc.workflows.create.useMutation({
+        onSuccess: ({ id: workflowId }) => {
+            toast.success("Workflow created!")
+            navigate(`/workflows/${workflowId}`)
+            utils.workflows.list.invalidate()
+        },
+        onError: (err) => {
+            console.debug(err)
+            toast.error(err.data?.message)
+        },
+    })
+
+    return (
+        <ProjectDashboardLayout currentSegment="Create a Workflow">
+            <div className="flex flex-col items-stretch gap-8">
+                <div className="col-span-full flex items-center justify-between">
+                    <h1 className="text-2xl font-medium">Create a Workflow</h1>
+                </div>
+
+                <Form {...form}>
+                    <form
+                        className="grid gap-4 max-w-lg self-center w-full"
+                        onSubmit={form.handleSubmit(values => createWorkflow.mutateAsync({
+                            projectId,
+                            name: values.workflowName,
+                        }))}
+                    >
+                        <FormField
+                            control={form.control}
+                            name="workflowName"
+                            render={({ field }) =>
+                                <FormItem>
+                                    <FormLabel>Workflow Name</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="text"
+                                            placeholder="Extract shipping information from new emails"
+                                            {...field}
+                                            autoFocus
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            }
+                        />
+
+                        <div className="grid gap-4 " style={{
+                            gridTemplateColumns: "auto 1fr",
+                        }}>
+                            <Button
+                                variant="ghost" type="button"
+                                className="self-end gap-2"
+                                onClick={() => window.history.back()}
+                                disabled={createWorkflow.isPending}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                className="self-end gap-2"
+                                disabled={createWorkflow.isPending}
+                            >
+                                {createWorkflow.isPending ? <>
+                                    <SpinningLoader />
+                                    Creating Workflow
+                                </> : <>
+                                    <TI><IconCheck /></TI>
+                                    Create Workflow
+                                </>}
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            </div>
+        </ProjectDashboardLayout>
+    )
+}
+// #endregion CreateWorkflow
+
+
+const GetStartedWithWorkflows = forwardRef<
+    HTMLDivElement,
+    Omit<React.ComponentPropsWithoutRef<"div">, "children"> & {
+        hasNoWorkflows?: boolean
+    }
+>(({ hasNoWorkflows, ...props }, ref) => {
+    const projectId = useCurrentProjectId()
+    return (
+        <div
+            {...props}
+            ref={ref}
+            className={cn("bg-gradient-to-tr from-violet-600 to-pink-700 p-8 rounded-xl text-white flex flex-col gap-2", props.className)}
+        >
+            <h2 className="text-2xl font-bold">
+                {hasNoWorkflows ? "Get started with Workflows" : "Create a Workflow"}
+            </h2>
+            <p>
+                Workflows are the core of your project. They are a series of actions composing advanced logic that run in response to a trigger. They are powerful tools that can automate a wide range of tasks.
+            </p>
+            <div className="flex justify-between items-center gap-4 mt-4">
+                <Button asChild variant="secondary" className="flex-center gap-2">
+                    <Link to={`/projects/${projectId}/workflows/create`}>
+                        <TI><IconRouteSquare2 /></TI>
+                        Create a Workflow
+                    </Link>
+                </Button>
+                <Button asChild variant="link" className="flex-center gap-2 text-white opacity-75 hover:opacity-100">
+                    <a href="https://learn.workflow.dog/workflows" target="_blank">
+                        Learn more about Workflows
+                        <TI><IconExternalLink /></TI>
+                    </a>
+                </Button>
+            </div>
+        </div>
+    )
+})
+
+const Project = { Layout, Index, Workflows, CreateWorkflow }
 export default Project

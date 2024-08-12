@@ -119,7 +119,7 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("created_at", "timestamptz", (col) => col.notNull().defaultTo(sql`now()`))
         .addColumn("creator", "uuid", (col) => col.references("user_meta.id").onDelete("set null"))
         .addColumn("is_enabled", "boolean", (col) => col.notNull().defaultTo(false))
-        .addColumn("name", "text", (col) => col.defaultTo("Untitled Workflow"))
+        .addColumn("name", "text", (col) => col.notNull().defaultTo("Untitled Workflow"))
         .addColumn("project_id", "uuid", (col) => col.references("projects.id").onDelete("cascade"))
         .addColumn("last_edited_at", "timestamptz")
         .addColumn("last_ran_at", "timestamptz")

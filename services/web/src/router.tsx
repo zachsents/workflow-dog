@@ -20,6 +20,11 @@ export const router = createBrowserRouter(createRoutesFromElements(
             <Route path=":projectId" element={<Project.Layout />}>
                 <Route index element={<Project.Index />} />
                 <Route path="delete" element={<Project.Index deleting />} />
+                <Route path="workflows">
+                    <Route index element={<Project.Workflows />} />
+                    <Route path="create" element={<Project.CreateWorkflow />} />
+                </Route>
+
             </Route>
         </Route>
     </Route>

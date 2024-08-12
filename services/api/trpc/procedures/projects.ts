@@ -1,14 +1,12 @@
 import { TRPCError } from "@trpc/server"
 import type { ProjectPermission } from "core/db"
+import { PROJECT_NAME_SCHEMA } from "core/schemas"
 import { sql } from "kysely"
 import { z } from "zod"
 import { authenticatedProcedure } from ".."
 import { userHasProjectPermission } from "../../lib/auth-checks"
 import { db } from "../../lib/db"
 import { assertOrForbidden } from "../assertions"
-
-
-const PROJECT_NAME_SCHEMA = z.string().min(1).max(120)
 
 
 export default {
@@ -85,7 +83,7 @@ export default {
         .mutation(async ({ input, ctx }) => db.transaction().execute(async trx => {
             const newProject = await trx.insertInto("projects")
                 .values({
-                    name: input.name.trim(),
+                    name: input.name,
                     creator: ctx.user.id,
                 })
                 .returning("id")
@@ -105,7 +103,7 @@ export default {
         .input(z.object({ name: PROJECT_NAME_SCHEMA }))
         .mutation(async ({ input, ctx }) => {
             await db.updateTable("projects")
-                .set({ name: input.name.trim() })
+                .set({ name: input.name })
                 .where("id", "=", ctx.projectId)
                 .executeTakeFirstOrThrow()
         }),
@@ -381,7 +379,8 @@ export function projectPermissionProcedure(permission: ProjectPermission) {
     return authenticatedProcedure
         .input(z.object({ projectId: z.string().uuid() }))
         .use(async ({ ctx, input, next }) => {
-            const hasPermission = await userHasProjectPermission(ctx.user.id, "read").byProjectId(input.projectId)
+            const hasPermission = await userHasProjectPermission(ctx.user.id, permission)
+                .byProjectId(input.projectId)
             assertOrForbidden(hasPermission)
             return next({
                 ctx: {

@@ -146,7 +146,6 @@ body {
     }
 }
 
-
 .bg-dots {
     background-image:
         linear-gradient(to right, transparent 2px, var(--dots-color, white) var(--dot-size, 1px)),

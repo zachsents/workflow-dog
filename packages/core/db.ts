@@ -433,7 +433,7 @@ export interface Workflows {
   is_enabled: Generated<boolean>;
   last_edited_at: Timestamp | null;
   last_ran_at: Timestamp | null;
-  name: Generated<string | null>;
+  name: Generated<string>;
   project_id: string | null;
 }
 

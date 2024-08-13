@@ -1,14 +1,8 @@
 import { IconBorderSides, IconDivide, IconEqual, IconLetterESmall, IconMath1Divide2, IconMathMax, IconMathMin, IconMinus, IconNumber10Small, IconPlus, IconSquareRoot, IconSquareRounded, IconStairsDown, IconStairsUp, IconSuperscript, IconVariableMinus, IconWaveSine, IconWood, IconX } from "@tabler/icons-react"
 import { StandardNode } from "web/src/components/action-node"
+import { RadioToggle, RadioToggleOption } from "web/src/components/radio-toggle"
 import { useValueType } from "workflow-types/react"
 import { clientNodeHelper, prefixDefinitionIds } from "../../helpers/react"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "web/src/components/ui/select"
 
 
 const createDef = clientNodeHelper({ color: "gray" })
@@ -376,16 +370,22 @@ const stdVariadicInput = (name: string, itemDisplayName: string = "Number") =>
         itemValueType={useValueType("number")}
     />
 
+
+type AngleUnit = "radians" | "degrees"
+
 const angleUnitConfig = () =>
-    <StandardNode.Config<"radians" | "degrees"> id="angleUnit" label="Angle Unit" defaultValue="radians">
+    <StandardNode.Config<AngleUnit>
+        id="angleUnit" label="Angle Unit" defaultValue="radians"
+    >
         {({ value, onChange }) =>
-            <Select value={value ?? ""} onValueChange={onChange}>
-                <SelectTrigger className="w-[160px]">
-                    <SelectValue placeholder="Angle Unit" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="radians">Radians</SelectItem>
-                    <SelectItem value="degrees">Degrees</SelectItem>
-                </SelectContent>
-            </Select>}
+            <RadioToggle
+                value={value!} onValueChange={onChange}
+            >
+                <RadioToggleOption value="radians">
+                    Radians
+                </RadioToggleOption>
+                <RadioToggleOption value="degrees">
+                    Degrees
+                </RadioToggleOption>
+            </RadioToggle>}
     </StandardNode.Config>

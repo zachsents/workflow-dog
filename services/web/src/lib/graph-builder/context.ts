@@ -3,7 +3,7 @@
  * Vite HMR.
  */
 import { createContext } from "react"
-import type { GraphBuilder } from "./graph-builder"
+import type { GraphBuilder } from "./core"
 
 export const GraphBuilderContext = createContext<GraphBuilder | null>(null)
 export const NodeContext = createContext<string | null>(null)

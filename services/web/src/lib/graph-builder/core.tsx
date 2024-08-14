@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent } from "@web/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import VerticalDivider from "@web/components/vertical-divider"
-import { useBooleanState, useDialogState, useKeyState, useMotionValueState, useSearch } from "@web/lib/hooks"
+import { useBooleanState, useDialogState, useKeyState, useMotionValueState } from "@web/lib/hooks"
 import { cn, stripUnderscoredProperties } from "@web/lib/utils"
 import { createRandomId, IdNamespace } from "core/ids"
 import { AnimatePresence, isMotionValue, motion, motionValue, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, type Transition, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion"
@@ -24,12 +24,12 @@ import React, { forwardRef, useContext, useEffect, useMemo, useRef } from "react
 import { useHotkeys } from "react-hotkeys-hook"
 import { toast } from "sonner"
 import SuperJSON from "superjson"
-import ClientNodeDefinitions from "workflow-packages/client-nodes"
-import type { ClientNodeDefinition } from "workflow-packages/helpers/react"
+import type { ClientNodeDefinition } from "workflow-packages/types/client"
 import { z } from "zod"
 import { createStore, useStore } from "zustand"
 import { useShallow } from "zustand/react/shallow"
-import { GraphBuilderContext, NodeContext } from "./graph-builder-ctx"
+import { GraphBuilderContext, NodeContext } from "./context"
+import { useNodeDefinitionsSearch } from "./utils"
 
 
 /**
@@ -241,21 +241,12 @@ function Viewport({ children }: { children: React.ReactNode }) {
 // #endregion Viewport
 
 
-const nodeDefinitionsList = Object.entries(ClientNodeDefinitions).map(([id, def]) => ({
-    id,
-    name: def.name,
-    package: getDefinitionPackageName(id),
-}))
-
 // #region MainToolbar
 function MainToolbar() {
 
-    const resultsPopover = useDialogState()
+    const [search, nodeDefinitionsList] = useNodeDefinitionsSearch()
 
-    const search = useSearch(nodeDefinitionsList, {
-        keys: ["name", "package"],
-        threshold: 0.4,
-    })
+    const resultsPopover = useDialogState()
 
     const [pinnedNodes] = usePinnedNodes()
     const [hotslot] = useHotSlot()
@@ -443,10 +434,7 @@ function ContextMenu() {
     const position = gbx.useStore(s => s.contextMenuPosition)
     const popoverKey = useMemo(() => Math.random().toString(16).slice(2), [position])
 
-    const search = useSearch(nodeDefinitionsList, {
-        keys: ["name", "package"],
-        threshold: 0.4,
-    })
+    const [search] = useNodeDefinitionsSearch()
 
     const closePopover = () => gbx.store.setState({ contextMenuPosition: null })
 
@@ -1137,7 +1125,7 @@ export function useGraphBuilder() {
 }
 
 export interface GraphBuilderOptions {
-    resolveNodeDefinition: (nodeDefinitionId: string) => NodeDefinition
+    nodeDefinitions: Record<string, NodeDefinition>
 }
 
 export class GraphBuilder {
@@ -1286,13 +1274,13 @@ export class GraphBuilder {
     }
 
     getNodeDefinition(definitionId: string) {
-        return this.options.resolveNodeDefinition(definitionId)
+        return this.options.nodeDefinitions[definitionId]
     }
 
     getNodeDefinitionForNode(nodeId: string) {
         if (!this.state.nodes.has(nodeId))
             throw new Error(`Node with ID ${nodeId} does not exist.`)
-        return this.options.resolveNodeDefinition(this.state.nodes.get(nodeId)!.definitionId)
+        return this.options.nodeDefinitions[this.state.nodes.get(nodeId)!.definitionId]
     }
 
     canConnectTo(nodeId: string, handleId: string, type: HandleType) {
@@ -1356,7 +1344,7 @@ export class GraphBuilder {
             const p = this.state.pan
             const z = this.state.zoom.get()
             mx.set((e.clientX - viewportRect.x - p.x.get()) / z)
-            my.set((e.clientY - viewportRect.x - p.y.get()) / z)
+            my.set((e.clientY - viewportRect.y - p.y.get()) / z)
             setReady()
         }
         useEffect(() => {
@@ -1611,19 +1599,6 @@ function EdgeLabel({
     )
 }
 
-
-export function handleIndexingId(name: string, index?: number) {
-    return `${name}${index != null ? `.${index}` : ""}`
-}
-
-export function getDefinitionPackageName(definitionId: string) {
-    const segments = definitionId.split("/")
-    return segments.length > 1
-        ? segments[0].toLowerCase()
-            .replaceAll(/[^A-Za-z0-9]+/g, " ")
-            .replaceAll(/(?<!\w)[a-z]/g, c => c.toUpperCase())
-        : undefined
-}
 
 function usePinnedNodes() {
     const pinnedNodes = useLocalStorageValue("graph-builder-pinned-nodes", {

@@ -3,9 +3,11 @@ import { useLocalStorageValue } from "@react-hookz/web"
 import { IconArrowRight, IconBook, IconChartLine, IconCheck, IconDots, IconExternalLink, IconMoneybag, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPlus, IconPointFilled, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconTrash, IconUsers } from "@tabler/icons-react"
 import { type ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@ui/chart"
 import AccountMenu from "@web/components/account-menu"
+import ConfirmDialog from "@web/components/confirm-dialog"
 import { BrandLink, FeedbackButton } from "@web/components/dashboard-header"
 import { ProjectDashboardLayout } from "@web/components/layouts/project-dashboard-layout"
 import ProjectSelector from "@web/components/project-selector"
+import RenameWorkflowDialog from "@web/components/rename-workflow-dialog"
 import SearchInput from "@web/components/search-input"
 import SimpleTooltip from "@web/components/simple-tooltip"
 import SpinningLoader from "@web/components/spinning-loader"
@@ -17,8 +19,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@web/components/ui/form"
 import { Input } from "@web/components/ui/input"
 import { Label } from "@web/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@web/components/ui/radio-group"
 import { Tabs, TabsList, TabsTrigger } from "@web/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
+import dayjs from "@web/lib/dayjs"
 import { plural } from "@web/lib/grammar"
 import { useCurrentProject, useCurrentProjectId, useDialogState, useSearch } from "@web/lib/hooks"
 import { getPlanData } from "@web/lib/plans"
@@ -32,10 +36,10 @@ import { useForm } from "react-hook-form"
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 import { toast } from "sonner"
+import { ClientEventTypes } from "workflow-packages/client"
+import type { ClientEventType } from "workflow-packages/types/client"
 import { z } from "zod"
-import dayjs from "@web/lib/dayjs"
-import RenameWorkflowDialog from "@web/components/rename-workflow-dialog"
-import ConfirmDialog from "@web/components/confirm-dialog"
+// import { ClientEventTypes } from "workflow-packages/client"
 
 
 // #region Layout
@@ -528,7 +532,7 @@ function Workflows() {
 
     const resultsByTrigger = useMemo(
         () => groupSearchSetting.value === "byTrigger"
-            ? _.groupBy(search.filtered, wf => wf.triggers[0]?.def_id ?? "")
+            ? _.groupBy(search.filtered, "trigger_event_type_id")
             : {},
         [search.filtered, groupSearchSetting.value]
     )
@@ -587,8 +591,11 @@ function Workflows() {
                                         {Object.entries(resultsByTrigger)
                                             .map(([triggerId, workflows]) =>
                                                 <div key={triggerId} className="grid gap-4">
-                                                    <h2 className="text-xl font-bold">
-                                                        {triggerId || "No trigger"}
+                                                    <h2 className="text-xl font-bold flex items-center gap-4">
+                                                        <span>{ClientEventTypes[triggerId]?.name ?? "Unknown trigger"}</span>
+                                                        <span className="text-muted-foreground text-sm font-normal">
+                                                            {ClientEventTypes[triggerId]?.whenName ?? null}
+                                                        </span>
                                                     </h2>
                                                     <div className="grid">
                                                         {workflows.map(workflow =>
@@ -630,19 +637,26 @@ interface WorkflowResultCardProps {
 
 function WorkflowResultCard({ workflow, withTrigger }: WorkflowResultCardProps) {
 
+    const workflowId = workflow.id
     const utils = trpc.useUtils()
 
-    const setEnabledMutation = trpc.workflows.setEnabled.useMutation({
-        onSuccess: ({ is_enabled }) => {
-            toast.success(is_enabled ? "Workflow enabled!" : "Workflow paused!")
-            utils.workflows.list.invalidate()
-            utils.workflows.byId.invalidate({ workflowId: workflow.id })
-        },
-    })
-    const setEnabled = (isEnabled?: boolean) => setEnabledMutation.mutate({
-        workflowId: workflow.id,
-        isEnabled,
-    })
+    const setEnabledMutation = trpc.workflows.setEnabled.useMutation()
+
+    const setEnabled = (isEnabled?: boolean) => {
+        const promise = setEnabledMutation.mutateAsync({
+            workflowId,
+            isEnabled,
+        }).then(() => Promise.all([
+            utils.workflows.list.invalidate(),
+            utils.workflows.byId.invalidate({ workflowId }),
+        ]))
+
+        toast.promise(promise, {
+            loading: isEnabled ? "Enabling..." : "Pausing...",
+            success: isEnabled ? "Workflow enabled!" : "Workflow paused!",
+            error: "Something went wrong.",
+        })
+    }
 
     const renameDialog = useDialogState()
     const deleteDialog = useDialogState()
@@ -663,21 +677,17 @@ function WorkflowResultCard({ workflow, withTrigger }: WorkflowResultCardProps) 
             }}
         >
             <SimpleTooltip
-                tooltip={setEnabledMutation.isPending
-                    ? "Loading..."
-                    : workflow.is_enabled
-                        ? "Live - Ready to run"
-                        : "Paused"}
+                tooltip={workflow.is_enabled
+                    ? "Live - Ready to run"
+                    : "Paused"}
                 triggerProps={{
                     asChild: false,
-                    className: "w-[2em] flex-center py-2",
+                    className: cn("w-[2em] flex-center py-2", setEnabledMutation.isPending && "pointer-events-none opacity-50"),
                 }}
             >
-                {setEnabledMutation.isPending
-                    ? <SpinningLoader />
-                    : workflow.is_enabled
-                        ? <TI className="text-green-600"><IconPointFilled /></TI>
-                        : <TI className="text-gray-600"><IconPlayerPauseFilled /></TI>}
+                {workflow.is_enabled
+                    ? <TI className="text-green-600"><IconPointFilled /></TI>
+                    : <TI className="text-gray-600"><IconPlayerPauseFilled /></TI>}
             </SimpleTooltip>
 
             <div>
@@ -686,7 +696,7 @@ function WorkflowResultCard({ workflow, withTrigger }: WorkflowResultCardProps) 
                 </p>
                 {withTrigger &&
                     <p className="text-muted-foreground text-sm">
-                        {workflow.triggers[0]?.def_id || "No trigger"}
+                        {ClientEventTypes[workflow.trigger_event_type_id]?.whenName ?? "Unknown trigger"}
                     </p>}
             </div>
 
@@ -765,8 +775,20 @@ function WorkflowResultCard({ workflow, withTrigger }: WorkflowResultCardProps) 
 // #region CreateWorkflow
 const createWorkflowSchema = z.object({
     workflowName: WORKFLOW_NAME_SCHEMA,
-    // trigger: z.string(),
+    triggerEventTypeId: z.string().min(1, "You must select a trigger."),
 })
+
+const eventTypeSearchList = Object.values(ClientEventTypes)
+    .map(evt => ({
+        ...evt,
+        package: evt.id.split("/")[0],
+    }))
+
+const mostPopularTriggers = [
+    "primitives/callable",
+    "primitives/schedule",
+    "primitives/webhook",
+]
 
 function CreateWorkflow() {
 
@@ -778,6 +800,7 @@ function CreateWorkflow() {
         resolver: zodResolver(createWorkflowSchema),
         defaultValues: {
             workflowName: "",
+            triggerEventTypeId: "",
         },
     })
 
@@ -787,11 +810,23 @@ function CreateWorkflow() {
             navigate(`/workflows/${workflowId}`)
             utils.workflows.list.invalidate()
         },
-        onError: (err) => {
-            console.debug(err)
-            toast.error(err.data?.message)
-        },
     })
+
+    async function handleSubmit({ workflowName, ...values }: z.infer<typeof createWorkflowSchema>) {
+        await createWorkflow.mutateAsync({
+            projectId,
+            name: workflowName,
+            ...values,
+        })
+    }
+
+    const triggerSearch = useSearch(eventTypeSearchList, {
+        keys: [{ name: "name", weight: 2 }, "whenName", "keywords", "package"],
+        threshold: 0.4,
+    })
+
+    const triggerValue = form.watch("triggerEventTypeId")
+    const selectedTrigger = !!triggerValue && ClientEventTypes[triggerValue]
 
     return (
         <ProjectDashboardLayout
@@ -805,18 +840,15 @@ function CreateWorkflow() {
 
                 <Form {...form}>
                     <form
-                        className="grid gap-4 max-w-lg self-center w-full"
-                        onSubmit={form.handleSubmit(values => createWorkflow.mutateAsync({
-                            projectId,
-                            name: values.workflowName,
-                        }))}
+                        className="grid gap-12 max-w-lg self-center w-full"
+                        onSubmit={form.handleSubmit(handleSubmit)}
                     >
                         <FormField
                             control={form.control}
                             name="workflowName"
                             render={({ field }) =>
                                 <FormItem>
-                                    <FormLabel>Workflow Name</FormLabel>
+                                    <FormLabel className="text-md">Workflow Name</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="text"
@@ -826,6 +858,90 @@ function CreateWorkflow() {
                                         />
                                     </FormControl>
                                     <FormMessage />
+                                </FormItem>
+                            }
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="triggerEventTypeId"
+                            render={({ field }) =>
+                                <FormItem className="space-y-0 grid gap-6">
+                                    <div className="grid gap-2">
+                                        <FormLabel className="text-md">Trigger</FormLabel>
+                                        <FormMessage />
+                                    </div>
+
+                                    <div className={cn(
+                                        "relative h-[8rem] flex-center gap-4 px-8 rounded-xl",
+                                        triggerValue
+                                            ? "outline outline-primary"
+                                            : "outline-dashed outline-gray-500 outline-1",
+                                    )}>
+                                        {selectedTrigger
+                                            ? <>
+                                                <div
+                                                    className="shrink-0 flex-center text-white text-2xl p-2 rounded-lg"
+                                                    style={{ backgroundColor: selectedTrigger.color }}
+                                                >
+                                                    <TI><selectedTrigger.icon /></TI>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-medium mb-1">
+                                                        {selectedTrigger.whenName}
+                                                    </p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {selectedTrigger.description}
+                                                    </p>
+                                                </div>
+
+                                                <div className="p-1 bg-primary text-white rounded-full flex-center absolute hack-center-y left-0 translate-x-[calc(-50%-2px)]">
+                                                    <TI><IconCheck /></TI>
+                                                </div>
+                                            </>
+                                            : <p className="text-sm text-muted-foreground text-center py-4">
+                                                Select a trigger
+                                            </p>}
+                                    </div>
+
+                                    <SearchInput
+                                        value={triggerSearch.query}
+                                        onValueChange={triggerSearch.setQuery}
+                                        quantity={eventTypeSearchList.length}
+                                        noun="trigger"
+                                        className="shadow-none"
+                                    />
+
+                                    <FormControl>
+                                        <RadioGroup
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value}
+                                            className="space-y-0 grid gap-4"
+                                        >
+                                            {triggerSearch.query
+                                                ? triggerSearch.filtered.filter(t => t.id !== triggerValue).map(trigger =>
+                                                    <TriggerResultCard key={trigger.id} trigger={trigger} />
+                                                )
+                                                : <div className="grid gap-2">
+                                                    <p className="text-sm font-bold">
+                                                        Commonly used triggers
+                                                    </p>
+                                                    <div className="grid gap-4">
+                                                        {mostPopularTriggers.filter(t => t !== triggerValue).map(triggerId =>
+                                                            <TriggerResultCard
+                                                                key={triggerId}
+                                                                trigger={ClientEventTypes[triggerId]}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                </div>}
+                                        </RadioGroup>
+                                    </FormControl>
+
+                                    {triggerSearch.filtered.length === 0 && !!triggerSearch.query &&
+                                        <p className="text-center text-sm text-muted-foreground py-4">
+                                            No triggers found
+                                        </p>}
                                 </FormItem>
                             }
                         />
@@ -859,6 +975,42 @@ function CreateWorkflow() {
                 </Form>
             </div>
         </ProjectDashboardLayout>
+    )
+}
+
+function TriggerResultCard({ trigger, isSelected }: { trigger: ClientEventType, isSelected?: boolean }) {
+    return (
+        <FormItem className="space-y-0" key={trigger.id}>
+            <FormControl className="hidden">
+                <RadioGroupItem value={trigger.id} />
+            </FormControl>
+            <FormLabel className={cn(
+                "relative flex items-center gap-4 border px-8 py-4 rounded-xl cursor-pointer outline outline-transparent transition-all",
+                isSelected ? "outline-primary" : "hover:bg-gray-50",
+            )}>
+                <div
+                    className="flex-center text-white text-2xl p-2 rounded-lg"
+                    style={{ backgroundColor: trigger.color }}
+                >
+                    <TI><trigger.icon /></TI>
+                </div>
+                <div>
+                    <p className="font-medium mb-1">
+                        {trigger.whenName}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                        {trigger.description}
+                    </p>
+                </div>
+
+                <div className={cn(
+                    "p-1 bg-primary text-white rounded-full flex-center absolute hack-center-y left-0 translate-x-[calc(-50%-2px)] opacity-0 transition-opacity",
+                    isSelected && "opacity-100",
+                )}>
+                    <TI><IconCheck /></TI>
+                </div>
+            </FormLabel>
+        </FormItem>
     )
 }
 // #endregion CreateWorkflow

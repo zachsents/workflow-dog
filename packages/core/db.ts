@@ -329,6 +329,10 @@ export interface AuthUserRoles {
   user_id: string;
 }
 
+export interface EventSources {
+  id: Generated<string>;
+}
+
 export interface ProjectInvitations {
   created_at: Generated<Timestamp>;
   id: Generated<string>;
@@ -370,16 +374,6 @@ export interface ServiceAccounts {
   service_user_id: string | null;
 }
 
-export interface Triggers {
-  config: Generated<Json>;
-  created_at: Generated<Timestamp>;
-  def_id: string;
-  id: Generated<string>;
-  service_account_id: string | null;
-  state: Generated<Json>;
-  workflow_id: string;
-}
-
 export interface UserMeta {
   created_at: Generated<Timestamp>;
   first_name: string | null;
@@ -419,7 +413,6 @@ export interface WorkflowRuns {
   scheduled_for: Timestamp | null;
   started_at: Timestamp | null;
   status: Generated<WorkflowRunStatus>;
-  trigger_id: string | null;
   trigger_payload: Generated<Json>;
   workflow_graph_id: string;
   workflow_id: string;
@@ -435,6 +428,12 @@ export interface Workflows {
   last_ran_at: Timestamp | null;
   name: Generated<string>;
   project_id: string | null;
+  trigger_event_type_id: Generated<string>;
+}
+
+export interface WorkflowsEventSources {
+  event_source_id: string;
+  workflow_id: string;
 }
 
 export interface WorkflowsUsageRecords {
@@ -480,16 +479,17 @@ export interface DB {
   "auth.user_metadata": AuthUserMetadata;
   "auth.user_roles": AuthUserRoles;
   "auth.userid_mapping": AuthUseridMapping;
+  event_sources: EventSources;
   project_invitations: ProjectInvitations;
   projects: Projects;
   projects_service_accounts: ProjectsServiceAccounts;
   projects_users: ProjectsUsers;
   service_accounts: ServiceAccounts;
-  triggers: Triggers;
   user_meta: UserMeta;
   workflow_graphs: WorkflowGraphs;
   workflow_run_node_outputs: WorkflowRunNodeOutputs;
   workflow_runs: WorkflowRuns;
   workflows: Workflows;
+  workflows_event_sources: WorkflowsEventSources;
   workflows_usage_records: WorkflowsUsageRecords;
 }

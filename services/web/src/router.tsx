@@ -5,6 +5,7 @@ import Login from "./routes/login"
 import Project from "./routes/project"
 import Projects from "./routes/projects"
 import Root from "./routes/root"
+import { WorkflowEdit, WorkflowRoot } from "./routes/edit-test"
 
 
 export const router = createBrowserRouter(createRoutesFromElements(
@@ -25,6 +26,9 @@ export const router = createBrowserRouter(createRoutesFromElements(
                     <Route path="create" element={<Project.CreateWorkflow />} />
                 </Route>
             </Route>
+        </Route>
+        <Route path="workflows/:workflowId" element={<WorkflowRoot />} loader={loggedInLoader}>
+            <Route index element={<WorkflowEdit />} />
         </Route>
     </Route>
 ))

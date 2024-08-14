@@ -3,23 +3,23 @@ import { Portal as HoverCardPortal } from "@radix-ui/react-hover-card"
 import useResizeObserver from "@react-hook/resize-observer"
 import { IconBracketsContain, IconChevronDown, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
 import { Button } from "@ui/button"
+import { Card } from "@ui/card"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@ui/dropdown-menu"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from "@ui/form"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@ui/hover-card"
+import { Input } from "@ui/input"
+import { Label } from "@ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@ui/popover"
-import { Card } from "@web/components/ui/card"
-import { getDefinitionPackageName, useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "@web/lib/graph-builder"
+import TI from "@web/components/tabler-icon"
 import { useDialogState } from "@web/lib/hooks"
 import { cn, getOffsetRelativeTo, type RequiredExcept } from "@web/lib/utils"
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { useValueType, ValueTypeDefinitions, type ValueTypeUsage } from "workflow-types/react"
 import { z } from "zod"
-import TI from "./tabler-icon"
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
-
+import { useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "./core"
+import { getDefinitionPackageName } from "./utils"
 
 
 // #region StandardNode
@@ -48,7 +48,6 @@ export function StandardNode({
     const showSelectHoverOutline = gbx.useStore(s => !s.connection && !s.boxSelection)
 
     const packageDisplayName = getDefinitionPackageName(n.definitionId)
-    const isColorHexCode = def.color.startsWith("#")
 
     return (
         <Card className={cn(
@@ -58,11 +57,8 @@ export function StandardNode({
                 : (showSelectHoverOutline && "hover:outline-dashed")
         )}>
             <div
-                className={cn(
-                    "font-bold px-4 py-1 text-center text-white mx-1 rounded-t-lg rounded-b-sm flex justify-center items-center gap-2",
-                    !isColorHexCode && `bg-${def.color}-600`,
-                )}
-                style={isColorHexCode ? { backgroundColor: def.color } : undefined}
+                className="font-bold px-4 py-1 text-center text-white mx-1 rounded-t-lg rounded-b-sm flex justify-center items-center gap-2"
+                style={{ backgroundColor: def.color }}
             >
                 <def.icon />
                 <span>{def.name}</span>
@@ -681,34 +677,3 @@ function NodeContent({
 }: NodeContentProps) {
     return children
 }
-
-
-
-/*
-
-So tailwind loads these colors:
-
-bg-slate-600
-bg-gray-600
-bg-zinc-600
-bg-neutral-600
-bg-stone-600
-bg-red-600
-bg-orange-600
-bg-amber-600
-bg-yellow-600
-bg-lime-600
-bg-green-600
-bg-emerald-600
-bg-teal-600
-bg-cyan-600
-bg-sky-600
-bg-blue-600
-bg-indigo-600
-bg-violet-600
-bg-purple-600
-bg-fuchsia-600
-bg-pink-600
-bg-rose-600
-
-*/

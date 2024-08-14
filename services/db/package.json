@@ -9,6 +9,6 @@
         "pg": "^8.12.0"
     },
     "scripts": {
-        "km": "EXTERNAL_DATABASE_URL=$(bun --env-file ../../.env -e 'console.log(Bun.env.EXTERNAL_DATABASE_URL)') kysely"
+        "km": "DB_URL=$(zenv -d ../../ -e dev get EXTERNAL_DATABASE_URL) kysely"
     }
 }

@@ -1,4 +1,4 @@
-import { IconBraces, IconBracketsContain, IconFile, IconHash, IconPhoto, IconTextSize, IconToggleLeftFilled, type Icon } from "@tabler/icons-react"
+import { IconBraces, IconBracketsContain, IconClock, IconFile, IconHash, IconPhoto, IconTextSize, IconToggleLeftFilled, type Icon } from "@tabler/icons-react"
 
 /* ------------------------------------------------------ */
 /* Definitions                                            */
@@ -50,6 +50,11 @@ export const ValueTypeDefinitions = {
         name: "Image",
         extends: ["file"],
         icon: IconPhoto,
+    }),
+    timestamp: createTypeDef({
+        name: "Timestamp",
+        jsType: "string",
+        icon: IconClock,
     }),
 }
 

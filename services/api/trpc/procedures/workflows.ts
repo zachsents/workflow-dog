@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server"
 import type { ProjectPermission, Triggers, WorkflowGraphs } from "core/db"
-import { PROJECT_NAME_SCHEMA, WORKFLOW_NAME_SCHEMA } from "core/schemas"
+import { WORKFLOW_NAME_SCHEMA } from "core/schemas"
 import { type Selectable, sql } from "kysely"
 import { z } from "zod"
 import { authenticatedProcedure } from ".."
@@ -12,17 +12,12 @@ import { projectPermissionProcedure } from "./projects"
 
 export default {
     list: projectPermissionProcedure("read")
-        .query(async ({ ctx }) =>
-            db.selectFrom("workflows")
-                .leftJoin("triggers as t", "workflow_id", "workflows.id")
-                .selectAll("workflows")
-                .select(
-                    sql<Selectable<Triggers>[]>`coalesce(jsonb_agg(t) filter (where t.id is not null), '[]')`.as("triggers")
-                )
+        .query(async ({ ctx }) => {
+            return db.selectFrom("workflows")
+                .selectAll()
                 .where("project_id", "=", ctx.projectId)
-                .groupBy("workflows.id")
                 .execute()
-        ),
+        }),
 
     byId: projectPermissionByWorkflowProcedure("read")
         .query(async ({ ctx }) => {
@@ -33,6 +28,7 @@ export default {
                     .select(sql<Selectable<WorkflowGraphs>>`row_to_json(wg)`.as("current_graph"))
                     .where("workflows.id", "=", ctx.workflowId)
                     .executeTakeFirst(),
+                // wilo: fixing this // 
                 db.selectFrom("triggers")
                     .selectAll()
                     .where("workflow_id", "=", ctx.workflowId)
@@ -84,7 +80,8 @@ export default {
 
     create: projectPermissionProcedure("write")
         .input(z.object({
-            name: PROJECT_NAME_SCHEMA,
+            name: WORKFLOW_NAME_SCHEMA,
+            triggerEventTypeId: z.string().min(1, "You must select a trigger."),
         }))
         .mutation(async ({ input, ctx }) => {
             return db.transaction().execute(async trx => {
@@ -93,6 +90,7 @@ export default {
                         name: input.name,
                         creator: ctx.user.id,
                         project_id: ctx.projectId,
+                        trigger_event_type_id: input.triggerEventTypeId,
                     })
                     .returning("id")
                     .executeTakeFirstOrThrow()

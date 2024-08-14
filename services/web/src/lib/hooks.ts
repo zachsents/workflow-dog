@@ -215,3 +215,36 @@ export function useCurrentProject() {
         throwOnError: true,
     })
 }
+
+
+/**
+ * Hook for getting the current workflow ID from the URL.
+ */
+export function useCurrentWorkflowId() {
+    const { workflowId } = useParams<{ workflowId: string }>()
+    if (!workflowId)
+        throw new Error("No workflowId found in params.")
+    return workflowId
+}
+
+
+/**
+ * Hook for getting the current workflow using the workflow ID
+ * from the URL.
+ */
+export function useCurrentWorkflow() {
+    const workflowId = useCurrentWorkflowId()
+    return trpc.workflows.byId.useQuery({ workflowId }, {
+        throwOnError: true,
+    })
+}
+
+
+/**
+ * Hook for getting the current project ID from the workflow
+ * referenced by the workflow ID in the URL.
+ */
+export function useCurrentProjectIdFromWorkflow() {
+    const workflow = useCurrentWorkflow().data
+    return workflow?.project_id ?? null
+}

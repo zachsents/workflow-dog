@@ -13,6 +13,7 @@
         "typescript": "^5.0.0",
         "react": "*",
         "@tabler/icons-react": "*",
-        "@react-hook/resize-observer": "*"
+        "@react-hook/resize-observer": "*",
+        "tailwindcss": "*"
     }
 }

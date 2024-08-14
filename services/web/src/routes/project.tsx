@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useLocalStorageValue } from "@react-hookz/web"
-import { IconArrowRight, IconBook, IconChartLine, IconCheck, IconDots, IconExternalLink, IconMoneybag, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPlus, IconPointFilled, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconTrash, IconUsers } from "@tabler/icons-react"
+import { IconArrowRight, IconBook, IconChartLine, IconCheck, IconDots, IconExternalLink, IconListDetails, IconMoneybag, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPlus, IconPointFilled, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconTrash, IconUsers } from "@tabler/icons-react"
 import { type ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@ui/chart"
 import AccountMenu from "@web/components/account-menu"
 import ConfirmDialog from "@web/components/confirm-dialog"
@@ -108,8 +108,17 @@ function Layout() {
                 </p>
             </div>
 
-            <div className="flex items-stretch justify-between p-2 border-b">
-                <ProjectSelector />
+            <div className="flex items-stretch justify-between gap-4 p-2 border-b">
+                <div className="flex items-stretch gap-2 *:shrink-0">
+                    <SimpleTooltip tooltip="All Projects">
+                        <Button variant="ghost" size="icon" asChild className="h-auto text-lg text-muted-foreground">
+                            <Link to="/projects">
+                                <TI><IconListDetails /></TI>
+                            </Link>
+                        </Button>
+                    </SimpleTooltip>
+                    <ProjectSelector />
+                </div>
 
                 <div className="flex items-center justify-end gap-6">
                     <FeedbackButton />

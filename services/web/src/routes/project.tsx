@@ -532,7 +532,7 @@ function Workflows() {
 
     const resultsByTrigger = useMemo(
         () => groupSearchSetting.value === "byTrigger"
-            ? _.groupBy(search.filtered, "trigger_event_type_id")
+            ? _.groupBy(_.sortBy(search.filtered, ["trigger_event_type_id", "name"]), "trigger_event_type_id")
             : {},
         [search.filtered, groupSearchSetting.value]
     )

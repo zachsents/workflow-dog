@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server"
-import type { ProjectPermission, Triggers, WorkflowGraphs } from "core/db"
+import type { ProjectPermission, WorkflowGraphs } from "core/db"
 import { WORKFLOW_NAME_SCHEMA } from "core/schemas"
 import { type Selectable, sql } from "kysely"
 import { z } from "zod"
@@ -16,33 +16,44 @@ export default {
             return db.selectFrom("workflows")
                 .selectAll()
                 .where("project_id", "=", ctx.projectId)
+                .orderBy("workflows.name")
+                .execute()
+        }),
+
+    listCallable: projectPermissionProcedure("read")
+        .input(z.object({
+            excluding: z.array(z.string().uuid()).optional().default([]),
+        }))
+        .query(async ({ ctx, input }) => {
+            return db.selectFrom("workflows")
+                .selectAll()
+                .where("project_id", "=", ctx.projectId)
+                .where("trigger_event_type_id", "=", "primitives/callable")
+                .where("id", "not in", input.excluding)
+                .orderBy("workflows.name")
                 .execute()
         }),
 
     byId: projectPermissionByWorkflowProcedure("read")
-        .query(async ({ ctx }) => {
-            const [workflow, triggers] = await Promise.all([
-                db.selectFrom("workflows")
-                    .leftJoin("workflow_graphs as wg", "current_graph_id", "wg.id")
-                    .selectAll("workflows")
-                    .select(sql<Selectable<WorkflowGraphs>>`row_to_json(wg)`.as("current_graph"))
-                    .where("workflows.id", "=", ctx.workflowId)
-                    .executeTakeFirst(),
-                // wilo: fixing this // 
-                db.selectFrom("triggers")
-                    .selectAll()
-                    .where("workflow_id", "=", ctx.workflowId)
-                    .execute()
-            ])
+        .input(z.object({
+            expandGraph: z.boolean().optional().default(false),
+        }))
+        .query(async ({ ctx, input }) => {
+            let qb = db.selectFrom("workflows")
+                .leftJoin("workflow_graphs as wg", "current_graph_id", "wg.id")
+                .selectAll("workflows")
+                .where("workflows.id", "=", ctx.workflowId)
+
+            if (input.expandGraph)
+                qb = qb.select(sql<Selectable<WorkflowGraphs>>`row_to_json(wg)`.as("current_graph"))
+
+            const workflow = await qb.executeTakeFirst()
 
             if (!workflow)
                 throw new TRPCError({ code: "NOT_FOUND" })
 
-            return { ...workflow, triggers }
+            return workflow
         }),
-
-    // listRunnable: projectPermissionProcedure("read")
-    // .query(async ({ ctx }) => {
 
     setEnabled: projectPermissionByWorkflowProcedure("write")
         .input(z.object({ isEnabled: z.boolean().optional() }))

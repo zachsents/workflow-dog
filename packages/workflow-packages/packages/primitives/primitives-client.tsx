@@ -203,8 +203,8 @@ helper.registerEventType("schedule", {
     whenName: "On a schedule",
     icon: IconClock,
     color: "gray.800",
-    description: "Triggers at a specific time. You can specify a timezone, but the time will be interpreted in UTC.",
-    keywords: ["time", "timezone", "utc", "schedule"],
+    description: "Triggers at a specific time.",
+    keywords: ["time", "date", "timezone", "utc", "schedule"],
     workflowInputs: {
         timestamp: {
             displayName: "Timestamp",

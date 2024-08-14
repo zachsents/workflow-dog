@@ -22,6 +22,7 @@ export default {
                 ])
                 .where("user_id", "=", ctx.user.id)
                 .groupBy("projects.id")
+                .orderBy("projects.created_at", "desc")
                 .execute()
 
             const projects = queryResult.map(row => {

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useHotkeys, type Options as HotKeysOptions } from "react-hotkeys-hook"
 import { useParams, useSearchParams } from "react-router-dom"
 import { trpc } from "./trpc"
+import type { ApiRouterInput } from "api/trpc/router"
 
 interface UseSearchParamEffectOptions {
     clearAfterEffect?: boolean
@@ -232,11 +233,9 @@ export function useCurrentWorkflowId() {
  * Hook for getting the current workflow using the workflow ID
  * from the URL.
  */
-export function useCurrentWorkflow() {
+export function useCurrentWorkflow(opts: Omit<ApiRouterInput["workflows"]["byId"], "workflowId"> = {}) {
     const workflowId = useCurrentWorkflowId()
-    return trpc.workflows.byId.useQuery({ workflowId }, {
-        throwOnError: true,
-    })
+    return trpc.workflows.byId.useQuery({ workflowId, ...opts })
 }
 
 

@@ -38,3 +38,14 @@ export async function promiseChain<T extends Record<string, any>>(input: {
         )
     ) as T
 }
+
+
+/**
+ * Just wrote this for a Twitter conversation, but looks like it 
+ * could be useful. Or maybe just slop. We'll see.
+ */
+export async function tryAsync<T>(promise: Promise<T>): Promise<readonly [T | undefined, Error | undefined]> {
+    return promise
+        .then(r => [r, undefined] as const)
+        .catch((err: Error) => [undefined, err] as const)
+}

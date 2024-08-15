@@ -12,6 +12,7 @@ import { useMustBeLoggedIn } from "@web/lib/auth"
 import { useSearch } from "@web/lib/hooks"
 import { trpc } from "@web/lib/trpc"
 import type { ApiRouterOutput } from "api/trpc/router"
+import { Helmet } from "react-helmet"
 import { Link, useMatch, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
@@ -28,6 +29,9 @@ function Index() {
     })
 
     return (<>
+        <Helmet>
+            <title>Projects - WorkflowDog</title>
+        </Helmet>
         <div className="bg-gray-50 min-h-screen flex-v items-center">
             <DashboardHeader withBrandTitle />
             <div className="w-full max-w-5xl mt-2 mb-10 p-12 flex-v items-stretch gap-4">

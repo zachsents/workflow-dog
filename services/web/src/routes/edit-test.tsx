@@ -10,6 +10,7 @@ import { GBRoot } from "@web/lib/graph-builder/core"
 import { useCurrentWorkflow, useCurrentWorkflowId, useDialogState } from "@web/lib/hooks"
 import { trpc } from "@web/lib/trpc"
 import { AnimatePresence, motion } from "framer-motion"
+import { Helmet } from "react-helmet"
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { ClientNodeDefinitions } from "workflow-packages/client"
@@ -53,6 +54,9 @@ export function WorkflowRoot() {
     }
 
     return <>
+        <Helmet>
+            <title>{workflow?.name ?? "Workflow"} - WorkflowDog</title>
+        </Helmet>
         {!!workflow &&
             <div
                 className="w-screen h-screen bg-gray-700 grid grid-flow-row auto-rows-auto"

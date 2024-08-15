@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useLocalStorageValue } from "@react-hookz/web"
-import { IconArrowRight, IconBook, IconChartLine, IconCheck, IconDots, IconExternalLink, IconListDetails, IconMoneybag, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPlus, IconPointFilled, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconTrash, IconUsers } from "@tabler/icons-react"
+import { IconArrowRight, IconBook, IconBrandXFilled, IconChartLine, IconCheck, IconCopy, IconDots, IconExternalLink, IconListDetails, IconMail, IconMoneybag, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPlus, IconPointFilled, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconTrash, IconUsers } from "@tabler/icons-react"
 import { type ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@ui/chart"
 import AccountMenu from "@web/components/account-menu"
 import ConfirmDialog from "@web/components/confirm-dialog"
@@ -32,6 +32,7 @@ import type { ApiRouterOutput } from "api/trpc/router"
 import { PROJECT_NAME_SCHEMA, WORKFLOW_NAME_SCHEMA } from "core/schemas"
 import _ from "lodash"
 import React, { forwardRef, useEffect, useMemo, useState } from "react"
+import { Helmet } from "react-helmet"
 import { useForm } from "react-hook-form"
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
@@ -50,9 +51,12 @@ function Layout() {
         localStorage.setItem("currentProjectId", projectId)
     }, [projectId])
 
-    const { isLoading, isSuccess } = useCurrentProject()
+    const { data: project, isLoading, isSuccess } = useCurrentProject()
 
-    return (
+    return <>
+        <Helmet>
+            <title>{project?.name ?? "Project"} - WorkflowDog</title>
+        </Helmet>
         <div className="grid h-screen place-items-stretch" style={{
             gridTemplateRows: "auto 1fr",
             gridTemplateColumns: "auto 1fr",
@@ -129,14 +133,14 @@ function Layout() {
             {isLoading
                 ? <SpinningLoader className="text-xl" />
                 : isSuccess
-                    ? <div>
+                    ? <div className="overflow-y-scroll">
                         <Outlet />
                     </div>
                     : <div className="flex-center text-center text-muted-foreground">
                         <p>There was a problem loading your project.</p>
                     </div>}
         </div>
-    )
+    </>
 }
 
 
@@ -197,7 +201,7 @@ function Index({ deleting }: { deleting?: boolean }) {
 
     return (
         <ProjectDashboardLayout currentSegment="Overview">
-            <div className="grid grid-cols-6 gap-8">
+            <div className="grid grid-cols-6 gap-8 pb-24">
                 <div className="col-span-full flex items-center justify-between">
                     <div>
                         <div className="flex items-center gap-4">
@@ -283,6 +287,39 @@ function Index({ deleting }: { deleting?: boolean }) {
                             Manage Team
                         </Link>
                     </Button>
+                </div>
+
+                <div className="col-span-full border rounded-xl p-8 flex items-center gap-8">
+                    <img src="/logo.svg" className="row-span-full h-20 px-4" />
+
+                    <div className="flex-1 min-w-0 grid gap-2">
+                        <h4 className="text-lg font-medium">Thanks for checking out WorkflowDog!</h4>
+                        <p>
+                            It's my goal to create a seriously smooth automation experience, but sometimes things break. If you have issues, please let me know.
+                        </p>
+                        <div className="grid grid-flow-col auto-cols-fr gap-4 mt-4">
+                            <SimpleTooltip tooltip="Copy Email Address" contentProps={{ side: "right" }}>
+                                <Button
+                                    variant="secondary" className="gap-2 text-primary"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText("info@workflow.dog")
+                                        toast.success("Copied to clipboard!")
+                                    }}
+                                >
+                                    <TI><IconMail /></TI>
+                                    info@workflow.dog
+                                    <TI className="text-muted-foreground ml-4"><IconCopy /></TI>
+                                </Button>
+                            </SimpleTooltip>
+                            <Button variant="secondary" className="gap-2" asChild>
+                                <a href="https://x.com/ZachSents" target="_blank">
+                                    <TI><IconBrandXFilled /></TI>
+                                    @ZachSents
+                                    <TI className="text-muted-foreground ml-4"><IconExternalLink /></TI>
+                                </a>
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <DeleteProjectDialog open={deleting} />

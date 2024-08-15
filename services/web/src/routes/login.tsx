@@ -6,6 +6,7 @@ import { getGoogleSignInUrl, handleGoogleCallback, useIsLoggedIn } from "@web/li
 import { useOnceEffect } from "@web/lib/hooks"
 import { useEffect } from "react"
 import { Outlet, useNavigate } from "react-router-dom"
+import { Helmet } from "react-helmet"
 
 
 // #region Layout
@@ -20,7 +21,10 @@ function Layout() {
             navigate("/projects", { replace: true })
     }, [isLoggedIn === true])
 
-    return (
+    return (<>
+        <Helmet>
+            <title>Sign In - WorkflowDog</title>
+        </Helmet>
         <div className="w-screen h-screen grid grid-cols-2 p-4 bg-gray-200 bg-dots">
             <div className="bg-primary rounded-xl p-4 grid place-items-center relative">
                 <img
@@ -51,7 +55,7 @@ function Layout() {
                 <Outlet />
             </div>
         </div>
-    )
+    </>)
 }
 
 

@@ -2,7 +2,7 @@ import { Anchor as PopoverAnchor } from "@radix-ui/react-popover"
 import useMergedRef from "@react-hook/merged-ref"
 import useResizeObserver from "@react-hook/resize-observer"
 import { useDebouncedCallback, useLocalStorageValue } from "@react-hookz/web"
-import { IconArrowLeftSquare, IconArrowRightSquare, IconClipboard, IconConfettiOff, IconCopy, IconFlame, IconPin, IconPinnedOff, IconTrash, IconX } from "@tabler/icons-react"
+import { IconArrowLeftSquare, IconArrowRightSquare, IconClipboard, IconConfettiOff, IconCopy, IconFlame, IconPin, IconPinnedOff, IconScissors, IconTrash, IconX } from "@tabler/icons-react"
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@ui/command"
 import Kbd from "@web/components/kbd"
 import SearchInput from "@web/components/search-input"
@@ -15,21 +15,18 @@ import { Popover, PopoverContent } from "@web/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import VerticalDivider from "@web/components/vertical-divider"
 import { useBooleanState, useDialogState, useKeyState, useMotionValueState } from "@web/lib/hooks"
-import { cn, stripUnderscoredProperties } from "@web/lib/utils"
+import { cn } from "@web/lib/utils"
 import { createRandomId, IdNamespace } from "core/ids"
-import { AnimatePresence, isMotionValue, motion, motionValue, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, type Transition, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion"
+import { AnimatePresence, motion, motionValue, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, type Transition } from "framer-motion"
 import { produce } from "immer"
-import _ from "lodash"
 import React, { forwardRef, useContext, useEffect, useMemo, useRef } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import { toast } from "sonner"
-import SuperJSON from "superjson"
 import type { ClientNodeDefinition } from "workflow-packages/types/client"
-import { z } from "zod"
 import { createStore, useStore } from "zustand"
 import { useShallow } from "zustand/react/shallow"
 import { GraphBuilderContext, NodeContext } from "./context"
-import { useNodeDefinitionsSearch } from "./utils"
+import { deserializeGraph, serializeGraph, shouldBeMotionValue, useNodeDefinitionsSearch, type AllowPrimitivesForMotionValues } from "./utils"
 
 
 /**
@@ -651,6 +648,13 @@ function SelectionToolbar() {
                         icon={IconClipboard}
                         hotkey="mod+c"
                         shortcut={["\u2318", "C"]}
+                    />
+                    <SelectionToolbarButton
+                        label="Cut"
+                        action={() => gbx.copySelectionToClipboard(true)}
+                        icon={IconScissors}
+                        hotkey="mod+x"
+                        shortcut={["\u2318", "X"]}
                     />
                     <SelectionToolbarButton
                         label="Duplicate"
@@ -1368,10 +1372,10 @@ export class GraphBuilder {
                 + Math.max(...nodes.map(n => n.position.y.get() + n._height.get()))) / 2,
         }
 
-        return SuperJSON.stringify(stripUnderscoredProperties({ nodes, edges, center } satisfies ClipboardContent))
+        return serializeGraph({ nodes, edges, center })
     }
 
-    copySelectionToClipboard() {
+    copySelectionToClipboard(cut = false) {
         if (this.state.selection.size === 0)
             return
 
@@ -1379,6 +1383,9 @@ export class GraphBuilder {
         localStorage.setItem("workflow-clipboard", content)
         // console.debug("Copied to clipboard:", content)
         toast.success("Copied to clipboard!")
+
+        if (cut)
+            this.deleteNodes(Array.from(this.state.selection))
     }
 
     pasteFromString(content: string, { position, offset: passedOffset, select }: {
@@ -1386,7 +1393,7 @@ export class GraphBuilder {
         offset?: { x: number, y: number }
         select?: boolean
     } = {}) {
-        const { nodes: nodesData, edges, center } = SuperJSON.parse(content) as ClipboardContent
+        const { nodes: nodesData, edges, center } = deserializeGraph(content) as ReturnType<typeof deserializeGraph> & { center: { x: number, y: number } }
         const offset = position ? {
             x: position.x - center.x,
             y: position.y - center.y,
@@ -1537,12 +1544,6 @@ export type HandleState = {
 export type HandleType = "input" | "output"
 export type ListHandleMode = "multi" | "single"
 
-export type ClipboardContent = {
-    nodes: any[]
-    edges: any[]
-    center: { x: number, y: number }
-}
-
 function useEdgePath(
     sx: MotionValue<number>, sy: MotionValue<number>,
     tx: MotionValue<number>, ty: MotionValue<number>,
@@ -1620,47 +1621,13 @@ function useHotSlot() {
 }
 
 
-function serializeGraph(graph: Pick<GraphBuilderStoreState, "nodes" | "edges">) {
-    // console.log(stripUnderscoredProperties(graph))
-    return SuperJSON.stringify(stripUnderscoredProperties(graph))
-}
-
-function deserializeGraph(content: string) {
-    const { nodes: parsedNodes, edges, ...rest } = z.object({
-        nodes: z.map(z.string(), z.object({
-            definitionId: z.string(),
-        }).passthrough()),
-        edges: z.map(z.string(), z.object({}).passthrough()),
-    }).passthrough().parse(SuperJSON.parse(content))
-
-    const nodes = new Map(
-        Array.from(parsedNodes.entries())
-            .map(([id, n]) => [id, createNode({ id, ...n })] as const)
-    )
-
-    return { nodes, edges: edges as Map<string, Edge>, ...rest }
-}
-
-
-export function shouldBeMotionValue<T>(value: T | MotionValue<T>) {
-    return (isMotionValue(value) ? value : motionValue(value)) as MotionValue<T>
-}
-
-type AllowPrimitiveForMotionValue<T extends MotionValue> = T extends MotionValue<infer R> ? MotionValue<R> | R : T
-
-export type AllowPrimitivesForMotionValues<T extends { [key: string]: any }> = {
-    [K in keyof T]: T[K] extends MotionValue
-    ? AllowPrimitiveForMotionValue<T[K]>
-    : T[K] extends { [key: string]: any }
-    ? AllowPrimitivesForMotionValues<T[K]>
-    : T[K]
-}
-
-
 function useUndoRedoSetup() {
     const gbx = useGraphBuilder()
     const history = gbx.useStore(s => s.history)
-    const serialize = (state: GraphBuilderStoreState) => serializeGraph(_.pick(state, ["nodes", "edges"]))
+    const serialize = (state: GraphBuilderStoreState) => serializeGraph({
+        nodes: Array.from(state.nodes.values()),
+        edges: Array.from(state.edges.values()),
+    })
 
     useEffect(() => {
         gbx.mutateState(s => {
@@ -1705,20 +1672,25 @@ function useUndoRedo() {
     const gbx = useGraphBuilder()
     const history = gbx.useStore(s => s.history)
 
-    const serialize = () => serializeGraph(_.pick(gbx.state, ["nodes", "edges"]))
+    const serialize = () => serializeGraph({
+        nodes: Array.from(gbx.state.nodes.values()),
+        edges: Array.from(gbx.state.edges.values()),
+    })
 
     function undo() {
         if (history.undoStack.length === 0)
             return
 
         const last = history.undoStack.at(-1)!
+        const fromHistory = deserializeGraph(last)
         gbx.store.setState({
             history: {
                 undoStack: history.undoStack.slice(0, -1),
                 redoStack: [...history.redoStack, serialize()],
                 current: last,
             },
-            ...deserializeGraph(last),
+            nodes: new Map(fromHistory.nodes.map(n => [n.id, n])),
+            edges: new Map(fromHistory.edges.map(e => [e.id, e])),
         })
     }
 
@@ -1727,13 +1699,15 @@ function useUndoRedo() {
             return
 
         const last = history.redoStack.at(-1)!
+        const fromHistory = deserializeGraph(last)
         gbx.store.setState({
             history: {
                 undoStack: [...history.undoStack, serialize()],
                 redoStack: history.redoStack.slice(0, -1),
                 current: last,
             },
-            ...deserializeGraph(last),
+            nodes: new Map(fromHistory.nodes.map(n => [n.id, n])),
+            edges: new Map(fromHistory.edges.map(e => [e.id, e])),
         })
     }
 

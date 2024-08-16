@@ -124,7 +124,7 @@ function Layout() {
                     <ProjectSelector />
                 </div>
 
-                <div className="flex items-center justify-end gap-6">
+                <div className="flex items-center justify-end gap-6 pr-6">
                     <FeedbackButton />
                     <AccountMenu />
                 </div>

@@ -20,7 +20,7 @@ const DashboardHeader = forwardRef<HTMLDivElement, DashboardHeaderProps & React.
             className={cn("flex justify-between items-stretch gap-10 px-10 py-4 self-stretch", props.className)}
             ref={ref}
         >
-            <BrandLink href="/" withTitle={withBrandTitle} />
+            <BrandLink href="/" withTitle={withBrandTitle} className="text-lg" />
             <div className="flex-center gap-10">
                 <FeedbackButton />
                 <AccountMenu />

@@ -3,7 +3,6 @@
     "type": "module",
     "devDependencies": {
         "@types/pg": "^8.11.6",
-        "core": "workspace:*",
         "kysely": "^0.27.3",
         "kysely-ctl": "^0.8.7",
         "pg": "^8.12.0"

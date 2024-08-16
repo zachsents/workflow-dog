@@ -1,32 +1,32 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto"
 
 
-const algorithm = "aes-128-gcm"
-const inputEncoding = "utf-8"
-const outputEncoding = "base64url"
+const ALGORITHM = "aes-128-gcm"
+const INPUT_ENCODING = "utf-8"
+const OUTPUT_ENCODING = "base64url"
 
 
 export function encrypt(value: string, key: string) {
-    const cipherKey = Buffer.from(key, inputEncoding)
+    const cipherKey = Buffer.from(key, INPUT_ENCODING)
 
     const iv = randomBytes(16)
 
-    const cipher = createCipheriv(algorithm, cipherKey, iv)
-    const encodedCipherText = cipher.update(value, inputEncoding, outputEncoding)
-        + cipher.final(outputEncoding)
+    const cipher = createCipheriv(ALGORITHM, cipherKey, iv)
+    const encodedCipherText = cipher.update(value, INPUT_ENCODING, OUTPUT_ENCODING)
+        + cipher.final(OUTPUT_ENCODING)
 
-    return iv.toString(outputEncoding) + ":" + encodedCipherText
+    return iv.toString(OUTPUT_ENCODING) + ":" + encodedCipherText
 }
 
 export function decrypt(cipherText: string, key: string) {
-    const cipherKey = Buffer.from(key, inputEncoding)
+    const cipherKey = Buffer.from(key, INPUT_ENCODING)
 
     const [encodedIv, encodedCipherText] = cipherText.split(":")
-    const iv = Buffer.from(encodedIv, outputEncoding)
+    const iv = Buffer.from(encodedIv, OUTPUT_ENCODING)
 
-    const decipher = createDecipheriv(algorithm, cipherKey, iv)
-    const decryptedToken = decipher.update(encodedCipherText, outputEncoding, inputEncoding)
-        + decipher.final(inputEncoding)
+    const decipher = createDecipheriv(ALGORITHM, cipherKey, iv)
+    const decryptedToken = decipher.update(encodedCipherText, OUTPUT_ENCODING, INPUT_ENCODING)
+        + decipher.final(INPUT_ENCODING)
 
     return decryptedToken
 }

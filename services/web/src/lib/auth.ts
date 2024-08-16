@@ -43,6 +43,10 @@ export function useMustBeLoggedIn() {
 }
 
 
+export function useUserId() {
+    return trpc.auth.userId.useQuery()
+}
+
 export function useUser() {
     return trpc.auth.user.useQuery()
 }

@@ -2,7 +2,7 @@ import { useMotionValue, useMotionValueEvent, type MotionValue } from "framer-mo
 import Fuse, { type IFuseOptions } from "fuse.js"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useHotkeys, type Options as HotKeysOptions } from "react-hotkeys-hook"
-import { useParams, useSearchParams } from "react-router-dom"
+import { useParams, useSearchParams, useNavigate } from "react-router-dom"
 import { trpc } from "./trpc"
 import type { ApiRouterInput } from "api/trpc/router"
 
@@ -211,10 +211,33 @@ export function useCurrentProjectId() {
  * from the URL.
  */
 export function useCurrentProject() {
+    const navigate = useNavigate()
+
     const projectId = useCurrentProjectId()
-    return trpc.projects.byId.useQuery({ projectId }, {
-        throwOnError: true,
+    const query = trpc.projects.byId.useQuery({ projectId }, {
+        retry: (failureCount, error) => {
+            if (failureCount >= 2)
+                return false
+            if (["FORBIDDEN", "NOT_FOUND", "BAD_REQUEST"].includes(error.data?.code))
+                return false
+            return true
+        },
+        throwOnError: false,
     })
+
+    useEffect(() => {
+        if (!query.isError)
+            return
+        console.debug(query.error.data?.code)
+
+        const storedProjectId = window.localStorage.getItem("currentProjectId")
+        if (storedProjectId === projectId)
+            window.localStorage.removeItem("currentProjectId")
+
+        navigate("/projects")
+    }, [query.isError])
+
+    return query
 }
 
 

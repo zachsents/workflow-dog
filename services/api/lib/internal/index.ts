@@ -46,11 +46,11 @@ export async function countWorkflowRunsInBillingPeriod(
         billingStart = await getProjectBilling(projectId)
             .then(billing => billing.period.start)
 
-    const { count } = await db.selectFrom("workflows_usage_records")
+    const { count } = await db.selectFrom("workflow_usage_records")
         .select(sql<number | null>`sum(run_count)`.as("count"))
-        .leftJoin("workflows", "workflows_usage_records.workflow_id", "workflows.id")
+        .leftJoin("workflows", "workflow_usage_records.workflow_id", "workflows.id")
         .where("workflows.project_id", "=", projectId)
-        .where("workflows_usage_records.billing_period_id", "=", billingStart!.toISOString())
+        .where("workflow_usage_records.billing_period_id", "=", billingStart!.toISOString())
         .executeTakeFirstOrThrow()
 
     return count
@@ -121,14 +121,14 @@ export async function queueWorkflow(workflowId: string, {
             .executeTakeFirstOrThrow()
 
         const usageQuery = runCount === null
-            ? trx.insertInto("workflows_usage_records")
+            ? trx.insertInto("workflow_usage_records")
                 .values({
                     workflow_id: workflowId,
                     run_count: 1,
                     billing_period_id: billing.period.start.toISOString(),
                 })
                 .execute()
-            : trx.updateTable("workflows_usage_records")
+            : trx.updateTable("workflow_usage_records")
                 .set({
                     run_count: sql`run_count + 1`,
                 })

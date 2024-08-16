@@ -27,7 +27,9 @@ services:
 
   db:
     container_name: db
-    image: postgres
+    image: registry.digitalocean.com/workflow-dog/db
+    build:
+      target: db
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     restart: unless-stopped
@@ -40,6 +42,7 @@ services:
       - PGPORT=${POSTGRES_PORT}
       - POSTGRES_PASSWORD
       - PGPASSWORD=${POSTGRES_PASSWORD}
+      - EXTERNAL_DATABASE_URL # needed for migrations
     volumes:
       - db-data:/var/lib/postgresql/data
 

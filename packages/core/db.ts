@@ -330,7 +330,9 @@ export interface AuthUserRoles {
 }
 
 export interface EventSources {
+  created_at: Generated<Timestamp>;
   id: Generated<string>;
+  state: Generated<Json>;
 }
 
 export interface ProjectInvitations {
@@ -346,13 +348,12 @@ export interface Projects {
   created_at: Generated<Timestamp>;
   creator: string | null;
   id: Generated<string>;
-  is_personal: Generated<boolean>;
   name: Generated<string>;
 }
 
-export interface ProjectsServiceAccounts {
+export interface ProjectsThirdPartyAccounts {
   project_id: string;
-  service_account_id: string;
+  third_party_account_id: string;
 }
 
 export interface ProjectsUsers {
@@ -361,21 +362,19 @@ export interface ProjectsUsers {
   user_id: string;
 }
 
-export interface ServiceAccounts {
+export interface ThirdPartyAccounts {
   created_at: Generated<Timestamp>;
-  creator: string | null;
-  display_name: string | null;
-  encrypted_token: string;
+  display_name: string;
+  encrypted_auth_data: string;
   id: Generated<string>;
-  profile: Json | null;
-  refresh_token: string | null;
-  scopes: string[] | null;
-  service_def_id: string | null;
-  service_user_id: string | null;
+  provider_id: string;
+  provider_user_id: string;
+  scopes: Generated<string[]>;
 }
 
 export interface UserMeta {
   created_at: Generated<Timestamp>;
+  email: string | null;
   first_name: string | null;
   id: Generated<string>;
   last_name: string | null;
@@ -383,51 +382,43 @@ export interface UserMeta {
   picture: string | null;
 }
 
-export interface WorkflowGraphs {
+export interface WorkflowRunOutputs {
   created_at: Generated<Timestamp>;
-  edges: Generated<Json>;
+  handle_id: string | null;
   id: Generated<string>;
-  nodes: Generated<Json>;
-  workflow_id: string | null;
-}
-
-export interface WorkflowRunNodeOutputs {
-  created_at: Generated<Timestamp>;
-  handle_id: string;
-  id: Generated<string>;
-  node_id: string;
-  type_meta_id: string | null;
-  value: Json | null;
+  is_global: Generated<boolean>;
+  node_id: string | null;
+  value: Json;
+  value_type: Json | null;
   workflow_run_id: string;
 }
 
 export interface WorkflowRuns {
   created_at: Generated<Timestamp>;
+  event_payload: Generated<Json>;
   finished_at: Timestamp | null;
-  global_errors: Generated<Json>;
-  global_outputs: Generated<Json>;
+  global_error: Generated<Json>;
   id: Generated<string>;
   node_errors: Generated<Json>;
-  node_outputs: Generated<Json>;
   numeric_id: number | null;
   scheduled_for: Timestamp | null;
+  snapshot_id: string;
   started_at: Timestamp | null;
   status: Generated<WorkflowRunStatus>;
-  trigger_payload: Generated<Json>;
-  workflow_graph_id: string;
   workflow_id: string;
 }
 
 export interface Workflows {
   created_at: Generated<Timestamp>;
   creator: string | null;
-  current_graph_id: string | null;
+  graph: Generated<Json>;
   id: Generated<string>;
   is_enabled: Generated<boolean>;
   last_edited_at: Timestamp | null;
   last_ran_at: Timestamp | null;
   name: Generated<string>;
   project_id: string | null;
+  trigger_config: Generated<Json>;
   trigger_event_type_id: Generated<string>;
 }
 
@@ -436,7 +427,15 @@ export interface WorkflowsEventSources {
   workflow_id: string;
 }
 
-export interface WorkflowsUsageRecords {
+export interface WorkflowSnapshots {
+  created_at: Generated<Timestamp>;
+  graph: Generated<Json>;
+  id: Generated<string>;
+  trigger_event_type_id: Generated<string>;
+  workflow_id: string;
+}
+
+export interface WorkflowUsageRecords {
   billing_period_id: string;
   id: Generated<string>;
   run_count: Generated<number>;
@@ -482,14 +481,14 @@ export interface DB {
   event_sources: EventSources;
   project_invitations: ProjectInvitations;
   projects: Projects;
-  projects_service_accounts: ProjectsServiceAccounts;
+  projects_third_party_accounts: ProjectsThirdPartyAccounts;
   projects_users: ProjectsUsers;
-  service_accounts: ServiceAccounts;
+  third_party_accounts: ThirdPartyAccounts;
   user_meta: UserMeta;
-  workflow_graphs: WorkflowGraphs;
-  workflow_run_node_outputs: WorkflowRunNodeOutputs;
+  workflow_run_outputs: WorkflowRunOutputs;
   workflow_runs: WorkflowRuns;
+  workflow_snapshots: WorkflowSnapshots;
+  workflow_usage_records: WorkflowUsageRecords;
   workflows: Workflows;
   workflows_event_sources: WorkflowsEventSources;
-  workflows_usage_records: WorkflowsUsageRecords;
 }

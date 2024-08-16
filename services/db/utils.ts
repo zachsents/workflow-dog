@@ -1,4 +1,4 @@
-import type { Kysely } from "kysely"
+import { type Kysely } from "kysely"
 
 
 export async function createTypeIfNotExists(db: Kysely<any>, typeName: string, typeEnum: string[]) {

@@ -3,7 +3,9 @@ import Dashboard from "supertokens-node/recipe/dashboard"
 import Session from "supertokens-node/recipe/session"
 import ThirdParty from "supertokens-node/recipe/thirdparty"
 // import EmailPassword from "supertokens-node/recipe/emailpassword"
-import { initUser } from "./internal/users"
+import UserMetadata from "supertokens-node/recipe/usermetadata"
+import { db } from "./db"
+import { resend } from "./resend"
 import { useEnvVar } from "./utils"
 
 
@@ -21,6 +23,9 @@ export function initSupertokens() {
             apiBasePath: "/api/auth",
         },
         recipeList: [
+            UserMetadata.init(),
+            Session.init(),
+            Dashboard.init(),
             ThirdParty.init({
                 signInAndUpFeature: {
                     providers: [{
@@ -29,7 +34,8 @@ export function initSupertokens() {
                             clients: [{
                                 clientId: useEnvVar("AUTH_GOOGLE_CLIENT_ID"),
                                 clientSecret: useEnvVar("AUTH_GOOGLE_CLIENT_SECRET"),
-                            }]
+                                scope: ["profile", "email"],
+                            }],
                         }
                     }],
                 },
@@ -38,35 +44,90 @@ export function initSupertokens() {
                         ...originalImplementation,
                         signInUp: async (input) => {
                             const res = await originalImplementation.signInUp(input)
+                            const hasError = res.status !== "OK"
+                            const isRefresh = input.session !== undefined
 
-                            // some kind of error, skip
-                            if (res.status !== "OK")
+                            if (hasError || isRefresh)
                                 return res
 
-                            // just a refresh
-                            if (input.session !== undefined)
-                                return res
+                            const isNewUser = res.createdNewRecipeUser && res.user.loginMethods.length === 1
+                            const profile = res.rawUserInfoFromProvider.fromUserInfoAPI
+                            const firstName: string | undefined = profile?.given_name ?? profile?.first_name
+                            const lastName: string | undefined = profile?.family_name ?? profile?.last_name
+                            const email: string | undefined = profile?.email ?? res.user.emails[0]
 
-                            // new user sign up
-                            if (res.createdNewRecipeUser && res.user.loginMethods.length === 1) {
-                                await initUser(
-                                    res.user,
-                                    res.rawUserInfoFromProvider.fromUserInfoAPI!
-                                )
+                            const tasks: Promise<any>[] = []
+
+                            if (isNewUser) {
+                                console.log("New user sign up:", email || "<unknown email>")
+
+                                // Create user metadata row starter project
+                                const dbPromise = db.transaction().execute(async trx => {
+                                    await trx.insertInto("user_meta").values({
+                                        id: res.user.id,
+                                        email,
+                                        first_name: firstName,
+                                        last_name: lastName,
+                                        name: profile?.name,
+                                        picture: profile?.picture,
+                                    }).executeTakeFirstOrThrow()
+
+                                    let nameForProject: string | undefined = firstName ?? profile?.name
+                                    if (nameForProject)
+                                        nameForProject += nameForProject.endsWith("s") ? "'" : "'s"
+
+                                    const { id: newProjectId } = await trx.insertInto("projects")
+                                        .values({
+                                            name: `${nameForProject || "My"} Project`,
+                                            creator: res.user.id,
+                                        })
+                                        .returning("id")
+                                        .executeTakeFirstOrThrow()
+
+                                    await trx.insertInto("projects_users")
+                                        .values({
+                                            project_id: newProjectId,
+                                            user_id: res.user.id,
+                                            permissions: ["read", "write"],
+                                        })
+                                        .executeTakeFirstOrThrow()
+                                })
+                                tasks.push(dbPromise)
+
+                                // Add user to resend list
+                                if (email) {
+                                    const resendPromise = resend.contacts.create({
+                                        email, firstName, lastName,
+                                        audienceId: useEnvVar("RESEND_GENERAL_AUDIENCE_ID"),
+                                    })
+                                    tasks.push(resendPromise)
+                                }
+                                else console.warn(`No email provided for new user sign up (User ID: ${res.user.id})`)
                             }
-                            // existing user sign in
                             else {
-                                console.log("Existing user sign in:", res.user.emails[0])
-                                // If needed: Post sign in logic
+                                console.log("Existing user sign in:", email || "<unknown email>")
+
+                                const dbPromise = db.updateTable("user_meta")
+                                    .set({
+                                        email,
+                                        first_name: firstName,
+                                        last_name: lastName,
+                                        name: profile?.name,
+                                        picture: profile?.picture,
+                                    })
+                                    .where("id", "=", res.user.id)
+                                    .executeTakeFirstOrThrow()
+
+                                tasks.push(dbPromise)
                             }
+
+                            await Promise.all(tasks)
                             return res
-                        }
-                    })
-                }
+                        },
+                    }),
+                },
             }),
             // EmailPassword.init(),
-            Session.init(),
-            Dashboard.init(),
         ],
         telemetry: false,
     })

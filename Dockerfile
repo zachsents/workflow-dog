@@ -24,6 +24,7 @@ FROM nginx as web-prod
 COPY ./services/web/nginx.conf /etc/nginx/
 COPY --from=web-build /app/services/web/dist /www
 
+
 # Proxy + landing page ----------------------------------- #
 
 FROM base as landing-build
@@ -51,3 +52,18 @@ COPY ./packages/core /app/packages/core
 COPY ./services/api /app/services/api
 WORKDIR /app/services/api
 CMD ["bun", "."]
+
+
+# Database ----------------------------------------------- #
+
+FROM postgres as db
+RUN apt-get update && apt-get install -y curl unzip
+USER postgres
+RUN curl -fsSL https://bun.sh/install | bash
+WORKDIR /wfd/db
+COPY ./services/db .
+RUN ~/.bun/bin/bun install
+WORKDIR /
+COPY ./services/db/startup.sh /docker-entrypoint-initdb.d/
+USER root
+RUN chmod a+x /docker-entrypoint-initdb.d/startup.sh

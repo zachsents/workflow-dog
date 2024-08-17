@@ -53,13 +53,13 @@ export default {
         }),
 
     overview: projectPermissionProcedure("read")
-        .query(async ({ input, ctx }) => {
+        .query(async ({ ctx }) => {
             /*
              * Postgres returns bigint for count fn, so it gets cast to string
              * @see https://stackoverflow.com/questions/47843370/postgres-sequelize-raw-query-to-get-count-returns-string-value
              */
 
-            const [workflowCount, memberCount] = await Promise.all([
+            const [workflowCount, memberCount, recentRunResults] = await Promise.all([
                 db.selectFrom("workflows")
                     .select(({ fn }) => [fn.countAll<string>().as("count")])
                     .where("project_id", "=", ctx.projectId)
@@ -71,11 +71,33 @@ export default {
                     .where("project_id", "=", ctx.projectId)
                     .executeTakeFirstOrThrow()
                     .then(r => parseInt(r.count)),
+
+                sql<{ id: string, started_at: Date, error_count: string }>`
+                SELECT
+                    id, started_at,
+                    count(sub.errs) + (case when global_error is null then 0 else 1 end) as error_count
+                FROM workflow_runs
+                LEFT JOIN LATERAL (
+                    SELECT errs
+                    FROM jsonb_object_keys(node_errors) as errs
+                ) sub ON true
+                WHERE
+                    project_id = ${ctx.projectId} 
+                    AND started_at IS NOT NULL 
+                    AND started_at > current_date - interval '8 days'
+                GROUP BY id;
+                `.execute(db).then(r => r.rows.map(row => ({
+                    ...row,
+                    error_count: parseInt(row.error_count),
+                }))),
+                // WILO: the exact splitting into buckets will be done
+                // on the frontend so we have the user's timezone.
             ])
 
             return {
                 workflowCount,
                 memberCount,
+                recentRunResults,
             }
         }),
 

@@ -199,6 +199,20 @@ function Index({ deleting }: { deleting?: boolean }) {
 
     const renameDialog = useDialogState()
 
+    const recentRunsData = useMemo<RecentRunsDataPoint[]>(() => {
+        if (!overview?.recentRunResults)
+            return []
+        return Object.entries(
+            _.groupBy(overview.recentRunResults, r => r.started_at.toLocaleDateString())
+        ).map(([date, runs]) => ({
+            date: new Date(date),
+            success: runs.filter(r => r.error_count === 0).length,
+            error: runs.filter(r => r.error_count > 0).length,
+        })).sort((a, b) => a.date.getTime() - b.date.getTime())
+    }, [overview?.recentRunResults])
+    // WILO: redoing so i can make sure there's a bin for each day,
+    // even if there's no data for that day.
+
     return (
         <ProjectDashboardLayout currentSegment="Overview">
             <div className="grid grid-cols-6 gap-8 pb-24">
@@ -265,7 +279,7 @@ function Index({ deleting }: { deleting?: boolean }) {
                     <p className="text-muted-foreground">
                         Any workflow run that had at least one error is considered an error.
                     </p>
-                    <RecentActivityChart />
+                    <RecentActivityChart data={recentRunsData} />
                     <Button asChild variant="outline" className="self-start flex-center gap-2 mt-4">
                         <Link to="workflows">
                             <TI><IconRouteSquare2 /></TI>
@@ -506,15 +520,11 @@ function RenameProjectDialog(props: React.ComponentProps<typeof Dialog>) {
 }
 
 
-const chartData = [
-    { date: "2024-07-20", success: 173, error: 10 },
-    { date: "2024-07-21", success: 186, error: 80 },
-    { date: "2024-07-22", success: 305, error: 200 },
-    { date: "2024-07-23", success: 237, error: 120 },
-    { date: "2024-07-24", success: 73, error: 190 },
-    { date: "2024-07-25", success: 209, error: 130 },
-    { date: "2024-07-26", success: 214, error: 140 },
-]
+type RecentRunsDataPoint = {
+    date: Date
+    success: number
+    error: number
+}
 
 const chartConfig = {
     success: {
@@ -527,10 +537,12 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
-function RecentActivityChart() {
+function RecentActivityChart({ data }: {
+    data: RecentRunsDataPoint[]
+}) {
     return (
         <ChartContainer config={chartConfig}>
-            <BarChart accessibilityLayer data={chartData}>
+            <BarChart accessibilityLayer data={data}>
                 <CartesianGrid vertical={false} />
                 <XAxis
                     dataKey="date"
@@ -545,13 +557,13 @@ function RecentActivityChart() {
                     dataKey="success"
                     stackId="a"
                     fill="var(--color-success)"
-                // radius={[0, 0, 4, 4]}
+                // radius={[4, 4, 0, 0]}
                 />
                 <Bar
                     dataKey="error"
                     stackId="a"
                     fill="var(--color-error)"
-                    radius={[4, 4, 0, 0]}
+                // radius={[4, 4, 0, 0]}
                 />
             </BarChart>
         </ChartContainer>

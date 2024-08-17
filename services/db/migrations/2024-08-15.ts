@@ -13,10 +13,11 @@ export async function up(db: Kysely<any>): Promise<void> {
 
     // Create function
     await sql`
-    CREATE OR REPLACE FUNCTION public.create_numeric_id_for_workflow_run()
+    CREATE OR REPLACE FUNCTION public.populate_workflow_run_info()
     RETURNS TRIGGER AS $$
     DECLARE
         _numeric_id int;
+        _project_id uuid;
     BEGIN
         WITH tmp AS (
             SELECT wr.id, row_number() OVER ( ORDER BY wr.created_at )
@@ -27,8 +28,12 @@ export async function up(db: Kysely<any>): Promise<void> {
         FROM tmp
         WHERE tmp.id = NEW.id;
 
+        SELECT project_id INTO _project_id
+        FROM workflows
+        WHERE id = NEW.workflow_id;
+
         UPDATE workflow_runs
-        SET numeric_id = _numeric_id
+        SET numeric_id = _numeric_id, project_id = _project_id
         WHERE id = NEW.id;
 
         RETURN NEW;
@@ -126,12 +131,14 @@ export async function up(db: Kysely<any>): Promise<void> {
     await db.schema.createTable("workflow_runs").ifNotExists()
         .addColumn("id", "uuid", (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
         .addColumn("numeric_id", "integer")
-        .addColumn("workflow_id", "uuid", (col) => col.notNull().references("workflows.id").onDelete("cascade"))
+        // if a workflow is deleted, we still want the run to exist for usage tracking
+        .addColumn("project_id", "uuid", (col) => col.references("projects.id").onDelete("cascade"))
+        .addColumn("workflow_id", "uuid", (col) => col.references("workflows.id").onDelete("set null"))
         .addColumn("snapshot_id", "uuid", (col) => col.notNull().references("workflow_snapshots.id"))
         .addColumn("status", sql`public.workflow_run_status`, (col) => col.notNull().defaultTo("pending"))
         .addColumn("event_payload", "jsonb", (col) => col.notNull().defaultTo("{}"))
         .addColumn("node_errors", "jsonb", (col) => col.notNull().defaultTo("{}"))
-        .addColumn("global_error", "jsonb", (col) => col.notNull().defaultTo("{}"))
+        .addColumn("global_error", "jsonb")
         .addColumn("created_at", "timestamptz", (col) => col.notNull().defaultTo(sql`now()`))
         .addColumn("started_at", "timestamptz")
         .addColumn("finished_at", "timestamptz")
@@ -150,21 +157,12 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("value", "jsonb", (col) => col.notNull())
         .execute()
 
-    await db.schema
-        .createTable("workflow_usage_records").ifNotExists()
-        .addColumn("id", "uuid", (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
-        .addColumn("workflow_id", "uuid", (col) => col.notNull().references("workflows.id").onDelete("no action"))
-        .addColumn("billing_period_id", "text", (col) => col.notNull())
-        .addColumn("run_count", "integer", (col) => col.notNull().defaultTo(0))
-        .addUniqueConstraint("workflow_usage_records_billing_period_id_workflow_id_unique", ["billing_period_id", "workflow_id"])
-        .execute()
-
     // Create trigger that creates a numeric ID for a workflow run
     await sql`
-    CREATE TRIGGER trigger_create_numeric_id_for_workflow_run
+    CREATE TRIGGER trigger_populate_workflow_run_info
     AFTER INSERT ON public.workflow_runs
     FOR EACH ROW
-    EXECUTE FUNCTION public.create_numeric_id_for_workflow_run();
+    EXECUTE FUNCTION public.populate_workflow_run_info();
     `.execute(db)
 
     // Enable row level security
@@ -180,12 +178,10 @@ export async function up(db: Kysely<any>): Promise<void> {
     await sql`ALTER TABLE public.workflows_event_sources ENABLE ROW LEVEL SECURITY`.execute(db)
     await sql`ALTER TABLE public.workflow_runs ENABLE ROW LEVEL SECURITY`.execute(db)
     await sql`ALTER TABLE public.workflow_run_outputs ENABLE ROW LEVEL SECURITY`.execute(db)
-    await sql`ALTER TABLE public.workflow_usage_records ENABLE ROW LEVEL SECURITY`.execute(db)
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
     // Drop tables in reverse order
-    await db.schema.dropTable("workflow_usage_records").ifExists().execute()
     await db.schema.dropTable("workflow_run_outputs").ifExists().execute()
     await db.schema.dropTable("workflow_runs").ifExists().execute()
     await db.schema.dropTable("workflows_event_sources").ifExists().execute()

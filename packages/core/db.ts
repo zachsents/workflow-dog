@@ -401,11 +401,12 @@ export interface WorkflowRuns {
   id: Generated<string>;
   node_errors: Generated<Json>;
   numeric_id: number | null;
+  project_id: string;
   scheduled_for: Timestamp | null;
   snapshot_id: string;
   started_at: Timestamp | null;
   status: Generated<WorkflowRunStatus>;
-  workflow_id: string;
+  workflow_id: string | null;
 }
 
 export interface Workflows {
@@ -432,13 +433,6 @@ export interface WorkflowSnapshots {
   graph: Generated<Json>;
   id: Generated<string>;
   trigger_event_type_id: Generated<string>;
-  workflow_id: string;
-}
-
-export interface WorkflowUsageRecords {
-  billing_period_id: string;
-  id: Generated<string>;
-  run_count: Generated<number>;
   workflow_id: string;
 }
 
@@ -488,7 +482,6 @@ export interface DB {
   workflow_run_outputs: WorkflowRunOutputs;
   workflow_runs: WorkflowRuns;
   workflow_snapshots: WorkflowSnapshots;
-  workflow_usage_records: WorkflowUsageRecords;
   workflows: Workflows;
   workflows_event_sources: WorkflowsEventSources;
 }

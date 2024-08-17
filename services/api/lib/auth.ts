@@ -58,20 +58,27 @@ export function initSupertokens() {
 
                             const tasks: Promise<any>[] = []
 
+                            const userMetadataPromise = db.insertInto("user_meta").values({
+                                id: res.user.id,
+                                email,
+                                first_name: firstName,
+                                last_name: lastName,
+                                name: profile?.name,
+                                picture: profile?.picture,
+                            }).onConflict(oc => oc.column("id").doUpdateSet(eb => ({
+                                email: eb.ref("excluded.email"),
+                                first_name: eb.ref("excluded.first_name"),
+                                last_name: eb.ref("excluded.last_name"),
+                                name: eb.ref("excluded.name"),
+                                picture: eb.ref("excluded.picture"),
+                            }))).executeTakeFirstOrThrow()
+                            tasks.push(userMetadataPromise)
+
                             if (isNewUser) {
                                 console.log("New user sign up:", email || "<unknown email>")
 
                                 // Create user metadata row starter project
-                                const dbPromise = db.transaction().execute(async trx => {
-                                    await trx.insertInto("user_meta").values({
-                                        id: res.user.id,
-                                        email,
-                                        first_name: firstName,
-                                        last_name: lastName,
-                                        name: profile?.name,
-                                        picture: profile?.picture,
-                                    }).executeTakeFirstOrThrow()
-
+                                const dbPromise = userMetadataPromise.then(() => db.transaction().execute(async trx => {
                                     let nameForProject: string | undefined = firstName ?? profile?.name
                                     if (nameForProject)
                                         nameForProject += nameForProject.endsWith("s") ? "'" : "'s"
@@ -91,7 +98,7 @@ export function initSupertokens() {
                                             permissions: ["read", "write"],
                                         })
                                         .executeTakeFirstOrThrow()
-                                })
+                                }))
                                 tasks.push(dbPromise)
 
                                 // Add user to resend list
@@ -106,19 +113,6 @@ export function initSupertokens() {
                             }
                             else {
                                 console.log("Existing user sign in:", email || "<unknown email>")
-
-                                const dbPromise = db.updateTable("user_meta")
-                                    .set({
-                                        email,
-                                        first_name: firstName,
-                                        last_name: lastName,
-                                        name: profile?.name,
-                                        picture: profile?.picture,
-                                    })
-                                    .where("id", "=", res.user.id)
-                                    .executeTakeFirstOrThrow()
-
-                                tasks.push(dbPromise)
                             }
 
                             await Promise.all(tasks)

@@ -1,10 +1,10 @@
 {
-    "CodeGPT.apiKey": "Anthropic",
     "files.associations": {
         "*.css": "tailwindcss"
     },
     "editor.quickSuggestions": {
-        "strings": true
+        "strings": "on"
     },
-    "editor.inlineSuggest.enabled": true,
+    "editor.quickSuggestionsDelay": 1,
+    "editor.suggest.preview": true,
 }

@@ -10,6 +10,8 @@ import { assertOrForbidden } from "../assertions"
 import { projectPermissionProcedure } from "./projects"
 
 
+//WILO: need to fix these procedures up to take new database schema into account
+
 export default {
     list: projectPermissionProcedure("read")
         .query(async ({ ctx }) => {

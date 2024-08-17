@@ -7,4 +7,5 @@
     },
     "editor.quickSuggestionsDelay": 1,
     "editor.suggest.preview": true,
+    "typescript.tsdk": "node_modules/typescript/lib",
 }

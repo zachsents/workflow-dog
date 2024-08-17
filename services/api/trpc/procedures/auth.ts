@@ -3,6 +3,7 @@ import supertokens from "supertokens-node"
 import { authenticatedProcedure } from ".."
 import { db } from "../../lib/db"
 
+
 export default {
     userId: authenticatedProcedure.query(async ({ ctx }) => ctx.user.id),
     user: authenticatedProcedure.query(async ({ ctx }) => {

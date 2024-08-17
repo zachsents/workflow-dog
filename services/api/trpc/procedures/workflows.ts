@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
-import type { ProjectPermission, WorkflowGraphs } from "core/db"
+import type { ProjectPermission } from "core/db"
 import { WORKFLOW_NAME_SCHEMA } from "core/schemas"
-import { type Selectable, sql } from "kysely"
+import { sql } from "kysely"
 import { z } from "zod"
 import { authenticatedProcedure } from ".."
 import { userHasProjectPermission } from "../../lib/auth-checks"
@@ -9,8 +9,6 @@ import { db } from "../../lib/db"
 import { assertOrForbidden } from "../assertions"
 import { projectPermissionProcedure } from "./projects"
 
-
-//WILO: need to fix these procedures up to take new database schema into account
 
 export default {
     list: projectPermissionProcedure("read")
@@ -37,19 +35,11 @@ export default {
         }),
 
     byId: projectPermissionByWorkflowProcedure("read")
-        .input(z.object({
-            expandGraph: z.boolean().optional().default(false),
-        }))
         .query(async ({ ctx, input }) => {
-            let qb = db.selectFrom("workflows")
-                .leftJoin("workflow_graphs as wg", "current_graph_id", "wg.id")
-                .selectAll("workflows")
-                .where("workflows.id", "=", ctx.workflowId)
-
-            if (input.expandGraph)
-                qb = qb.select(sql<Selectable<WorkflowGraphs>>`row_to_json(wg)`.as("current_graph"))
-
-            const workflow = await qb.executeTakeFirst()
+            const workflow = await db.selectFrom("workflows")
+                .selectAll()
+                .where("id", "=", ctx.workflowId)
+                .executeTakeFirst()
 
             if (!workflow)
                 throw new TRPCError({ code: "NOT_FOUND" })
@@ -106,16 +96,6 @@ export default {
                         trigger_event_type_id: input.triggerEventTypeId,
                     })
                     .returning("id")
-                    .executeTakeFirstOrThrow()
-
-                const newGraph = await trx.insertInto("workflow_graphs")
-                    .values({ workflow_id: newWorkflow.id })
-                    .returning("id")
-                    .executeTakeFirstOrThrow()
-
-                await trx.updateTable("workflows")
-                    .set({ current_graph_id: newGraph.id })
-                    .where("id", "=", newWorkflow.id)
                     .executeTakeFirstOrThrow()
 
                 return newWorkflow

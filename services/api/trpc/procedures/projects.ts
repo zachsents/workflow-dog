@@ -53,7 +53,11 @@ export default {
         }),
 
     overview: projectPermissionProcedure("read")
-        .query(async ({ ctx }) => {
+        .input(z.object({
+            timezone: z.string().refine(tz => Intl.supportedValuesOf("timeZone").includes(tz)),
+            historyLength: z.number().min(1).max(30).default(7),
+        }))
+        .query(async ({ ctx, input }) => {
             /*
              * Postgres returns bigint for count fn, so it gets cast to string
              * @see https://stackoverflow.com/questions/47843370/postgres-sequelize-raw-query-to-get-count-returns-string-value
@@ -72,26 +76,34 @@ export default {
                     .executeTakeFirstOrThrow()
                     .then(r => parseInt(r.count)),
 
-                sql<{ id: string, started_at: Date, error_count: string }>`
-                SELECT
-                    id, started_at,
-                    count(sub.errs) + (case when global_error is null then 0 else 1 end) as error_count
-                FROM workflow_runs
+                sql<{ date: Date, error: string, success: string }>`
+                WITH date_bins AS (
+                    SELECT 
+                        daterange(
+                            (now() at time zone ${input.timezone} - make_interval(days => _offset))::date, 
+                            (now() at time zone ${input.timezone} - make_interval(days => _offset - 1))::date
+                        ) as date_bin
+                    FROM (SELECT generate_series(0, ${input.historyLength - 1}) as _offset)
+                )
+                SELECT 
+                    lower(date_bin)::timestamp at time zone ${input.timezone} as date,
+                    sum(_error) as error,
+                    sum(_success) as success
+                FROM date_bins
+                LEFT JOIN workflow_runs ON date_bin @> (workflow_runs.started_at at time zone ${input.timezone})::date
                 LEFT JOIN LATERAL (
-                    SELECT errs
-                    FROM jsonb_object_keys(node_errors) as errs
-                ) sub ON true
-                WHERE
-                    project_id = ${ctx.projectId} 
-                    AND started_at IS NOT NULL 
-                    AND started_at > current_date - interval '8 days'
-                GROUP BY id;
+                    SELECT 
+                        (id is not null and (count(node_error_keys) > 0 or global_error is not null))::int as _error,
+                        (id is not null and count(node_error_keys) = 0 and global_error is null)::int as _success
+                    FROM jsonb_object_keys(node_errors) as node_error_keys
+                ) ON true
+                GROUP BY date_bin
+                ORDER BY date_bin;
                 `.execute(db).then(r => r.rows.map(row => ({
                     ...row,
-                    error_count: parseInt(row.error_count),
+                    error: parseInt(row.error),
+                    success: parseInt(row.success),
                 }))),
-                // WILO: the exact splitting into buckets will be done
-                // on the frontend so we have the user's timezone.
             ])
 
             return {

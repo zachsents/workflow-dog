@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useLocalStorageValue } from "@react-hookz/web"
 import { IconArrowRight, IconBook, IconBrandXFilled, IconChartLine, IconCheck, IconCopy, IconDots, IconExternalLink, IconListDetails, IconMail, IconMoneybag, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPlus, IconPointFilled, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconTrash, IconUsers } from "@tabler/icons-react"
-import { type ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@ui/chart"
 import AccountMenu from "@web/components/account-menu"
 import ConfirmDialog from "@web/components/confirm-dialog"
 import { BrandLink, FeedbackButton } from "@web/components/dashboard-header"
@@ -20,6 +19,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@web/components/ui/input"
 import { Label } from "@web/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@web/components/ui/radio-group"
+import { Separator } from "@web/components/ui/separator"
 import { Tabs, TabsList, TabsTrigger } from "@web/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import dayjs from "@web/lib/dayjs"
@@ -35,7 +35,6 @@ import React, { forwardRef, useEffect, useMemo, useState } from "react"
 import { Helmet } from "react-helmet"
 import { useForm } from "react-hook-form"
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 import { toast } from "sonner"
 import { ClientEventTypes } from "workflow-packages/client"
 import type { ClientEventType } from "workflow-packages/types/client"
@@ -193,25 +192,14 @@ function Index({ deleting }: { deleting?: boolean }) {
     const projectId = useCurrentProjectId()
     const project = useCurrentProject().data!
     const planData = getPlanData(project.billing_plan)
-    const { data: overview } = trpc.projects.overview.useQuery({ projectId })
+    const { data: overview } = trpc.projects.overview.useQuery({
+        projectId,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    })
 
     const hasNoWorkflows = overview?.workflowCount === 0
 
     const renameDialog = useDialogState()
-
-    const recentRunsData = useMemo<RecentRunsDataPoint[]>(() => {
-        if (!overview?.recentRunResults)
-            return []
-        return Object.entries(
-            _.groupBy(overview.recentRunResults, r => r.started_at.toLocaleDateString())
-        ).map(([date, runs]) => ({
-            date: new Date(date),
-            success: runs.filter(r => r.error_count === 0).length,
-            error: runs.filter(r => r.error_count > 0).length,
-        })).sort((a, b) => a.date.getTime() - b.date.getTime())
-    }, [overview?.recentRunResults])
-    // WILO: redoing so i can make sure there's a bin for each day,
-    // even if there's no data for that day.
 
     return (
         <ProjectDashboardLayout currentSegment="Overview">
@@ -274,12 +262,13 @@ function Index({ deleting }: { deleting?: boolean }) {
 
                 <div className="col-span-3 bg-gray-100 border rounded-xl p-8 flex flex-col gap-2">
                     <h3 className="font-medium text-xl">
-                        Recent activity
+                        Recent Workflow Runs
                     </h3>
                     <p className="text-muted-foreground">
-                        Any workflow run that had at least one error is considered an error.
+                        These are the workflow runs from the last 7 days.
                     </p>
-                    <RecentActivityChart data={recentRunsData} />
+                    {!!overview?.recentRunResults &&
+                        <RecentActivityChart data={overview.recentRunResults} height={200} />}
                     <Button asChild variant="outline" className="self-start flex-center gap-2 mt-4">
                         <Link to="workflows">
                             <TI><IconRouteSquare2 /></TI>
@@ -520,53 +509,49 @@ function RenameProjectDialog(props: React.ComponentProps<typeof Dialog>) {
 }
 
 
-type RecentRunsDataPoint = {
-    date: Date
-    success: number
-    error: number
-}
-
-const chartConfig = {
-    success: {
-        label: "Successful",
-        color: "var(--color-green-600)",
-    },
-    error: {
-        label: "Had >1 error",
-        color: "var(--color-red-500)",
-    },
-} satisfies ChartConfig
-
-function RecentActivityChart({ data }: {
-    data: RecentRunsDataPoint[]
+function RecentActivityChart({ data, height = 300 }: {
+    data: {
+        date: Date
+        success: number
+        error: number
+    }[]
+    height?: number
 }) {
+    const scale = height / data.reduce((acc, d) => {
+        const total = d.success + d.error
+        return total > acc ? total : acc
+    }, 0)
+
     return (
-        <ChartContainer config={chartConfig}>
-            <BarChart accessibilityLayer data={data}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                    dataKey="date"
-                    tickLine={false}
-                    tickMargin={10}
-                    axisLine={true}
-                    tickFormatter={(value) => new Date(value).toLocaleDateString()}
-                />
-                <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-                <ChartLegend content={<ChartLegendContent />} />
-                <Bar
-                    dataKey="success"
-                    stackId="a"
-                    fill="var(--color-success)"
-                // radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                    dataKey="error"
-                    stackId="a"
-                    fill="var(--color-error)"
-                // radius={[4, 4, 0, 0]}
-                />
-            </BarChart>
-        </ChartContainer>
+        <div className="grid gap-1 auto-rows-auto" style={{
+            gridTemplateColumns: `repeat(${data.length}, 1fr)`,
+        }}>
+            {data.map(d =>
+                <SimpleTooltip key={"bar-" + d.date.toString()} tooltip={<>
+                    <p className="font-bold">{d.date.toLocaleDateString()}</p>
+                    <p className="text-red-300">{d.error} {plural("run", d.error)} with error(s)</p>
+                    <p className="text-green-300">{d.success} successful {plural("run", d.success)}</p>
+                </>}>
+                    <div
+                        className="flex flex-col items-stretch justify-end gap-1 *:shrink-0 *:grow-0 *:rounded-sm rounded-sm hover:bg-gray-500/10"
+                    >
+                        {d.error > 0 &&
+                            <div className="bg-red-500" style={{ height: d.error * scale }} />}
+                        {d.success > 0 &&
+                            <div className="bg-green-500" style={{ height: d.success * scale }} />}
+                    </div>
+                </SimpleTooltip>
+            )}
+            <Separator className="col-span-full" />
+            {data.map(d =>
+                <p
+                    key={"label-" + d.date.toString()}
+                    className="text-xs text-muted-foreground text-center place-self-center"
+                >
+                    {d.date.toLocaleDateString()}
+                </p>
+            )}
+        </div>
     )
 }
 // #endregion Index

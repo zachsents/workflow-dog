@@ -277,14 +277,24 @@ function Index({ deleting }: { deleting?: boolean }) {
                     </Button>
                 </div>
 
-                <div className="col-span-3 bg-gray-100 border rounded-xl p-8 flex flex-col gap-2">
-                    <h3 className="font-medium text-xl">
-                        Invite people to your project
-                    </h3>
-                    <p className="text-muted-foreground">
-                        Add team members to your project to collaborate on workflows and automate tasks together.
-                    </p>
-                    <Button asChild variant="outline" className="self-start flex-center gap-2 mt-4">
+                <div className="col-span-3 bg-gray-100 border rounded-xl p-8 flex-col gap-4">
+                    <div className="grid gap-2">
+                        <h3 className="font-medium text-xl">
+                            Invite people to your project
+                        </h3>
+                        <p className="text-muted-foreground">
+                            Add team members to your project to collaborate on workflows and automate tasks together.
+                        </p>
+                    </div>
+                    <div className="flex items-stretch h-16">
+                        {overview?.memberPictures.map((pic, i) =>
+                            <img
+                                key={i} src={pic ?? undefined}
+                                className="aspect-square shrink-0 rounded-full border-4 border-white shadow-sm -ml-4 first:ml-0"
+                            />
+                        )}
+                    </div>
+                    <Button asChild variant="outline" className="self-start flex-center gap-2 mt-2">
                         <Link to="team">
                             <TI><IconUsers /></TI>
                             Manage Team

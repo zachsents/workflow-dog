@@ -63,7 +63,7 @@ export default {
              * @see https://stackoverflow.com/questions/47843370/postgres-sequelize-raw-query-to-get-count-returns-string-value
              */
 
-            const [workflowCount, memberCount, recentRunResults] = await Promise.all([
+            const [workflowCount, memberCount, recentRunResults, memberPictures] = await Promise.all([
                 db.selectFrom("workflows")
                     .select(({ fn }) => [fn.countAll<string>().as("count")])
                     .where("project_id", "=", ctx.projectId)
@@ -104,12 +104,21 @@ export default {
                     error: parseInt(row.error),
                     success: parseInt(row.success),
                 }))),
+
+                db.selectFrom("projects_users")
+                    .innerJoin("user_meta", "user_meta.id", "user_id")
+                    .select(["picture"])
+                    .where("project_id", "=", ctx.projectId)
+                    .limit(5)
+                    .execute()
+                    .then(r => r.map(row => row.picture)),
             ])
 
             return {
                 workflowCount,
                 memberCount,
                 recentRunResults,
+                memberPictures,
             }
         }),
 

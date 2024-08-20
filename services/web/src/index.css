@@ -144,6 +144,11 @@ body {
     .hack-center {
         @apply hack-center-x hack-center-y;
     }
+
+    /* Usage of flex-col should imply flex */
+    .flex-col {
+        display: flex;
+    }
 }
 
 .bg-dots {

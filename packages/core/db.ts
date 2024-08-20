@@ -397,11 +397,11 @@ export interface WorkflowRuns {
   created_at: Generated<Timestamp>;
   event_payload: Generated<Json>;
   finished_at: Timestamp | null;
-  global_error: Generated<Json>;
+  global_error: Generated<Json | null>;
   id: Generated<string>;
   node_errors: Generated<Json>;
   numeric_id: number | null;
-  project_id: string;
+  project_id: string | null;
   scheduled_for: Timestamp | null;
   snapshot_id: string;
   started_at: Timestamp | null;

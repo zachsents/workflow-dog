@@ -1,9 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { IconBrandXFilled, IconCopy, IconDots, IconExternalLink, IconMail, IconPencil, IconRouteSquare2, IconTrash, IconUsers } from "@tabler/icons-react"
+import { IconBrandXFilled, IconCopy, IconDots, IconExternalLink, IconMail, IconPencil, IconRouteSquare2, IconTrash, IconUser, IconUsers } from "@tabler/icons-react"
 import { ProjectDashboardLayout } from "@web/components/layouts/project-dashboard-layout"
 import SimpleTooltip from "@web/components/simple-tooltip"
 import SpinningLoader from "@web/components/spinning-loader"
 import TI from "@web/components/tabler-icon"
+import { Avatar, AvatarFallback, AvatarImage } from "@web/components/ui/avatar"
 import { Badge } from "@web/components/ui/badge"
 import { Button } from "@web/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@web/components/ui/dialog"
@@ -126,12 +127,14 @@ export default function ProjectIndex({ deleting }: { deleting?: boolean }) {
                             Add team members to your project to collaborate on workflows and automate tasks together.
                         </p>
                     </div>
-                    <div className="flex items-stretch h-16">
+                    <div className="flex items-center no-shrink-children">
                         {overview?.memberPictures.map((pic, i) =>
-                            <img
-                                key={i} src={pic ?? undefined}
-                                className="aspect-square shrink-0 rounded-full border-4 border-white shadow-sm -ml-4 first:ml-0"
-                            />
+                            <Avatar key={i} className="w-16 aspect-square h-auto border-4 border-white shadow-sm -ml-4 first:ml-0">
+                                <AvatarImage src={pic ?? undefined} />
+                                <AvatarFallback className="text-muted-foreground">
+                                    <TI><IconUser /></TI>
+                                </AvatarFallback>
+                            </Avatar>
                         )}
                     </div>
                     <Button asChild variant="outline" className="self-start flex-center gap-2 mt-2">

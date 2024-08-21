@@ -53,3 +53,35 @@ export function deepFilter(
     }
     return _.cloneDeepWith(obj, cloner)
 }
+
+
+/**
+ * Tag function that returns undefined if any of the values
+ * are nullish. Useful shorthand for checking if a value
+ * is exists before using it in a template string.
+ */
+export function t(parts: TemplateStringsArray, ...values: any[]) {
+    return values.some(v => v == null)
+        ? undefined
+        : parts.reduce((acc, part, i) => acc + part + (values[i] ?? ""), "")
+}
+
+
+/**
+ * Helper function that filters out falsy values for search params.
+ * Just makes it a little easier to write shorthand.
+ */
+export function urlSearchParams(params: Record<string, string | undefined | null>) {
+    const filtered = Object.fromEntries(
+        Object.entries(params).filter(([, v]) => Boolean(v))
+    ) as Record<string, string>
+    return new URLSearchParams(filtered).toString()
+}
+
+
+/**
+ * Another helper for shorthanding URLs.
+ */
+export function url(url: string, params: Parameters<typeof urlSearchParams>[0]) {
+    return url + "?" + urlSearchParams(params)
+}

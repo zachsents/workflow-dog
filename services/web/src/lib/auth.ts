@@ -52,25 +52,26 @@ export function useUser() {
 }
 
 
-export async function getGoogleSignInUrl() {
-    return await getAuthorisationURLWithQueryParamsAndSetState({
+export async function getGoogleSignInUrl(email?: string) {
+    const url = new URL(await getAuthorisationURLWithQueryParamsAndSetState({
         thirdPartyId: "google",
         frontendRedirectURI: `${import.meta.env.VITE_APP_ORIGIN}/login/callback`,
-    })
+    }))
+    if (email)
+        url.searchParams.set("login_hint", email)
+    return url.toString()
 }
 
 
 export async function handleGoogleCallback() {
     const res = await signInAndUp()
-
     switch (res.status) {
-        case "OK":
-            if (res.createdNewRecipeUser && res.user.loginMethods.length === 1) {
-                // sign up successful
-            } else {
-                // sign in successful
-            }
-            return res.user
+        case "OK": {
+            const email = res.user.loginMethods.find(lm => lm.email)?.email
+            if (email)
+                localStorage.setItem("last_google_login", email)
+            return res.createdNewRecipeUser && res.user.loginMethods.length === 1
+        }
         case "SIGN_IN_UP_NOT_ALLOWED":
             console.debug(res)
             throw new Error(res.reason)

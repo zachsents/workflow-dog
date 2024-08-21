@@ -36,7 +36,7 @@ export function initSupertokens() {
                                 clientSecret: useEnvVar("AUTH_GOOGLE_CLIENT_SECRET"),
                                 scope: ["profile", "email"],
                             }],
-                        }
+                        },
                     }],
                 },
                 override: {

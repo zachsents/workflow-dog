@@ -27,11 +27,6 @@ export function userHasProjectPermission(userId: string, permission: ProjectPerm
             .innerJoin("workflows", "workflows.project_id", "projects_users.project_id")
             .where("workflows.id", "=", workflowId)
         ),
-        byTriggerId: (triggerId: string) => queryUserPermission(userId, permission, qb => qb
-            .innerJoin("workflows", "workflows.project_id", "projects_users.project_id")
-            .innerJoin("triggers", "triggers.workflow_id", "workflows.id")
-            .where("triggers.id", "=", triggerId)
-        ),
         byWorkflowRunId: (runId: string) => queryUserPermission(userId, permission, qb => qb
             .innerJoin("workflows", "workflows.project_id", "projects_users.project_id")
             .innerJoin("workflow_runs", "workflow_runs.workflow_id", "workflows.id")

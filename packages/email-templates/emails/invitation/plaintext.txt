@@ -1,0 +1,17 @@
+WorkflowDog
+
+{{ INVITER }} has invited you to collaborate on "{{ PROJECT_NAME }}".
+
+You can accept this invitation by clicking the link below. If you don't wish to join this project, you can simply ignore this message.
+
+[Accept invitation](https://workflow.dog/invitations/{{ INVITATION_ID }}/accept)
+
+---
+
+Note: This invitation was intended for {{ INVITEE }}. If you were not expecting this invitation, you can ignore this email.
+
+If you don't have an account, you'll have to sign up first.
+
+---
+
+If you have any questions, feel free to message us at info@workflow.dog.

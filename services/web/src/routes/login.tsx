@@ -5,8 +5,8 @@ import TI from "@web/components/tabler-icon"
 import { getGoogleSignInUrl, handleGoogleCallback, useIsLoggedIn } from "@web/lib/auth"
 import { useOnceEffect } from "@web/lib/hooks"
 import { useEffect } from "react"
-import { Outlet, useNavigate } from "react-router-dom"
 import { Helmet } from "react-helmet"
+import { Outlet, useNavigate, useSearchParams } from "react-router-dom"
 
 
 // #region Layout
@@ -71,6 +71,15 @@ function Index() {
         },
     })
 
+    const [params] = useSearchParams()
+    const returnTo = params.get("return_to")
+    useEffect(() => {
+        if (returnTo)
+            localStorage.setItem("login_return_to", returnTo)
+        else
+            localStorage.removeItem("login_return_to")
+    }, [returnTo])
+
     return (<>
         <form className="flex flex-col justify-center items-stretch gap-2 max-w-sm">
             <h1 className="text-2xl font-bold">
@@ -129,13 +138,23 @@ function Callback() {
         handleGoogleCallback()
             .then(async user => {
                 console.debug("User signed in:", user.emails[0], user)
-                window.location.replace("/app")
+
+                const returnTo = localStorage.getItem("login_return_to")
+                if (returnTo)
+                    localStorage.removeItem("login_return_to")
+
+                window.location.replace(returnTo || "/app")
             })
             .catch(err => {
                 console.error(err)
-                window.location.replace(
-                    err.message ? `/login?tm=${err.message}` : "/login"
-                )
+
+                const returnTo = localStorage.getItem("login_return_to")
+                const params = new URLSearchParams({
+                    ...err.message && { tm: err.message },
+                    ...returnTo && { return_to: returnTo },
+                })
+
+                window.location.replace(`/login?${params.toString()}`)
             })
     })
 

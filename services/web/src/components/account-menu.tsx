@@ -1,4 +1,3 @@
-import { IconLoader } from "@tabler/icons-react"
 import { useMutation } from "@tanstack/react-query"
 import { Avatar, AvatarFallback, AvatarImage } from "@ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@ui/dropdown-menu"
@@ -12,7 +11,7 @@ export default function AccountMenu() {
 
     const { data: user } = useUser()
 
-    const userEmailInitial = user?.emails[0][0].toUpperCase() ?? " "
+    const userEmailInitial = user?.emails?.[0][0].toUpperCase() ?? " "
 
     const signOutMutation = useMutation({
         mutationFn: () => signOut(),
@@ -25,7 +24,7 @@ export default function AccountMenu() {
         <DropdownMenu>
             <DropdownMenuTrigger>
                 <Avatar className="hover:scale-110 transition-transform">
-                    <AvatarImage src={user?.metadata?.picture} />
+                    <AvatarImage src={user?.metadata?.picture ?? undefined} />
                     <AvatarFallback>
                         {userEmailInitial}
                     </AvatarFallback>

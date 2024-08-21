@@ -6,6 +6,7 @@ interface SimpleTooltipProps {
     triggerProps?: React.ComponentProps<typeof TooltipTrigger>
     contentProps?: React.ComponentProps<typeof TooltipContent>
     delay?: number
+    disabled?: boolean
 }
 
 export default function SimpleTooltip({
@@ -14,10 +15,11 @@ export default function SimpleTooltip({
     triggerProps,
     contentProps,
     delay = 0,
+    disabled = false,
 }: SimpleTooltipProps) {
     return (
         <TooltipProvider delayDuration={delay}>
-            <Tooltip>
+            <Tooltip open={disabled ? false : undefined}>
                 <TooltipTrigger asChild {...triggerProps}>
                     {children}
                 </TooltipTrigger>

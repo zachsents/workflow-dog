@@ -1,11 +1,13 @@
 import { TRPCError } from "@trpc/server"
 import type { ProjectPermission } from "core/db"
+import { getPlanLimits } from "core/plans"
 import { PROJECT_NAME_SCHEMA } from "core/schemas"
 import { sql } from "kysely"
 import { z } from "zod"
 import { authenticatedProcedure } from ".."
 import { userHasProjectPermission } from "../../lib/auth-checks"
 import { db } from "../../lib/db"
+import { sendEmailFromTemplate } from "../../lib/resend"
 import { assertOrForbidden } from "../assertions"
 
 
@@ -42,7 +44,9 @@ export default {
     byId: projectPermissionProcedure("read")
         .query(async ({ ctx }) => {
             const queryResult = await db.selectFrom("projects")
-                .selectAll()
+                .innerJoin("projects_users", "projects.id", "projects_users.project_id")
+                .selectAll("projects")
+                .select(sql<string[]>`permissions::text[]`.as("your_permissions"))
                 .where("id", "=", ctx.projectId)
                 .executeTakeFirst()
 
@@ -106,9 +110,10 @@ export default {
                 }))),
 
                 db.selectFrom("projects_users")
-                    .innerJoin("user_meta", "user_meta.id", "user_id")
-                    .select(["picture"])
+                    .innerJoin("user_meta", "user_meta.id", "projects_users.user_id")
+                    .select("picture")
                     .where("project_id", "=", ctx.projectId)
+                    .orderBy(sql<boolean>`user_id = ${ctx.user.id}`, "desc")
                     .limit(5)
                     .execute()
                     .then(r => r.map(row => row.picture)),
@@ -160,6 +165,199 @@ export default {
 
             return { success: true, projectId: ctx.projectId }
         }),
+
+    team: {
+        list: projectPermissionProcedure("read")
+            .query(async ({ ctx, input }) => {
+                return db.selectFrom("projects_users")
+                    .innerJoin("user_meta", "user_meta.id", "user_id")
+                    .selectAll("user_meta")
+                    .select(sql<string[]>`projects_users.permissions::text[]`.as("permissions"))
+                    .where("project_id", "=", ctx.projectId)
+                    .execute()
+                    .then(r => r.map(row => ({
+                        ...row,
+                        isYou: row.id === ctx.user.id,
+                        isEditor: row.permissions.includes("write"),
+                        isInvited: false,
+                    })))
+            }),
+
+        canInviteMembers: projectPermissionProcedure("read")
+            .query(async ({ ctx }) => {
+                const { billing_plan } = await db.selectFrom("projects")
+                    .select("billing_plan")
+                    .where("id", "=", ctx.projectId)
+                    .executeTakeFirstOrThrow()
+
+                const limit = getPlanLimits(billing_plan).teamMembers
+
+                return db.selectFrom("projects_users")
+                    .select(({ fn }) => [fn.countAll<string>().as("count")])
+                    .where("project_id", "=", ctx.projectId)
+                    .executeTakeFirstOrThrow()
+                    .then(r => parseInt(r.count) < limit)
+            }),
+
+        remove: projectPermissionProcedure("write")
+            .input(z.object({ userId: z.string().uuid() }))
+            .mutation(async ({ input, ctx }) => {
+                return db.deleteFrom("projects_users")
+                    .where("project_id", "=", ctx.projectId)
+                    .where("user_id", "=", input.userId)
+                    .returning("user_id")
+                    .executeTakeFirstOrThrow()
+            }),
+
+        setRole: projectPermissionProcedure("write")
+            .input(z.object({
+                userId: z.string().uuid(),
+                role: z.enum(["editor", "viewer"]),
+            }))
+            .mutation(async ({ input, ctx }) => {
+                await db.updateTable("projects_users")
+                    .set({
+                        permissions: input.role === "viewer"
+                            ? ["read"]
+                            : ["read", "write"],
+                    })
+                    .where("project_id", "=", ctx.projectId)
+                    .where("user_id", "=", input.userId)
+                    .executeTakeFirstOrThrow()
+            }),
+
+        invite: projectPermissionProcedure("write")
+            .input(z.object({
+                email: z.string().email(),
+            }))
+            .mutation(async ({ input, ctx }) => {
+                await Promise.all([
+                    // User is already on team
+                    db.selectNoFrom(eb => eb.exists(eb.selectFrom("projects_users")
+                        .innerJoin("user_meta", "user_meta.id", "projects_users.user_id")
+                        .where("project_id", "=", ctx.projectId)
+                        .where("email", "=", input.email)
+                    ).as("already_on_team")).executeTakeFirstOrThrow().then(r => {
+                        if (r.already_on_team)
+                            throw new TRPCError({
+                                code: "CONFLICT",
+                                message: "User is already on the team",
+                            })
+                    }),
+                    // User is already invited to team
+                    db.selectNoFrom(eb => eb.exists(eb.selectFrom("project_invitations")
+                        .where("project_id", "=", ctx.projectId)
+                        .where("invitee_email", "=", input.email)
+                    ).as("already_invited")).executeTakeFirstOrThrow().then(r => {
+                        if (r.already_invited)
+                            throw new TRPCError({
+                                code: "CONFLICT",
+                                message: "User has already been invited",
+                            })
+                    }),
+                    // Project limit exceeded
+                    db.selectFrom("projects")
+                        .select("billing_plan")
+                        .where("id", "=", ctx.projectId)
+                        .executeTakeFirstOrThrow()
+                        .then(async ({ billing_plan }) => {
+                            const limit = getPlanLimits(billing_plan).teamMembers
+                            const { limit_exceeded } = await db.selectFrom("projects_users")
+                                .select(sql<boolean>`count(*) >= ${limit}`.as("limit_exceeded"))
+                                .where("project_id", "=", ctx.projectId)
+                                .executeTakeFirstOrThrow()
+
+                            if (limit_exceeded)
+                                throw new TRPCError({
+                                    code: "TOO_MANY_REQUESTS",
+                                    message: `Plan limit exceeded. Your plan only allows ${limit} members.`,
+                                })
+                        }),
+                ])
+
+                const [invitationId, projectName, inviterEmail] = await Promise.all([
+                    db.insertInto("project_invitations")
+                        .values({
+                            project_id: input.projectId,
+                            invitee_email: input.email,
+                        })
+                        .returning("id")
+                        .executeTakeFirstOrThrow()
+                        .then(r => r.id),
+                    db.selectFrom("projects")
+                        .select("name")
+                        .where("id", "=", input.projectId)
+                        .executeTakeFirstOrThrow()
+                        .then(r => r.name),
+                    db.selectFrom("user_meta")
+                        .select("email")
+                        .where("id", "=", ctx.user.id)
+                        .executeTakeFirstOrThrow()
+                        .then(r => r.email),
+                ])
+
+                await sendEmailFromTemplate(input.email, "invitation", {
+                    PROJECT_NAME: projectName,
+                    INVITER: inviterEmail!,
+                    INVITEE: input.email,
+                    INVITATION_ID: invitationId,
+                })
+            }),
+
+        listInvitations: projectPermissionProcedure("read")
+            .query(async ({ ctx }) => {
+                return db.selectFrom("project_invitations")
+                    .selectAll()
+                    .where("project_id", "=", ctx.projectId)
+                    .orderBy("created_at", "desc")
+                    .execute()
+            }),
+
+        cancelInvitation: projectPermissionProcedure("write")
+            .input(z.object({ invitationId: z.string().uuid() }))
+            .mutation(async ({ input, ctx }) => {
+                await db.deleteFrom("project_invitations")
+                    .where("id", "=", input.invitationId)
+                    .where("project_id", "=", ctx.projectId)
+                    .executeTakeFirstOrThrow()
+            }),
+
+        acceptInvitation: authenticatedProcedure
+            .input(z.object({ invitationId: z.string().uuid() }))
+            .mutation(async ({ input, ctx }) => {
+                const email = await db.selectFrom("user_meta")
+                    .select("email")
+                    .where("id", "=", ctx.user.id)
+                    .executeTakeFirstOrThrow()
+                    .then(r => r.email)
+
+                const invitation = await db.selectFrom("project_invitations")
+                    .selectAll()
+                    .where("id", "=", input.invitationId)
+                    .where("invitee_email", "=", email)
+                    .executeTakeFirst()
+
+                if (!invitation)
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "That invitation was invalid",
+                    })
+
+                await db.transaction().execute(async trx => Promise.all([
+                    trx.insertInto("projects_users")
+                        .values({
+                            project_id: invitation.project_id,
+                            user_id: ctx.user.id,
+                        })
+                        .executeTakeFirstOrThrow(),
+                    trx.deleteFrom("project_invitations")
+                        .where("id", "=", input.invitationId)
+                        .executeTakeFirstOrThrow(),
+                ]))
+
+                return { projectId: invitation.project_id }
+            }),
+    }
 
     // updateSettings: t.procedure
     //     .input(z.object({

@@ -48,7 +48,10 @@ COPY --from=landing-build /app/services/landing/dist /www
 # API ---------------------------------------------------- #
 
 FROM base as api
+RUN apt-get update && apt-get install -y ruby-full
+RUN gem install premailer nokogiri
 COPY ./packages/core /app/packages/core
+COPY ./packages/email-templates /app/packages/email-templates
 COPY ./services/api /app/services/api
 WORKDIR /app/services/api
 CMD ["bun", "."]

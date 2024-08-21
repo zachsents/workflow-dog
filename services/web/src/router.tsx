@@ -6,6 +6,8 @@ import Project from "./routes/project"
 import Projects from "./routes/projects"
 import Root from "./routes/root"
 import { WorkflowEdit, WorkflowRoot } from "./routes/edit-test"
+import { vtrpc } from "./lib/trpc"
+import { TRPCClientError } from "@trpc/client"
 
 
 export const router = createBrowserRouter(createRoutesFromElements(
@@ -25,11 +27,33 @@ export const router = createBrowserRouter(createRoutesFromElements(
                     <Route index element={<Project.Workflows />} />
                     <Route path="create" element={<Project.CreateWorkflow />} />
                 </Route>
+                <Route path="team" element={<Project.Team />} />
             </Route>
         </Route>
         <Route path="workflows/:workflowId" element={<WorkflowRoot />} loader={loggedInLoader}>
             <Route index element={<WorkflowEdit />} />
         </Route>
+
+        <Route path="invitations/:invitationId/accept" loader={async ({ params: { invitationId } }) => {
+            if (!invitationId)
+                return replace("/app")
+
+            if (!(await isLoggedIn()))
+                return replace("/login?" + new URLSearchParams({
+                    return_to: window.location.pathname,
+                    tm: "You need to log in first",
+                }).toString())
+
+            return await vtrpc.projects.team.acceptInvitation.mutate({ invitationId })
+                .then(r => replace(`/projects/${r.projectId}`))
+                .catch(err => {
+                    if (err instanceof TRPCClientError)
+                        return replace("/projects?" + new URLSearchParams({
+                            tm: err.data?.message
+                        }).toString())
+                    throw err
+                })
+        }} />
     </Route>
 ))
 

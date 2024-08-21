@@ -8,6 +8,6 @@ export const db = new Kysely<DB>({
         pool: new Pool({
             connectionString: useEnvVar("DATABASE_URL"),
             max: 10,
-        })
+        }),
     })
 })

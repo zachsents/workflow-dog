@@ -149,6 +149,10 @@ body {
     .flex-col {
         display: flex;
     }
+
+    .no-shrink-children > * {
+        @apply shrink-0; 
+    }
 }
 
 .bg-dots {

@@ -357,7 +357,38 @@ export default {
 
                 return { projectId: invitation.project_id }
             }),
-    }
+    },
+
+    usage: projectPermissionProcedure("read")
+        .input(z.object({
+            timezone: z.string().refine(tz => Intl.supportedValuesOf("timeZone").includes(tz)),
+        }))
+        .query(async ({ ctx, input }) => {
+            const runCounts = await sql<{ date: Date, workflow_id: string, run_count: string }>`
+            WITH date_bins AS (
+                SELECT 
+                    daterange(
+                        (now() at time zone ${input.timezone} - make_interval(days => _offset))::date, 
+                        (now() at time zone ${input.timezone} - make_interval(days => _offset - 1))::date
+                    ) as date_bin
+                FROM (SELECT generate_series(0, 30) as _offset)
+            )
+            SELECT
+                lower(date_bin)::timestamp at time zone ${input.timezone} as date,
+                workflow_runs.workflow_id,
+                count(workflow_runs.id) as run_count
+            FROM date_bins
+            LEFT JOIN workflow_runs ON date_bin @> (workflow_runs.started_at at time zone ${input.timezone})::date
+            WHERE workflow_runs.project_id = ${ctx.projectId}
+            GROUP BY date, workflow_runs.workflow_id
+            ORDER BY date;
+            `.execute(db).then(r => r.rows.map(row => ({
+                ...row,
+                run_count: parseInt(row.run_count),
+            })))
+
+            return { runCounts }
+        }),
 
     // updateSettings: t.procedure
     //     .input(z.object({

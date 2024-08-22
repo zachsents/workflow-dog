@@ -44,7 +44,7 @@ export default function ProjectIndex({ deleting }: { deleting?: boolean }) {
 
     return (
         <ProjectDashboardLayout currentSegment="Overview">
-            <div className="grid grid-cols-6 gap-8 pb-24">
+            <div className="grid grid-cols-6 gap-8">
                 <div className="col-span-full flex items-center justify-between">
                     <div>
                         <div className="flex items-center gap-4">

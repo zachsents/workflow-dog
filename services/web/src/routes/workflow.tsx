@@ -11,12 +11,12 @@ import { useCurrentWorkflow, useCurrentWorkflowId, useDialogState } from "@web/l
 import { trpc } from "@web/lib/trpc"
 import { AnimatePresence, motion } from "framer-motion"
 import { Helmet } from "react-helmet"
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { ClientNodeDefinitions } from "workflow-packages/client"
 
 
-export function WorkflowRoot() {
+function WorkflowIndex() {
 
     const utils = trpc.useUtils()
     const navigate = useNavigate()
@@ -51,6 +51,20 @@ export function WorkflowRoot() {
             success: isEnabled ? "Workflow enabled!" : "Workflow paused!",
             error: "Something went wrong.",
         })
+    }
+
+    const saveGraphMutation = trpc.workflows.saveGraph.useMutation({
+        onSuccess: (newData) => {
+            utils.workflows.byId.setData({ workflowId }, old => ({
+                ...old!,
+                ...newData,
+            }))
+            utils.workflows.list.invalidate()
+            // utils.workflows.byId.invalidate({ workflowId })
+        },
+    })
+    const saveGraph = (graph: string) => {
+        saveGraphMutation.mutate({ graph, workflowId })
     }
 
     return <>
@@ -133,14 +147,35 @@ export function WorkflowRoot() {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <div className="mx-4 bg-background/10 rounded-full text-background font-medium text-xs text-center grid grid-flow-col auto-cols-fr place-items-stretch gap-1 p-1 h-auto *:rounded-full *:px-4 *:py-1 [&.active]:*:bg-background [&.active]:*:text-foreground *:transition-colors">
+                    {/* <div className="mx-4 bg-background/10 rounded-full text-background font-medium text-xs text-center grid grid-flow-col auto-cols-fr place-items-stretch gap-1 p-1 h-auto *:rounded-full *:px-4 *:py-1 [&.active]:*:bg-background [&.active]:*:text-foreground *:transition-colors">
                         <NavLink to="trigger" replace>Trigger</NavLink>
                         <NavLink to="edit" replace>Edit</NavLink>
                         <NavLink to="history" replace>History</NavLink>
-                    </div>
+                    </div> */}
+
+                    <p className="self-center mx-4 text-xs text-center text-muted-foreground">
+                        {saveGraphMutation.isPending
+                            ? "Saving..."
+                            : saveGraphMutation.isSuccess
+                                ? "Saved!"
+                                : saveGraphMutation.isError
+                                    ? "Failed to save"
+                                    : "Waiting to save"}
+                    </p>
                 </div>
 
-                <Outlet />
+                <GBRoot
+                    className="w-full h-full overflow-clip"
+                    options={{
+                        nodeDefinitions: ClientNodeDefinitions,
+                        initialGraph: workflow.graph,
+                        onGraphChange: graph => {
+                            console.debug("Saving graph...")
+                            saveGraph(graph)
+                        },
+                    }}
+                >
+                </GBRoot>
 
                 <RenameWorkflowDialog workflow={workflow} {...renameDialog.dialogProps} />
                 <ConfirmDialog
@@ -164,15 +199,5 @@ export function WorkflowRoot() {
     </>
 }
 
-
-export function WorkflowEdit() {
-    return (
-        <GBRoot
-            className="w-full h-full overflow-clip"
-            options={{
-                nodeDefinitions: ClientNodeDefinitions,
-            }}
-        >
-        </GBRoot>
-    )
-}
+const Workflow = { Index: WorkflowIndex }
+export default Workflow

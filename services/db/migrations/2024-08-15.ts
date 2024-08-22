@@ -101,7 +101,7 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("project_id", "uuid", (col) => col.references("projects.id").onDelete("cascade"))
         .addColumn("name", "text", (col) => col.notNull().defaultTo("Untitled Workflow"))
         .addColumn("is_enabled", "boolean", (col) => col.notNull().defaultTo(false))
-        .addColumn("graph", "jsonb", (col) => col.notNull().defaultTo('{ "nodes": [], "edges": [] }'))
+        .addColumn("graph", "text", (col) => col.notNull().defaultTo('{"json":{"nodes":[],"edges":[]}}'))
         .addColumn("trigger_event_type_id", "text", (col) => col.notNull().defaultTo("primitives/callable"))
         .addColumn("trigger_config", "jsonb", (col) => col.notNull().defaultTo("{}"))
         .addColumn("last_edited_at", "timestamptz")
@@ -112,7 +112,7 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("id", "uuid", (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
         .addColumn("created_at", "timestamptz", (col) => col.notNull().defaultTo(sql`now()`))
         .addColumn("workflow_id", "uuid", (col) => col.notNull().references("workflows.id").onDelete("cascade"))
-        .addColumn("graph", "jsonb", (col) => col.notNull().defaultTo('{ "nodes": [], "edges": [] }'))
+        .addColumn("graph", "text", (col) => col.notNull().defaultTo('{"json":{"nodes":[],"edges":[]}}'))
         .addColumn("trigger_event_type_id", "text", (col) => col.notNull().defaultTo("primitives/callable"))
         .execute()
 

@@ -23,7 +23,7 @@ import React, { forwardRef, useContext, useEffect, useMemo, useRef } from "react
 import { useHotkeys } from "react-hotkeys-hook"
 import { toast } from "sonner"
 import type { ClientNodeDefinition } from "workflow-packages/types/client"
-import { createStore, useStore } from "zustand"
+import { createStore, useStore, type StoreApi } from "zustand"
 import { useShallow } from "zustand/react/shallow"
 import { GraphBuilderContext, NodeContext } from "./context"
 import { deserializeGraph, serializeGraph, shouldBeMotionValue, useNodeDefinitionsSearch, type AllowPrimitivesForMotionValues } from "./utils"
@@ -61,7 +61,7 @@ function GraphRenderer({ children, ...props }: React.ComponentProps<"div">) {
         return () => ac.abort()
     }, [])
 
-    useUndoRedoSetup()
+    useMonitorGraphHistory()
     const { undo, redo } = useUndoRedo()
     useHotkeys("mod+z", undo, { preventDefault: true })
     useHotkeys("mod+y", redo, { preventDefault: true })
@@ -127,7 +127,7 @@ function Viewport({ children }: { children: React.ReactNode }) {
     })
     useHotkeys("shift+z", () => setHotslot(null))
 
-    useHotkeys("ctrl+v", (e) => gbx.pasteFromClipboard(), { preventDefault: true })
+    useHotkeys("ctrl+v", () => gbx.pasteFromClipboard(), { preventDefault: true })
 
     return (
         <motion.div
@@ -219,6 +219,9 @@ function Viewport({ children }: { children: React.ReactNode }) {
                 className="relative z-10 pointer-events-none origin-top-left"
                 style={{ x: pan.x, y: pan.y, scale: zoom }}
             >
+                <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[4px] h-[100px] bg-blue-600 rounded-full pointer-events-none" />
+                <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[100px] h-[4px] bg-red-600 rounded-full pointer-events-none" />
+
                 {children}
             </motion.div>
 
@@ -573,7 +576,6 @@ function SelectionToolbar() {
         })
         return [xs, ys, widths, heights] as const
     }, [gbx, selection])
-
 
     const minX = useTransform(() => Math.min(...xs.map(x => x.get())))
     const minY = useTransform(() => Math.min(...ys.map(y => y.get())))
@@ -1129,36 +1131,82 @@ export function useGraphBuilder() {
 
 export interface GraphBuilderOptions {
     nodeDefinitions: Record<string, NodeDefinition>
+    initialGraph?: string
+    onGraphChange?: (serializedGraph: string) => void
 }
 
 export class GraphBuilder {
 
-    public store = createStore<GraphBuilderStoreState>(() => ({
-        nodes: new Map(),
-        edges: new Map(),
+    public store: StoreApi<GraphBuilderStoreState>
 
-        selection: new Set(),
+    constructor(public options: GraphBuilderOptions) {
+        let initialNodes: GraphBuilderStoreState["nodes"] = new Map()
+        let initialEdges: GraphBuilderStoreState["edges"] = new Map()
 
-        viewportElement: null,
-        pan: { x: motionValue(0), y: motionValue(0) },
-        zoom: motionValue(1),
+        if (options.initialGraph) {
+            const { nodes, edges } = deserializeGraph(options.initialGraph ?? "")
+            initialNodes = new Map(nodes.map(n => [n.id, n]))
+            initialEdges = new Map(edges.map(e => [e.id, e]))
+        }
 
-        boxSelection: null,
-        connection: null,
+        this.store = createStore<GraphBuilderStoreState>(() => ({
+            nodes: initialNodes,
+            edges: initialEdges,
 
-        screenMousePosition: { x: motionValue(0), y: motionValue(0) },
-        currentlyHoveredNodeDefId: null,
+            selection: new Set(),
 
-        contextMenuPosition: null,
+            viewportElement: null,
+            pan: { x: motionValue(0), y: motionValue(0) },
+            zoom: motionValue(1),
 
-        history: {
-            undoStack: [],
-            redoStack: [],
-            current: null,
-        },
-    }))
+            boxSelection: null,
+            connection: null,
 
-    constructor(public options: GraphBuilderOptions) { }
+            screenMousePosition: { x: motionValue(0), y: motionValue(0) },
+            currentlyHoveredNodeDefId: null,
+
+            contextMenuPosition: null,
+
+            history: {
+                undoStack: [],
+                redoStack: [],
+                current: null,
+            },
+        }))
+
+        if (initialNodes.size === 0)
+            return
+
+        const unsubscribe = this.store.subscribe((state) => {
+            if (!state.viewportElement) return
+            unsubscribe()
+
+            const PADDING = 100
+            const viewportRect = state.viewportElement.getBoundingClientRect()
+            const targetRect = {
+                width: viewportRect.width - PADDING * 2,
+                height: viewportRect.height - PADDING * 2,
+            }
+            const targetAspectRatio = targetRect.width / targetRect.height
+
+            const nodesArr = Array.from(state.nodes.values())
+            const minX = Math.min(...nodesArr.map(n => n.position.x.get()))
+            const minY = Math.min(...nodesArr.map(n => n.position.y.get()))
+            const maxX = Math.max(...nodesArr.map(n => n.position.x.get() + n._width.get()))
+            const maxY = Math.max(...nodesArr.map(n => n.position.y.get() + n._height.get()))
+
+            const nodeBoxAspectRatio = (maxX - minX) / (maxY - minY)
+            const initialZoom = nodeBoxAspectRatio > targetAspectRatio
+                ? targetRect.width / (maxX - minX)
+                : targetRect.height / (maxY - minY)
+            const initialPanX = -initialZoom * (maxX + minX) / 2 + viewportRect.width / 2
+            const initialPanY = -initialZoom * (maxY + minY) / 2 + viewportRect.height / 2
+
+            if (!isNaN(initialPanX)) this.state.pan.x.set(initialPanX)
+            if (!isNaN(initialPanY)) this.state.pan.y.set(initialPanY)
+            if (!isNaN(initialZoom)) this.state.zoom.set(initialZoom)
+        })
+    }
 
     get state() {
         return this.store.getState()
@@ -1482,9 +1530,9 @@ export type Node = {
     _shouldCenterSelf?: boolean
 }
 
-export function createNode(
-    data: Omit<Partial<AllowPrimitivesForMotionValues<Node>>, "definitionId"> & { definitionId: string },
-): Node {
+export type ExternalNode = Omit<Partial<AllowPrimitivesForMotionValues<Node>>, "definitionId"> & { definitionId: string }
+
+export function createNode(data: ExternalNode): Node {
     const { id, position, _width, _height, ...rest } = data
     return {
         handleStates: {},
@@ -1620,7 +1668,7 @@ function useHotSlot() {
 }
 
 
-function useUndoRedoSetup() {
+function useMonitorGraphHistory() {
     const gbx = useGraphBuilder()
     const history = gbx.useStore(s => s.history)
     const serialize = (state: GraphBuilderStoreState) => serializeGraph({
@@ -1644,6 +1692,7 @@ function useUndoRedoSetup() {
                 current: serializedUpdate,
             }
         })
+        gbx.options.onGraphChange?.(serializedUpdate)
     }
 
     const fastUpdate = useDebouncedCallback(update, [gbx, history], 25)

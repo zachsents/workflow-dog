@@ -218,7 +218,7 @@ export function useCurrentProject() {
         retry: (failureCount, error) => {
             if (failureCount >= 2)
                 return false
-            if (["FORBIDDEN", "NOT_FOUND", "BAD_REQUEST"].includes(error.data?.code))
+            if (["FORBIDDEN", "NOT_FOUND", "BAD_REQUEST"].includes(error.data?.code as any))
                 return false
             return true
         },

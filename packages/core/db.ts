@@ -412,7 +412,7 @@ export interface WorkflowRuns {
 export interface Workflows {
   created_at: Generated<Timestamp>;
   creator: string | null;
-  graph: Generated<Json>;
+  graph: Generated<string>;
   id: Generated<string>;
   is_enabled: Generated<boolean>;
   last_edited_at: Timestamp | null;
@@ -430,7 +430,7 @@ export interface WorkflowsEventSources {
 
 export interface WorkflowSnapshots {
   created_at: Generated<Timestamp>;
-  graph: Generated<Json>;
+  graph: Generated<string>;
   id: Generated<string>;
   trigger_event_type_id: Generated<string>;
   workflow_id: string;

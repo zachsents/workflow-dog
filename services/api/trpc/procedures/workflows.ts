@@ -14,7 +14,7 @@ export default {
     list: projectPermissionProcedure("read")
         .query(async ({ ctx }) => {
             return db.selectFrom("workflows")
-                .selectAll()
+                .select(["id", "name", "is_enabled", "created_at", "project_id", "trigger_event_type_id", "last_edited_at", "last_ran_at"])
                 .where("project_id", "=", ctx.projectId)
                 .orderBy("workflows.name")
                 .execute()
@@ -100,6 +100,21 @@ export default {
 
                 return newWorkflow
             })
+        }),
+
+    saveGraph: projectPermissionByWorkflowProcedure("write")
+        .input(z.object({
+            graph: z.string(),
+        }))
+        .mutation(async ({ input, ctx }) => {
+            return db.updateTable("workflows")
+                .set({
+                    graph: input.graph,
+                    last_edited_at: sql`now()`,
+                })
+                .where("id", "=", ctx.workflowId)
+                .returning(["last_edited_at", "graph"])
+                .executeTakeFirstOrThrow()
         }),
 
     // updateGraph: t.procedure

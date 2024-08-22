@@ -1,5 +1,5 @@
 import { useLocalStorageValue } from "@react-hookz/web"
-import { IconArrowRight, IconDots, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPlus, IconPointFilled, IconTrash } from "@tabler/icons-react"
+import { IconArrowRight, IconDots, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPlus, IconPointFilled, IconRun, IconTrash } from "@tabler/icons-react"
 import ConfirmDialog from "@web/components/confirm-dialog"
 import { ProjectDashboardLayout } from "@web/components/layouts/project-dashboard-layout"
 import RenameWorkflowDialog from "@web/components/rename-workflow-dialog"
@@ -15,7 +15,7 @@ import { useCurrentProjectId, useDialogState, useSearch } from "@web/lib/hooks"
 import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
 import type { ApiRouterOutput } from "api/trpc/router"
-import _ from "lodash"
+import _, { has } from "lodash"
 import { useMemo } from "react"
 import { Link } from "react-router-dom"
 import { toast } from "sonner"
@@ -176,12 +176,15 @@ function WorkflowResultCard({ workflow, withTrigger }: WorkflowResultCardProps) 
         },
     })
 
+    const hasBeenEditedBefore = workflow.last_edited_at && workflow.last_edited_at.getTime() > 0
+    const hasRanBefore = workflow.last_ran_at && workflow.last_ran_at.getTime() > 0
+
     return (<>
         <Link
             to={`/workflows/${workflow.id}`}
             className="group p-3 grid items-center gap-2 shadow-none border-t border-x last:border-b first:rounded-t-lg last:rounded-b-lg"
             style={{
-                gridTemplateColumns: "auto 1fr 180px auto auto",
+                gridTemplateColumns: "auto 1fr 280px auto auto",
             }}
         >
             <SimpleTooltip
@@ -208,11 +211,24 @@ function WorkflowResultCard({ workflow, withTrigger }: WorkflowResultCardProps) 
                     </p>}
             </div>
 
-            <p className="text-muted-foreground text-sm px-2">
-                {workflow.last_edited_at && workflow.last_edited_at.getTime() > 0
-                    ? `Last ran ${dayjs(workflow.last_edited_at).fromNow()}`
-                    : "Never ran"}
-            </p>
+            <div className="text-muted-foreground text-sm px-2">
+                <div className="flex items-center gap-1">
+                    <TI className={cn(!hasBeenEditedBefore && "opacity-50")}><IconPencil /></TI>
+                    <p>
+                        {hasBeenEditedBefore
+                            ? `Last edited ${dayjs(workflow.last_edited_at).fromNow()}`
+                            : "Never edited"}
+                    </p>
+                </div>
+                <div className="flex items-center gap-1">
+                    <TI className={cn(!hasRanBefore && "opacity-50")}><IconRun /></TI>
+                    <p>
+                        {hasRanBefore
+                            ? `Last ran ${dayjs(workflow.last_ran_at).fromNow()}`
+                            : "Never ran"}
+                    </p>
+                </div>
+            </div>
 
             <Button
                 size="compact" variant="secondary"

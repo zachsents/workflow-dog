@@ -5,11 +5,11 @@ import ErrorPage from "./components/error-page"
 import { BrandLoader } from "./components/spinning-loader"
 import { vtrpc } from "./lib/trpc"
 import { t, url } from "./lib/utils"
-import { WorkflowEdit, WorkflowRoot } from "./routes/workflow"
 import Login from "./routes/login"
 import Project from "./routes/project"
 import Projects from "./routes/projects"
 import Root from "./routes/root"
+import Workflow from "./routes/workflow"
 
 
 const RETURN_TO_LOCAL_STORAGE_KEY = "login_return_to"
@@ -94,8 +94,8 @@ export const router = createBrowserRouter(createRoutesFromElements(
             </Route>
         </Route>
 
-        <Route path="workflows/:workflowId" element={<WorkflowRoot />} loader={LOADERS.MustBeLoggedIn}>
-            <Route index element={<WorkflowEdit />} />
+        <Route path="workflows/:workflowId" loader={LOADERS.MustBeLoggedIn}>
+            <Route index element={<Workflow.Index />} />
         </Route>
 
         <Route path="invitations/:invitationId/accept" element={LOADING_SCREEN} loader={LOADERS.AcceptInvitation} />

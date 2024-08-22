@@ -156,7 +156,7 @@ body {
 }
 
 .bg-dots {
-    background-image: radial-gradient(circle at center, var(--dots-color, white) 6%, transparent 6%);
+    background-image: radial-gradient(circle at center, var(--dots-color, var(--color-gray-200)) 6%, transparent 6%);
     background-size: 24px 24px;
 }
 

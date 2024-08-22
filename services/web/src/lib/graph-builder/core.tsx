@@ -2,7 +2,7 @@ import { Anchor as PopoverAnchor } from "@radix-ui/react-popover"
 import useMergedRef from "@react-hook/merged-ref"
 import useResizeObserver from "@react-hook/resize-observer"
 import { useDebouncedCallback, useLocalStorageValue } from "@react-hookz/web"
-import { IconArrowLeftSquare, IconArrowRightSquare, IconClipboard, IconConfettiOff, IconCopy, IconFlame, IconPin, IconPinnedOff, IconScissors, IconTrash, IconX } from "@tabler/icons-react"
+import { IconArrowLeftSquare, IconArrowRightSquare, IconClipboard, IconConfetti, IconConfettiOff, IconCopy, IconFlame, IconPalette, IconPaletteOff, IconPin, IconPinnedOff, IconScissors, IconTrash, IconX } from "@tabler/icons-react"
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@ui/command"
 import Kbd from "@web/components/kbd"
 import SearchInput from "@web/components/search-input"
@@ -11,7 +11,7 @@ import TI from "@web/components/tabler-icon"
 import { Button } from "@web/components/ui/button"
 import { Card } from "@web/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@web/components/ui/dropdown-menu"
-import { Popover, PopoverContent } from "@web/components/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "@web/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import VerticalDivider from "@web/components/vertical-divider"
 import { useBooleanState, useDialogState, useKeyState, useMotionValueState } from "@web/lib/hooks"
@@ -591,6 +591,19 @@ function SelectionToolbar() {
 
     const isWaitingOnWidths = useMotionValueState(useTransform(() => widths.some(w => w.get() === 0)))
 
+    const setHighlightColor = (color: string | null) => void gbx.mutateState(s => {
+        s.selection.forEach(id => {
+            const n = s.nodes.get(id)
+            if (!n) return
+            if (color)
+                n.highlightColor = color
+            else
+                delete n.highlightColor
+        })
+    })
+
+    const allDisabled = gbx.useStore(s => Array.from(s.selection).every(id => s.nodes.get(id)?.disabled))
+
     return (
         <TooltipProvider delayDuration={0}>
             <motion.div
@@ -634,14 +647,60 @@ function SelectionToolbar() {
                     />
                     <VerticalDivider className="mx-1" />
                     <SelectionToolbarButton
-                        label="Disable"
+                        label={allDisabled ? "Enable" : "Disable"}
                         action={() => {
-
+                            gbx.mutateState(s => {
+                                s.selection.forEach(id => {
+                                    const n = s.nodes.get(id)
+                                    if (!n) return
+                                    n.disabled = !allDisabled
+                                })
+                            })
                         }}
-                        icon={IconConfettiOff}
+                        icon={allDisabled ? IconConfetti : IconConfettiOff}
                         hotkey="mod+shift+e"
                         shortcut={["\u2318", "\u21e7", "E"]}
                     />
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <SelectionToolbarButton
+                                label="Set Highlight Color"
+                                icon={IconPalette}
+                            />
+                        </PopoverTrigger>
+                        <PopoverContent sideOffset={10} className="p-1 flex-center gap-1 *:text-xl">
+                            <Button
+                                variant="ghost" size="icon"
+                                onClick={() => setHighlightColor(null)}
+                            >
+                                <TI><IconPaletteOff /></TI>
+                            </Button>
+                            <Button
+                                variant="ghost" size="icon"
+                                onClick={() => setHighlightColor("red")}
+                            >
+                                <div className="bg-red-500 rounded-full w-[1em] h-[1em]" />
+                            </Button>
+                            <Button
+                                variant="ghost" size="icon"
+                                onClick={() => setHighlightColor("yellow")}
+                            >
+                                <div className="bg-yellow-500 rounded-full w-[1em] h-[1em]" />
+                            </Button>
+                            <Button
+                                variant="ghost" size="icon"
+                                onClick={() => setHighlightColor("green")}
+                            >
+                                <div className="bg-green-500 rounded-full w-[1em] h-[1em]" />
+                            </Button>
+                            <Button
+                                variant="ghost" size="icon"
+                                onClick={() => setHighlightColor("blue")}
+                            >
+                                <div className="bg-blue-500 rounded-full w-[1em] h-[1em]" />
+                            </Button>
+                        </PopoverContent>
+                    </Popover>
                     <VerticalDivider className="mx-1" />
                     <SelectionToolbarButton
                         label="Copy"
@@ -686,11 +745,11 @@ const SelectionToolbarButton = forwardRef<HTMLButtonElement, React.ComponentProp
     label: string
     shortcut?: string[]
     hotkey?: string
-    action: () => void
+    action?: () => void
 }>(({ icon: Icon, label, shortcut, hotkey, action, ...props }, ref) => {
 
     const hasHotkey = useMemo(() => !!hotkey, [])
-    if (hasHotkey) useHotkeys(hotkey!, action, { preventDefault: true })
+    if (hasHotkey && action) useHotkeys(hotkey!, action, { preventDefault: true })
 
     return (
         <Tooltip>
@@ -700,7 +759,7 @@ const SelectionToolbarButton = forwardRef<HTMLButtonElement, React.ComponentProp
                     {...props}
                     className={cn("text-lg aspect-square h-[2.25em] p-0 flex-center", props.className)}
                     onClick={ev => {
-                        action()
+                        action?.()
                         props.onClick?.(ev)
                     }}
                     ref={ref}
@@ -737,7 +796,6 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
         }))
     })
 
-
     const resizeRef = useRef<HTMLDivElement>(null)
     useResizeObserver(resizeRef, entry => {
         n._width.set(entry.contentRect.width)
@@ -767,7 +825,10 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
                     "absolute pointer-events-auto",
                     isDragging ? "cursor-grabbing" : "cursor-pointer",
                 )}
-                style={{ x: n.position.x, y: n.position.y }}
+                style={{
+                    x: n.position.x,
+                    y: n.position.y,
+                }}
                 ref={ref}
 
                 onPanStart={startDrag}
@@ -1526,6 +1587,8 @@ export type Node = {
     handleStates: Record<string, HandleState>
 
     config: Record<string, any>
+    highlightColor?: string
+    disabled?: boolean
 
     _shouldCenterSelf?: boolean
 }
@@ -1761,3 +1824,5 @@ function useUndoRedo() {
 
     return { undo, redo }
 }
+
+

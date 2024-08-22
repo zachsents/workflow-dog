@@ -10,6 +10,7 @@ import { GBRoot } from "@web/lib/graph-builder/core"
 import { useCurrentWorkflow, useCurrentWorkflowId, useDialogState } from "@web/lib/hooks"
 import { trpc } from "@web/lib/trpc"
 import { AnimatePresence, motion } from "framer-motion"
+import { useEffect } from "react"
 import { Helmet } from "react-helmet"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
@@ -60,12 +61,18 @@ function WorkflowIndex() {
                 ...newData,
             }))
             utils.workflows.list.invalidate()
-            // utils.workflows.byId.invalidate({ workflowId })
         },
     })
     const saveGraph = (graph: string) => {
         saveGraphMutation.mutate({ graph, workflowId })
     }
+
+    useEffect(() => {
+        if (!saveGraphMutation.isPending) return
+        const ac = new AbortController()
+        window.addEventListener("beforeunload", e => e.preventDefault(), { signal: ac.signal })
+        return () => ac.abort()
+    }, [saveGraphMutation.isPending])
 
     return <>
         <Helmet>

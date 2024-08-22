@@ -52,16 +52,24 @@ export function StandardNode({
     return (
         <Card className={cn(
             "select-none outline-primary outline-2 outline-offset-2 flex flex-col items-stretch gap-4 py-1",
+            n.highlightColor && `shadow-[0_0_0px_20px] shadow-${n.highlightColor}-400/40`,
             isSelected
                 ? "outline"
                 : (showSelectHoverOutline && "hover:outline-dashed")
         )}>
             <div
-                className="font-bold px-4 py-1 text-center text-white mx-1 rounded-t-lg rounded-b-sm flex justify-center items-center gap-2"
+                className={cn(
+                    "font-bold px-4 py-1 text-center text-white mx-1 rounded-t-lg rounded-b-sm flex justify-center items-center gap-2",
+                    n.disabled && "opacity-50",
+                )}
                 style={{ backgroundColor: def.color }}
             >
                 <def.icon />
-                <span>{def.name}</span>
+                <span className={cn(
+                    n.disabled && "line-through decoration-2",
+                )}>
+                    {def.name}
+                </span>
 
                 {!hidePackageBadge && packageDisplayName &&
                     <span className="bg-white/30 px-2 py-0.5 rounded-sm ml-3 text-xs font-medium leading-none">
@@ -677,3 +685,32 @@ function NodeContent({
 }: NodeContentProps) {
     return children
 }
+
+
+
+
+/*
+So tailwind loads all these colors for node highlights.
+shadow-slate-400/40
+shadow-gray-400/40
+shadow-zinc-400/40
+shadow-neutral-400/40
+shadow-stone-400/40
+shadow-red-400/40
+shadow-orange-400/40
+shadow-amber-400/40
+shadow-yellow-400/40
+shadow-lime-400/40
+shadow-green-400/40
+shadow-emerald-400/40
+shadow-teal-400/40
+shadow-cyan-400/40
+shadow-sky-400/40
+shadow-blue-400/40
+shadow-indigo-400/40
+shadow-violet-400/40
+shadow-purple-400/40
+shadow-fuchsia-400/40
+shadow-pink-400/40
+shadow-rose-400/40
+ */

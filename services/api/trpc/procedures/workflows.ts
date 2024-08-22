@@ -105,12 +105,25 @@ export default {
     saveGraph: projectPermissionByWorkflowProcedure("write")
         .input(z.object({
             graph: z.string(),
+            clientTimestamp: z.date(),
         }))
         .mutation(async ({ input, ctx }) => {
+            const { last_save_client_timestamp, ...oldWorkflow } = await db.selectFrom("workflows")
+                .select(["graph", "last_save_client_timestamp", "last_edited_at"])
+                .where("id", "=", ctx.workflowId)
+                .executeTakeFirstOrThrow()
+
+            const isAnOldUpdate = !!last_save_client_timestamp
+                && last_save_client_timestamp.getTime() >= input.clientTimestamp.getTime()
+
+            if (isAnOldUpdate)
+                return oldWorkflow
+
             return db.updateTable("workflows")
                 .set({
                     graph: input.graph,
                     last_edited_at: sql`now()`,
+                    last_save_client_timestamp: input.clientTimestamp,
                 })
                 .where("id", "=", ctx.workflowId)
                 .returning(["last_edited_at", "graph"])

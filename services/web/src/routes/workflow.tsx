@@ -64,7 +64,10 @@ function WorkflowIndex() {
         },
     })
     const saveGraph = (graph: string) => {
-        saveGraphMutation.mutate({ graph, workflowId })
+        saveGraphMutation.mutate({
+            workflowId, graph,
+            clientTimestamp: new Date(),
+        })
     }
 
     useEffect(() => {

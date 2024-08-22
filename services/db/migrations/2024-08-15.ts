@@ -106,6 +106,7 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("trigger_config", "jsonb", (col) => col.notNull().defaultTo("{}"))
         .addColumn("last_edited_at", "timestamptz")
         .addColumn("last_ran_at", "timestamptz")
+        .addColumn("last_save_client_timestamp", "timestamptz")
         .execute()
 
     await db.schema.createTable("workflow_snapshots").ifNotExists()

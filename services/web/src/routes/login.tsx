@@ -41,7 +41,9 @@ function LoginIndex() {
         <Helmet>
             <title>Sign In - WorkflowDog</title>
         </Helmet>
-        <div className="w-screen h-screen grid grid-cols-2 p-4 bg-gray-200 bg-dots">
+        <div className="w-screen h-screen grid grid-cols-2 p-4 bg-white bg-dots" style={{
+            "--dots-color": "var(--color-gray-200)",
+        } as any}>
             <div className="bg-primary rounded-xl p-4 grid place-items-center relative">
                 <img
                     className="w-auto h-20"

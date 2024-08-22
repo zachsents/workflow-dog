@@ -167,13 +167,12 @@ function Viewport({ children }: { children: React.ReactNode }) {
         >
             {/* Background / Interaction Box */}
             <motion.div
-                className="absolute top-0 left-0 w-full h-full z-0 bg-dots bg-gray-300 cursor-grab"
+                className="absolute top-0 left-0 w-full h-full z-0 bg-dots bg-white cursor-grab"
                 style={{
                     backgroundPositionX: pan.x,
                     backgroundPositionY: pan.y,
-                    // backgroundPositionX: useMotionTemplate`calc(50% + ${pan.x}px)`,
-                    // backgroundPositionY: useMotionTemplate`calc(50% + ${pan.y}px)`,
                     backgroundSize: useTransform(() => `${24 * zoom.get()}px ${24 * zoom.get()}px`),
+                    ...{ "--dots-color": "var(--color-gray-300)" } as any,
                 }}
                 animate={{ cursor: isBoxSelecting ? "crosshair" : "grab" }}
                 whileTap={{ cursor: isBoxSelecting ? "crosshair" : "grabbing" }}

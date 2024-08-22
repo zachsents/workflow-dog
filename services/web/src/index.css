@@ -156,11 +156,8 @@ body {
 }
 
 .bg-dots {
-    background-image:
-        linear-gradient(to right, transparent 2px, var(--dots-color, white) var(--dot-size, 1px)),
-        linear-gradient(to bottom, transparent 2px, var(--dots-color, white) var(--dot-size, 1px));
-    background-size: var(--bg-size, 24px) var(--bg-size, 24px);
-    background-position: 0 0, calc(var(--bg-size, 24px) / 2) calc(var(--bg-size, 24px) / 2);
+    background-image: radial-gradient(circle at center, var(--dots-color, white) 6%, transparent 6%);
+    background-size: 24px 24px;
 }
 
 .react-flow__edges {

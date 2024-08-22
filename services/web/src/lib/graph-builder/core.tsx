@@ -1803,6 +1803,7 @@ function useUndoRedo() {
             nodes: new Map(fromHistory.nodes.map(n => [n.id, n])),
             edges: new Map(fromHistory.edges.map(e => [e.id, e])),
         })
+        gbx.options.onGraphChange?.(last)
     }
 
     function redo() {
@@ -1820,6 +1821,7 @@ function useUndoRedo() {
             nodes: new Map(fromHistory.nodes.map(n => [n.id, n])),
             edges: new Map(fromHistory.edges.map(e => [e.id, e])),
         })
+        gbx.options.onGraphChange?.(last)
     }
 
     return { undo, redo }

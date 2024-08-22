@@ -2,7 +2,7 @@ import { Anchor as PopoverAnchor } from "@radix-ui/react-popover"
 import useMergedRef from "@react-hook/merged-ref"
 import useResizeObserver from "@react-hook/resize-observer"
 import { useDebouncedCallback, useLocalStorageValue } from "@react-hookz/web"
-import { IconArrowLeftSquare, IconArrowRightSquare, IconClipboard, IconConfetti, IconConfettiOff, IconCopy, IconFlame, IconPalette, IconPaletteOff, IconPin, IconPinnedOff, IconScissors, IconTrash, IconX } from "@tabler/icons-react"
+import { IconArrowLeftSquare, IconArrowRightSquare, IconBook, IconClipboard, IconConfetti, IconConfettiOff, IconCopy, IconExternalLink, IconFlame, IconPalette, IconPaletteOff, IconPin, IconPinnedOff, IconScissors, IconTrash, IconX } from "@tabler/icons-react"
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@ui/command"
 import Kbd from "@web/components/kbd"
 import SearchInput from "@web/components/search-input"
@@ -481,10 +481,33 @@ function ContextMenu() {
                                                 closePopover()
                                             }}
                                             className="flex items-center gap-2 px-4"
-                                        // style={{ color: definition.color }}
                                         >
-                                            <TI><def.icon /></TI>
-                                            <span>{def.name}</span>
+                                            <div className="text-white p-1 rounded-sm shrink-0" style={{ backgroundColor: def.color }}>
+                                                <TI><def.icon /></TI>
+                                            </div>
+                                            <div className="flex-1">
+                                                <p>{def.name}</p>
+                                                <p className="text-xs text-muted-foreground">{def.description}</p>
+                                            </div>
+                                            <SimpleTooltip
+                                                tooltip={<div className="flex-center gap-1">
+                                                    Learn about this action
+                                                    <TI><IconExternalLink /></TI>
+                                                </div>}
+                                                contentProps={{ side: "right" }}
+                                            >
+                                                <Button
+                                                    className="shrink-0 text-muted-foreground" variant="ghost" size="icon" asChild
+                                                    onClick={ev => {
+                                                        ev.stopPropagation()
+                                                        closePopover()
+                                                    }}
+                                                >
+                                                    <a href={`https://learn.workflow.dog/actions/${def.id}`} target="_blank">
+                                                        <TI><IconBook /></TI>
+                                                    </a>
+                                                </Button>
+                                            </SimpleTooltip>
                                         </CommandItem>
                                     )
                                 })}

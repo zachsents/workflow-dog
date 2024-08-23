@@ -25,6 +25,9 @@ const LOADERS = {
         })
         return null
     },
+    WorkflowsList: () => {
+        return replace(t`/projects/${window.localStorage.getItem("currentProjectId")}/workflows` ?? "/projects")
+    },
     MustBeLoggedIn: async () => {
         return await isLoggedIn() ? null : replace("/login")
     },
@@ -94,8 +97,9 @@ export const router = createBrowserRouter(createRoutesFromElements(
             </Route>
         </Route>
 
-        <Route path="workflows/:workflowId" loader={LOADERS.MustBeLoggedIn}>
-            <Route index element={<Workflow.Index />} />
+        <Route path="workflows" loader={LOADERS.MustBeLoggedIn}>
+            <Route index loader={LOADERS.WorkflowsList} />
+            <Route path=":workflowId" element={<Workflow.Index />} />
         </Route>
 
         <Route path="invitations/:invitationId/accept" element={LOADING_SCREEN} loader={LOADERS.AcceptInvitation} />

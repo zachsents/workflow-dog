@@ -691,7 +691,7 @@ function SelectionToolbar() {
                                 icon={IconPalette}
                             />
                         </PopoverTrigger>
-                        <PopoverContent sideOffset={10} className="p-1 flex-center gap-1 *:text-xl">
+                        <PopoverContent sideOffset={10} className="p-1 flex-center gap-1 *:text-xl w-auto">
                             <Button
                                 variant="ghost" size="icon"
                                 onClick={() => setHighlightColor(null)}
@@ -703,6 +703,12 @@ function SelectionToolbar() {
                                 onClick={() => setHighlightColor("red")}
                             >
                                 <div className="bg-red-500 rounded-full w-[1em] h-[1em]" />
+                            </Button>
+                            <Button
+                                variant="ghost" size="icon"
+                                onClick={() => setHighlightColor("orange")}
+                            >
+                                <div className="bg-orange-500 rounded-full w-[1em] h-[1em]" />
                             </Button>
                             <Button
                                 variant="ghost" size="icon"
@@ -718,9 +724,27 @@ function SelectionToolbar() {
                             </Button>
                             <Button
                                 variant="ghost" size="icon"
+                                onClick={() => setHighlightColor("cyan")}
+                            >
+                                <div className="bg-cyan-500 rounded-full w-[1em] h-[1em]" />
+                            </Button>
+                            <Button
+                                variant="ghost" size="icon"
                                 onClick={() => setHighlightColor("blue")}
                             >
                                 <div className="bg-blue-500 rounded-full w-[1em] h-[1em]" />
+                            </Button>
+                            <Button
+                                variant="ghost" size="icon"
+                                onClick={() => setHighlightColor("violet")}
+                            >
+                                <div className="bg-violet-500 rounded-full w-[1em] h-[1em]" />
+                            </Button>
+                            <Button
+                                variant="ghost" size="icon"
+                                onClick={() => setHighlightColor("pink")}
+                            >
+                                <div className="bg-pink-500 rounded-full w-[1em] h-[1em]" />
                             </Button>
                         </PopoverContent>
                     </Popover>
@@ -1409,7 +1433,15 @@ export class GraphBuilder {
     }
 
     getNodeDefinition(definitionId: string) {
-        return this.options.nodeDefinitions[definitionId]
+        let def = this.options.nodeDefinitions[definitionId]
+
+        if (!def) {
+            def = this.options.nodeDefinitions[`node:${definitionId}`]
+            if (def) console.warn(`Found node definition using old format ("${definitionId}"). Please update your code to use the new format ("node:${definitionId}").`)
+        }
+
+        if (!def) throw new Error(`Node definition not found: ${definitionId}`)
+        return def
     }
 
     getNodeDefinitionForNode(nodeId: string) {
@@ -1736,7 +1768,7 @@ function EdgeLabel({
 
 function usePinnedNodes() {
     const pinnedNodes = useLocalStorageValue("graph-builder-pinned-nodes", {
-        defaultValue: ["primitives/text", "primitives/number"],
+        defaultValue: ["node:primitives/text", "node:primitives/number"],
         initializeWithValue: true,
     })
     const addPinnedNode = (defId: string) => pinnedNodes.set(Array.from(new Set([...pinnedNodes.value, defId])))

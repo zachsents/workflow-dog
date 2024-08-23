@@ -31,8 +31,8 @@ export function handleIndexingId(name: string, index?: number) {
 
 
 export function getDefinitionPackageName(definitionId: string) {
-    const segments = definitionId.split("/")
-    return segments.length > 1
+    const segments = definitionId.split(/[/:]/g)
+    return segments.length > 2
         ? segments[0].toLowerCase()
             .replaceAll(/[^A-Za-z0-9]+/g, " ")
             .replaceAll(/(?<!\w)[a-z]/g, c => c.toUpperCase())

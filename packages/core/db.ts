@@ -331,6 +331,8 @@ export interface AuthUserRoles {
 
 export interface EventSources {
   created_at: Generated<Timestamp>;
+  definition_id: string;
+  enabled_event_types: Generated<string[]>;
   id: Generated<string>;
   state: Generated<Json>;
 }
@@ -397,7 +399,7 @@ export interface WorkflowRuns {
   created_at: Generated<Timestamp>;
   event_payload: Generated<Json>;
   finished_at: Timestamp | null;
-  global_error: Generated<Json | null>;
+  global_error: Json | null;
   id: Generated<string>;
   node_errors: Generated<Json>;
   numeric_id: number | null;

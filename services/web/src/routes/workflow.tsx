@@ -1,20 +1,22 @@
-import { IconArrowLeft, IconChevronDown, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPointFilled, IconRouteSquare2, IconTrash } from "@tabler/icons-react"
+import { IconArrowLeft, IconChevronDown, IconLayoutSidebarLeftExpandFilled, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPointFilled, IconRouteSquare2, IconRun, IconTrash, IconX } from "@tabler/icons-react"
 import ConfirmDialog from "@web/components/confirm-dialog"
 import RenameWorkflowDialog from "@web/components/rename-workflow-dialog"
 import SpinningLoader from "@web/components/spinning-loader"
 import TI from "@web/components/tabler-icon"
 import { Button } from "@web/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@web/components/ui/dropdown-menu"
+import { ScrollArea } from "@web/components/ui/scroll-area"
 import VerticalDivider from "@web/components/vertical-divider"
 import { GBRoot } from "@web/lib/graph-builder/core"
 import { useCurrentWorkflow, useCurrentWorkflowId, useDialogState } from "@web/lib/hooks"
 import { trpc } from "@web/lib/trpc"
+import { cn } from "@web/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect } from "react"
 import { Helmet } from "react-helmet"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
-import { ClientNodeDefinitions } from "workflow-packages/client"
+import { ClientEventTypes, ClientNodeDefinitions } from "workflow-packages/client"
 
 
 function WorkflowIndex() {
@@ -105,7 +107,7 @@ function WorkflowIndex() {
                             </p>
                             <TI className="text-muted-foreground group-hover:text-background transition-colors"><IconChevronDown /></TI>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent side="bottom" className="*:flex *:items-center *:gap-2 w-[200px]">
+                        <DropdownMenuContent side="bottom" className="*:flex *:items-center *:gap-2 w-[200px] z-[200]">
                             <DropdownMenuItem onSelect={renameDialog.open}>
                                 <TI><IconPencil /></TI>
                                 Rename Workflow
@@ -134,7 +136,7 @@ function WorkflowIndex() {
                                 <TI className="ml-1"><IconChevronDown /></TI>
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent side="bottom" className="*:flex *:items-center *:gap-4 w-[300px]">
+                        <DropdownMenuContent side="bottom" className="*:flex *:items-center *:gap-4 w-[300px] z-[200]">
                             {workflow.is_enabled
                                 ? <DropdownMenuItem onSelect={() => setEnabled(false)}>
                                     <TI><IconPlayerPauseFilled /></TI>
@@ -163,7 +165,7 @@ function WorkflowIndex() {
                         <NavLink to="history" replace>History</NavLink>
                     </div> */}
 
-                    <p className="self-center mx-4 text-xs text-center text-muted-foreground">
+                    <p className="self-center mx-4 text-xs text-center text-muted-foreground select-none">
                         {saveGraphMutation.isPending
                             ? "Saving..."
                             : saveGraphMutation.isSuccess
@@ -185,6 +187,7 @@ function WorkflowIndex() {
                         },
                     }}
                 >
+                    <TriggerPanel />
                 </GBRoot>
 
                 <RenameWorkflowDialog workflow={workflow} {...renameDialog.dialogProps} />
@@ -211,3 +214,88 @@ function WorkflowIndex() {
 
 const Workflow = { Index: WorkflowIndex }
 export default Workflow
+
+
+function TriggerPanel() {
+
+    // const workflowId = useCurrentWorkflowId()
+    const workflow = useCurrentWorkflow().data!
+
+    const [params, setParams] = useSearchParams()
+    const isOpen = params.get("trigger") != null
+    const setOpen = (open: boolean) => {
+        if (open) params.set("trigger", "")
+        else params.delete("trigger")
+        setParams(params.toString())
+    }
+
+    const eventType = ClientEventTypes[workflow.trigger_event_type_id]
+    if (!eventType) throw new Error(`Unknown event type: ${workflow.trigger_event_type_id}`)
+
+    return <>
+        <Button
+            variant="outline"
+            className={cn(
+                "absolute top-2 left-2 z-[100] gap-4 text-sm shadow-md bg-white/90 transition-opacity",
+                isOpen && "opacity-0 pointer-events-none",
+            )}
+            onClick={() => setOpen(true)}
+        >
+            <div className="flex-center gap-1 text-xs text-muted-foreground">
+                <TI><IconRun /></TI>
+                Trigger
+            </div>
+            <VerticalDivider className="self-stretch" />
+            <span>
+                {ClientEventTypes[workflow.trigger_event_type_id]?.whenName ?? "Unknown trigger"}
+            </span>
+            <TI className="text-muted-foreground"><IconLayoutSidebarLeftExpandFilled /></TI>
+        </Button>
+
+        <div
+            className={cn(
+                "absolute z-[100] top-0 left-0 w-full h-full bg-black/10 transition-opacity",
+                !isOpen && "opacity-0 pointer-events-none",
+            )}
+            onPointerDown={() => setOpen(false)}
+        />
+
+        <div className={cn(
+            "absolute top-0 left-0 z-[100] h-full bg-white w-[400px] border-r shadow-xl transition flex-col items-stretch",
+            !isOpen && "opacity-0 -translate-x-2 pointer-events-none",
+        )}>
+            <div className="flex items-center justify-between gap-4 no-shrink-children p-4 border-b">
+                <h2 className="text-xl font-medium">Configure Trigger</h2>
+                <Button variant="ghost" size="icon" className="text-md" onClick={() => setOpen(false)}>
+                    <TI><IconX /></TI>
+                </Button>
+            </div>
+
+            <div className="grid gap-x-4 gap-y-3 items-center p-4 border-b" style={{
+                gridTemplateColumns: "auto 1fr",
+            }}>
+                <div
+                    className="text-white p-2 text-lg rounded-sm"
+                    style={{ backgroundColor: eventType.color }}
+                >
+                    <TI><eventType.icon /></TI>
+                </div>
+                <div>
+                    <p className="font-medium">{eventType.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                        {eventType.whenName}
+                    </p>
+                </div>
+                <p className="text-xs text-muted-foreground col-span-full">
+                    {eventType.description}
+                </p>
+            </div>
+
+            <ScrollArea className="flex-1 min-h-0 w-full">
+                <div className="p-4">
+                    {eventType.sourceComponent && <eventType.sourceComponent />}
+                </div>
+            </ScrollArea>
+        </div>
+    </>
+}

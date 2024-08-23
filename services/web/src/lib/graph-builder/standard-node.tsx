@@ -103,7 +103,7 @@ export function StandardNode({
                     </PopoverTrigger>
                     <PopoverContent
                         side="bottom" sideOffset={16}
-                        className="px-2 py-4 flex flex-col items-stretch gap-2"
+                        className="px-2 py-4 flex flex-col items-stretch gap-4"
                     >
                         {configItems}
                     </PopoverContent>

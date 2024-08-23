@@ -2,6 +2,8 @@ import { TRPCError } from "@trpc/server"
 import type { ProjectPermission } from "core/db"
 import { WORKFLOW_NAME_SCHEMA } from "core/schemas"
 import { sql } from "kysely"
+import _ from "lodash"
+import { ServerEventSources, ServerEventTypes } from "workflow-packages/server"
 import { z } from "zod"
 import { authenticatedProcedure } from ".."
 import { userHasProjectPermission } from "../../lib/auth-checks"
@@ -28,7 +30,7 @@ export default {
             return db.selectFrom("workflows")
                 .selectAll()
                 .where("project_id", "=", ctx.projectId)
-                .where("trigger_event_type_id", "=", "primitives/callable")
+                .where("trigger_event_type_id", "=", "eventType:primitives/callable")
                 .where("id", "not in", input.excluding)
                 .orderBy("workflows.name")
                 .execute()
@@ -98,6 +100,54 @@ export default {
                     .returning("id")
                     .executeTakeFirstOrThrow()
 
+                const initializer = await ServerEventTypes[input.triggerEventTypeId].createEventSources({
+                    workflowId: newWorkflow.id,
+                })
+
+                initializer.map(async init => {
+                    const eventSourceDef = ServerEventSources[init.definitionId]
+
+                    // TODO: figure out how to prevent this if the event type
+                    // doesnt support immediate creation.
+
+                    const existingSource = await trx.selectFrom("event_sources")
+                        .selectAll()
+                        .where("id", "=", init.id)
+                        .executeTakeFirst()
+
+                    if (!existingSource) {
+                        const result = await eventSourceDef.setup({
+                            initializer: init,
+                            enabledEventTypes: [input.triggerEventTypeId],
+                        })
+
+                        return trx.insertInto("event_sources").values({
+                            id: init.id,
+                            definition_id: init.definitionId,
+                            enabled_event_types: [input.triggerEventTypeId],
+                            state: _.merge({}, init.state ?? {}, result?.state ?? {}),
+                        }).executeTakeFirstOrThrow()
+                    }
+
+                    if (existingSource.definition_id !== init.definitionId)
+                        throw new Error("Event Source definition mismatch. This is a bug.")
+
+                    if (!existingSource.enabled_event_types.includes(input.triggerEventTypeId)) {
+                        const result = await eventSourceDef.addEventTypes(existingSource, [input.triggerEventTypeId])
+
+                        return trx.updateTable("event_sources").set({
+                            enabled_event_types: [...existingSource.enabled_event_types, input.triggerEventTypeId],
+                            state: _.merge({}, existingSource.state ?? {}, init.state ?? {}, result?.state ?? {}),
+                        }).where("id", "=", init.id).executeTakeFirstOrThrow()
+                    }
+
+                    return trx.updateTable("event_sources").set({
+                        state: _.merge({}, existingSource.state ?? {}, init.state ?? {}),
+                    }).where("id", "=", init.id).executeTakeFirstOrThrow()
+                })
+
+                // TO DO: add join relationship in workflows_event_sources
+
                 return newWorkflow
             })
         }),
@@ -130,42 +180,8 @@ export default {
                 .executeTakeFirstOrThrow()
         }),
 
-    // updateGraph: t.procedure
-    //     .input(z.object({
-    //         workflowId: z.string().uuid(),
-    //         graph: z.object({
-    //             nodes: z.any().array(),
-    //             edges: z.any().array(),
-    //         }),
-    //     }))
-    //     .mutation(async ({ input, ctx }) => {
-    //         assertAuthenticated(ctx)
-    //         assert(
-    //             await userHasProjectPermission(ctx.userId!, "write")
-    //                 .byWorkflowId(input.workflowId),
-    //             forbidden()
-    //         )
 
-    //         await db.transaction().execute(trx => Promise.all([
-    //             trx.updateTable("workflow_graphs")
-    //                 .set({
-    //                     nodes: JSON.stringify(input.graph.nodes),
-    //                     edges: JSON.stringify(input.graph.edges),
-    //                 })
-    //                 .where(
-    //                     "id", "=",
-    //                     eb => eb.selectFrom("workflows")
-    //                         .select("current_graph_id")
-    //                         .where("id", "=", input.workflowId)
-    //                 )
-    //                 .executeTakeFirstOrThrow(),
 
-    //             trx.updateTable("workflows")
-    //                 .set({ last_edited_at: new Date() })
-    //                 .where("id", "=", input.workflowId)
-    //                 .executeTakeFirstOrThrow()
-    //         ]))
-    //     }),
 
     // runManually: t.procedure
     //     .input(z.object({

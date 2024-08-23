@@ -8,4 +8,6 @@
     "editor.quickSuggestionsDelay": 1,
     "editor.suggest.preview": true,
     "typescript.tsdk": "node_modules/typescript/lib",
+    "workbench.editor.customLabels.enabled": true,
+    "workbench.editor.customLabels.patterns": {}
 }

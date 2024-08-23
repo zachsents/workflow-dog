@@ -32,9 +32,9 @@ const eventTypeSearchList = Object.values(ClientEventTypes)
     }))
 
 const mostPopularTriggers = [
-    "primitives/callable",
-    "primitives/schedule",
-    "primitives/webhook",
+    "eventType:primitives/callable",
+    "eventType:primitives/schedule",
+    "eventType:primitives/webhook",
 ]
 
 export default function ProjectCreateWorkflow() {
@@ -54,7 +54,11 @@ export default function ProjectCreateWorkflow() {
     const createWorkflow = trpc.workflows.create.useMutation({
         onSuccess: ({ id: workflowId }) => {
             toast.success("Workflow created!")
-            navigate(`/workflows/${workflowId}`)
+            navigate(
+                ClientEventTypes[form.getValues().triggerEventTypeId]?.eventSourceCreation === "created"
+                    ? `/workflows/${workflowId}?trigger`
+                    : `/workflows/${workflowId}`
+            )
             utils.workflows.list.invalidate()
         },
     })

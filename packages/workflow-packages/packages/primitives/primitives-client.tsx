@@ -1,18 +1,23 @@
 import useResizeObserver from "@react-hook/resize-observer"
-import { IconClock, IconHash, IconLink, IconRouteSquare2, IconTextSize, IconToggleLeftFilled, IconWebhook } from "@tabler/icons-react"
+import { IconClock, IconExternalLink, IconHash, IconLink, IconRouteSquare2, IconTextSize, IconToggleLeftFilled, IconWebhook } from "@tabler/icons-react"
 import { useMemo, useRef } from "react"
-import { StandardNode } from "web/src/lib/graph-builder/standard-node"
+import { Link } from "react-router-dom"
+import TI from "web/src/components/tabler-icon"
+import { Button } from "web/src/components/ui/button"
 import { Input } from "web/src/components/ui/input"
 import { Switch } from "web/src/components/ui/switch"
 import { Textarea } from "web/src/components/ui/textarea"
 import { useGraphBuilder, useNodeId } from "web/src/lib/graph-builder/core"
+import { StandardNode } from "web/src/lib/graph-builder/standard-node"
+import { useCurrentWorkflow } from "web/src/lib/hooks"
+import { t } from "web/src/lib/utils"
 import { useValueType } from "workflow-types/react"
 import { createPackageHelper } from "../../client-registry"
 
 
 const helper = createPackageHelper("primitives")
 
-
+// #region Node: Text
 helper.registerNodeDef("text", {
     name: "Text",
     description: "Some fixed text.",
@@ -60,6 +65,7 @@ helper.registerNodeDef("text", {
     },
 })
 
+// #region Node: Number
 helper.registerNodeDef("number", {
     name: "Number",
     description: "A number.",
@@ -92,6 +98,7 @@ helper.registerNodeDef("number", {
     },
 })
 
+// #region Node: Switch
 helper.registerNodeDef("boolean", {
     name: "Switch",
     description: "A true or false value.",
@@ -115,6 +122,7 @@ helper.registerNodeDef("boolean", {
     },
 })
 
+// #region EventType: Callable
 helper.registerEventType("callable", {
     name: "Callable",
     whenName: "When another workflow calls this one",
@@ -133,9 +141,29 @@ helper.registerEventType("callable", {
             description: "The data returned from this workflow. This will be available to the workflow that called it.",
             valueType: null,
         },
-    }
+    },
+    eventSourceCreation: "assigned",
+    sourceComponent: () => {
+        const workflow = useCurrentWorkflow().data
+        return (
+            <div>
+                <p className="text-sm">
+                    This workflow will run when you use a <a href="https://learn.workflow.dog/actions/run-workflow" target="_blank" className="font-bold text-primary inline-flex items-center gap-1 hover:underline">
+                        Run Workflow
+                        <TI><IconExternalLink /></TI>
+                    </a> action in another workflow.
+                </p>
+                <Button asChild variant="link" className="inline-block px-0">
+                    <Link to={t`/projects/${workflow?.project_id}/workflows/create` ?? "/workflows"}>
+                        Create a new workflow
+                    </Link>
+                </Button>
+            </div>
+        )
+    },
 })
 
+// #region EventType: Webhook
 helper.registerEventType("webhook", {
     name: "Webhook",
     whenName: "When a webhook is received",
@@ -165,8 +193,10 @@ helper.registerEventType("webhook", {
             valueType: useValueType("record", [useValueType("string")]),
         },
     },
+    eventSourceCreation: "assigned",
 })
 
+// #region EventType: HTTP Request
 helper.registerEventType("httpRequest", {
     name: "HTTP Request",
     whenName: "When a HTTP request is received",
@@ -196,8 +226,21 @@ helper.registerEventType("httpRequest", {
             valueType: useValueType("record", [useValueType("string")]),
         },
     },
+    eventSourceCreation: "configured",
+    sourceComponent: () => {
+        const workflow = useCurrentWorkflow().data!
+        return (
+            <form onSubmit={ev => ev.preventDefault()}>
+                <Input placeholder="**" />
+                <p className="break-all text-xs font-mono">
+                    https://run.workflow.dog/x/{workflow.project_id}
+                </p>
+            </form>
+        )
+    },
 })
 
+// #region EventType: Schedule
 helper.registerEventType("schedule", {
     name: "Schedule",
     whenName: "On a schedule",
@@ -211,5 +254,13 @@ helper.registerEventType("schedule", {
             description: "The date & time at which the event occurred.",
             valueType: useValueType("timestamp"),
         },
+    },
+    eventSourceCreation: "configured",
+    sourceComponent: () => {
+        return (
+            <div>
+                This will render a list of calendar pickers.
+            </div>
+        )
     },
 })

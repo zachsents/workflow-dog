@@ -100,28 +100,29 @@ export default {
                     .returning("id")
                     .executeTakeFirstOrThrow()
 
-                const initializer = await ServerEventTypes[input.triggerEventTypeId].createEventSources({
+                const initializers = await ServerEventTypes[input.triggerEventTypeId].createEventSources({
                     workflowId: newWorkflow.id,
                 })
 
-                initializer.map(async init => {
+                const initTasks = initializers.map(async init => {
                     const eventSourceDef = ServerEventSources[init.definitionId]
-
-                    // TODO: figure out how to prevent this if the event type
-                    // doesnt support immediate creation.
 
                     const existingSource = await trx.selectFrom("event_sources")
                         .selectAll()
                         .where("id", "=", init.id)
                         .executeTakeFirst()
 
+                    if (existingSource && existingSource.definition_id !== init.definitionId)
+                        throw new Error("Event Source definition mismatch. This is a bug.")
+
+                    // CASE 1: Source doesn't exist yet
                     if (!existingSource) {
                         const result = await eventSourceDef.setup({
                             initializer: init,
                             enabledEventTypes: [input.triggerEventTypeId],
                         })
 
-                        return trx.insertInto("event_sources").values({
+                        await trx.insertInto("event_sources").values({
                             id: init.id,
                             definition_id: init.definitionId,
                             enabled_event_types: [input.triggerEventTypeId],
@@ -129,25 +130,30 @@ export default {
                         }).executeTakeFirstOrThrow()
                     }
 
-                    if (existingSource.definition_id !== init.definitionId)
-                        throw new Error("Event Source definition mismatch. This is a bug.")
-
-                    if (!existingSource.enabled_event_types.includes(input.triggerEventTypeId)) {
+                    // CASE 2: Source already exists, but isn't set up for this event type
+                    else if (!existingSource.enabled_event_types.includes(input.triggerEventTypeId)) {
                         const result = await eventSourceDef.addEventTypes(existingSource, [input.triggerEventTypeId])
 
-                        return trx.updateTable("event_sources").set({
+                        await trx.updateTable("event_sources").set({
                             enabled_event_types: [...existingSource.enabled_event_types, input.triggerEventTypeId],
                             state: _.merge({}, existingSource.state ?? {}, init.state ?? {}, result?.state ?? {}),
                         }).where("id", "=", init.id).executeTakeFirstOrThrow()
                     }
 
-                    return trx.updateTable("event_sources").set({
-                        state: _.merge({}, existingSource.state ?? {}, init.state ?? {}),
-                    }).where("id", "=", init.id).executeTakeFirstOrThrow()
+                    // CASE 3: Source already exists, and is set up for this event type
+                    else {
+                        await trx.updateTable("event_sources").set({
+                            state: _.merge({}, existingSource.state ?? {}, init.state ?? {}),
+                        }).where("id", "=", init.id).executeTakeFirstOrThrow()
+                    }
+
+                    await trx.insertInto("workflows_event_sources").values({
+                        workflow_id: newWorkflow.id,
+                        event_source_id: init.id,
+                    }).executeTakeFirstOrThrow()
                 })
 
-                // TO DO: add join relationship in workflows_event_sources
-
+                await Promise.all(initTasks)
                 return newWorkflow
             })
         }),

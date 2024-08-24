@@ -1,7 +1,7 @@
 import { Anchor as PopoverAnchor } from "@radix-ui/react-popover"
 import useMergedRef from "@react-hook/merged-ref"
 import useResizeObserver from "@react-hook/resize-observer"
-import { useDebouncedCallback, useLocalStorageValue } from "@react-hookz/web"
+import { useDebouncedCallback, useLocalStorageValue, useRerender } from "@react-hookz/web"
 import { IconArrowLeftSquare, IconArrowRightSquare, IconBook, IconClipboard, IconConfetti, IconConfettiOff, IconCopy, IconExternalLink, IconFlame, IconPalette, IconPaletteOff, IconPin, IconPinnedOff, IconScissors, IconTrash, IconX } from "@tabler/icons-react"
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@ui/command"
 import Kbd from "@web/components/kbd"
@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from "@web/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import VerticalDivider from "@web/components/vertical-divider"
-import { useBooleanState, useDialogState, useKeyState, useMotionValueState } from "@web/lib/hooks"
+import { useBooleanState, useDialogState, useKeyState, useMotionValueState, useOnceEffect } from "@web/lib/hooks"
 import { cn } from "@web/lib/utils"
 import { createRandomId, IdNamespace } from "core/ids"
 import { AnimatePresence, motion, motionValue, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, type Transition } from "framer-motion"
@@ -913,6 +913,10 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
 // #region EdgeRenderer
 function EdgeRenderer() {
     const gbx = useGraphBuilder()
+
+    const zoom = gbx.useStore(s => s.zoom)
+    const pan = gbx.useStore(s => s.pan)
+
     const edges = gbx.useStore(useShallow(
         s => Array.from(s.edges.values())
             .filter(e => {
@@ -924,14 +928,24 @@ function EdgeRenderer() {
 
     const connection = gbx.useStore(s => s.connection)
 
+    /*
+    There's a bug where the EdgeRenderer doesn't react to the initial
+    centering of the viewport. Not sure why this is, as a console.log
+    shows the correct value. Could be a Framer Motion bug.
+    */
+    const rerender = useRerender()
+    useOnceEffect(() => {
+        rerender()
+    })
+
     return (
-        <svg
+        <motion.svg
             className="absolute z-[9] top-0 left-0 w-full h-full pointer-events-none"
         >
             <motion.g x={0} y={0} width={0} height={0} style={{
-                x: gbx.state.pan.x,
-                y: gbx.state.pan.y,
-                scale: gbx.state.zoom,
+                x: pan.x,
+                y: pan.y,
+                scale: zoom,
                 originX: "0px",
                 originY: "0px",
             }}>
@@ -939,7 +953,7 @@ function EdgeRenderer() {
 
                 {connection && <ConnectionLine />}
             </motion.g>
-        </svg>
+        </motion.svg>
     )
 }
 

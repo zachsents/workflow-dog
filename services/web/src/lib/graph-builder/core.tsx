@@ -666,7 +666,7 @@ function SelectionToolbar() {
                         }}
                         icon={IconArrowRightSquare}
                         hotkey="shift+ArrowRight"
-                        shortcut={["\u21e7", "\u21e7"]}
+                        shortcut={["\u21e7", "\u2192"]}
                     />
                     <VerticalDivider className="mx-1" />
                     <SelectionToolbarButton

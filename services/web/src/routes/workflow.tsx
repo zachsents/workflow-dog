@@ -8,11 +8,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ScrollArea } from "@web/components/ui/scroll-area"
 import VerticalDivider from "@web/components/vertical-divider"
 import { GBRoot } from "@web/lib/graph-builder/core"
-import { useCurrentWorkflow, useCurrentWorkflowId, useDialogState } from "@web/lib/hooks"
+import { useCurrentWorkflow, useCurrentWorkflowId, useDialogState, usePreventUnloadWhileSaving } from "@web/lib/hooks"
 import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
-import { useEffect } from "react"
 import { Helmet } from "react-helmet"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
@@ -72,12 +71,7 @@ function WorkflowIndex() {
         })
     }
 
-    useEffect(() => {
-        if (!saveGraphMutation.isPending) return
-        const ac = new AbortController()
-        window.addEventListener("beforeunload", e => e.preventDefault(), { signal: ac.signal })
-        return () => ac.abort()
-    }, [saveGraphMutation.isPending])
+    usePreventUnloadWhileSaving(saveGraphMutation.isPending)
 
     return <>
         <Helmet>
@@ -218,7 +212,7 @@ export default Workflow
 
 function TriggerPanel() {
 
-    // const workflowId = useCurrentWorkflowId()
+    const workflowId = useCurrentWorkflowId()
     const workflow = useCurrentWorkflow().data!
 
     const [params, setParams] = useSearchParams()
@@ -291,9 +285,13 @@ function TriggerPanel() {
                 </p>
             </div>
 
-            <ScrollArea className="flex-1 min-h-0 w-full">
+            <ScrollArea className="flex-1 min-h-0 w-full relative">
                 <div className="p-4">
-                    {eventType.sourceComponent && <eventType.sourceComponent />}
+                    {eventType.sourceComponent &&
+                        <eventType.sourceComponent
+                            workflowId={workflowId}
+                            eventSources={workflow.eventSources}
+                        />}
                 </div>
             </ScrollArea>
         </div>

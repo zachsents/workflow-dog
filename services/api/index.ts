@@ -18,6 +18,8 @@ import { db } from "./lib/db"
 import { useEnvVar } from "./lib/utils"
 import { createContext } from "./trpc"
 import { apiRouter } from "./trpc/router"
+import "./lib/bullmq"
+import { RUN_QUEUE } from "./lib/bullmq"
 
 
 const port = process.env.PORT || 3001
@@ -92,8 +94,8 @@ app.all("/api/run/*", bodyParser.raw({ type: "*/*" }), async (req, res) => {
 
     const [{ events }, subscribedWorkflows] = await Promise.all([genEventsTask, queryWorkflowsTask])
 
-    console.log("Generated events:" + events.map(e => `\n\t- ${e.type}`).join(""))
-    console.log("Found subscribed workflows:" + subscribedWorkflows.map(w => `\n\t- ${w.id}`).join(""))
+    console.log(`Generated events (${events.length}):` + events.map(e => `\n\t- ${e.type}`).join(""))
+    console.log(`Found subscribed workflows (${subscribedWorkflows.length}):` + subscribedWorkflows.map(w => `\n\t- ${w.id}`).join(""))
 
     const newRunsData = await Promise.all(
         subscribedWorkflows.map(async wf => {
@@ -142,6 +144,12 @@ app.all("/api/run/*", bodyParser.raw({ type: "*/*" }), async (req, res) => {
             .execute()
             .then(r => r.map(r => r.id))
         : []
+
+    if (newRunIds.length > 0)
+        await RUN_QUEUE.addBulk(newRunIds.map(id => ({
+            name: id,
+            data: { workflowRunId: id },
+        })))
 
     await updateStateTask // has been running in background
 

@@ -46,3 +46,7 @@ services:
   supertokens:
     ports:
       - ${SUPERTOKENS_PORT}:${SUPERTOKENS_PORT}
+
+  redis:
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}

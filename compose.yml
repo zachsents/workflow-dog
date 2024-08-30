@@ -75,6 +75,8 @@ services:
       - AUTH_GOOGLE_CLIENT_SECRET
       - RESEND_KEY
       - RESEND_GENERAL_AUDIENCE_ID
+      - REDIS_PORT
+      - REDIS_PASSWORD
 
   supertokens:
     container_name: supertokens
@@ -90,5 +92,21 @@ services:
       - SUPERTOKENS_PORT
       - POSTGRESQL_TABLE_SCHEMA=auth
 
+  redis:
+    container_name: redis
+    image: bitnami/redis:latest
+    restart: unless-stopped
+    volumes:
+      - redis-data:/bitnami/redis/data
+    healthcheck:
+      <<: *std_healthcheck
+      test: redis-cli ping -u redis://default:${REDIS_PASSWORD}@localhost:${REDIS_PORT}/0
+    environment:
+      - REDIS_PORT_NUMBER=${REDIS_PORT}
+      - REDIS_MASTER_PORT_NUMBER=${REDIS_PORT}
+      - REDIS_PASSWORD
+      - REDIS_MASTER_PASSWORD=${REDIS_PASSWORD}
+
 volumes:
   db-data:
+  redis-data:

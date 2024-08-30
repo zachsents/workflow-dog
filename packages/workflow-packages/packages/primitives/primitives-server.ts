@@ -3,6 +3,8 @@ import { createHash } from "node:crypto"
 import SuperJSON from "superjson"
 import { z } from "zod"
 import { createPackageHelper } from "../../server-registry"
+import { parseCronExpression } from "cron-schedule"
+import { EVENT_QUEUE } from "api/lib/bullmq"
 
 
 const helper = createPackageHelper("primitives")
@@ -128,10 +130,34 @@ helper.registerEventType("httpRequest", {
 const scheduleEventSource = helper.registerEventSource("schedule", {
     name: "Schedule",
     async setup(options) {
-        // TODO: create actual cron job
+        const { cron, timezone } = z.object({
+            cron: z.string().superRefine((value, ctx) => {
+                try {
+                    parseCronExpression(value)
+                } catch (err: any) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: err.message,
+                    })
+                }
+            }),
+            timezone: z.string(),
+        }).passthrough().parse(options.initializer.state)
+
+        const job = await EVENT_QUEUE.add(options.initializer.id, {}, {
+            repeat: {
+                pattern: cron,
+                tz: timezone,
+            }
+        })
+        return { state: { jobKey: job.repeatJobKey } }
     },
-    async cleanup() {
-        // TODO: delete cron job
+    async cleanup(source) {
+        const {jobKey} = z.object({
+            jobKey: z.string(),
+        }).passthrough().parse(source.state)
+
+        await EVENT_QUEUE.removeRepeatableByKey(jobKey)
     },
     /** Doesn't need to be implemented */
     addEventTypes() { },
@@ -153,13 +179,30 @@ helper.registerEventType("schedule", {
         if (!data) return []
 
         const { schedules } = z.object({
-            schedules: z.string().array(),
+            schedules: z.object({
+                cron: z.string().superRefine((value, ctx) => {
+                    try {
+                        parseCronExpression(value)
+                    } catch (err: any) {
+                        ctx.addIssue({
+                            code: z.ZodIssueCode.custom,
+                            message: err.message,
+                        })
+                    }
+                }),
+                mode: z.enum(["picker", "cron"]),
+                timezone: z.enum(Intl.supportedValuesOf("timeZone") as [string, ...string[]]),
+            }).array(),
         }).parse(data)
 
         return schedules.map(schedule => ({
-            id: createHash("md5").update(schedule).digest("hex"),
+            id: createHash("md5")
+                .update(scheduleEventSource.id)
+                .update(schedule.cron)
+                .update(schedule.timezone)
+                .digest("hex"),
             definitionId: scheduleEventSource.id,
-            state: { schedule },
+            state: schedule,
         }))
     },
     generateRunsFromEvent(event) {

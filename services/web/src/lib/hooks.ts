@@ -1,10 +1,11 @@
 import { useMotionValue, useMotionValueEvent, type MotionValue } from "framer-motion"
 import Fuse, { type IFuseOptions } from "fuse.js"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useHotkeys, type Options as HotKeysOptions } from "react-hotkeys-hook"
 import { useParams, useSearchParams, useNavigate } from "react-router-dom"
 import { trpc } from "./trpc"
 import type { ApiRouterInput } from "api/trpc/router"
+import { usePreviousDistinct } from "@react-hookz/web"
 
 interface UseSearchParamEffectOptions {
     clearAfterEffect?: boolean
@@ -269,4 +270,42 @@ export function useCurrentWorkflow(opts: Omit<ApiRouterInput["workflows"]["byId"
 export function useCurrentProjectIdFromWorkflow() {
     const workflow = useCurrentWorkflow().data
     return workflow?.project_id ?? null
+}
+
+
+export function useControlledState<T>(
+    passedValue?: T,
+    onChange?: (value: T) => void,
+    defaultValue?: T,
+) {
+
+    const isControlled = passedValue !== undefined
+    const wasControlled = usePreviousDistinct(isControlled)
+
+    useEffect(() => {
+        if (isControlled && !wasControlled)
+            console.warn("useControlledState: value is switching from uncontrolled to controlled")
+        if (!isControlled && wasControlled)
+            console.warn("useControlledState: value is switching from controlled to uncontrolled")
+    }, [isControlled, wasControlled])
+
+    const [internal, setInternal] = useState<T | undefined>(isControlled ? passedValue : defaultValue)
+    const value = isControlled ? passedValue : internal
+    const setValue = useCallback((value: T) => {
+        setInternal(value)
+        onChange?.(value)
+    }, [])
+
+    return [value, setValue] as const
+}
+
+
+export function usePreventUnloadWhileSaving(saving: boolean) {
+    useEffect(() => {
+        if (saving) {
+            const ac = new AbortController()
+            window.addEventListener("beforeunload", e => e.preventDefault(), { signal: ac.signal })
+            return () => ac.abort()
+        }
+    }, [saving])
 }

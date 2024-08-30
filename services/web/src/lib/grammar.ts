@@ -17,6 +17,22 @@ export function singular(word: string) {
     return word
 }
 
+export function numberSuffix(n: number | string) {
+    n = parseInt(n.toString())
+    const onesDigit = Math.floor(n) % 10
+    const tensDigit = Math.floor(n / 10) % 10
+
+    if (tensDigit == 1)
+        return "th"
+
+    switch (onesDigit) {
+        case 1: return "st"
+        case 2: return "nd"
+        case 3: return "rd"
+        default: return "th"
+    }
+}
+
 
 export function formatDate(date: Date, showDate = true, showTime = true) {
     return date?.toLocaleString(undefined, {

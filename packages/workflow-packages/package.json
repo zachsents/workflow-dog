@@ -1,21 +1,24 @@
 {
-  "name": "workflow-packages",
-  "module": "index.ts",
-  "type": "module",
-  "dependencies": {
-    "superjson": "^2.2.1",
-    "web": "workspace:*",
-    "workflow-types": "workspace:*",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0",
-    "react": "*",
-    "@tabler/icons-react": "*",
-    "@react-hook/resize-observer": "*",
-    "tailwindcss": "*"
-  }
+    "name": "workflow-packages",
+    "module": "index.ts",
+    "type": "module",
+    "dependencies": {
+        "superjson": "^2.2.1",
+        "web": "workspace:*",
+        "workflow-types": "workspace:*",
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0",
+        "react": "*",
+        "@tabler/icons-react": "*",
+        "@react-hook/resize-observer": "*",
+        "tailwindcss": "*",
+        "cron-schedule": "*",
+        "react-hook-form": "*",
+        "sonner": "*"
+    }
 }

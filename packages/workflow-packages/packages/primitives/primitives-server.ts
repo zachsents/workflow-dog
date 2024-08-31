@@ -10,6 +10,8 @@ import { EVENT_QUEUE } from "api/lib/bullmq"
 const helper = createPackageHelper("primitives")
 
 
+// #region HTTP Endpoints
+
 /**
  * This is the most basic form of an event source, which are all just
  * webhooks with extra functionality. This one is just the webhook.
@@ -126,6 +128,10 @@ helper.registerEventType("httpRequest", {
     },
 })
 
+// #endregion HTTP Endpoints
+
+
+// #region Schedules
 
 const scheduleEventSource = helper.registerEventSource("schedule", {
     name: "Schedule",
@@ -153,7 +159,7 @@ const scheduleEventSource = helper.registerEventSource("schedule", {
         return { state: { jobKey: job.repeatJobKey } }
     },
     async cleanup(source) {
-        const {jobKey} = z.object({
+        const { jobKey } = z.object({
             jobKey: z.string(),
         }).passthrough().parse(source.state)
 
@@ -210,3 +216,4 @@ helper.registerEventType("schedule", {
     },
 })
 
+// #endregion Schedules

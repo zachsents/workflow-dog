@@ -1,7 +1,5 @@
-import type React from "react"
-import type { ValueTypeUsage } from "workflow-types/react"
-import type { EventSourceCreation } from "./shared"
 import type { ApiRouterOutput } from "api/trpc/router"
+import type { ValueTypeUsage } from "workflow-types/react"
 
 export interface ClientDefinition {
     id: string
@@ -24,11 +22,13 @@ export interface ClientEventType extends ClientDefinition {
     whenName: string
     workflowInputs: Record<string, ClientEventTypeIO>
     workflowOutputs: Record<string, ClientEventTypeIO>
-    eventSourceCreation: EventSourceCreation
-    sourceComponent?: React.ComponentType<{ 
-        workflowId: string
-        eventSources: ApiRouterOutput["workflows"]["byId"]["eventSources"]
-    }>
+    requiresConfiguration?: boolean
+    sourceComponent?: React.ComponentType<ClientEventTypeSourceComponentProps>
+}
+
+export type ClientEventTypeSourceComponentProps = {
+    workflowId: string
+    eventSources: ApiRouterOutput["workflows"]["byId"]["eventSources"]
 }
 
 export interface ClientEventTypeIO {

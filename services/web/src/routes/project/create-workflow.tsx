@@ -55,7 +55,7 @@ export default function ProjectCreateWorkflow() {
         onSuccess: ({ id: workflowId }) => {
             toast.success("Workflow created!")
             navigate(
-                ClientEventTypes[form.getValues().triggerEventTypeId]?.eventSourceCreation === "created"
+                ClientEventTypes[form.getValues().triggerEventTypeId]?.requiresConfiguration
                     ? `/workflows/${workflowId}?trigger`
                     : `/workflows/${workflowId}`
             )

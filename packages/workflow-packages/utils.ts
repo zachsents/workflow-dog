@@ -1,3 +1,8 @@
+/***
+ * Everything in here must be isomorphic.
+ */
+
+
 
 /**
  * Creates a builder function for a registry. Just a convenient

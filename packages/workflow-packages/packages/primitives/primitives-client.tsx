@@ -1,11 +1,7 @@
-import { zodResolver } from "@hookform/resolvers/zod"
 import useResizeObserver from "@react-hook/resize-observer"
-import { IconClock, IconExternalLink, IconHash, IconLink, IconPlus, IconRouteSquare2, IconTextSize, IconToggleLeftFilled, IconWebhook, IconX } from "@tabler/icons-react"
+import { IconClock, IconExternalLink, IconHash, IconLink, IconRouteSquare2, IconTextSize, IconToggleLeftFilled, IconWebhook } from "@tabler/icons-react"
 import { useMemo, useRef } from "react"
-import { useController, useFieldArray, useForm, type Control } from "react-hook-form"
 import { Link } from "react-router-dom"
-import ScheduleInput, { type ScheduleInputMode } from "web/src/components/schedule-input"
-import SpinningLoader from "web/src/components/spinning-loader"
 import TI from "web/src/components/tabler-icon"
 import { Button } from "web/src/components/ui/button"
 import { Input } from "web/src/components/ui/input"
@@ -13,13 +9,11 @@ import { Switch } from "web/src/components/ui/switch"
 import { Textarea } from "web/src/components/ui/textarea"
 import { useGraphBuilder, useNodeId } from "web/src/lib/graph-builder/core"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
-import { useCurrentWorkflow, usePreventUnloadWhileSaving } from "web/src/lib/hooks"
-import { trpc } from "web/src/lib/trpc"
-import { cn, t } from "web/src/lib/utils"
+import { useCurrentWorkflow } from "web/src/lib/hooks"
+import { t } from "web/src/lib/utils"
 import { useValueType } from "workflow-types/react"
-import { z } from "zod"
 import { createPackageHelper } from "../../client-registry"
-import { toast } from "sonner"
+import ScheduleConfig from "./components/schedule-config"
 
 
 const helper = createPackageHelper("primitives")
@@ -149,7 +143,6 @@ helper.registerEventType("callable", {
             valueType: null,
         },
     },
-    eventSourceCreation: "assigned",
     sourceComponent: () => {
         const workflow = useCurrentWorkflow().data
         return (
@@ -200,7 +193,6 @@ helper.registerEventType("webhook", {
             valueType: useValueType("record", [useValueType("string")]),
         },
     },
-    eventSourceCreation: "assigned",
     sourceComponent: ({ workflowId }) => {
         return (
             <div>
@@ -240,7 +232,7 @@ helper.registerEventType("httpRequest", {
             valueType: useValueType("record", [useValueType("string")]),
         },
     },
-    eventSourceCreation: "configured",
+    requiresConfiguration: true,
     sourceComponent: () => {
         const workflow = useCurrentWorkflow().data!
         return (
@@ -269,174 +261,6 @@ helper.registerEventType("schedule", {
             valueType: useValueType("timestamp"),
         },
     },
-    eventSourceCreation: "configured",
-    sourceComponent: ({ workflowId, eventSources }) => {
-
-        const formValues = useMemo<ScheduleFormSchema>(() => ({
-            schedules: eventSources.map(evSrc => ({
-                mode: (evSrc.state as any)?.mode ?? "picker",
-                cron: (evSrc.state as any)?.cron ?? "0 0 * * *",
-                timezone: (evSrc.state as any)?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
-            }))
-        }), [eventSources])
-
-        const form = useForm({
-            resolver: zodResolver(z.object({
-                schedules: z.object({
-                    mode: z.enum(["picker", "cron"]),
-                    cron: z.string(),
-                    timezone: z.string(),
-                }).array().superRefine((value, ctx) => {
-                    const unique = new Set<string>()
-                    value.forEach((sch, i) => {
-                        const str = sch.cron + sch.timezone
-                        if (unique.has(str))
-                            ctx.addIssue({
-                                code: z.ZodIssueCode.custom,
-                                message: "Duplicate schedule",
-                                path: [i],
-                            })
-                        else
-                            unique.add(str)
-                    })
-                }),
-            })),
-            values: formValues,
-            mode: "onChange",
-            reValidateMode: "onChange",
-        })
-        const fieldArr = useFieldArray({
-            control: form.control,
-            name: "schedules",
-        })
-
-        const utils = trpc.useUtils()
-        const updateEventSources = trpc.workflows.updateEventSources.useMutation()
-
-        const handleSubmit = form.handleSubmit(async values => {
-            await updateEventSources.mutateAsync({
-                workflowId,
-                eventSourceData: values,
-            })
-            await utils.workflows.byId.invalidate({ workflowId })
-            toast.success("Schedule saved!")
-        })
-
-        usePreventUnloadWhileSaving(form.formState.isDirty || form.formState.isSubmitting)
-
-        return (
-            <form className="grid gap-8 pt-8 pb-24" onSubmit={handleSubmit}>
-                {fieldArr.fields.map((item, i) =>
-                    <WrappedScheduleInput
-                        key={item.id} control={form.control}
-                        index={i}
-                        onDelete={() => fieldArr.remove(i)}
-                    />
-                )}
-
-                {fieldArr.fields.length === 0 &&
-                    <p className="text-xs text-muted-foreground text-center">
-                        No schedules
-                    </p>}
-
-                <Button type="button"
-                    size="sm" className="gap-2"
-                    onClick={() => fieldArr.append({
-                        mode: "picker",
-                        cron: "0 9 * * *",
-                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    })}
-                >
-                    <TI><IconPlus /></TI>
-                    Add Schedule
-                </Button>
-
-                {form.formState.isDirty &&
-                    <div className="absolute z-[1] bottom-0 left-0 w-full grid grid-cols-2 p-2 gap-2 bg-white shadow-lg border-t">
-                        <Button
-                            type="button" variant="ghost" onClick={() => form.reset()}
-                            disabled={form.formState.isSubmitting}
-                        >
-                            Reset
-                        </Button>
-                        <Button
-                            type="submit" className="gap-2"
-                            disabled={form.formState.isSubmitting}
-                        >
-                            {form.formState.isSubmitting ? <>
-                                <SpinningLoader />
-                                Saving
-                            </> : <>
-                                Save
-                            </>}
-                        </Button>
-                    </div>}
-            </form>
-        )
-    },
+    requiresConfiguration: true,
+    sourceComponent: ScheduleConfig,
 })
-
-type ScheduleFormSchema = {
-    schedules: {
-        mode: ScheduleInputMode
-        cron: string
-        timezone: string
-    }[]
-}
-
-function WrappedScheduleInput({ control, index, onDelete }: {
-    control: Control<ScheduleFormSchema>
-    index: number
-    onDelete: () => void
-}) {
-
-    const { field: modeField, formState } = useController({
-        control,
-        name: `schedules.${index}.mode` as const,
-    })
-
-    const { field: cronField } = useController({
-        control,
-        name: `schedules.${index}.cron` as const,
-    })
-
-    const { field: timezoneField } = useController({
-        control,
-        name: `schedules.${index}.timezone` as const,
-    })
-
-    const error = formState.errors?.schedules?.[index]?.root?.message
-
-    return (
-        <div className="grid gap-2">
-            <div className={cn(
-                "border shadow-md rounded-md p-2 pb-4",
-                error && "border-destructive"
-            )}>
-                {error && <p className="text-sm text-destructive mb-4 text-center bg-destructive/10 py-1 rounded-md">
-                    {error}
-                </p>}
-                <ScheduleInput
-                    label={`Schedule ${index + 1}`}
-                    // mode={modeField.value}
-                    mode="picker"
-                    onModeChange={modeField.onChange}
-                    value={cronField.value}
-                    onValueChange={cronField.onChange}
-                    timezone={timezoneField.value}
-                    onTimezoneChange={timezoneField.onChange}
-                />
-            </div>
-            <div className="grid grid-flow-col auto-cols-fr">
-                <Button
-                    variant="ghost" size="sm"
-                    className="gap-2 font-bold text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => onDelete()}
-                >
-                    <TI><IconX /></TI>
-                    Delete Schedule
-                </Button>
-            </div>
-        </div>
-    )
-}

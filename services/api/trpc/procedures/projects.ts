@@ -9,6 +9,7 @@ import { userHasProjectPermission } from "../../lib/auth-checks"
 import { db } from "../../lib/db"
 import { sendEmailFromTemplate } from "../../lib/resend"
 import { assertOrForbidden } from "../assertions"
+import { cleanupEventSourcesForWorkflow } from "../../lib/internal/event-sources"
 
 
 export default {
@@ -159,11 +160,24 @@ export default {
 
     delete: projectPermissionProcedure("write")
         .mutation(async ({ ctx }) => {
-            await db.deleteFrom("projects")
-                .where("id", "=", ctx.projectId)
-                .executeTakeFirstOrThrow()
+            return db.transaction().execute(async trx => {
 
-            return { success: true, projectId: ctx.projectId }
+                const workflows = await trx.selectFrom("workflows")
+                    .select("id")
+                    .where("project_id", "=", ctx.projectId)
+                    .execute()
+
+                await Promise.all(workflows.map(wf =>
+                    cleanupEventSourcesForWorkflow(wf.id, {
+                        dbHandle: trx,
+                    })
+                ))
+
+                return trx.deleteFrom("projects")
+                    .where("id", "=", ctx.projectId)
+                    .returning("id")
+                    .executeTakeFirstOrThrow()
+            })
         }),
 
     team: {

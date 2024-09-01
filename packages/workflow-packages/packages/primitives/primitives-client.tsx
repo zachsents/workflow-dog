@@ -2,6 +2,7 @@ import useResizeObserver from "@react-hook/resize-observer"
 import { IconClock, IconExternalLink, IconHash, IconLink, IconRouteSquare2, IconTextSize, IconToggleLeftFilled, IconWebhook } from "@tabler/icons-react"
 import { useMemo, useRef } from "react"
 import { Link } from "react-router-dom"
+import CopyButton from "web/src/components/copy-button"
 import TI from "web/src/components/tabler-icon"
 import { Button } from "web/src/components/ui/button"
 import { Input } from "web/src/components/ui/input"
@@ -137,6 +138,8 @@ helper.registerEventType("callable", {
             description: "The data passed to this workflow from the workflow that called it.",
             valueType: null,
         },
+    },
+    workflowOutputs: {
         dataOut: {
             displayName: "Data Out",
             description: "The data returned from this workflow. This will be available to the workflow that called it.",
@@ -172,34 +175,34 @@ helper.registerEventType("webhook", {
     description: "Triggers when a webhook is received. You'll be provided with a URL that you can use with any external service. Only accepts HTTP POST requests.",
     keywords: ["webhook", "http", "external", "service", "url"],
     workflowInputs: {
-        url: {
-            displayName: "URL",
-            description: "The URL that was called.",
-            valueType: useValueType("string"),
+        data: {
+            displayName: "Data",
+            description: "The JSON data passed from the webhook.",
+            valueType: null,
         },
-        method: {
-            displayName: "Method",
-            description: "The HTTP method that was called.",
-            valueType: useValueType("string"),
-        },
-        body: {
-            displayName: "Body",
-            description: "The body of the request.",
-            valueType: useValueType("string"),
-        },
-        headers: {
-            displayName: "Headers",
-            description: "The headers of the request.",
+        params: {
+            displayName: "Parameters",
+            description: "The parameters parsed from the webhook URL.",
             valueType: useValueType("record", [useValueType("string")]),
         },
     },
     sourceComponent: ({ workflowId }) => {
+        const url = import.meta.env.DEV
+            ? `http://localhost:8080/api/run/webhook_${workflowId}`
+            : `https://run.workflow.dog/x/webhook_${workflowId}`
+
         return (
-            <div>
-                {workflowId}
+            <div className="grid gap-4">
+                <p className="text-sm">
+                    This is a unique URL that triggers this workflow. Copy it and paste it into any service that accepts webhooks.
+                </p>
+                <pre className="break-all whitespace-normal text-xs p-2 bg-gray-100 rounded-md">
+                    {url}
+                </pre>
+                <CopyButton content={url} copyText="Copy URL" />
             </div>
         )
-    }
+    },
 })
 
 // #region EventType: HTTP Request
@@ -211,9 +214,9 @@ helper.registerEventType("httpRequest", {
     description: "Triggers when a HTTP request is received. You can specify a custom URL path, which can be shared between multiple workflows. Accepts common HTTP methods e.g. GET, POST, PUT, PATCH, DELETE, etc.",
     keywords: ["http", "request", "url", "path", "method"],
     workflowInputs: {
-        url: {
-            displayName: "URL",
-            description: "The URL that was called.",
+        path: {
+            displayName: "Path",
+            description: "The path on the URL that was called.",
             valueType: useValueType("string"),
         },
         method: {
@@ -223,7 +226,7 @@ helper.registerEventType("httpRequest", {
         },
         body: {
             displayName: "Body",
-            description: "The body of the request.",
+            description: "The body of the request as a base64 encoded string.",
             valueType: useValueType("string"),
         },
         headers: {
@@ -231,17 +234,28 @@ helper.registerEventType("httpRequest", {
             description: "The headers of the request.",
             valueType: useValueType("record", [useValueType("string")]),
         },
+        query: {
+            displayName: "Query Parameters",
+            description: "The query parameters of the request.",
+            valueType: useValueType("record", [useValueType("string")]),
+        },
     },
     requiresConfiguration: true,
-    sourceComponent: () => {
-        const workflow = useCurrentWorkflow().data!
+    sourceComponent: ({ workflowId }) => {
+        const url = import.meta.env.DEV
+            ? `http://localhost:8080/api/run/request_${workflowId}`
+            : `https://run.workflow.dog/x/request_${workflowId}`
+
         return (
-            <form onSubmit={ev => ev.preventDefault()}>
-                <Input placeholder="**" />
-                <p className="break-all text-xs font-mono">
-                    https://run.workflow.dog/x/{workflow.project_id}
+            <div className="grid gap-4">
+                <p className="text-sm">
+                    This is a unique URL that triggers this workflow. Copy it and use it for any HTTP request.
                 </p>
-            </form>
+                <pre className="break-all whitespace-normal text-xs p-2 bg-gray-100 rounded-md">
+                    {url}
+                </pre>
+                <CopyButton content={url} copyText="Copy URL" />
+            </div>
         )
     },
 })

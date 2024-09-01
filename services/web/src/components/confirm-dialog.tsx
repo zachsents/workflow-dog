@@ -53,6 +53,7 @@ const ConfirmDialog = forwardRef<HTMLDivElement, ConfirmDialogProps>(({
                             else
                                 props.onOpenChange?.(false)
                         }}
+                        className="gap-2"
                     >
                         {isPending
                             ? <>

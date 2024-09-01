@@ -13,13 +13,14 @@ import {
     middleware as supertokensMiddleware
 } from "supertokens-node/framework/express"
 import { ServerEventSources, ServerEventTypes } from "workflow-packages/server"
+import type { ServerEvent } from "workflow-packages/types/server"
 import { initSupertokens } from "./lib/auth"
+import "./lib/bullmq"
+import { RUN_QUEUE } from "./lib/bullmq"
 import { db } from "./lib/db"
 import { useEnvVar } from "./lib/utils"
 import { createContext } from "./trpc"
 import { apiRouter } from "./trpc/router"
-import "./lib/bullmq"
-import { RUN_QUEUE } from "./lib/bullmq"
 
 
 const port = process.env.PORT || 3001
@@ -58,8 +59,8 @@ app.use("/api/trpc", createExpressMiddleware({
 app.get("/api/health", (_, res) => void res.send("ok"))
 
 // Event source handler
-app.all("/api/run/*", bodyParser.raw({ type: "*/*" }), async (req, res) => {
-    const eventSourceId = (req.params as any)[0]
+app.all(["/api/run/:eventSourceId", "/api/run/:eventSourceId/*"], bodyParser.raw({ type: "*/*" }), async (req, res) => {
+    const eventSourceId = req.params.eventSourceId
     const eventSource = await db.selectFrom("event_sources")
         .selectAll()
         .where("id", "=", eventSourceId)
@@ -71,11 +72,16 @@ app.all("/api/run/*", bodyParser.raw({ type: "*/*" }), async (req, res) => {
     const eventSourceDef = ServerEventSources[eventSource.definition_id]
     console.debug(`Received request for ${eventSourceDef.name} (${eventSourceDef.id}) event source\nEvent source ID: ${eventSourceId}`)
 
-    const genEventsTask = Promise.resolve(eventSourceDef.generateEvents(req, eventSource))
+    const genEventsTask = (async () => eventSourceDef.generateEvents(req, eventSource))()
         .then(r => ({
             ...r,
-            events: r.events.map(ev => ({ ...ev, source: eventSource.definition_id })),
+            events: r?.events?.map(ev => ({ ...ev, source: eventSource.definition_id })) ?? [],
         }))
+        .catch(err => {
+            console.debug("Encountered an error while generating events for event source " + eventSourceDef.id)
+            console.error(err)
+            return { events: [] as ServerEvent[], state: undefined }
+        })
 
     const updateStateTask = genEventsTask.then(async r => {
         if (r.state)
@@ -102,9 +108,13 @@ app.all("/api/run/*", bodyParser.raw({ type: "*/*" }), async (req, res) => {
             const eventType = ServerEventTypes[wf.trigger_event_type_id]
             const relevantEvents = events.filter(ev => ev.type === wf.trigger_event_type_id)
 
-            const runData = await Promise.all(
-                relevantEvents.map(async ev => eventType.generateRunsFromEvent(ev, wf.trigger_config))
-            ).then(r => r.filter(Boolean).flat())
+            const runData = await Promise.all(relevantEvents.map(
+                ev => (async () => eventType.generateRunsFromEvent(ev, wf.trigger_config))().catch(err => {
+                    console.debug("Encountered an error while generating runs for workflow " + wf.id, ev)
+                    console.error(err)
+                    return [] as any[]
+                })
+            )).then(r => r.filter(Boolean).flat())
 
             if (runData.length === 0)
                 return [] as Insertable<WorkflowRuns>[]

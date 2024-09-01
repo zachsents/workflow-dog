@@ -10,6 +10,7 @@ import { userHasProjectPermission } from "../../lib/auth-checks"
 import { db } from "../../lib/db"
 import { assertOrForbidden } from "../assertions"
 import { projectPermissionProcedure } from "./projects"
+import { cleanupEventSourcesForWorkflow } from "../../lib/internal/event-sources"
 
 
 export default {
@@ -83,11 +84,17 @@ export default {
         }),
 
     "delete": projectPermissionByWorkflowProcedure("write")
-        .mutation(async ({ input, ctx }) => {
-            return db.deleteFrom("workflows")
-                .where("id", "=", input.workflowId)
-                .returning("id")
-                .executeTakeFirstOrThrow()
+        .mutation(async ({ ctx }) => {
+            return db.transaction().execute(async trx => {
+                await cleanupEventSourcesForWorkflow(ctx.workflowId, {
+                    dbHandle: trx,
+                })
+
+                return trx.deleteFrom("workflows")
+                    .where("id", "=", ctx.workflowId)
+                    .returning("id")
+                    .executeTakeFirstOrThrow()
+            })
         }),
 
     create: projectPermissionProcedure("write")
@@ -109,6 +116,7 @@ export default {
 
                 const initializers = await ServerEventTypes[input.triggerEventTypeId].createEventSources({
                     workflowId: newWorkflow.id,
+                    projectId: ctx.projectId,
                 })
 
                 const initTasks = initializers.map(async init => {
@@ -124,7 +132,7 @@ export default {
 
                     // CASE 1: Source doesn't exist yet
                     if (!existingSource) {
-                        const result = await eventSourceDef.setup({
+                        const result = await eventSourceDef.setup?.({
                             initializer: init,
                             enabledEventTypes: [input.triggerEventTypeId],
                         })
@@ -139,7 +147,7 @@ export default {
 
                     // CASE 2: Source already exists, but isn't set up for this event type
                     else if (!existingSource.enabled_event_types.includes(input.triggerEventTypeId)) {
-                        const result = await eventSourceDef.addEventTypes(existingSource, [input.triggerEventTypeId])
+                        const result = await eventSourceDef.addEventTypes?.(existingSource, [input.triggerEventTypeId])
 
                         await trx.updateTable("event_sources").set({
                             enabled_event_types: [...existingSource.enabled_event_types, input.triggerEventTypeId],
@@ -199,12 +207,13 @@ export default {
         }))
         .mutation(async ({ input, ctx }) => {
             const workflow = await db.selectFrom("workflows")
-                .select(["trigger_event_type_id"])
+                .select(["project_id", "trigger_event_type_id"])
                 .where("id", "=", ctx.workflowId)
                 .executeTakeFirstOrThrow()
 
             const initializers = await ServerEventTypes[workflow.trigger_event_type_id].createEventSources({
                 workflowId: ctx.workflowId,
+                projectId: workflow.project_id,
                 data: input.eventSourceData,
             })
 
@@ -223,7 +232,7 @@ export default {
 
                     // CASE 1: Source doesn't exist yet
                     if (!existingSource) {
-                        const result = await eventSourceDef.setup({
+                        const result = await eventSourceDef.setup?.({
                             initializer: init,
                             enabledEventTypes: [workflow.trigger_event_type_id],
                         })
@@ -240,7 +249,7 @@ export default {
 
                     // CASE 2: Source already exists, but isn't set up for this event type
                     else if (!existingSource.enabled_event_types.includes(workflow.trigger_event_type_id)) {
-                        const result = await eventSourceDef.addEventTypes(existingSource, [workflow.trigger_event_type_id])
+                        const result = await eventSourceDef.addEventTypes?.(existingSource, [workflow.trigger_event_type_id])
 
                         await trx.updateTable("event_sources")
                             .set({
@@ -271,71 +280,10 @@ export default {
                 })
                 await Promise.all(initTasks)
 
-                const existingSourcesForThisWorkflow = await trx.selectFrom("workflows_event_sources")
-                    .innerJoin("event_sources", "event_sources.id", "workflows_event_sources.event_source_id")
-                    .selectAll("event_sources")
-                    .where("workflow_id", "=", ctx.workflowId)
-                    .execute()
-
-                const cleanupTasks = existingSourcesForThisWorkflow
-                    .filter(eventSource => initializers.every(init => init.id !== eventSource.id))
-                    .map(async eventSource => {
-                        const { being_used_elsewhere } = await trx.selectFrom("workflows_event_sources")
-                            .select(sql<boolean>`count(*) > 1`.as("being_used_elsewhere"))
-                            .where("event_source_id", "=", eventSource.id)
-                            .executeTakeFirstOrThrow()
-
-                        // not being used anywhere else -- full cleanup
-                        if (!being_used_elsewhere) {
-                            const eventSourceDef = ServerEventSources[eventSource.definition_id]
-                            await eventSourceDef.cleanup(eventSource)
-                            await trx.deleteFrom("workflows_event_sources")
-                                .where("event_source_id", "=", eventSource.id)
-                                .execute()
-                            await trx.deleteFrom("event_sources")
-                                .where("id", "=", eventSource.id)
-                                .execute()
-                            return
-                        }
-
-                        const { being_used_elsewhere_with_same_event_type } = await trx.selectFrom("workflows_event_sources")
-                            .innerJoin("workflows", "workflows.id", "workflows_event_sources.workflow_id")
-                            .select(sql<boolean>`count(*) > 1`.as("being_used_elsewhere_with_same_event_type"))
-                            .where("event_source_id", "=", eventSource.id)
-                            .where("workflows.trigger_event_type_id", "=", workflow.trigger_event_type_id)
-                            .executeTakeFirstOrThrow()
-
-                        // being used elsewhere but not with this event type -- remove event type
-                        if (!being_used_elsewhere_with_same_event_type) {
-                            const eventSourceDef = ServerEventSources[eventSource.definition_id]
-                            const result = await eventSourceDef.removeEventTypes(eventSource, [workflow.trigger_event_type_id])
-                            await Promise.all([
-                                trx.updateTable("event_sources")
-                                    .set({
-                                        enabled_event_types: sql`array_remove(enabled_event_types, ${workflow.trigger_event_type_id})`,
-                                        state: _.merge({}, eventSource.state ?? {}, result?.state ?? {}),
-                                    })
-                                    .where("id", "=", eventSource.id)
-                                    .executeTakeFirstOrThrow(),
-                                trx.deleteFrom("workflows_event_sources")
-                                    .where("event_source_id", "=", eventSource.id)
-                                    .where("workflow_id", "=", ctx.workflowId)
-                                    .execute(),
-                            ])
-                            return
-                        }
-
-                        // just delete relationship
-                        await trx.deleteFrom("workflows_event_sources")
-                            .where("event_source_id", "=", eventSource.id)
-                            .where("workflow_id", "=", ctx.workflowId)
-                            .execute()
-                    })
-                await Promise.all(cleanupTasks)
-
-                // TODO: 
-                // - abstract this out to separate function
-
+                await cleanupEventSourcesForWorkflow(ctx.workflowId, {
+                    dbHandle: trx,
+                    excludedEventSources: initializers.map(init => init.id),
+                })
             })
 
             return null

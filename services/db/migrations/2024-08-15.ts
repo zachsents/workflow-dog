@@ -98,7 +98,7 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("id", "uuid", (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
         .addColumn("created_at", "timestamptz", (col) => col.notNull().defaultTo(sql`now()`))
         .addColumn("creator", "uuid", (col) => col.references("user_meta.id").onDelete("set null"))
-        .addColumn("project_id", "uuid", (col) => col.references("projects.id").onDelete("cascade"))
+        .addColumn("project_id", "uuid", (col) => col.notNull().references("projects.id").onDelete("cascade"))
         .addColumn("name", "text", (col) => col.notNull().defaultTo("Untitled Workflow"))
         .addColumn("is_enabled", "boolean", (col) => col.notNull().defaultTo(false))
         .addColumn("graph", "text", (col) => col.notNull().defaultTo('{"json":{"nodes":[],"edges":[]}}'))
@@ -137,7 +137,7 @@ export async function up(db: Kysely<any>): Promise<void> {
         // if a workflow is deleted, we still want the run to exist for usage tracking
         .addColumn("project_id", "uuid", (col) => col.references("projects.id").onDelete("cascade"))
         .addColumn("workflow_id", "uuid", (col) => col.references("workflows.id").onDelete("set null"))
-        .addColumn("snapshot_id", "uuid", (col) => col.notNull().references("workflow_snapshots.id"))
+        .addColumn("snapshot_id", "uuid", (col) => col.references("workflow_snapshots.id").onDelete("set null"))
         .addColumn("status", sql`public.workflow_run_status`, (col) => col.notNull().defaultTo("pending"))
         .addColumn("event_payload", "jsonb", (col) => col.notNull().defaultTo("{}"))
         .addColumn("node_errors", "jsonb", (col) => col.notNull().defaultTo("{}"))

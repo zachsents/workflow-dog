@@ -19,6 +19,9 @@
         "tailwindcss": "*",
         "cron-schedule": "*",
         "react-hook-form": "*",
-        "sonner": "*"
+        "sonner": "*",
+        "@react-hookz/web": "*",
+        "kysely": "*",
+        "zod": "*"
     }
 }

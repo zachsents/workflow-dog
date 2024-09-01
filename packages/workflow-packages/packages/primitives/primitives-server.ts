@@ -1,83 +1,70 @@
-import { db } from "api/lib/db"
+import { EVENT_QUEUE } from "api/lib/bullmq"
+import { parseCronExpression } from "cron-schedule"
 import { createHash } from "node:crypto"
 import SuperJSON from "superjson"
 import { z } from "zod"
-import { createPackageHelper } from "../../server-registry"
-import { parseCronExpression } from "cron-schedule"
-import { EVENT_QUEUE } from "api/lib/bullmq"
+import { createPackageHelper, uniformEventData } from "../../server-registry"
 
 
 const helper = createPackageHelper("primitives")
 
 
-// #region HTTP Endpoints
+// #region Callable
 
-/**
- * This is the most basic form of an event source, which are all just
- * webhooks with extra functionality. This one is just the webhook.
- */
-const httpEndpointEventSource = helper.registerEventSource("httpEndpoint", {
-    name: "HTTP Endpoint",
-    setup() { },
-    cleanup() { },
-    addEventTypes() { },
-    removeEventTypes() { },
+const callableEventSource = helper.registerEventSource("callable", {
+    name: "Callable Endpoint",
     generateEvents(req, source) {
+        if (req.method.toUpperCase() !== "POST")
+            return
 
-        const eventData: HttpEndpointEventData = {
-            method: req.method.toUpperCase(),
-            path: req.path,
-            body: req.body instanceof Buffer ? req.body : null,
-            headers: Object.fromEntries(
-                Object.entries(req.headers)
-                    .map(([k, v]) => [k.toLowerCase(), v?.toString()] as const)
-                    .filter(([k, v]) => v != null)
-            ) as Record<string, string>,
-            query: Object.fromEntries<string | string[]>(
-                Object.entries(req.query).map(([k, v]) => {
-                    if (typeof v === "string")
-                        return [k, v as string] as const
-                    else if (Array.isArray(v))
-                        return [k, v as string[]] as const
-                }).filter(x => !!x)
-            ),
-        }
+        const parsedBody = req.body instanceof Buffer
+            ? SuperJSON.stringify(SuperJSON.parse(req.body.toString("utf8")))
+            : SuperJSON.stringify(null)
 
         return {
-            events: source.enabled_event_types.map(type => ({
-                type,
-                data: eventData,
-            }))
+            events: uniformEventData(source, { dataIn: parsedBody }),
         }
     },
 })
-
-interface HttpEndpointEventData {
-    method: string
-    path: string
-    headers: Record<string, string>
-    query: Record<string, string | string[]>
-    body: Buffer | null
-}
 
 helper.registerEventType("callable", {
     name: "Callable",
     createEventSources({ workflowId }) {
         return [{
             id: "callable_" + workflowId,
-            definitionId: httpEndpointEventSource.id,
+            definitionId: callableEventSource.id,
         }]
     },
     generateRunsFromEvent(event) {
-        const eventData = event.data as HttpEndpointEventData
-        if (eventData.method !== "POST")
+        return [event.data]
+    },
+})
+
+
+// #region Webhook
+
+const webhookEventSource = helper.registerEventSource("webhook", {
+    name: "Webhook Endpoint",
+    generateEvents(req, source) {
+        if (req.method.toUpperCase() !== "POST")
             return
 
-        const parsedBody = eventData.body
-            ? SuperJSON.stringify(SuperJSON.parse(eventData.body!.toString("utf8")))
-            : SuperJSON.stringify(null)
+        const data = req.body instanceof Buffer
+            ? JSON.parse(req.body.toString("utf8"))
+            : null
 
-        return [parsedBody]
+        const params = Object.fromEntries<string>(
+            Object.entries(req.query).map(([k, v]) => {
+                if (typeof v === "string")
+                    return [k, v] as const
+                else if (Array.isArray(v))
+                    return [k, v[0].toString()] as const
+            }).filter(x => !!x)
+        )
+
+        return {
+            events: uniformEventData(source, { data, params }),
+        }
     },
 })
 
@@ -86,52 +73,61 @@ helper.registerEventType("webhook", {
     createEventSources({ workflowId }) {
         return [{
             id: "webhook_" + workflowId,
-            definitionId: httpEndpointEventSource.id,
+            definitionId: webhookEventSource.id,
         }]
     },
     generateRunsFromEvent(event) {
-        const eventData = event.data as HttpEndpointEventData
-        if (eventData.method !== "POST")
-            return
+        return [event.data]
+    },
+})
 
-        const parsedBody = eventData.body
-            ? JSON.parse(eventData.body.toString("utf8"))
-            : null
 
-        return [{
-            data: parsedBody,
-            params: eventData.query,
-        }]
+// #region HTTP Request
+
+const httpRequestEventSource = helper.registerEventSource("httpRequest", {
+    name: "HTTP Endpoint",
+    generateEvents(req, source) {
+        const pathSegments = req.path.split("/")
+        const path = "/" + pathSegments.slice(pathSegments.indexOf(source.id) + 1).join("/")
+
+        return {
+            events: uniformEventData(source, {
+                method: req.method.toUpperCase(),
+                path,
+                body: req.body instanceof Buffer ? req.body.toString("base64") : null,
+                headers: Object.fromEntries(
+                    Object.entries(req.headers)
+                        .map(([k, v]) => [k.toLowerCase(), v?.toString()] as const)
+                        .filter(([k, v]) => v != null)
+                ) as Record<string, string>,
+                query: Object.fromEntries<string | string[]>(
+                    Object.entries(req.query).map(([k, v]) => {
+                        if (typeof v === "string")
+                            return [k, v as string] as const
+                        else if (Array.isArray(v))
+                            return [k, v as string[]] as const
+                    }).filter(x => !!x)
+                ),
+            }),
+        }
     },
 })
 
 helper.registerEventType("httpRequest", {
     name: "HTTP Request",
     async createEventSources({ workflowId }) {
-        const { project_id } = await db.selectFrom("workflows")
-            .select("project_id")
-            .where("id", "=", workflowId)
-            .executeTakeFirstOrThrow()
-
         return [{
-            id: "request_" + project_id,
-            definitionId: httpEndpointEventSource.id,
+            id: "request_" + workflowId,
+            definitionId: httpRequestEventSource.id,
         }]
     },
     generateRunsFromEvent(event) {
-        const { body, ...eventData } = event.data as HttpEndpointEventData
-        const parsedBody = body?.toString("utf8") ?? null
-        return [{
-            ...eventData,
-            body: parsedBody,
-        }]
+        return [event.data]
     },
 })
 
-// #endregion HTTP Endpoints
 
-
-// #region Schedules
+// #region Schedule
 
 const scheduleEventSource = helper.registerEventSource("schedule", {
     name: "Schedule",
@@ -165,10 +161,6 @@ const scheduleEventSource = helper.registerEventSource("schedule", {
 
         await EVENT_QUEUE.removeRepeatableByKey(jobKey)
     },
-    /** Doesn't need to be implemented */
-    addEventTypes() { },
-    /** Doesn't need to be implemented */
-    removeEventTypes() { },
     generateEvents(req, source) {
         return {
             events: source.enabled_event_types.map(type => ({
@@ -215,5 +207,3 @@ helper.registerEventType("schedule", {
         return [event.data]
     },
 })
-
-// #endregion Schedules

@@ -1,5 +1,7 @@
+import type { Selectable } from "kysely"
 import type { ServerDefinition, ServerEventSourceDefinition, ServerEventType } from "./types/server"
 import { createRegistryBuilderFn } from "./utils"
+import type { EventSources } from "core/db"
 
 
 export const eventTypes: Record<string, ServerEventType> = {}
@@ -19,4 +21,9 @@ export function createPackageHelper(packageName: string) {
             ...GLOBAL_DEFAULTS,
         }),
     }
+}
+
+
+export function uniformEventData(source: Selectable<EventSources>, data: any) {
+    return source.enabled_event_types.map(type => ({ type, data }))
 }

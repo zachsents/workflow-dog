@@ -16,25 +16,41 @@ type EventSourceInitializer = {
 }
 
 export interface ServerEventType extends ServerDefinition {
+    /**
+     * Generates event sources from some arbitrary data, usually passed
+     * from a trigger config form. Multiple event sources can be created
+     * from the same data.
+     * 
+     * Event Source IDs should be absolutely unique and should also be
+     * deterministic based on the identifying data. Event Sources are
+     * smartly reused and deduped. Hashing functions are good candidates
+     * for generating IDs.
+     */
     createEventSources: (options: {
         workflowId: string
+        projectId: string
         data?: unknown
     }) => MaybePromise<EventSourceInitializer[]>
+
+    /**
+     * Generates run data from an event. Multiple runs can be spawned from a
+     * single event. If no runs are generated, you can return `undefined`.
+     */
     generateRunsFromEvent: (event: ServerEvent, workflowTriggerConfig?: any) => MaybePromise<any[] | void>
 }
 
 export interface ServerEventSourceDefinition extends ServerDefinition {
-    setup: (options: {
+    setup?: (options: {
         initializer: EventSourceInitializer
         enabledEventTypes: string[]
     }) => MaybePromise<{ state?: any } | void>
-    addEventTypes: (source: Selectable<EventSources>, eventTypeIds: string[]) => MaybePromise<{ state?: any } | void>
-    removeEventTypes: (source: Selectable<EventSources>, eventTypeIds: string[]) => MaybePromise<{ state?: any } | void>
-    cleanup: (source: Selectable<EventSources>) => MaybePromise<void>
+    addEventTypes?: (source: Selectable<EventSources>, eventTypeIds: string[]) => MaybePromise<{ state?: any } | void>
+    removeEventTypes?: (source: Selectable<EventSources>, eventTypeIds: string[]) => MaybePromise<{ state?: any } | void>
+    cleanup?: (source: Selectable<EventSources>) => MaybePromise<void>
     generateEvents: (req: Request, source: Selectable<EventSources>) => MaybePromise<{
-        events: Omit<ServerEvent, "source">[]
+        events?: Omit<ServerEvent, "source">[]
         state?: any
-    }>
+    } | void>
 }
 
 export interface ServerEvent {

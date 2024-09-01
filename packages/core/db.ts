@@ -405,7 +405,7 @@ export interface WorkflowRuns {
   numeric_id: number | null;
   project_id: string | null;
   scheduled_for: Timestamp | null;
-  snapshot_id: string;
+  snapshot_id: string | null;
   started_at: Timestamp | null;
   status: Generated<WorkflowRunStatus>;
   workflow_id: string | null;
@@ -421,7 +421,7 @@ export interface Workflows {
   last_ran_at: Timestamp | null;
   last_save_client_timestamp: Timestamp | null;
   name: Generated<string>;
-  project_id: string | null;
+  project_id: string;
   trigger_config: Generated<Json>;
   trigger_event_type_id: Generated<string>;
 }

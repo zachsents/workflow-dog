@@ -44,16 +44,25 @@ export const RUN_QUEUE = new Queue("runs", {
         removeOnFail: true,
     },
 })
+
 new Worker("runs", async (job) => {
     console.log("[Bull] starting dry workflow run", job.data.workflowRunId)
-    await db.updateTable("workflow_runs")
-        .set({ started_at: sql`now()`, status: "running" })
-        .where("id", "=", job.data.workflowRunId)
-        .executeTakeFirstOrThrow()
+    const [{ graph }] = await Promise.all([
+        db.selectFrom("workflow_runs")
+            .innerJoin("workflows", "workflows.id", "workflow_runs.workflow_id")
+            .select("graph")
+            .where("workflow_runs.id", "=", job.data.workflowRunId)
+            .executeTakeFirstOrThrow(),
+        db.updateTable("workflow_runs")
+            .set({ started_at: sql`now()`, status: "running" })
+            .where("id", "=", job.data.workflowRunId)
+            .executeTakeFirstOrThrow(),
+    ])
 
     // TO DO: implement workflow execution here
     console.log("[Bull] exec...", job.data.workflowRunId)
     await new Promise(resolve => setTimeout(resolve, 1000))
+    console.log(graph)
 
     await db.updateTable("workflow_runs")
         .set({ finished_at: sql`now()`, status: "completed" })

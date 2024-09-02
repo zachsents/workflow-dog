@@ -124,6 +124,7 @@ type StandardNodeChild = ReactElementFromFn<typeof Handle>
     | ReactElementFromFn<typeof MultiHandle>
     | ReactElementFromFn<typeof Config>
     | ReactElementFromFn<typeof NodeContent>
+    | undefined | null
 
 const validHandleComponents = [Handle.name, MultiHandle.name]
 
@@ -473,7 +474,7 @@ function HandleRenameDialog({ open, onOpenChange, handleName, handleIndex, handl
 interface HandleProps {
     type: HandleType
     name: string
-    valueType?: ValueTypeUsage
+    valueType?: ValueTypeUsage | null
     indexingId?: string
     displayName?: string
     allowNaming?: boolean

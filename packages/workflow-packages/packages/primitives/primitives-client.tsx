@@ -1,5 +1,5 @@
 import useResizeObserver from "@react-hook/resize-observer"
-import { IconClock, IconExternalLink, IconHash, IconLink, IconRouteSquare2, IconTextSize, IconToggleLeftFilled, IconWebhook } from "@tabler/icons-react"
+import { IconClock, IconExternalLink, IconHash, IconLink, IconRouteSquare2, IconRun, IconTextSize, IconToggleLeftFilled, IconWebhook } from "@tabler/icons-react"
 import { useMemo, useRef } from "react"
 import { Link } from "react-router-dom"
 import CopyButton from "web/src/components/copy-button"
@@ -12,12 +12,67 @@ import { useGraphBuilder, useNodeId } from "web/src/lib/graph-builder/core"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
 import { useCurrentWorkflow } from "web/src/lib/hooks"
 import { t } from "web/src/lib/utils"
-import { useValueType } from "workflow-types/react"
+import { useValueType, ValueTypeDefinitions } from "workflow-types/react"
 import { createPackageHelper } from "../../client-registry"
 import ScheduleConfig from "./components/schedule-config"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "web/src/components/ui/select"
+import { ClientEventTypes } from "../../client"
 
 
 const helper = createPackageHelper("primitives")
+
+// #region Node: Trigger Data
+helper.registerNodeDef("triggerData", {
+    name: "Data from Trigger",
+    description: "The data passed to this workflow from the trigger.",
+    icon: IconRun,
+    component: () => {
+        const eventTypeId = useCurrentWorkflow().data!.trigger_event_type_id
+        const eventType = ClientEventTypes[eventTypeId]
+
+        const gbx = useGraphBuilder()
+        const nodeId = useNodeId()
+
+        const selectedInput = gbx.useNodeState<string | null | undefined>(nodeId, n => n.config.selectedInput)
+        const setSelectedInput = (value: string) => void gbx.mutateNodeState(nodeId, n => {
+            n.config.selectedInput = value || null
+        })
+
+        // TODO: add side effect that checks if trigger has been changed and resets
+
+        return (
+            <StandardNode hidePackageBadge>
+                {selectedInput
+                    ? <StandardNode.Handle
+                        type="output" name="data" displayName=" "
+                        valueType={eventType.workflowInputs[selectedInput!].valueType}
+                    />
+                    : null}
+                <StandardNode.Content>
+                    <Select value={selectedInput ?? ""} onValueChange={setSelectedInput}>
+                        <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Pick a property">
+                                {eventType?.workflowInputs[selectedInput!].displayName}
+                            </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Object.entries(eventType.workflowInputs).map(([inputId, inputDef]) =>
+                                <SelectItem key={inputId} value={inputId}>
+                                    <p>{inputDef.displayName}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {inputDef.valueType
+                                            ? ValueTypeDefinitions[inputDef.valueType.typeDefinitionId].name
+                                            : "Any"}
+                                    </p>
+                                </SelectItem>
+                            )}
+                        </SelectContent>
+                    </Select>
+                </StandardNode.Content>
+            </StandardNode>
+        )
+    },
+})
 
 // #region Node: Text
 helper.registerNodeDef("text", {
@@ -240,7 +295,6 @@ helper.registerEventType("httpRequest", {
             valueType: useValueType("record", [useValueType("string")]),
         },
     },
-    requiresConfiguration: true,
     sourceComponent: ({ workflowId }) => {
         const url = import.meta.env.DEV
             ? `http://localhost:8080/api/run/request_${workflowId}`

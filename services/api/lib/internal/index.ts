@@ -38,33 +38,23 @@ export async function getProjectBilling(projectId: string) {
 }
 
 
-export async function countWorkflowRunsInBillingPeriod(
-    projectId: string,
-    billingStart?: Date
-) {
-    if (!billingStart)
-        billingStart = await getProjectBilling(projectId)
-            .then(billing => billing.period.start)
+// export async function countWorkflowRunsInBillingPeriod(
+//     projectId: string,
+//     billingStart?: Date
+// ) {
+//     if (!billingStart)
+//         billingStart = await getProjectBilling(projectId)
+//             .then(billing => billing.period.start)
 
-    const { count } = await db.selectFrom("workflow_usage_records")
-        .select(sql<number | null>`sum(run_count)`.as("count"))
-        .leftJoin("workflows", "workflow_usage_records.workflow_id", "workflows.id")
-        .where("workflows.project_id", "=", projectId)
-        .where("workflow_usage_records.billing_period_id", "=", billingStart!.toISOString())
-        .executeTakeFirstOrThrow()
+//     const { count } = await db.selectFrom("workflow_usage_records")
+//         .select(sql<number | null>`sum(run_count)`.as("count"))
+//         .leftJoin("workflows", "workflow_usage_records.workflow_id", "workflows.id")
+//         .where("workflows.project_id", "=", projectId)
+//         .where("workflow_usage_records.billing_period_id", "=", billingStart!.toISOString())
+//         .executeTakeFirstOrThrow()
 
-    return count
-}
-
-
-export async function countProjectMembers(projectId: string) {
-    const { count } = await db.selectFrom("projects_users")
-        .select(({ fn }) => [fn.countAll<number>().as("count")])
-        .where("project_id", "=", projectId)
-        .executeTakeFirstOrThrow()
-
-    return count
-}
+//     return count
+// }
 
 
 interface QueueWorkflowOptions {
@@ -149,17 +139,6 @@ export async function queueWorkflow(workflowId: string, {
     }
 
     return newRunId
-}
-
-
-export function enrichWorkflowRunRow(row: Selectable<WorkflowRuns>) {
-    return {
-        ...row,
-        error_count: (Array.isArray(row.node_errors) ? row.node_errors.length : 0)
-            + (Array.isArray(row.global_errors) ? row.global_errors.length : 0),
-        has_errors: Array.isArray(row.node_errors) && row.node_errors.length > 0
-            || Array.isArray(row.global_errors) && row.global_errors.length > 0,
-    }
 }
 
 

@@ -11,36 +11,6 @@ export async function up(db: Kysely<any>): Promise<void> {
         "completed", "failed", "running",
     ])
 
-    // Create function
-    await sql`
-    CREATE OR REPLACE FUNCTION public.populate_workflow_run_info()
-    RETURNS TRIGGER AS $$
-    DECLARE
-        _numeric_id int;
-        _project_id uuid;
-    BEGIN
-        WITH tmp AS (
-            SELECT wr.id, row_number() OVER ( ORDER BY wr.created_at )
-            FROM workflow_runs wr
-            WHERE wr.workflow_id = NEW.workflow_id
-        )
-        SELECT row_number INTO _numeric_id
-        FROM tmp
-        WHERE tmp.id = NEW.id;
-
-        SELECT project_id INTO _project_id
-        FROM workflows
-        WHERE id = NEW.workflow_id;
-
-        UPDATE workflow_runs
-        SET numeric_id = _numeric_id, project_id = _project_id
-        WHERE id = NEW.id;
-
-        RETURN NEW;
-    END;
-    $$ LANGUAGE plpgsql;
-    `.execute(db)
-
     // Create tables
     await db.schema.createTable("user_meta").ifNotExists()
         .addColumn("id", "uuid", (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
@@ -133,7 +103,6 @@ export async function up(db: Kysely<any>): Promise<void> {
 
     await db.schema.createTable("workflow_runs").ifNotExists()
         .addColumn("id", "uuid", (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
-        .addColumn("numeric_id", "integer")
         // if a workflow is deleted, we still want the run to exist for usage tracking
         .addColumn("project_id", "uuid", (col) => col.references("projects.id").onDelete("cascade"))
         .addColumn("workflow_id", "uuid", (col) => col.references("workflows.id").onDelete("set null"))
@@ -142,6 +111,8 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("event_payload", "jsonb", (col) => col.notNull().defaultTo("{}"))
         .addColumn("node_errors", "jsonb", (col) => col.notNull().defaultTo("{}"))
         .addColumn("global_error", "jsonb")
+        // -v- computed in trigger -v-
+        .addColumn("error_count", "integer", col => col.notNull().defaultTo(0))
         .addColumn("created_at", "timestamptz", (col) => col.notNull().defaultTo(sql`now()`))
         .addColumn("started_at", "timestamptz")
         .addColumn("finished_at", "timestamptz")
@@ -160,12 +131,52 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("value", "jsonb", (col) => col.notNull())
         .execute()
 
-    // Create trigger that creates a numeric ID for a workflow run
+    // Create triggers for workflow runs
     await sql`
-    CREATE TRIGGER trigger_populate_workflow_run_info
-    AFTER INSERT ON public.workflow_runs
+    CREATE OR REPLACE FUNCTION public.workflow_runs_on_insert()
+    RETURNS TRIGGER AS $$
+    DECLARE
+        _project_id uuid;
+    BEGIN
+        SELECT project_id INTO _project_id
+        FROM workflows
+        WHERE id = NEW.workflow_id;
+
+        NEW.project_id := _project_id;
+
+        RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql;
+
+    CREATE TRIGGER trigger_workflow_runs_on_insert
+    BEFORE INSERT ON public.workflow_runs
     FOR EACH ROW
-    EXECUTE FUNCTION public.populate_workflow_run_info();
+    EXECUTE FUNCTION public.workflow_runs_on_insert();
+    `.execute(db)
+
+    await sql`
+    CREATE OR REPLACE FUNCTION public.workflow_runs_on_update()
+    RETURNS TRIGGER AS $$
+    DECLARE
+        _error_count int;
+    BEGIN
+        IF NEW.node_errors IS DISTINCT FROM OLD.node_errors OR NEW.global_error IS DISTINCT FROM OLD.global_error THEN
+            SELECT 
+                count(node_error_keys) + (NEW.global_error is not null)::int
+            INTO _error_count
+            FROM jsonb_object_keys(NEW.node_errors) as node_error_keys;
+
+            NEW.error_count := _error_count;
+        END IF;
+
+        RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql;
+
+    CREATE TRIGGER trigger_workflow_runs_on_update
+    BEFORE UPDATE ON public.workflow_runs
+    FOR EACH ROW
+    EXECUTE FUNCTION public.workflow_runs_on_update();
     `.execute(db)
 
     // Enable row level security
@@ -199,7 +210,8 @@ export async function down(db: Kysely<any>): Promise<void> {
     await db.schema.dropTable("user_meta").ifExists().execute()
 
     // Drop function
-    await sql`DROP FUNCTION IF EXISTS public.create_numeric_id_for_workflow_run`.execute(db)
+    await sql`DROP FUNCTION IF EXISTS public.workflow_runs_on_insert`.execute(db)
+    await sql`DROP FUNCTION IF EXISTS public.workflow_runs_on_update`.execute(db)
 
     // Drop custom types
     await db.schema.dropType("workflow_run_status").ifExists().execute()

@@ -12,7 +12,7 @@ export async function cleanupEventSourcesForWorkflow(workflowId: string, {
     dbHandle?: Kysely<DB> | Transaction<DB>
     /** A list of event source IDs to exclude from cleanup */
     excludedEventSources?: string[]
-}) {
+} = {}) {
 
     const [existingSourcesForThisWorkflow, eventTypeId] = await Promise.all([
         dbHandle.selectFrom("workflows_event_sources")

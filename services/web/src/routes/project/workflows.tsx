@@ -27,7 +27,7 @@ export default function ProjectWorkflows() {
 
     const projectId = useCurrentProjectId()
     const { data: workflows, isPending } = trpc.workflows.list.useQuery({ projectId })
-
+    
     const search = useSearch(workflows ?? [], {
         keys: ["name"],
         threshold: 0.4,

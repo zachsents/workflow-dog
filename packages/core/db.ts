@@ -397,12 +397,12 @@ export interface WorkflowRunOutputs {
 
 export interface WorkflowRuns {
   created_at: Generated<Timestamp>;
+  error_count: Generated<number>;
   event_payload: Generated<Json>;
   finished_at: Timestamp | null;
   global_error: Json | null;
   id: Generated<string>;
   node_errors: Generated<Json>;
-  numeric_id: number | null;
   project_id: string | null;
   scheduled_for: Timestamp | null;
   snapshot_id: string | null;
@@ -418,7 +418,6 @@ export interface Workflows {
   id: Generated<string>;
   is_enabled: Generated<boolean>;
   last_edited_at: Timestamp | null;
-  last_ran_at: Timestamp | null;
   last_save_client_timestamp: Timestamp | null;
   name: Generated<string>;
   project_id: string;
@@ -435,7 +434,7 @@ export interface WorkflowSnapshots {
   created_at: Generated<Timestamp>;
   graph: Generated<string>;
   id: Generated<string>;
-  trigger_event_type_id: Generated<string>;
+  trigger_event_type_id: string;
   workflow_id: string;
 }
 

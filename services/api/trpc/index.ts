@@ -9,6 +9,9 @@ import { ZodError } from "zod"
 
 export const t = initTRPC.context<ApiContext>().create({
     errorFormatter: ({ shape, error }) => {
+        if (error.code === "INTERNAL_SERVER_ERROR")
+            console.error(error)
+
         const zodError = error.code === "BAD_REQUEST" && error.cause instanceof ZodError
             ? error.cause.flatten()
             : null

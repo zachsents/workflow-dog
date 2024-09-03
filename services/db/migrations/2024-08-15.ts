@@ -75,7 +75,6 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("trigger_event_type_id", "text", (col) => col.notNull().defaultTo("eventType:primitives/callable"))
         .addColumn("trigger_config", "jsonb", (col) => col.notNull().defaultTo("{}"))
         .addColumn("last_edited_at", "timestamptz")
-        .addColumn("last_ran_at", "timestamptz")
         .addColumn("last_save_client_timestamp", "timestamptz")
         .execute()
 
@@ -131,7 +130,26 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("value", "jsonb", (col) => col.notNull())
         .execute()
 
-    // Create triggers for workflow runs
+    // Trigger - on workflow update
+    await sql`
+    CREATE OR REPLACE FUNCTION public.workflows_on_update()
+    RETURNS TRIGGER AS $$
+    BEGIN
+        IF NEW.graph IS DISTINCT FROM OLD.graph OR NEW.trigger_config IS DISTINCT FROM OLD.trigger_config THEN
+            NEW.last_edited_at := now();
+        END IF;
+
+        RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql;
+
+    CREATE TRIGGER trigger_workflows_on_update
+    BEFORE UPDATE ON public.workflows
+    FOR EACH ROW
+    EXECUTE FUNCTION public.workflows_on_update();
+    `.execute(db)
+
+    // Trigger - on workflow run insert
     await sql`
     CREATE OR REPLACE FUNCTION public.workflow_runs_on_insert()
     RETURNS TRIGGER AS $$
@@ -154,6 +172,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     EXECUTE FUNCTION public.workflow_runs_on_insert();
     `.execute(db)
 
+    // Trigger - on workflow run update
     await sql`
     CREATE OR REPLACE FUNCTION public.workflow_runs_on_update()
     RETURNS TRIGGER AS $$
@@ -210,6 +229,7 @@ export async function down(db: Kysely<any>): Promise<void> {
     await db.schema.dropTable("user_meta").ifExists().execute()
 
     // Drop function
+    await sql`DROP FUNCTION IF EXISTS public.workflows_on_update`.execute(db)
     await sql`DROP FUNCTION IF EXISTS public.workflow_runs_on_insert`.execute(db)
     await sql`DROP FUNCTION IF EXISTS public.workflow_runs_on_update`.execute(db)
 

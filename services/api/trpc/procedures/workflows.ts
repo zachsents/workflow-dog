@@ -17,6 +17,13 @@ export default {
     list: projectPermissionProcedure("read")
         .query(async ({ ctx }) => {
             return db.selectFrom("workflows")
+                .leftJoinLateral(
+                    eb => eb.selectFrom("workflow_runs")
+                        .select(sql<Date>`max(started_at)`.as("last_ran_at"))
+                        .whereRef("workflow_id", "=", "workflows.id")
+                        .as("sub"),
+                    join => join.onTrue()
+                )
                 .select(["id", "name", "is_enabled", "created_at", "project_id", "trigger_event_type_id", "last_edited_at", "last_ran_at"])
                 .where("project_id", "=", ctx.projectId)
                 .orderBy("workflows.name")
@@ -180,7 +187,7 @@ export default {
         }))
         .mutation(async ({ input, ctx }) => {
             const { last_save_client_timestamp, ...oldWorkflow } = await db.selectFrom("workflows")
-                .select(["graph", "last_save_client_timestamp", "last_edited_at"])
+                .select(["graph", "last_save_client_timestamp"])
                 .where("id", "=", ctx.workflowId)
                 .executeTakeFirstOrThrow()
 
@@ -193,11 +200,10 @@ export default {
             return db.updateTable("workflows")
                 .set({
                     graph: input.graph,
-                    last_edited_at: sql`now()`,
                     last_save_client_timestamp: input.clientTimestamp,
                 })
                 .where("id", "=", ctx.workflowId)
-                .returning(["last_edited_at", "graph"])
+                .returning("graph")
                 .executeTakeFirstOrThrow()
         }),
 

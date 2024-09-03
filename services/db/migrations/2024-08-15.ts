@@ -130,7 +130,10 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("value", "jsonb", (col) => col.notNull())
         .execute()
 
-    // Trigger - on workflow update
+    /**
+     * Trigger - on workflow update
+     *  - Updates last edited timestamp
+     */
     await sql`
     CREATE OR REPLACE FUNCTION public.workflows_on_update()
     RETURNS TRIGGER AS $$
@@ -149,18 +152,42 @@ export async function up(db: Kysely<any>): Promise<void> {
     EXECUTE FUNCTION public.workflows_on_update();
     `.execute(db)
 
-    // Trigger - on workflow run insert
+    /**
+     * Trigger - on workflow run insert
+     *  - Adds project ID
+     *  - Either links to existing snapshot or creates a new one
+     */
     await sql`
     CREATE OR REPLACE FUNCTION public.workflow_runs_on_insert()
     RETURNS TRIGGER AS $$
     DECLARE
         _project_id uuid;
+        _existing_snapshot_id uuid;
     BEGIN
         SELECT project_id INTO _project_id
         FROM workflows
         WHERE id = NEW.workflow_id;
 
         NEW.project_id := _project_id;
+
+        SELECT snap.id INTO _existing_snapshot_id
+        FROM workflow_snapshots snap
+        LEFT JOIN workflows wf ON snap.workflow_id = wf.id
+        WHERE (
+            wf.id = NEW.workflow_id
+            AND snap.graph = wf.graph
+            AND snap.trigger_event_type_id = wf.trigger_event_type_id
+        );
+
+        IF _existing_snapshot_id IS NULL THEN
+            INSERT INTO workflow_snapshots (workflow_id, graph, trigger_event_type_id)
+            SELECT id, graph, trigger_event_type_id
+            FROM workflows
+            WHERE id = NEW.workflow_id
+            RETURNING id INTO _existing_snapshot_id;
+        END IF;
+
+        NEW.snapshot_id := _existing_snapshot_id;
 
         RETURN NEW;
     END;
@@ -172,7 +199,10 @@ export async function up(db: Kysely<any>): Promise<void> {
     EXECUTE FUNCTION public.workflow_runs_on_insert();
     `.execute(db)
 
-    // Trigger - on workflow run update
+    /**
+     * Trigger - on workflow run update
+     *  - Updates error counts
+     */
     await sql`
     CREATE OR REPLACE FUNCTION public.workflow_runs_on_update()
     RETURNS TRIGGER AS $$

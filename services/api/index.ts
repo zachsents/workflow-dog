@@ -119,26 +119,9 @@ app.all(["/api/run/:eventSourceId", "/api/run/:eventSourceId/*"], bodyParser.raw
             if (runData.length === 0)
                 return [] as Insertable<WorkflowRuns>[]
 
-            const { id: snapshotId } =
-                await db.selectFrom("workflow_snapshots")
-                    .leftJoin("workflows", "workflows.id", "workflow_snapshots.workflow_id")
-                    .select("workflow_snapshots.id")
-                    .whereRef("workflows.graph", "=", "workflow_snapshots.graph")
-                    .whereRef("workflows.trigger_event_type_id", "=", "workflow_snapshots.trigger_event_type_id")
-                    .executeTakeFirst()
-                ?? await db.insertInto("workflow_snapshots")
-                    .values(eb => ({
-                        workflow_id: wf.id,
-                        trigger_event_type_id: wf.trigger_event_type_id,
-                        graph: eb.selectFrom("workflows").select("graph").where("id", "=", wf.id)
-                    }))
-                    .returning("id")
-                    .executeTakeFirstOrThrow()
-
             const newRuns: Insertable<WorkflowRuns>[] = runData.map(data => ({
                 workflow_id: wf.id,
                 event_payload: data,
-                snapshot_id: snapshotId,
             }))
 
             return newRuns

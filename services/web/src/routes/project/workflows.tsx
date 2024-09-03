@@ -27,7 +27,7 @@ export default function ProjectWorkflows() {
 
     const projectId = useCurrentProjectId()
     const { data: workflows, isPending } = trpc.workflows.list.useQuery({ projectId })
-    
+
     const search = useSearch(workflows ?? [], {
         keys: ["name"],
         threshold: 0.4,
@@ -179,6 +179,8 @@ function WorkflowResultCard({ workflow, withTrigger }: WorkflowResultCardProps) 
     const hasBeenEditedBefore = workflow.last_edited_at && workflow.last_edited_at.getTime() > 0
     const hasRanBefore = workflow.last_ran_at && workflow.last_ran_at.getTime() > 0
 
+    const eventTypeDef = ClientEventTypes[workflow.trigger_event_type_id]
+
     return (<>
         <Link
             to={`/workflows/${workflow.id}`}
@@ -207,7 +209,7 @@ function WorkflowResultCard({ workflow, withTrigger }: WorkflowResultCardProps) 
                 </p>
                 {withTrigger &&
                     <p className="text-muted-foreground text-sm">
-                        {ClientEventTypes[workflow.trigger_event_type_id]?.whenName ?? "Unknown trigger"}
+                        {eventTypeDef?.whenName ?? "Unknown trigger"}
                     </p>}
             </div>
 
@@ -259,6 +261,11 @@ function WorkflowResultCard({ workflow, withTrigger }: WorkflowResultCardProps) 
                         e.stopPropagation()
                     }}
                 >
+                    {eventTypeDef?.additionalDropdownItems && <>
+                        <eventTypeDef.additionalDropdownItems workflowId={workflow.id} />
+                        <DropdownMenuSeparator className="first:hidden" />
+                    </>}
+
                     {!setEnabledMutation.isPending && (workflow.is_enabled
                         ? <DropdownMenuItem onSelect={() => setEnabled(false)}>
                             <TI><IconPlayerPauseFilled /></TI>

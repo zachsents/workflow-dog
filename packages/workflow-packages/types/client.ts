@@ -24,6 +24,7 @@ export interface ClientEventType extends ClientDefinition {
     workflowOutputs: Record<string, ClientEventTypeIO>
     requiresConfiguration?: boolean
     sourceComponent?: React.ComponentType<ClientEventTypeSourceComponentProps>
+    additionalDropdownItems?: React.ComponentType<{ workflowId: string }>
 }
 
 export type ClientEventTypeSourceComponentProps = {

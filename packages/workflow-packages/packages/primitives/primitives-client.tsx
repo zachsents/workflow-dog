@@ -17,6 +17,7 @@ import { createPackageHelper } from "../../client-registry"
 import ScheduleConfig from "./components/schedule-config"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "web/src/components/ui/select"
 import { ClientEventTypes } from "../../client"
+import { DropdownMenuItem } from "web/src/components/ui/dropdown-menu"
 
 
 const helper = createPackageHelper("primitives")
@@ -258,6 +259,16 @@ helper.registerEventType("webhook", {
             </div>
         )
     },
+    additionalDropdownItems: ({ workflowId }) => (
+        <DropdownMenuItem onClick={() => {
+            navigator.clipboard.writeText(import.meta.env.DEV
+                ? `http://localhost:8080/api/run/webhook_${workflowId}`
+                : `https://run.workflow.dog/x/webhook_${workflowId}`)
+        }}>
+            <TI><IconLink /></TI>
+            Copy webhook URL
+        </DropdownMenuItem>
+    ),
 })
 
 // #region EventType: HTTP Request
@@ -312,6 +323,16 @@ helper.registerEventType("httpRequest", {
             </div>
         )
     },
+    additionalDropdownItems: ({ workflowId }) => (
+        <DropdownMenuItem onClick={() => {
+            navigator.clipboard.writeText(import.meta.env.DEV
+                ? `http://localhost:8080/api/run/request_${workflowId}`
+                : `https://run.workflow.dog/x/request_${workflowId}`)
+        }}>
+            <TI><IconLink /></TI>
+            Copy webhook URL
+        </DropdownMenuItem>
+    ),
 })
 
 // #region EventType: Schedule

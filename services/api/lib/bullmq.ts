@@ -163,14 +163,12 @@ new Worker("runs", async (job) => {
                     const names = (n.handleStates as any)[handleName].multi.names as string[] | undefined
                     if (names && outputValue?.constructor === Object) {
                         names.forEach((name, i) => {
-                            if (outputValue[name] !== undefined)
-                                acc[`${handleName}.${i}`] = outputValue[name]
+                            acc[`${handleName}.${i}`] = outputValue[name] ?? null
                         })
                     }
                     else if (!names && Array.isArray(outputValue)) {
                         outputValue.forEach((v, i) => {
-                            if (v !== undefined)
-                                acc[`${handleName}.${i}`] = v
+                            acc[`${handleName}.${i}`] = v ?? null
                         })
                     }
                     return acc

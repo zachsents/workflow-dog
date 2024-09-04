@@ -34,6 +34,6 @@ export type ClientEventTypeSourceComponentProps = {
 
 export interface ClientEventTypeIO {
     displayName?: string
-    valueType: ValueTypeUsage | null
+    valueType: ValueTypeUsage
     description?: string
 }

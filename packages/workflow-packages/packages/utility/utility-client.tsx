@@ -9,10 +9,11 @@ import { createPackageHelper } from "../../client-registry"
 import { cn } from "web/src/lib/utils"
 
 
-const helper = createPackageHelper("control")
+const helper = createPackageHelper("utility")
 
 helper.registerNodeDef("ternary", {
     name: "Choose Value",
+    description: "Chooses between two input values to output based on a condition.",
     icon: IconArrowsJoin2,
     component: () => <StandardNode>
         <StandardNode.Handle type="input" name="condition" valueType={useValueType("boolean")} />
@@ -24,6 +25,7 @@ helper.registerNodeDef("ternary", {
 
 helper.registerNodeDef("router", {
     name: "Route Value",
+    description: "Routes the input value to one of two outputs based on a condition.",
     icon: IconArrowsSplit2,
     component: () => <StandardNode>
         <StandardNode.Handle type="input" name="condition" valueType={useValueType("boolean")} />
@@ -35,6 +37,7 @@ helper.registerNodeDef("router", {
 
 helper.registerNodeDef("passthrough", {
     name: "Passthrough",
+    description: "Passes the input value through to the output. Mostly for testing.",
     icon: IconSquare,
     component: () => <StandardNode>
         <StandardNode.Handle type="input" name="valueIn" displayName="Value" />
@@ -44,15 +47,20 @@ helper.registerNodeDef("passthrough", {
 
 helper.registerNodeDef("isNull", {
     name: "Is Null",
+    description: "Checks if the input value is null.",
     icon: IconSquare,
     component: () => <StandardNode>
         <StandardNode.Handle type="input" name="value" />
-        <StandardNode.Handle type="output" name="isNull" valueType={useValueType("boolean")} />
+        <StandardNode.Handle
+            type="output" name="isNull" displayName="Is Null"
+            valueType={useValueType("boolean")}
+        />
     </StandardNode>,
 })
 
 helper.registerNodeDef("comment", {
     name: "Comment",
+    description: "Displays a comment in the workflow. Purely cosmetic.",
     icon: IconMessage,
     color: "gray.400",
     component: () => {

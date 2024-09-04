@@ -53,7 +53,7 @@ helper.registerNodeDef("triggerData", {
                     <Select value={selectedInput ?? ""} onValueChange={setSelectedInput}>
                         <SelectTrigger className="w-[200px]">
                             <SelectValue placeholder="Pick a property">
-                                {eventType?.workflowInputs[selectedInput!].displayName}
+                                {eventType?.workflowInputs[selectedInput!]?.displayName}
                             </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
@@ -191,14 +191,14 @@ helper.registerEventType("callable", {
         dataIn: {
             displayName: "Data In",
             description: "The data passed to this workflow from the workflow that called it.",
-            valueType: null,
+            valueType: useValueType("any"),
         },
     },
     workflowOutputs: {
         dataOut: {
             displayName: "Data Out",
             description: "The data returned from this workflow. This will be available to the workflow that called it.",
-            valueType: null,
+            valueType: useValueType("any"),
         },
     },
     sourceComponent: () => {
@@ -233,7 +233,7 @@ helper.registerEventType("webhook", {
         data: {
             displayName: "Data",
             description: "The JSON data passed from the webhook.",
-            valueType: null,
+            valueType: useValueType("any"),
         },
         params: {
             displayName: "Parameters",

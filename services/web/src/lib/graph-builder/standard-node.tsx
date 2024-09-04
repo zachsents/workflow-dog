@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Portal as HoverCardPortal } from "@radix-ui/react-hover-card"
 import useResizeObserver from "@react-hook/resize-observer"
-import { IconBracketsContain, IconChevronDown, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
+import { IconBraces, IconBracketsContain, IconChevronDown, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
 import { Button } from "@ui/button"
 import { Card } from "@ui/card"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@ui/dialog"
@@ -13,7 +13,7 @@ import { Label } from "@ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@ui/popover"
 import TI from "@web/components/tabler-icon"
 import { useDialogState } from "@web/lib/hooks"
-import { cn, getOffsetRelativeTo, type RequiredExcept } from "@web/lib/utils"
+import { cn, getOffsetRelativeTo } from "@web/lib/utils"
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { useValueType, ValueTypeDefinitions, type ValueTypeUsage } from "workflow-types/react"
@@ -37,12 +37,12 @@ export function StandardNode({
 
     if (!Array.isArray(children)) children = [children]
     const handleFilter = (handleType: HandleType) => (c: StandardNodeChild) =>
-        validHandleComponents.includes(c.type.name)
+        c && validHandleComponents.includes(c.type.name)
         && (c.props as HandleProps | MultiHandleProps).type === handleType
     const inputs = children.filter(handleFilter("input"))
     const outputs = children.filter(handleFilter("output"))
-    const configItems = children.filter(c => c.type.name === Config.name)
-    const contentItems = children.filter(c => c.type.name === NodeContent.name)
+    const configItems = children.filter(c => c && c.type.name === Config.name)
+    const contentItems = children.filter(c => c && c.type.name === NodeContent.name)
 
     const isSelected = gbx.useStore(s => s.selection.has(id))
     const showSelectHoverOutline = gbx.useStore(s => !s.connection && !s.boxSelection)
@@ -161,7 +161,7 @@ interface MultiHandleProps {
     itemValueType?: ValueTypeUsage
 }
 
-type MultiHandlePropsWithDefaults = RequiredExcept<MultiHandleProps, "itemValueType">
+type MultiHandlePropsWithDefaults = Required<MultiHandleProps>
 
 // #region MultiHandle
 function MultiHandle(passedProps: MultiHandleProps) {
@@ -176,6 +176,7 @@ function MultiHandle(passedProps: MultiHandleProps) {
         defaultSingleMode: false,
         displayName: passedProps.name,
         itemDisplayName: passedProps.displayName ?? passedProps.name,
+        itemValueType: useValueType("any"),
         ...passedProps,
     }
 
@@ -247,8 +248,10 @@ function MultiHandle(passedProps: MultiHandleProps) {
                                     })
                                 })}
                             >
-                                <TI className="text-muted-foreground"><IconBracketsContain /></TI>
-                                <span>Provide entire list as input</span>
+                                <TI className="text-muted-foreground">
+                                    {props.allowNaming ? <IconBraces /> : <IconBracketsContain />}
+                                </TI>
+                                <span>Provide entire {props.allowNaming ? "record" : "list"} as input</span>
                             </DropdownMenuItem>}
 
                         {listMode === "single" &&
@@ -266,7 +269,7 @@ function MultiHandle(passedProps: MultiHandleProps) {
                                 })}
                             >
                                 <TI className="text-muted-foreground"><IconList /></TI>
-                                <span>Provide list items individually</span>
+                                <span>Provide items individually</span>
                             </DropdownMenuItem>}
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -296,7 +299,10 @@ function MultiHandle(passedProps: MultiHandleProps) {
                 <Handle
                     name={props.name} type={props.type}
                     displayName={props.displayName}
-                    valueType={useValueType("list", props.itemValueType && [props.itemValueType])}
+                    valueType={useValueType(
+                        props.allowNaming ? "record" : "list",
+                        [props.itemValueType],
+                    )}
                 />}
         </div>
     )
@@ -474,7 +480,7 @@ function HandleRenameDialog({ open, onOpenChange, handleName, handleIndex, handl
 interface HandleProps {
     type: HandleType
     name: string
-    valueType?: ValueTypeUsage | null
+    valueType?: ValueTypeUsage
     indexingId?: string
     displayName?: string
     allowNaming?: boolean
@@ -487,7 +493,7 @@ interface HandleProps {
 function Handle({
     type, name, indexingId = name,
     displayName = name.replaceAll(/(?<!\w)[a-z]/g, c => c.toUpperCase()),
-    valueType,
+    valueType = useValueType("any"),
     allowNaming = false, onNameClick,
     optional = false,
 }: HandleProps) {

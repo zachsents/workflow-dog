@@ -111,10 +111,19 @@ new Worker("runs", async (job) => {
                 const [, arrName, indexStr] = arrMatch
                 const index = parseInt(indexStr)
 
-                if (!isNaN(index) && (acc[arrName] === undefined || Array.isArray(acc[arrName]))) {
+                if (isNaN(index))
+                    return acc
+
+                const name = (n.handleStates as any)[arrName]?.multi?.names?.[index] as string | undefined
+
+                if (name) {
+                    acc[arrName] ??= {}
+                    acc[arrName][name] = v
+                } else {
                     acc[arrName] ??= []
                     acc[arrName][index] = v
                 }
+
                 return acc
             }
 
@@ -136,16 +145,42 @@ new Worker("runs", async (job) => {
             return rejectFns[n.id](new Error("Missing node definition: " + n.definitionId))
         }
 
+        let rawOutputs: Awaited<ReturnType<typeof def["action"]>>
         try {
-            resolveFns[n.id](await def.action(formedInputs, {
+            rawOutputs = await def.action(formedInputs, {
                 node: n,
                 workflowId: workflow_id!,
                 projectId: project_id!,
                 eventPayload: event_payload,
-            }))
+            })
         } catch (err) {
-            rejectFns[n.id](err)
+            return rejectFns[n.id](err)
         }
+
+        const outputs = rawOutputs
+            ? Object.entries(rawOutputs).reduce((acc, [handleName, outputValue]) => {
+                if ((n.handleStates as any)[handleName]?.listMode === "multi") {
+                    const names = (n.handleStates as any)[handleName].multi.names as string[] | undefined
+                    if (names && outputValue?.constructor === Object) {
+                        names.forEach((name, i) => {
+                            if (outputValue[name] !== undefined)
+                                acc[`${handleName}.${i}`] = outputValue[name]
+                        })
+                    }
+                    else if (!names && Array.isArray(outputValue)) {
+                        outputValue.forEach((v, i) => {
+                            if (v !== undefined)
+                                acc[`${handleName}.${i}`] = v
+                        })
+                    }
+                    return acc
+                }
+                acc[handleName] = outputValue
+                return acc
+            }, {} as Record<string, any>)
+            : undefined
+
+        resolveFns[n.id](outputs)
     })
 
     const [nodeErrors] = await Promise.all([

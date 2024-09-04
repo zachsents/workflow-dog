@@ -1,4 +1,4 @@
-import { IconBraces, IconBracketsContain, IconClock, IconFile, IconHash, IconPhoto, IconTextSize, IconToggleLeftFilled, type Icon } from "@tabler/icons-react"
+import { IconBraces, IconBracketsContain, IconClock, IconFile, IconHash, IconPhoto, IconSquare, IconTextSize, IconToggleLeftFilled, type Icon } from "@tabler/icons-react"
 
 /* ------------------------------------------------------ */
 /* Definitions                                            */
@@ -6,6 +6,10 @@ import { IconBraces, IconBracketsContain, IconClock, IconFile, IconHash, IconPho
 // #region Definitions
 
 export const ValueTypeDefinitions = {
+    any: createTypeDef({
+        name: "Any",
+        icon: IconSquare,
+    }),
     string: createTypeDef({
         name: "String",
         jsType: "string",
@@ -121,6 +125,8 @@ export function useValueType(
 }
 
 export function doTypesMatch(a: ValueTypeUsage, b: ValueTypeUsage): boolean {
+    // TODO: add support for matching any type
+
     if (a.typeDefinitionId !== b.typeDefinitionId) {
         const aDef = ValueTypeDefinitions[a.typeDefinitionId]
 

@@ -32,3 +32,31 @@ helper.registerNodeDef("titlecase", {
         }
     },
 })
+
+helper.registerNodeDef("template", {
+    name: "Template",
+    action(inputs) {
+        const { template, substitutions } = z.object({
+            template: z.string(),
+            substitutions: z.record(
+                z.string().refine(x => /^[\w -]+$/.test(x), "Substitution names can only contain letters, numbers, spaces, underscores, and dashes."),
+                z.string(),
+            ).default({}),
+        }).parse(inputs)
+
+        const result = Object.entries(substitutions).reduce((acc: string, [varName, content]) => {
+            const pattern = new RegExp(`\\{{1,2}\\s*?${varName}\\s*?\\}{1,2}`, "g")
+            return acc.replaceAll(pattern, content)
+        }, template)
+
+        return { result }
+    },
+})
+
+helper.registerNodeDef("length", {
+    name: "Text Length",
+    action(inputs) {
+        const { text } = z.object({ text: z.string() }).parse(inputs)
+        return { length: text.length }
+    },
+})

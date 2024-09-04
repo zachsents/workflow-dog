@@ -156,14 +156,14 @@ function Viewport({ children }: { children: React.ReactNode }) {
                 pan.x.set(mouseX + zoomRatio * (pan.x.get() - mouseX))
                 pan.y.set(mouseY + zoomRatio * (pan.y.get() - mouseY))
             }}
-            onCopy={e => {
-                e.preventDefault()
-                gbx.copySelectionToClipboard()
-            }}
-            onPaste={e => {
-                e.preventDefault()
-                gbx.pasteFromClipboard()
-            }}
+        // onCopy={e => {
+        //     e.preventDefault()
+        //     gbx.copySelectionToClipboard()
+        // }}
+        // onPaste={e => {
+        //     e.preventDefault()
+        //     gbx.pasteFromClipboard()
+        // }}
         >
             {/* Background / Interaction Box */}
             <motion.div

@@ -8,6 +8,16 @@ export interface ServerDefinition {
 }
 
 
+export interface ServerNodeDefinition extends ServerDefinition {
+    action: (inputs: Record<string, unknown>, context: {
+        node: any
+        workflowId: string
+        projectId: string
+        eventPayload: any
+    }) => MaybePromise<Record<string, any> | void>
+}
+
+
 type EventSourceInitializer = {
     /** Also doubles as URL slug */
     id: string

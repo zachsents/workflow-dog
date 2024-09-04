@@ -131,7 +131,7 @@ helper.registerNodeDef("number", {
     component: () => {
         const gbx = useGraphBuilder()
         const nodeId = useNodeId()
-        const value = gbx.useNodeState<string>(nodeId, n => n.config.value ? `${n.config.value}` : "")
+        const value = gbx.useNodeState<string>(nodeId, n => n.config.value ?? "")
 
         return (
             <StandardNode hidePackageBadge>
@@ -142,11 +142,10 @@ helper.registerNodeDef("number", {
                         placeholder="0"
                         value={value}
                         onChange={e => gbx.mutateNodeState(nodeId, n => {
-                            const parsed = parseFloat(e.currentTarget.value)
-                            n.config.value = isNaN(parsed) ? null : parsed
+                            n.config.value = e.currentTarget.value
                         })}
                         style={{
-                            width: `calc(${value.length}ch + 80px)`
+                            width: `calc(${Math.max(value.length, 1)}ch + 80px)`
                         }}
                         onPointerDownCapture={(e) => e.stopPropagation()}
                     />

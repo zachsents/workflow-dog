@@ -3,8 +3,7 @@ import { alphanumeric } from "nanoid-dictionary"
 
 
 export enum IdNamespace {
-    ActionNodeDefinition = "node-def",
-    ActionNode = "node",
+    ActionNode = "node_inst",
     Edge = "edge",
     TriggerDefinition = "trigger-def",
     InputHandle = "input",

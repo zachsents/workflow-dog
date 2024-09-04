@@ -58,6 +58,41 @@ app.use("/api/trpc", createExpressMiddleware({
 // Health check -- see Docker compose file
 app.get("/api/health", (_, res) => void res.send("ok"))
 
+
+// Run status endpoint
+app.get("/api/run/status/:workflowRunId", async (req, res) => {
+    // TODO: add token to allow access
+    const workflowRunId = req.params.workflowRunId
+    const run = await db.selectFrom("workflow_runs")
+        .select(["status", "node_errors"])
+        .where("id", "=", workflowRunId)
+        .executeTakeFirst()
+
+    if (!run)
+        return res.status(404).send("Workflow run not found")
+
+    const { node_errors, ...rest } = run
+
+    const outputRows = req.query.with_outputs == null
+        ? []
+        : await db.selectFrom("workflow_run_outputs")
+            .select(["node_id", "handle_id", "value"])
+            .where("workflow_run_id", "=", workflowRunId)
+            .where("is_global", "=", false)
+            .execute()
+
+    const node_data = _.merge({},
+        _.mapValues(_.groupBy(outputRows, "node_id"), rows => ({
+            outputs: Object.fromEntries(rows.map(row =>
+                [row.handle_id, row.value] as const
+            )),
+        })),
+        _.mapValues(node_errors as any, error => ({ error })),
+    )
+
+    return res.json({ ...rest, node_data })
+})
+
 // Event source handler
 app.all(["/api/run/:eventSourceId", "/api/run/:eventSourceId/*"], bodyParser.raw({ type: "*/*" }), async (req, res) => {
     const eventSourceId = req.params.eventSourceId
@@ -146,7 +181,12 @@ app.all(["/api/run/:eventSourceId", "/api/run/:eventSourceId/*"], bodyParser.raw
 
     await updateStateTask // has been running in background
 
-    res.status(generatedAnyRuns ? 202 : 200).json({ runs: newRunIds })
+    res.status(generatedAnyRuns ? 202 : 200).json({
+        runs: newRunIds.map(runId => ({
+            id: runId,
+            statusUrl: useEnvVar("APP_ORIGIN") + "/api/run/status/" + runId + "?with_outputs",
+        }))
+    })
 })
 
 

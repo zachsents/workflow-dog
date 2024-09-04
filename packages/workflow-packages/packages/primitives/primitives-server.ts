@@ -9,6 +9,36 @@ import { createPackageHelper, uniformEventData } from "../../server-registry"
 const helper = createPackageHelper("primitives")
 
 
+helper.registerNodeDef("triggerData", {
+    name: "Data from Trigger",
+    action(inputs, ctx) {
+        return { data: ctx.eventPayload[ctx.node.config.selectedInput] }
+    },
+})
+
+helper.registerNodeDef("text", {
+    name: "Text",
+    action(inputs, ctx) {
+        return { text: ctx.node.config.value?.toString() || "" }
+    },
+})
+
+helper.registerNodeDef("number", {
+    name: "Number",
+    action(inputs, ctx) {
+        const value = parseFloat(ctx.node.config.value as string)
+        return { number: isNaN(value) ? null : value }
+    },
+})
+
+helper.registerNodeDef("boolean", {
+    name: "Boolean",
+    action(inputs, ctx) {
+        return { boolean: !!ctx.node.config.value }
+    },
+})
+
+
 // #region Callable
 
 const callableEventSource = helper.registerEventSource("callable", {

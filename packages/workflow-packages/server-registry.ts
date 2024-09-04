@@ -1,9 +1,10 @@
 import type { Selectable } from "kysely"
-import type { ServerDefinition, ServerEventSourceDefinition, ServerEventType } from "./types/server"
+import type { ServerDefinition, ServerEventSourceDefinition, ServerEventType, ServerNodeDefinition } from "./types/server"
 import { createRegistryBuilderFn } from "./utils"
 import type { EventSources } from "core/db"
 
 
+export const nodeDefs: Record<string, ServerNodeDefinition> = {}
 export const eventTypes: Record<string, ServerEventType> = {}
 export const eventSources: Record<string, ServerEventSourceDefinition> = {}
 
@@ -14,6 +15,9 @@ const GLOBAL_DEFAULTS = {
 
 export function createPackageHelper(packageName: string) {
     return {
+        registerNodeDef: createRegistryBuilderFn(nodeDefs, `node:${packageName}`, {
+            ...GLOBAL_DEFAULTS,
+        }),
         registerEventType: createRegistryBuilderFn(eventTypes, `eventType:${packageName}`, {
             ...GLOBAL_DEFAULTS,
         }),

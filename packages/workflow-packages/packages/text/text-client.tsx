@@ -29,3 +29,15 @@ helper.registerNodeDef("lowercase", {
         />
     </StandardNode>,
 })
+
+helper.registerNodeDef("titlecase", {
+    name: "Title Case",
+    icon: IconLetterCaseUpper,
+    component: () => <StandardNode>
+        <StandardNode.Handle type="input" name="text" valueType={useValueType("string")} />
+        <StandardNode.Handle
+            type="output" name="result" valueType={useValueType("string")}
+            displayName="text"
+        />
+    </StandardNode>,
+})

@@ -1,7 +1,7 @@
-import { IconBorderSides, IconDivide, IconEqual, IconLetterESmall, IconMath1Divide2, IconMathMax, IconMathMin, IconMinus, IconNumber10Small, IconPlus, IconSquareRoot, IconSquareRounded, IconStairsDown, IconStairsUp, IconSuperscript, IconVariableMinus, IconWaveSine, IconWood, IconX, type Icon, type IconProps } from "@tabler/icons-react"
+import { IconBorderSides, IconDice, IconDivide, IconEqual, IconMath1Divide2, IconMathMax, IconMathMin, IconMinus, IconPlus, IconSquareRoot, IconSquareRounded, IconStairsDown, IconStairsUp, IconSuperscript, IconVariableMinus, IconWaveSine, IconWood, IconX, type Icon, type IconProps } from "@tabler/icons-react"
 import { forwardRef } from "react"
-import { StandardNode } from "web/src/lib/graph-builder/standard-node"
 import { RadioToggle, RadioToggleOption } from "web/src/components/radio-toggle"
+import { StandardNode } from "web/src/lib/graph-builder/standard-node"
 import { useValueType } from "workflow-types/react"
 import { createPackageHelper } from "../../client-registry"
 
@@ -64,11 +64,6 @@ helper.registerNodeDef("divide", {
         <StandardNode.Handle
             type="output"
             name="quotient"
-            valueType={useValueType("number")}
-        />
-        <StandardNode.Handle
-            type="output"
-            name="remainder"
             valueType={useValueType("number")}
         />
     </StandardNode>
@@ -195,40 +190,6 @@ helper.registerNodeDef("log", {
     </StandardNode>
 })
 
-helper.registerNodeDef("logBase10", {
-    name: "Logarithm (Base 10)",
-    icon: IconNumber10Small,
-    component: () => <StandardNode>
-        <StandardNode.Handle
-            type="input"
-            name="number"
-            valueType={useValueType("number")}
-        />
-        <StandardNode.Handle
-            type="output"
-            name="log"
-            valueType={useValueType("number")}
-        />
-    </StandardNode>
-})
-
-helper.registerNodeDef("naturalLog", {
-    name: "Natural Logarithm",
-    icon: IconLetterESmall,
-    component: () => <StandardNode>
-        <StandardNode.Handle
-            type="input"
-            name="number"
-            valueType={useValueType("number")}
-        />
-        <StandardNode.Handle
-            type="output"
-            name="log"
-            valueType={useValueType("number")}
-        />
-    </StandardNode>
-})
-
 helper.registerNodeDef("absolute", {
     name: "Absolute Value",
     icon: forwardRef<Icon, IconProps>((props, ref) =>
@@ -321,6 +282,28 @@ helper.registerNodeDef("round", {
         <StandardNode.Handle
             type="output"
             name="rounded"
+            valueType={useValueType("number")}
+        />
+    </StandardNode>
+})
+
+helper.registerNodeDef("random", {
+    name: "Random Number",
+    icon: IconDice,
+    component: () => <StandardNode>
+        <StandardNode.Handle
+            type="input"
+            name="min"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="input"
+            name="max"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="output"
+            name="random"
             valueType={useValueType("number")}
         />
     </StandardNode>

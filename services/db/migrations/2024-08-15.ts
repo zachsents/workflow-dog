@@ -218,6 +218,14 @@ export async function up(db: Kysely<any>): Promise<void> {
             NEW.error_count := _error_count;
         END IF;
 
+        IF NEW.status <> OLD.status AND NEW.status = 'running' THEN
+            NEW.started_at := now();
+        END IF;
+
+        IF NEW.status <> OLD.status AND ( NEW.status = 'completed' OR NEW.status = 'failed' ) THEN
+            NEW.finished_at := now();
+        END IF;
+
         RETURN NEW;
     END;
     $$ LANGUAGE plpgsql;

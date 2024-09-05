@@ -343,7 +343,7 @@ export default {
                 const queryResult = await db.selectFrom("workflow_runs")
                     .leftJoin("workflow_runs_meta", "workflow_runs.id", "workflow_runs_meta.id")
                     .selectAll("workflow_runs")
-                    .select("row_number")
+                    .select(["row_number"])
                     .where("workflow_runs.id", "=", ctx.workflowRunId)
                     .executeTakeFirst()
 
@@ -364,6 +364,22 @@ export default {
             }),
     },
 
+    snapshots: {
+        byId: projectPermissionByWorkflowProcedure("read")
+            .input(z.object({ snapshotId: z.string().uuid() }))
+            .query(async ({ input, ctx }) => {
+                const queryResult = await db.selectFrom("workflow_snapshots")
+                    .selectAll()
+                    .where("id", "=", input.snapshotId)
+                    .where("workflow_id", "=", ctx.workflowId)
+                    .executeTakeFirst()
+
+                if (!queryResult)
+                    throw new TRPCError({ code: "NOT_FOUND" })
+
+                return queryResult
+            }),
+    },
 
     // runManually: t.procedure
     //     .input(z.object({

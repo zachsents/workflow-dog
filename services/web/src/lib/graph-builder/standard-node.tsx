@@ -53,9 +53,9 @@ export function StandardNode({
         <Card className={cn(
             "select-none outline-primary outline-2 outline-offset-2 flex flex-col items-stretch gap-4 py-1",
             n.highlightColor && `shadow-[0_0_0px_20px] shadow-${n.highlightColor}-400/40`,
-            isSelected
-                ? "outline"
-                : (showSelectHoverOutline && "hover:outline-dashed")
+            !gbx.options.readonly && (
+                isSelected ? "outline" : (showSelectHoverOutline && "hover:outline-dashed")
+            ),
         )}>
             <div
                 className={cn(
@@ -223,6 +223,7 @@ function MultiHandle(passedProps: MultiHandleProps) {
                         <Button
                             size="icon" variant="ghost"
                             className="text-xs rounded-full"
+                            disabled={gbx.options.readonly}
                         >
                             <TI><IconDots /></TI>
                         </Button>
@@ -282,7 +283,7 @@ function MultiHandle(passedProps: MultiHandleProps) {
                     <MultiHandleItem key={`${props.name}.${i}`} {...props} index={i} />
                 )}
 
-                {props.allowAdding && multiState.amount < props.max &&
+                {props.allowAdding && multiState.amount < props.max && !gbx.options.readonly &&
                     <Button
                         size="compact" variant="ghost"
                         onClick={() => gbx.mutateState(s => {
@@ -340,10 +341,10 @@ function MultiHandleItem({
                         ? (multiState.names?.[index] ?? "")
                         : `${itemDisplayName} ${index + 1}`}
                     valueType={itemValueType}
-                    allowNaming={allowNaming} onNameClick={renameDialog.open}
+                    allowNaming={allowNaming && !gbx.options.readonly} onNameClick={renameDialog.open}
                 />
             </div>
-            {allowAdding &&
+            {allowAdding && !gbx.options.readonly &&
                 <Button
                     size="sm" variant="destructive"
                     className={cn(
@@ -378,7 +379,7 @@ function MultiHandleItem({
                     <TI><IconX /></TI>
                 </Button>}
         </div>
-        {allowNaming &&
+        {allowNaming && !gbx.options.readonly &&
             <HandleRenameDialog
                 handleName={name}
                 handleIndex={index}
@@ -551,7 +552,7 @@ function Handle({
                         (isConnectingAtAll && !canConnectToUs) && "opacity-50 pointer-events-none",
                     )}
                     ref={parentRef}
-                    {...eventHandlers}
+                    {...!gbx.options.readonly && eventHandlers}
                 >
                     {displayNameComponent}
                     {valueTypeDef &&
@@ -571,7 +572,7 @@ function Handle({
                             (isConnectingAtAll && !canConnectToUs) && "opacity-0",
                         )}
                         ref={childRef}
-                        onPointerDownCapture={onPointerDownCapture}
+                        onPointerDownCapture={gbx.options.readonly ? undefined : onPointerDownCapture}
                     >
                         <div className={cn(
                             "rounded-full w-2 aspect-square transition-colors",

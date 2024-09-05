@@ -7,7 +7,7 @@ import { Button } from "@web/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@web/components/ui/dropdown-menu"
 import { ScrollArea } from "@web/components/ui/scroll-area"
 import VerticalDivider from "@web/components/vertical-divider"
-import { GBRoot } from "@web/lib/graph-builder/core"
+import { GBRoot, MainToolbar } from "@web/lib/graph-builder/core"
 import { useCurrentWorkflow, useCurrentWorkflowId, useDialogState, usePreventUnloadWhileSaving, useSelectedRunId } from "@web/lib/hooks"
 import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
@@ -82,6 +82,13 @@ function WorkflowIndex() {
         workflowRunId: selectedRunId!,
     }, {
         enabled: !!selectedRunId,
+    })
+
+    const { data: selectedSnapshot } = trpc.workflows.snapshots.byId.useQuery({
+        workflowId,
+        snapshotId: selectedRun?.snapshot_id!,
+    }, {
+        enabled: !!selectedRun?.snapshot_id,
     })
 
     return <>
@@ -163,19 +170,17 @@ function WorkflowIndex() {
                                     </DropdownMenuItem>}
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        {/* <div className="mx-4 bg-background/10 rounded-full text-background font-medium text-xs text-center grid grid-flow-col auto-cols-fr place-items-stretch gap-1 p-1 h-auto *:rounded-full *:px-4 *:py-1 [&.active]:*:bg-background [&.active]:*:text-foreground *:transition-colors">
-                            <NavLink to="trigger" replace>Trigger</NavLink>
-                            <NavLink to="edit" replace>Edit</NavLink>
-                            <NavLink to="history" replace>History</NavLink>
-                        </div> */}
+
                         <p className="self-center mx-4 text-xs text-center text-muted-foreground select-none">
-                            {saveGraphMutation.isPending
-                                ? "Saving..."
-                                : saveGraphMutation.isSuccess
-                                    ? "Saved!"
-                                    : saveGraphMutation.isError
-                                        ? "Failed to save"
-                                        : "Waiting to save"}
+                            {selectedRunId
+                                ? "This will not be saved."
+                                : saveGraphMutation.isPending
+                                    ? "Saving..."
+                                    : saveGraphMutation.isSuccess
+                                        ? "Saved!"
+                                        : saveGraphMutation.isError
+                                            ? "Failed to save"
+                                            : "Waiting to save"}
                         </p>
                     </div>
 
@@ -197,20 +202,38 @@ function WorkflowIndex() {
                         </div>}
                 </div>
 
-                <GBRoot
-                    className="w-full h-full overflow-clip"
-                    options={{
-                        nodeDefinitions: ClientNodeDefinitions,
-                        initialGraph: workflow.graph,
-                        onGraphChange: graph => {
-                            console.debug("Saving graph...")
-                            saveGraph(graph)
-                        },
-                    }}
-                >
-                    <TriggerPanel />
+                <div className="relative w-full h-full overflow-clip bg-gray-50">
+                    {!selectedRunId && <GBRoot
+                        className="w-full h-full"
+                        options={{
+                            nodeDefinitions: ClientNodeDefinitions,
+                            initialGraph: workflow.graph,
+                            onGraphChange: graph => {
+                                console.debug("Saving graph...")
+                                saveGraph(graph)
+                            },
+                        }}
+                        key="current"
+                    >
+                        <div className="absolute hack-center-x z-20 bottom-4 px-4 max-w-full">
+                            <MainToolbar />
+                        </div>
+                    </GBRoot>}
+
+                    {!!selectedRunId && !!selectedSnapshot?.graph && <GBRoot
+                        className="w-full h-full"
+                        options={{
+                            nodeDefinitions: ClientNodeDefinitions,
+                            initialGraph: selectedSnapshot!.graph,
+                            readonly: true,
+                        }}
+                        key={selectedRunId}
+                    >
+                    </GBRoot>}
+
+                    {!selectedRunId && <TriggerPanel />}
                     <RunHistoryPanel />
-                </GBRoot>
+                </div>
 
                 <RenameWorkflowDialog workflow={workflow} {...renameDialog.dialogProps} />
                 <ConfirmDialog

@@ -78,11 +78,11 @@ function GraphRenderer({ children, ...props }: React.ComponentProps<"div">) {
                     )
                 })}
             </Viewport>
-            <div className="absolute hack-center-x z-20 bottom-4 px-4 max-w-full">
-                <MainToolbar />
-            </div>
-            <ContextMenu />
-            <SelectionToolbar />
+
+            {!gbx.options.readonly && <>
+                <ContextMenu />
+                <SelectionToolbar />
+            </>}
 
             {children}
         </div>
@@ -110,24 +110,39 @@ function Viewport({ children }: { children: React.ReactNode }) {
     const isBoxSelecting = useKeyState("ctrl") || !!boxSelection
 
     useHotkeys("backspace, delete", () => {
+        if (gbx.options.readonly)
+            return
         if (gbx.state.selection.size > 0)
             gbx.deleteNodes(Array.from(gbx.state.selection))
     })
 
     useHotkeys("ctrl+a", () => {
+        if (gbx.options.readonly)
+            return
         gbx.store.setState({ selection: new Set(gbx.state.nodes.keys()) })
     }, { preventDefault: true })
 
     const [hotslot, setHotslot] = useHotSlot()
     useHotkeys("z", () => {
+        if (gbx.options.readonly)
+            return
+
         if (gbx.state.currentlyHoveredNodeDefId)
             setHotslot(gbx.state.currentlyHoveredNodeDefId)
         else if (hotslot)
             gbx.addNodeAtMouse({ definitionId: hotslot })
     })
-    useHotkeys("shift+z", () => setHotslot(null))
+    useHotkeys("shift+z", () => {
+        if (gbx.options.readonly)
+            return
+        setHotslot(null)
+    })
 
-    useHotkeys("ctrl+v", () => gbx.pasteFromClipboard(), { preventDefault: true })
+    useHotkeys("ctrl+v", () => {
+        if (gbx.options.readonly)
+            return
+        gbx.pasteFromClipboard()
+    }, { preventDefault: true })
 
     return (
         <motion.div
@@ -156,14 +171,6 @@ function Viewport({ children }: { children: React.ReactNode }) {
                 pan.x.set(mouseX + zoomRatio * (pan.x.get() - mouseX))
                 pan.y.set(mouseY + zoomRatio * (pan.y.get() - mouseY))
             }}
-        // onCopy={e => {
-        //     e.preventDefault()
-        //     gbx.copySelectionToClipboard()
-        // }}
-        // onPaste={e => {
-        //     e.preventDefault()
-        //     gbx.pasteFromClipboard()
-        // }}
         >
             {/* Background / Interaction Box */}
             <motion.div
@@ -178,7 +185,9 @@ function Viewport({ children }: { children: React.ReactNode }) {
                 whileTap={{ cursor: isBoxSelecting ? "crosshair" : "grabbing" }}
 
                 onPanStart={(e, info) => {
-                    if (!e.ctrlKey) return
+                    if (!e.ctrlKey || gbx.options.readonly)
+                        return
+
                     const rect = gbx.state.viewportElement!.getBoundingClientRect()
                     gbx.store.setState({
                         boxSelection: {
@@ -192,6 +201,9 @@ function Viewport({ children }: { children: React.ReactNode }) {
                 }}
                 onPan={(e, info) => {
                     if (e.ctrlKey || gbx.state.boxSelection) {
+                        if (gbx.options.readonly)
+                            return
+
                         const bs = gbx.state.boxSelection
                         if (!bs) return
                         bs.offset.x.set(info.offset.x)
@@ -209,6 +221,9 @@ function Viewport({ children }: { children: React.ReactNode }) {
                     tapControls.registerPanEnd(e, info)
                 }}
                 onContextMenu={e => {
+                    if (gbx.options.readonly)
+                        return
+
                     e.preventDefault()
                     gbx.store.setState({ contextMenuPosition: { x: e.clientX, y: e.clientY } })
                 }}
@@ -229,11 +244,11 @@ function Viewport({ children }: { children: React.ReactNode }) {
             <EdgeRenderer />
 
             {/* Selection Box */}
-            {boxSelection &&
+            {!gbx.options.readonly && boxSelection &&
                 <SelectionBox />}
 
             {/* Debug */}
-            <Debug />
+            {/* <Debug /> */}
         </motion.div>
     )
 }
@@ -241,7 +256,7 @@ function Viewport({ children }: { children: React.ReactNode }) {
 
 
 // #region MainToolbar
-function MainToolbar() {
+export function MainToolbar() {
 
     const [search, nodeDefinitionsList] = useNodeDefinitionsSearch()
 
@@ -870,7 +885,8 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
             <motion.div
                 className={cn(
                     "absolute pointer-events-auto",
-                    isDragging ? "cursor-grabbing" : "cursor-pointer",
+                    gbx.options.readonly ? "cursor-default"
+                        : isDragging ? "cursor-grabbing" : "cursor-pointer",
                 )}
                 style={{
                     x: n.position.x,
@@ -878,30 +894,32 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
                 }}
                 ref={ref}
 
-                onPanStart={startDrag}
-                onPan={(e, info) => {
-                    const selection = gbx.state.selection
-                    const zoom = gbx.state.zoom.get()
-                    if (selection.has(n.id)) {
-                        selection.forEach(id => {
-                            const node = gbx.state.nodes.get(id)
-                            if (!node) return
-                            node.position.x.set(node.position.x.get() + info.delta.x / zoom)
-                            node.position.y.set(node.position.y.get() + info.delta.y / zoom)
-                        })
-                    } else {
-                        n.position.x.set(n.position.x.get() + info.delta.x / zoom)
-                        n.position.y.set(n.position.y.get() + info.delta.y / zoom)
-                    }
+                {...!gbx.options.readonly && {
+                    onPanStart: startDrag,
+                    onPan: (e, info) => {
+                        const selection = gbx.state.selection
+                        const zoom = gbx.state.zoom.get()
+                        if (selection.has(n.id)) {
+                            selection.forEach(id => {
+                                const node = gbx.state.nodes.get(id)
+                                if (!node) return
+                                node.position.x.set(node.position.x.get() + info.delta.x / zoom)
+                                node.position.y.set(node.position.y.get() + info.delta.y / zoom)
+                            })
+                        } else {
+                            n.position.x.set(n.position.x.get() + info.delta.x / zoom)
+                            n.position.y.set(n.position.y.get() + info.delta.y / zoom)
+                        }
+                    },
+                    // For detecting tap's that aren't part of a pan
+                    onTap: tapControls.registerTap,
+                    onPanEnd: (e, info) => {
+                        tapControls.registerPanEnd(e, info)
+                        endDrag()
+                    },
+                    onPointerEnter: () => gbx.store.setState({ currentlyHoveredNodeDefId: n.definitionId }),
+                    onPointerLeave: () => gbx.store.setState({ currentlyHoveredNodeDefId: null }),
                 }}
-                // For detecting tap's that aren't part of a pan
-                onTap={tapControls.registerTap}
-                onPanEnd={(e, info) => {
-                    tapControls.registerPanEnd(e, info)
-                    endDrag()
-                }}
-                onPointerEnter={() => gbx.store.setState({ currentlyHoveredNodeDefId: n.definitionId })}
-                onPointerLeave={() => gbx.store.setState({ currentlyHoveredNodeDefId: null })}
             >
                 {children}
             </motion.div>
@@ -1080,10 +1098,12 @@ function Edge({ id }: { id: string }) {
     const { path, mid } = useEdgePath(sx, sy, tx, ty, { spring: false })
 
     return (
-        <g className="group cursor-pointer">
+        <g className={cn("group", !gbx.options.readonly && "cursor-pointer")}>
             <g
                 style={{ pointerEvents: "stroke" }}
                 onClick={(ev) => {
+                    if (gbx.options.readonly) return
+
                     const bothPartOfSelection = gbx.state.selection.has(e.s) && gbx.state.selection.has(e.t)
                     gbx.store.setState(s => ({
                         selection: new Set(
@@ -1100,19 +1120,28 @@ function Edge({ id }: { id: string }) {
                     className="stroke-white stroke-[6px] fill-none"
                     style={{ strokeLinecap: "round" }}
                     d={path}
+                    variants={edgePathDrawAnim}
+                    initial="hidden"
+                    animate="visible"
                 />
-                <motion.path
+                {!gbx.options.readonly && <motion.path
                     className="group-hover:stroke-gray-400/20 stroke-[20px] fill-none"
                     style={{ strokeLinecap: "round" }}
                     d={path}
-                />
+                    variants={edgePathDrawAnim}
+                    initial="hidden"
+                    animate="visible"
+                />}
                 <motion.path
                     className="stroke-gray-400 stroke-[4px] fill-none"
                     style={{ strokeLinecap: "round" }}
                     d={path}
+                    variants={edgePathDrawAnim}
+                    initial="hidden"
+                    animate="visible"
                 />
             </g>
-            <EdgeLabel mx={mid.x} my={mid.y}>
+            {!gbx.options.readonly && <EdgeLabel mx={mid.x} my={mid.y}>
                 <Button
                     size="sm" variant="destructive"
                     className="pointer-events-auto absolute hack-center group-hover:opacity-100 opacity-0 rounded-full h-[20px] aspect-square px-0"
@@ -1123,9 +1152,21 @@ function Edge({ id }: { id: string }) {
                 >
                     <TI><IconX /></TI>
                 </Button>
-            </EdgeLabel>
+            </EdgeLabel>}
         </g>
     )
+}
+
+const edgePathDrawAnim = {
+    hidden: { pathLength: 0, opacity: 0 },
+    visible: {
+        pathLength: 1,
+        opacity: 1,
+        transition: {
+            pathLength: { type: "spring", duration: 1, bounce: 0 },
+            opacity: { duration: 0.5 },
+        },
+    }
 }
 
 
@@ -1255,6 +1296,7 @@ export interface GraphBuilderOptions {
     nodeDefinitions: Record<string, NodeDefinition>
     initialGraph?: string
     onGraphChange?: (serializedGraph: string) => void
+    readonly?: boolean
 }
 
 export class GraphBuilder {

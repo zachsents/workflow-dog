@@ -402,6 +402,7 @@ export interface WorkflowRuns {
   finished_at: Timestamp | null;
   global_error: Json | null;
   id: Generated<string>;
+  is_starred: Generated<boolean>;
   node_errors: Generated<Json>;
   project_id: string | null;
   scheduled_for: Timestamp | null;
@@ -409,6 +410,11 @@ export interface WorkflowRuns {
   started_at: Timestamp | null;
   status: Generated<WorkflowRunStatus>;
   workflow_id: string | null;
+}
+
+export interface WorkflowRunsMeta {
+  id: string | null;
+  row_number: Int8 | null;
 }
 
 export interface Workflows {
@@ -483,6 +489,7 @@ export interface DB {
   user_meta: UserMeta;
   workflow_run_outputs: WorkflowRunOutputs;
   workflow_runs: WorkflowRuns;
+  workflow_runs_meta: WorkflowRunsMeta;
   workflow_snapshots: WorkflowSnapshots;
   workflows: Workflows;
   workflows_event_sources: WorkflowsEventSources;

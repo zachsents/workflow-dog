@@ -1,12 +1,12 @@
 import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowsJoin2, IconArrowsSplit2, IconMessage, IconSquare, IconTypography } from "@tabler/icons-react"
-import { StandardNode } from "web/src/lib/graph-builder/standard-node"
 import TI from "web/src/components/tabler-icon"
 import { Textarea } from "web/src/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "web/src/components/ui/toggle-group"
 import { useGraphBuilder, useNodeId } from "web/src/lib/graph-builder/core"
+import { StandardNode } from "web/src/lib/graph-builder/standard-node"
+import { cn } from "web/src/lib/utils"
 import { useValueType } from "workflow-types/react"
 import { createPackageHelper } from "../../client-registry"
-import { cn } from "web/src/lib/utils"
 
 
 const helper = createPackageHelper("utility")

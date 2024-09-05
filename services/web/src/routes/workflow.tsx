@@ -1,4 +1,4 @@
-import { IconArrowLeft, IconChevronDown, IconLayoutSidebarLeftExpandFilled, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPointFilled, IconRouteSquare2, IconRun, IconTrash, IconX } from "@tabler/icons-react"
+import { IconArrowLeft, IconChevronDown, IconClock, IconLayoutSidebarLeftExpandFilled, IconLayoutSidebarRightExpandFilled, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPointFilled, IconRefresh, IconRouteSquare2, IconRun, IconTrash, IconX } from "@tabler/icons-react"
 import ConfirmDialog from "@web/components/confirm-dialog"
 import RenameWorkflowDialog from "@web/components/rename-workflow-dialog"
 import SpinningLoader from "@web/components/spinning-loader"
@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ScrollArea } from "@web/components/ui/scroll-area"
 import VerticalDivider from "@web/components/vertical-divider"
 import { GBRoot } from "@web/lib/graph-builder/core"
-import { useCurrentWorkflow, useCurrentWorkflowId, useDialogState, usePreventUnloadWhileSaving } from "@web/lib/hooks"
+import { useCurrentWorkflow, useCurrentWorkflowId, useDialogState, usePreventUnloadWhileSaving, useSelectedRunId } from "@web/lib/hooks"
 import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
@@ -16,6 +16,10 @@ import { Helmet } from "react-helmet"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { ClientEventTypes, ClientNodeDefinitions } from "workflow-packages/client"
+import dayjs from "@web/lib/dayjs"
+import RunHistoryTable from "@web/components/run-history-table"
+import SimpleTooltip from "@web/components/simple-tooltip"
+import { useMutation } from "@tanstack/react-query"
 
 
 function WorkflowIndex() {
@@ -73,6 +77,13 @@ function WorkflowIndex() {
 
     usePreventUnloadWhileSaving(saveGraphMutation.isPending)
 
+    const [selectedRunId, setSelectedRunId] = useSelectedRunId()
+    const { data: selectedRun } = trpc.workflows.runs.byId.useQuery({
+        workflowRunId: selectedRunId!,
+    }, {
+        enabled: !!selectedRunId,
+    })
+
     return <>
         <Helmet>
             <title>{workflow?.name ?? "Workflow"} - WorkflowDog</title>
@@ -85,89 +96,105 @@ function WorkflowIndex() {
                     gridTemplateColumns: "1fr",
                 }}
             >
-                <div className="col-span-full text-background p-1 flex items-stretch gap-2">
-                    <Button variant="ghost" size="compact" asChild className="gap-2 h-auto">
-                        <Link to={`/projects/${workflow.project_id}/workflows`}>
-                            <TI><IconArrowLeft /></TI>
-                            Back to Workflows
-                        </Link>
-                    </Button>
-                    <VerticalDivider />
-                    <DropdownMenu>
-                        <DropdownMenuTrigger className="group text-sm px-2 py-1 flex-center gap-2 hover:bg-background/10 rounded-sm transition-colors">
-                            <TI><IconRouteSquare2 /></TI>
-                            <p>
-                                {workflow.name}
-                            </p>
-                            <TI className="text-muted-foreground group-hover:text-background transition-colors"><IconChevronDown /></TI>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent side="bottom" className="*:flex *:items-center *:gap-2 w-[200px] z-[200]">
-                            <DropdownMenuItem onSelect={renameDialog.open}>
-                                <TI><IconPencil /></TI>
-                                Rename Workflow
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600" onSelect={deleteDialog.open}>
-                                <TI><IconTrash /></TI>
-                                Delete Workflow
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="secondary" size="compact"
-                                disabled={setEnabledMutation.isPending}
-                                className="gap-1 self-center"
-                            >
-                                {workflow.is_enabled ? <>
-                                    <TI className="text-green-600 text-lg"><IconPointFilled /></TI>
-                                    Live
-                                </> : <>
-                                    <TI className="text-gray-600 text-lg"><IconPlayerPauseFilled /></TI>
-                                    Paused
-                                </>}
-                                <TI className="ml-1"><IconChevronDown /></TI>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent side="bottom" className="*:flex *:items-center *:gap-4 w-[300px] z-[200]">
-                            {workflow.is_enabled
-                                ? <DropdownMenuItem onSelect={() => setEnabled(false)}>
-                                    <TI><IconPlayerPauseFilled /></TI>
-                                    <div>
-                                        <p>Pause Workflow</p>
-                                        <p className="text-xs text-muted-foreground">
-                                            When paused, triggers won't cause the workflow to run.
-                                        </p>
-                                    </div>
+                <div className="col-span-full text-background p-1 flex items-stretch justify-between gap-2">
+                    <div className="flex items-stretch gap-2">
+                        <Button variant="ghost" size="compact" asChild className="gap-2 h-auto">
+                            <Link to={`/projects/${workflow.project_id}/workflows`}>
+                                <TI><IconArrowLeft /></TI>
+                                Back to Workflows
+                            </Link>
+                        </Button>
+                        <VerticalDivider />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger className="group text-sm px-2 py-1 flex-center gap-2 hover:bg-background/10 rounded-sm transition-colors">
+                                <TI><IconRouteSquare2 /></TI>
+                                <p>
+                                    {workflow.name}
+                                </p>
+                                <TI className="text-muted-foreground group-hover:text-background transition-colors"><IconChevronDown /></TI>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent side="bottom" className="*:flex *:items-center *:gap-2 w-[200px] z-[200]">
+                                <DropdownMenuItem onSelect={renameDialog.open}>
+                                    <TI><IconPencil /></TI>
+                                    Rename Workflow
                                 </DropdownMenuItem>
-                                : <DropdownMenuItem onSelect={() => setEnabled(true)}>
-                                    <TI className="text-green-600"><IconPlayerPlayFilled /></TI>
-                                    <div>
-                                        <p>Enable Workflow</p>
-                                        <p className="text-xs text-muted-foreground">
-                                            When enabled, triggers will cause the workflow to run.
-                                        </p>
-                                    </div>
-                                </DropdownMenuItem>}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                                <DropdownMenuItem className="text-red-600" onSelect={deleteDialog.open}>
+                                    <TI><IconTrash /></TI>
+                                    Delete Workflow
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="secondary" size="compact"
+                                    disabled={setEnabledMutation.isPending}
+                                    className="gap-1 self-center"
+                                >
+                                    {workflow.is_enabled ? <>
+                                        <TI className="text-green-600 text-lg"><IconPointFilled /></TI>
+                                        Live
+                                    </> : <>
+                                        <TI className="text-gray-600 text-lg"><IconPlayerPauseFilled /></TI>
+                                        Paused
+                                    </>}
+                                    <TI className="ml-1"><IconChevronDown /></TI>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent side="bottom" className="*:flex *:items-center *:gap-4 w-[300px] z-[200]">
+                                {workflow.is_enabled
+                                    ? <DropdownMenuItem onSelect={() => setEnabled(false)}>
+                                        <TI><IconPlayerPauseFilled /></TI>
+                                        <div>
+                                            <p>Pause Workflow</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                When paused, triggers won't cause the workflow to run.
+                                            </p>
+                                        </div>
+                                    </DropdownMenuItem>
+                                    : <DropdownMenuItem onSelect={() => setEnabled(true)}>
+                                        <TI className="text-green-600"><IconPlayerPlayFilled /></TI>
+                                        <div>
+                                            <p>Enable Workflow</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                When enabled, triggers will cause the workflow to run.
+                                            </p>
+                                        </div>
+                                    </DropdownMenuItem>}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        {/* <div className="mx-4 bg-background/10 rounded-full text-background font-medium text-xs text-center grid grid-flow-col auto-cols-fr place-items-stretch gap-1 p-1 h-auto *:rounded-full *:px-4 *:py-1 [&.active]:*:bg-background [&.active]:*:text-foreground *:transition-colors">
+                            <NavLink to="trigger" replace>Trigger</NavLink>
+                            <NavLink to="edit" replace>Edit</NavLink>
+                            <NavLink to="history" replace>History</NavLink>
+                        </div> */}
+                        <p className="self-center mx-4 text-xs text-center text-muted-foreground select-none">
+                            {saveGraphMutation.isPending
+                                ? "Saving..."
+                                : saveGraphMutation.isSuccess
+                                    ? "Saved!"
+                                    : saveGraphMutation.isError
+                                        ? "Failed to save"
+                                        : "Waiting to save"}
+                        </p>
+                    </div>
 
-                    {/* <div className="mx-4 bg-background/10 rounded-full text-background font-medium text-xs text-center grid grid-flow-col auto-cols-fr place-items-stretch gap-1 p-1 h-auto *:rounded-full *:px-4 *:py-1 [&.active]:*:bg-background [&.active]:*:text-foreground *:transition-colors">
-                        <NavLink to="trigger" replace>Trigger</NavLink>
-                        <NavLink to="edit" replace>Edit</NavLink>
-                        <NavLink to="history" replace>History</NavLink>
-                    </div> */}
-
-                    <p className="self-center mx-4 text-xs text-center text-muted-foreground select-none">
-                        {saveGraphMutation.isPending
-                            ? "Saving..."
-                            : saveGraphMutation.isSuccess
-                                ? "Saved!"
-                                : saveGraphMutation.isError
-                                    ? "Failed to save"
-                                    : "Waiting to save"}
-                    </p>
+                    {!!selectedRunId &&
+                        <div className="flex-center gap-2 self-center mx-4">
+                            <Button
+                                variant="default" size="compact" className="gap-1"
+                                onClick={() => setSelectedRunId(null)}
+                            >
+                                <TI><IconArrowLeft /></TI>
+                                Back to Current Workflow
+                            </Button>
+                            <div className={cn(
+                                "bg-background rounded-sm text-xs flex-center px-2 py-0.5 transition-colors",
+                                selectedRun ? "text-foreground" : "text-background",
+                            )}>
+                                Currently Viewing Run #<span className="font-semibold">{selectedRun?.row_number}</span>
+                            </div>
+                        </div>}
                 </div>
 
                 <GBRoot
@@ -182,6 +209,7 @@ function WorkflowIndex() {
                     }}
                 >
                     <TriggerPanel />
+                    <RunHistoryPanel />
                 </GBRoot>
 
                 <RenameWorkflowDialog workflow={workflow} {...renameDialog.dialogProps} />
@@ -248,14 +276,14 @@ function TriggerPanel() {
 
         <div
             className={cn(
-                "absolute z-[100] top-0 left-0 w-full h-full bg-black/10 transition-opacity",
+                "absolute z-[101] top-0 left-0 w-full h-full bg-black/10 transition-opacity",
                 !isOpen && "opacity-0 pointer-events-none",
             )}
             onPointerDown={() => setOpen(false)}
         />
 
         <div className={cn(
-            "absolute top-0 left-0 z-[100] h-full bg-white w-[400px] border-r shadow-xl transition flex-col items-stretch",
+            "absolute top-0 left-0 z-[102] h-full bg-white w-[400px] border-r shadow-xl transition flex-col items-stretch",
             !isOpen && "opacity-0 -translate-x-2 pointer-events-none",
         )}>
             <div className="flex items-center justify-between gap-4 no-shrink-children p-4 border-b">
@@ -292,6 +320,91 @@ function TriggerPanel() {
                             workflowId={workflowId}
                             eventSources={workflow.eventSources}
                         />}
+                </div>
+            </ScrollArea>
+        </div>
+    </>
+}
+
+
+function RunHistoryPanel() {
+
+    // const workflowId = useCurrentWorkflowId()
+    const workflow = useCurrentWorkflow().data!
+
+    const [params, setParams] = useSearchParams()
+    const isOpen = params.get("history") != null
+    const setOpen = (open: boolean) => {
+        if (open) params.set("history", "")
+        else params.delete("history")
+        setParams(params.toString())
+    }
+
+    const hasRanBefore = workflow.last_ran_at && workflow.last_ran_at.getTime() > 0
+
+    const utils = trpc.useUtils()
+    const refreshMutation = useMutation({
+        mutationFn: () => utils.workflows.runs.list.invalidate(),
+    })
+
+    return <>
+        <Button
+            variant="outline"
+            className={cn(
+                "absolute top-2 right-2 z-[100] gap-4 text-sm shadow-md bg-white/90 transition-opacity",
+                isOpen && "opacity-0 pointer-events-none",
+            )}
+            onClick={() => setOpen(true)}
+        >
+            <TI className="text-muted-foreground"><IconLayoutSidebarRightExpandFilled /></TI>
+            <div className="flex-center gap-1">
+                <TI><IconClock /></TI>
+                Run History
+            </div>
+            <VerticalDivider className="self-stretch" />
+            <span className="text-xs text-muted-foreground">
+                {hasRanBefore
+                    ? `Last ran ${dayjs(workflow.last_ran_at).fromNow()}`
+                    : "Never ran"}
+            </span>
+        </Button>
+
+        <div
+            className={cn(
+                "absolute z-[101] top-0 left-0 w-full h-full bg-black/10 transition-opacity",
+                !isOpen && "opacity-0 pointer-events-none",
+            )}
+            onPointerDown={() => setOpen(false)}
+        />
+
+        <div className={cn(
+            "absolute top-0 right-0 z-[102] h-full bg-white w-[500px] border-l shadow-xl transition flex-col items-stretch",
+            !isOpen && "opacity-0 translate-x-2 pointer-events-none",
+        )}>
+            <div className="flex items-center justify-between gap-4 no-shrink-children p-4 border-b">
+                <div className="flex items-center gap-4 no-shrink-children">
+                    <h2 className="text-xl font-medium">Run History</h2>
+                    <SimpleTooltip tooltip="Refresh" contentProps={{ side: "right" }}>
+                        <Button
+                            variant="ghost" size="icon"
+                            className="text-lg text-muted-foreground"
+                            onClick={() => void refreshMutation.mutate()}
+                            disabled={refreshMutation.isPending}
+                        >
+                            <TI className={cn(refreshMutation.isPending && "animate-spin")}>
+                                <IconRefresh />
+                            </TI>
+                        </Button>
+                    </SimpleTooltip>
+                </div>
+                <Button variant="ghost" size="icon" className="text-md" onClick={() => setOpen(false)}>
+                    <TI><IconX /></TI>
+                </Button>
+            </div>
+
+            <ScrollArea className="flex-1 min-h-0 w-full relative">
+                <div className="p-4">
+                    <RunHistoryTable />
                 </div>
             </ScrollArea>
         </div>

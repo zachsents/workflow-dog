@@ -48,8 +48,16 @@ export default {
         .query(async ({ ctx, input }) => {
             const [workflow, eventSources] = await Promise.all([
                 db.selectFrom("workflows")
-                    .selectAll()
-                    .where("id", "=", ctx.workflowId)
+                    .leftJoinLateral(
+                        eb => eb.selectFrom("workflow_runs")
+                            .select(sql<Date>`max(started_at)`.as("last_ran_at"))
+                            .whereRef("workflow_id", "=", "workflows.id")
+                            .as("sub"),
+                        join => join.onTrue()
+                    )
+                    .selectAll("workflows")
+                    .select("last_ran_at")
+                    .where("workflows.id", "=", ctx.workflowId)
                     .executeTakeFirst(),
                 db.selectFrom("workflows_event_sources")
                     .innerJoin("event_sources", "event_sources.id", "workflows_event_sources.event_source_id")
@@ -296,6 +304,67 @@ export default {
         }),
 
 
+    runs: {
+        list: projectPermissionByWorkflowProcedure("read")
+            .input(z.object({
+                limit: z.number().min(1).max(100).default(50),
+                offset: z.number().min(0).default(0),
+                sortColumn: z.enum(["started_at", "error_count", "duration"]).default("started_at"),
+                sortDir: z.enum(["asc", "desc"]).default("desc"),
+            }))
+            .query(async ({ input, ctx }) => {
+                const [runs, total] = await Promise.all([
+                    db.selectFrom("workflow_runs")
+                        .leftJoin("workflow_runs_meta", "workflow_runs.id", "workflow_runs_meta.id")
+                        .select([
+                            "workflow_runs.id", "status", "node_errors", "started_at", "error_count", "is_starred", "row_number",
+                            sql<string>`extract(epoch from (finished_at - started_at)) * 1000`.as("duration"),
+                        ])
+                        .where("workflow_id", "=", ctx.workflowId)
+                        .orderBy(input.sortColumn, input.sortDir)
+                        .limit(input.limit)
+                        .offset(input.offset)
+                        .execute()
+                        .then(rows => rows.map(({ duration, ...row }) => ({
+                            ...row,
+                            duration: parseFloat(duration),
+                        }))),
+                    db.selectFrom("workflow_runs")
+                        .select(sql<string>`count(*)`.as("count"))
+                        .where("workflow_id", "=", ctx.workflowId)
+                        .executeTakeFirstOrThrow(),
+                ])
+
+                return { total: parseInt(total.count), runs }
+            }),
+
+        byId: projectPermissionByWorkflowRunProcedure("read")
+            .query(async ({ ctx }) => {
+                const queryResult = await db.selectFrom("workflow_runs")
+                    .leftJoin("workflow_runs_meta", "workflow_runs.id", "workflow_runs_meta.id")
+                    .selectAll("workflow_runs")
+                    .select("row_number")
+                    .where("workflow_runs.id", "=", ctx.workflowRunId)
+                    .executeTakeFirst()
+
+                if (!queryResult)
+                    throw new TRPCError({ code: "NOT_FOUND" })
+
+                return queryResult
+            }),
+
+        setStarred: projectPermissionByWorkflowRunProcedure("write")
+            .input(z.object({ isStarred: z.boolean() }))
+            .mutation(async ({ input, ctx }) => {
+                return db.updateTable("workflow_runs")
+                    .set({ is_starred: input.isStarred })
+                    .where("id", "=", ctx.workflowRunId)
+                    .returning(["id", "is_starred"])
+                    .executeTakeFirstOrThrow()
+            }),
+    },
+
+
     // runManually: t.procedure
     //     .input(z.object({
     //         workflowId: z.string().uuid(),
@@ -520,6 +589,23 @@ export function projectPermissionByWorkflowProcedure(permission: ProjectPermissi
                 ctx: {
                     ...ctx,
                     workflowId: input.workflowId,
+                    projectPermission: permission,
+                }
+            })
+        })
+}
+
+export function projectPermissionByWorkflowRunProcedure(permission: ProjectPermission) {
+    return authenticatedProcedure
+        .input(z.object({ workflowRunId: z.string().uuid() }))
+        .use(async ({ ctx, input, next }) => {
+            const hasPermission = await userHasProjectPermission(ctx.user.id, permission)
+                .byWorkflowRunId(input.workflowRunId)
+            assertOrForbidden(hasPermission)
+            return next({
+                ctx: {
+                    ...ctx,
+                    workflowRunId: input.workflowRunId,
                     projectPermission: permission,
                 }
             })

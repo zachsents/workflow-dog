@@ -41,7 +41,7 @@ helper.registerNodeDef("passthrough", {
 
 helper.registerNodeDef("isNull", {
     name: "Is Null",
-    action(inputs) {
+    async action(inputs) {
         const { value } = z.object({
             value: z.any(),
         }).parse(inputs)

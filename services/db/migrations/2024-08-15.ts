@@ -116,7 +116,14 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("started_at", "timestamptz")
         .addColumn("finished_at", "timestamptz")
         .addColumn("scheduled_for", "timestamptz")
+        .addColumn("is_starred", "boolean", (col) => col.notNull().defaultTo(false))
         .execute()
+
+    await sql`
+    CREATE OR REPLACE VIEW workflow_runs_meta AS
+        SELECT id, row_number() OVER (PARTITION BY workflow_id ORDER BY created_at ASC) as row_number
+        FROM workflow_runs;
+    `.execute(db)
 
     await db.schema
         .createTable("workflow_run_outputs").ifNotExists()
@@ -252,6 +259,8 @@ export async function up(db: Kysely<any>): Promise<void> {
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
+    await sql`DROP VIEW IF EXISTS workflow_runs_meta`.execute(db)
+
     // Drop tables in reverse order
     await db.schema.dropTable("workflow_run_outputs").ifExists().execute()
     await db.schema.dropTable("workflow_runs").ifExists().execute()

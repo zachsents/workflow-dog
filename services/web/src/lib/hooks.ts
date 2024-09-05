@@ -309,3 +309,20 @@ export function usePreventUnloadWhileSaving(saving: boolean) {
         }
     }, [saving])
 }
+
+
+export function useSelectedRunId() {
+    const SELECTED_RUN_QUERY_KEY = "r"
+    
+    const [params, setParams] = useSearchParams()
+    const selectedRunId = params.get(SELECTED_RUN_QUERY_KEY) || null
+    const setSelectedRun = useCallback((runId: string | null) => {
+        if (runId)
+            params.set(SELECTED_RUN_QUERY_KEY, runId)
+        else
+            params.delete(SELECTED_RUN_QUERY_KEY)
+        setParams(params.toString())
+    }, [params])
+
+    return [selectedRunId, setSelectedRun] as const
+}

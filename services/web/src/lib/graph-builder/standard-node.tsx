@@ -95,7 +95,7 @@ export function StandardNode({
                     <PopoverTrigger asChild>
                         <Button
                             size="compact" variant="ghost"
-                            className="self-center gap-1 text-[0.5rem] text-muted-foreground"
+                            className="self-center gap-1 text-[0.65em] text-muted-foreground"
                         >
                             Configure {configItems.length} option{configItems.length > 1 && "s"}
                             <TI><IconChevronDown /></TI>
@@ -212,7 +212,9 @@ function MultiHandle(passedProps: MultiHandleProps) {
                 isInput ? "pl-2" : "px-1",
             )}>
                 <div className="flex-center gap-1">
-                    <TI><IconBracketsContain /></TI>
+                    <TI>
+                        {props.allowNaming ? <IconBraces /> : <IconBracketsContain />}
+                    </TI>
                     <span className="font-medium">{props.displayName}</span>
                 </div>
 

@@ -31,6 +31,7 @@
     "@react-hookz/web": "^24.0.4",
     "@tabler/icons-react": "*",
     "@tanstack/react-query": "^5.45.1",
+    "@tanstack/react-table": "^8.20.5",
     "@trpc/client": "11.0.0-rc.417",
     "@trpc/react-query": "11.0.0-rc.417",
     "@trpc/server": "*",

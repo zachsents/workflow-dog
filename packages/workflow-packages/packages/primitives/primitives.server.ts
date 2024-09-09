@@ -1,29 +1,29 @@
 import { EVENT_QUEUE } from "api/lib/bullmq"
 import { parseCronExpression } from "cron-schedule"
 import { createHash } from "node:crypto"
-import SuperJSON from "superjson"
 import { z } from "zod"
-import { createPackageHelper, uniformEventData } from "../../server-registry"
+import { createPackage, uniformEventData } from "../../registry/registry.server"
 
 
-const helper = createPackageHelper("primitives")
+const helper = createPackage("primitives")
 
+// #region Nodes
 
-helper.registerNodeDef("triggerData", {
+helper.node("triggerData", {
     name: "Data from Trigger",
     action(inputs, ctx) {
         return { data: ctx.eventPayload[ctx.node.config.selectedInput] }
     },
 })
 
-helper.registerNodeDef("text", {
+helper.node("text", {
     name: "Text",
     action(inputs, ctx) {
         return { text: ctx.node.config.value?.toString() || "" }
     },
 })
 
-helper.registerNodeDef("number", {
+helper.node("number", {
     name: "Number",
     action(inputs, ctx) {
         const value = parseFloat(ctx.node.config.value as string)
@@ -31,25 +31,99 @@ helper.registerNodeDef("number", {
     },
 })
 
-helper.registerNodeDef("boolean", {
+helper.node("boolean", {
     name: "Boolean",
     action(inputs, ctx) {
         return { boolean: !!ctx.node.config.value }
     },
 })
 
+helper.node("null", {
+    name: "Null",
+    action() {
+        return { null: null }
+    },
+})
+
+
+// #region Value Types
+
+helper.valueType("any", {
+    name: "Any",
+})
+
+helper.valueType("unknown", {
+    name: "Unknown",
+})
+
+// WILO: adding parsing on the server side to interpret trigger data
+
+helper.valueType("null", {
+    name: "Empty",
+    isApplicable: v => v == null,
+    toJSON: () => null,
+})
+
+helper.valueType("string", {
+    name: "Text",
+    isApplicable: v => typeof v === "string",
+    toJSON: v => v,
+})
+
+helper.valueType("number", {
+    name: "Number",
+    isApplicable: v => typeof v === "number",
+    toJSON: v => v,
+})
+
+helper.valueType("boolean", {
+    name: "Boolean",
+    isApplicable: v => typeof v === "boolean",
+    toJSON: v => v,
+})
+
+helper.valueType("object", {
+    name: "Object",
+    isApplicable: v => typeof v === "object" && v != null,
+    toJSON: (v, toJSON) => Object.fromEntries(Object.entries(v as object).map(([k, v]) => [k, toJSON(v)] as const)),
+})
+
+helper.valueType("map", {
+    name: "Map",
+    isApplicable: v => v instanceof Map,
+    toJSON: (v, toJSON) => {
+        const map = v as Map<string, any>
+        return Array.from(map.entries()).map(([k, v]) => [k, toJSON(v)] as const)
+    },
+    conversionPriority: 10,
+})
+
+helper.valueType("array", {
+    name: "List",
+    isApplicable: v => Array.isArray(v),
+    toJSON: (v, toJSON) => (v as any[]).map(v => toJSON(v)),
+    conversionPriority: 10,
+})
+
+helper.valueType("date", {
+    name: "Date & Time",
+    isApplicable: v => v instanceof Date,
+    toJSON: v => (v as Date).toISOString(),
+    conversionPriority: 10,
+})
+
+
+
 
 // #region Callable
 
-const callableEventSource = helper.registerEventSource("callable", {
+const callableEventSource = helper.eventSource("callable", {
     name: "Callable Endpoint",
     generateEvents(req, source) {
         if (req.method.toUpperCase() !== "POST")
             return
 
-        const parsedBody = req.body instanceof Buffer
-            ? SuperJSON.stringify(SuperJSON.parse(req.body.toString("utf8")))
-            : SuperJSON.stringify(null)
+        const parsedBody = req.body instanceof Buffer ? req.body.toString("utf8") : null
 
         return {
             events: uniformEventData(source, { dataIn: parsedBody }),
@@ -57,7 +131,7 @@ const callableEventSource = helper.registerEventSource("callable", {
     },
 })
 
-helper.registerEventType("callable", {
+helper.eventType("callable", {
     name: "Callable",
     createEventSources({ workflowId }) {
         return [{
@@ -73,7 +147,7 @@ helper.registerEventType("callable", {
 
 // #region Webhook
 
-const webhookEventSource = helper.registerEventSource("webhook", {
+const webhookEventSource = helper.eventSource("webhook", {
     name: "Webhook Endpoint",
     generateEvents(req, source) {
         if (req.method.toUpperCase() !== "POST")
@@ -98,7 +172,7 @@ const webhookEventSource = helper.registerEventSource("webhook", {
     },
 })
 
-helper.registerEventType("webhook", {
+helper.eventType("webhook", {
     name: "Webhook",
     createEventSources({ workflowId }) {
         return [{
@@ -114,7 +188,7 @@ helper.registerEventType("webhook", {
 
 // #region HTTP Request
 
-const httpRequestEventSource = helper.registerEventSource("httpRequest", {
+const httpRequestEventSource = helper.eventSource("httpRequest", {
     name: "HTTP Endpoint",
     generateEvents(req, source) {
         const pathSegments = req.path.split("/")
@@ -143,7 +217,7 @@ const httpRequestEventSource = helper.registerEventSource("httpRequest", {
     },
 })
 
-helper.registerEventType("httpRequest", {
+helper.eventType("httpRequest", {
     name: "HTTP Request",
     async createEventSources({ workflowId }) {
         return [{
@@ -159,7 +233,7 @@ helper.registerEventType("httpRequest", {
 
 // #region Schedule
 
-const scheduleEventSource = helper.registerEventSource("schedule", {
+const scheduleEventSource = helper.eventSource("schedule", {
     name: "Schedule",
     async setup(options) {
         const { cron, timezone } = z.object({
@@ -193,15 +267,15 @@ const scheduleEventSource = helper.registerEventSource("schedule", {
     },
     generateEvents(req, source) {
         return {
-            events: source.enabled_event_types.map(type => ({
-                type,
-                data: {},
-            })),
+            events: uniformEventData(source, {
+                timestamp: new Date(),
+                // TODO: figure out how to serialize data here -- workers convert to JSON
+            }),
         }
     },
 })
 
-helper.registerEventType("schedule", {
+helper.eventType("schedule", {
     name: "Schedule",
     createEventSources({ data }) {
         if (!data) return []

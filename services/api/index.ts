@@ -13,7 +13,7 @@ import {
     middleware as supertokensMiddleware
 } from "supertokens-node/framework/express"
 import { ServerEventSources, ServerEventTypes } from "workflow-packages/server"
-import type { ServerEvent } from "workflow-packages/types/server"
+import type { ServerEvent } from "workflow-packages/lib/types"
 import { initSupertokens } from "./lib/auth"
 import "./lib/bullmq"
 import { RUN_QUEUE } from "./lib/bullmq"
@@ -21,6 +21,7 @@ import { db } from "./lib/db"
 import { useEnvVar } from "./lib/utils"
 import { createContext } from "./trpc"
 import { apiRouter } from "./trpc/router"
+import { jsonifyValue } from "workflow-packages/lib/value-types.server"
 
 
 const port = process.env.PORT || 3001
@@ -156,7 +157,7 @@ app.all(["/api/run/:eventSourceId", "/api/run/:eventSourceId/*"], bodyParser.raw
 
             const newRuns: Insertable<WorkflowRuns>[] = runData.map(data => ({
                 workflow_id: wf.id,
-                event_payload: data,
+                event_payload: data && _.mapValues(data, v => JSON.stringify(jsonifyValue(v))),
             }))
 
             return newRuns

@@ -1,5 +1,5 @@
 import { ServiceDefinitions } from "@pkg/server"
-import { OAuth2Config } from "@pkg/types/server"
+import { OAuth2Config } from "@pkg/types"
 import axios from "axios"
 import type { Selectable } from "kysely"
 import _ from "lodash"

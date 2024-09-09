@@ -1,12 +1,12 @@
 import { IconSelect } from "@tabler/icons-react"
-import { createPackageHelper } from "../../client-registry"
+import { createPackage } from "../../registry/registry.client"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
-import { useValueType } from "workflow-types/react"
+import { useValueType } from "../../lib/value-types.client"
 
 
-const helper = createPackageHelper("objects")
+const helper = createPackage("objects")
 
-helper.registerNodeDef("getProperty", {
+helper.node("getProperty", {
     name: "Get Property",
     description: "Selects a property from an object.",
     icon: IconSelect,
@@ -17,7 +17,7 @@ helper.registerNodeDef("getProperty", {
     </StandardNode>,
 })
 
-helper.registerNodeDef("getProperties", {
+helper.node("getProperties", {
     name: "Get Properties",
     description: "Selects multiple properties from an object.",
     icon: IconSelect,
@@ -33,7 +33,7 @@ helper.registerNodeDef("getProperties", {
     </StandardNode>,
 })
 
-helper.registerNodeDef("setProperty", {
+helper.node("setProperty", {
     name: "Set Property",
     description: "Sets a property on an object.",
     icon: IconSelect,
@@ -45,3 +45,19 @@ helper.registerNodeDef("setProperty", {
     </StandardNode>,
 })
 
+helper.node("setProperties", {
+    name: "Set Properties",
+    description: "Sets multiple properties on an object.",
+    icon: IconSelect,
+    component: () => <StandardNode>
+        <StandardNode.Handle type="input" name="object" valueType={useValueType("object")} />
+        <StandardNode.MultiHandle
+            type="input" name="properties"
+            displayName="Properties"
+            itemDisplayName="Property"
+            allowNaming allowSingleMode={false}
+            defaultAmount={1}
+        />
+        <StandardNode.Handle type="output" name="newObject" valueType={useValueType("object")} />
+    </StandardNode>,
+})

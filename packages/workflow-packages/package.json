@@ -5,10 +5,13 @@
     "dependencies": {
         "superjson": "^2.2.1",
         "web": "workspace:*",
-        "workflow-types": "workspace:*",
         "zod": "^3.23.8"
     },
     "devDependencies": {
+        "@babel/generator": "^7.25.6",
+        "@babel/parser": "^7.25.6",
+        "@babel/traverse": "^7.25.6",
+        "@babel/types": "^7.25.6",
         "@types/bun": "latest"
     },
     "peerDependencies": {
@@ -22,6 +25,7 @@
         "sonner": "*",
         "@react-hookz/web": "*",
         "kysely": "*",
-        "zod": "*"
+        "zod": "*",
+        "devalue": "*"
     }
 }

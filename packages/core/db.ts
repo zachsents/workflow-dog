@@ -390,7 +390,7 @@ export interface WorkflowRunOutputs {
   id: Generated<string>;
   is_global: Generated<boolean>;
   node_id: string | null;
-  value: Json;
+  value: string;
   value_type: Json | null;
   workflow_run_id: string;
 }

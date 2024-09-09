@@ -22,7 +22,7 @@ import { produce } from "immer"
 import React, { forwardRef, useContext, useEffect, useMemo, useRef } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import { toast } from "sonner"
-import type { ClientNodeDefinition } from "workflow-packages/types/client"
+import type { ClientNodeDefinition } from "workflow-packages/lib/types"
 import { createStore, useStore, type StoreApi } from "zustand"
 import { useShallow } from "zustand/react/shallow"
 import { GraphBuilderContext, NodeContext } from "./context"
@@ -1297,6 +1297,7 @@ export interface GraphBuilderOptions {
     initialGraph?: string
     onGraphChange?: (serializedGraph: string) => void
     readonly?: boolean
+    runOutputs?: Record<string, Record<string, string>>
 }
 
 export class GraphBuilder {

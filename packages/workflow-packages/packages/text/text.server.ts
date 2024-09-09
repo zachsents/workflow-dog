@@ -1,10 +1,10 @@
 import { z } from "zod"
-import { createPackageHelper } from "../../server-registry"
+import { createPackage } from "../../registry/registry.server"
 
 
-const helper = createPackageHelper("text")
+const helper = createPackage("text")
 
-helper.registerNodeDef("uppercase", {
+helper.node("uppercase", {
     name: "Uppercase",
     async action(inputs) {
         const { text } = z.object({ text: z.string() }).parse(inputs)
@@ -12,7 +12,7 @@ helper.registerNodeDef("uppercase", {
     },
 })
 
-helper.registerNodeDef("lowercase", {
+helper.node("lowercase", {
     name: "Lowercase",
     action(inputs) {
         const { text } = z.object({ text: z.string() }).parse(inputs)
@@ -20,7 +20,7 @@ helper.registerNodeDef("lowercase", {
     },
 })
 
-helper.registerNodeDef("titlecase", {
+helper.node("titlecase", {
     name: "Title Case",
     action(inputs) {
         const { text } = z.object({ text: z.string() }).parse(inputs)
@@ -33,7 +33,7 @@ helper.registerNodeDef("titlecase", {
     },
 })
 
-helper.registerNodeDef("template", {
+helper.node("template", {
     name: "Template",
     action(inputs) {
         const { template, substitutions } = z.object({
@@ -53,7 +53,7 @@ helper.registerNodeDef("template", {
     },
 })
 
-helper.registerNodeDef("length", {
+helper.node("length", {
     name: "Text Length",
     action(inputs) {
         const { text } = z.object({ text: z.string() }).parse(inputs)

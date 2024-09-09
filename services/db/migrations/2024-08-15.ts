@@ -133,8 +133,7 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("is_global", "boolean", (col) => col.notNull().defaultTo(false))
         .addColumn("node_id", "text")
         .addColumn("handle_id", "text")
-        .addColumn("value_type", "jsonb")
-        .addColumn("value", "jsonb", (col) => col.notNull())
+        .addColumn("value", "text", (col) => col.notNull())
         .execute()
 
     /**

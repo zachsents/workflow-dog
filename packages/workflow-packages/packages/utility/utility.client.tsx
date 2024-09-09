@@ -1,17 +1,17 @@
-import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowsJoin2, IconArrowsSplit2, IconMessage, IconSquare, IconTypography } from "@tabler/icons-react"
+import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowsJoin2, IconArrowsSplit2, IconBraces, IconMessage, IconSquare, IconTypography } from "@tabler/icons-react"
 import TI from "web/src/components/tabler-icon"
 import { Textarea } from "web/src/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "web/src/components/ui/toggle-group"
 import { useGraphBuilder, useNodeId } from "web/src/lib/graph-builder/core"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
 import { cn } from "web/src/lib/utils"
-import { useValueType } from "workflow-types/react"
-import { createPackageHelper } from "../../client-registry"
+import { createPackage } from "../../registry/registry.client"
+import { useValueType } from "../../lib/value-types.client"
 
 
-const helper = createPackageHelper("utility")
+const helper = createPackage("utility")
 
-helper.registerNodeDef("ternary", {
+helper.node("ternary", {
     name: "Choose Value",
     description: "Chooses between two input values to output based on a condition.",
     icon: IconArrowsJoin2,
@@ -23,7 +23,7 @@ helper.registerNodeDef("ternary", {
     </StandardNode>,
 })
 
-helper.registerNodeDef("router", {
+helper.node("router", {
     name: "Route Value",
     description: "Routes the input value to one of two outputs based on a condition.",
     icon: IconArrowsSplit2,
@@ -35,7 +35,7 @@ helper.registerNodeDef("router", {
     </StandardNode>,
 })
 
-helper.registerNodeDef("passthrough", {
+helper.node("passthrough", {
     name: "Passthrough",
     description: "Passes the input value through to the output. Mostly for testing.",
     icon: IconSquare,
@@ -45,20 +45,20 @@ helper.registerNodeDef("passthrough", {
     </StandardNode>,
 })
 
-helper.registerNodeDef("isNull", {
+helper.node("isNull", {
     name: "Is Null",
     description: "Checks if the input value is null.",
     icon: IconSquare,
     component: () => <StandardNode>
         <StandardNode.Handle type="input" name="value" />
         <StandardNode.Handle
-            type="output" name="isNull" displayName="Is Null"
+            type="output" name="isNull"
             valueType={useValueType("boolean")}
         />
     </StandardNode>,
 })
 
-helper.registerNodeDef("comment", {
+helper.node("comment", {
     name: "Comment",
     description: "Displays a comment in the workflow. Purely cosmetic.",
     icon: IconMessage,
@@ -158,3 +158,38 @@ helper.registerNodeDef("comment", {
 
 type CommentTextAlign = "left" | "center" | "right"
 type CommentTextSize = "sm" | "md" | "lg"
+
+
+helper.node("jsonParse", {
+    name: "Parse JSON",
+    description: "Parses a JSON string and outputs the corresponding value.",
+    icon: IconBraces,
+    component: () => <StandardNode>
+        <StandardNode.Handle type="input" name="json" displayName="JSON" valueType={useValueType("string")} />
+        <StandardNode.Handle type="output" name="parsed" />
+    </StandardNode>,
+})
+
+helper.node("jsonStringify", {
+    name: "Convert to JSON",
+    description: "Converts a value to a JSON string.",
+    icon: IconBraces,
+    component: () => <StandardNode>
+        <StandardNode.Handle type="input" name="value" />
+        <StandardNode.Handle type="output" name="json" displayName="JSON" valueType={useValueType("string")} />
+    </StandardNode>,
+})
+
+helper.node("coalesce", {
+    name: "Coalesce",
+    description: "Returns the first non-null value from the input.",
+    icon: IconSquare,
+    component: () => <StandardNode>
+        <StandardNode.MultiHandle
+            type="input" name="values" displayName="Values"
+            itemDisplayName="Value" itemValueType={useValueType("any")}
+            min={1} defaultAmount={2}
+        />
+        <StandardNode.Handle type="output" name="value" />
+    </StandardNode>,
+})

@@ -8,6 +8,7 @@ import { db } from "./db"
 import { useEnvVar } from "./utils"
 import type { Insertable } from "kysely"
 import type { WorkflowRunOutputs } from "core/db"
+import { jsonifyValue } from "workflow-packages/lib/value-types.server"
 
 
 const connection = new IORedis({
@@ -209,13 +210,15 @@ new Worker("runs", async (job) => {
                         is_global: false,
                         node_id: nodeId,
                         handle_id: handleId,
-                        value: SuperJSON.stringify(outputValue),
+                        value: JSON.stringify(jsonifyValue(outputValue)),
                     }))
 
                 if (outputRecords.length > 0)
-                    return db.insertInto("workflow_run_outputs").values(outputRecords).execute()
+                    await db.insertInto("workflow_run_outputs").values(outputRecords).execute()
             })
-        ),
+        ).catch(err => {
+            console.error(err)
+        }),
 
         // Wait for all execution promises to settle
         Promise.allSettled(Object.values(promises)),
@@ -230,4 +233,4 @@ new Worker("runs", async (job) => {
         .executeTakeFirstOrThrow()
 
     console.log("[Bull] finished workflow run", job.data.workflowRunId)
-}, { connection })
+}, { connection, concurrency: 10 })

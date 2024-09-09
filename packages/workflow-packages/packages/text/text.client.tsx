@@ -1,12 +1,12 @@
 import { IconBraces, IconLetterCaseLower, IconLetterCaseUpper, IconRuler } from "@tabler/icons-react"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
-import { useValueType } from "workflow-types/react"
-import { createPackageHelper } from "../../client-registry"
+import { createPackage } from "../../registry/registry.client"
+import { useValueType } from "../../lib/value-types.client"
 
 
-const helper = createPackageHelper("text")
+const helper = createPackage("text")
 
-helper.registerNodeDef("uppercase", {
+helper.node("uppercase", {
     name: "Uppercase",
     description: "Converts the input text to uppercase.",
     icon: IconLetterCaseUpper,
@@ -19,7 +19,7 @@ helper.registerNodeDef("uppercase", {
     </StandardNode>,
 })
 
-helper.registerNodeDef("lowercase", {
+helper.node("lowercase", {
     name: "Lowercase",
     description: "Converts the input text to lowercase.",
     icon: IconLetterCaseLower,
@@ -32,7 +32,7 @@ helper.registerNodeDef("lowercase", {
     </StandardNode>,
 })
 
-helper.registerNodeDef("titlecase", {
+helper.node("titlecase", {
     name: "Title Case",
     description: "Converts the input text to title case.",
     icon: IconLetterCaseUpper,
@@ -45,7 +45,7 @@ helper.registerNodeDef("titlecase", {
     </StandardNode>,
 })
 
-helper.registerNodeDef("template", {
+helper.node("template", {
     name: "Template",
     description: "Uses a template string with substitutions to generate the output text.",
     icon: IconBraces,
@@ -65,7 +65,7 @@ helper.registerNodeDef("template", {
     </StandardNode>,
 })
 
-helper.registerNodeDef("length", {
+helper.node("length", {
     name: "Text Length",
     description: "Calculates the length of the input text.",
     icon: IconRuler,

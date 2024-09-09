@@ -1,10 +1,10 @@
 import { z } from "zod"
-import { createPackageHelper } from "../../server-registry"
+import { createPackage } from "../../registry/registry.server"
 
 
-const helper = createPackageHelper("math")
+const helper = createPackage("math")
 
-helper.registerNodeDef("add", {
+helper.node("add", {
     name: "Add",
     action(inputs) {
         const { addends } = z.object({
@@ -17,7 +17,7 @@ helper.registerNodeDef("add", {
     },
 })
 
-helper.registerNodeDef("subtract", {
+helper.node("subtract", {
     name: "Subtract",
     action(inputs) {
         const { minuends } = z.object({
@@ -30,7 +30,7 @@ helper.registerNodeDef("subtract", {
     },
 })
 
-helper.registerNodeDef("multiply", {
+helper.node("multiply", {
     name: "Multiply",
     action(inputs) {
         const { factors } = z.object({
@@ -43,7 +43,7 @@ helper.registerNodeDef("multiply", {
     },
 })
 
-helper.registerNodeDef("divide", {
+helper.node("divide", {
     name: "Divide",
     action(inputs) {
         const { dividend, divisor } = z.object({
@@ -55,7 +55,7 @@ helper.registerNodeDef("divide", {
     },
 })
 
-helper.registerNodeDef("inverse", {
+helper.node("inverse", {
     name: "Inverse",
     action(inputs) {
         const { number } = z.object({
@@ -66,7 +66,7 @@ helper.registerNodeDef("inverse", {
     },
 })
 
-helper.registerNodeDef("negate", {
+helper.node("negate", {
     name: "Negate",
     action(inputs) {
         const { number } = z.object({
@@ -77,7 +77,7 @@ helper.registerNodeDef("negate", {
     },
 })
 
-helper.registerNodeDef("max", {
+helper.node("max", {
     name: "Max",
     action(inputs) {
         const { numbers } = z.object({
@@ -93,7 +93,7 @@ helper.registerNodeDef("max", {
     },
 })
 
-helper.registerNodeDef("min", {
+helper.node("min", {
     name: "Min",
     action(inputs) {
         const { numbers } = z.object({
@@ -109,7 +109,7 @@ helper.registerNodeDef("min", {
     },
 })
 
-helper.registerNodeDef("power", {
+helper.node("power", {
     name: "Power",
     action(inputs) {
         const { base, exponent } = z.object({
@@ -121,7 +121,7 @@ helper.registerNodeDef("power", {
     },
 })
 
-helper.registerNodeDef("sqrt", {
+helper.node("sqrt", {
     name: "Square Root",
     action(inputs) {
         const { number } = z.object({
@@ -132,7 +132,7 @@ helper.registerNodeDef("sqrt", {
     },
 })
 
-helper.registerNodeDef("log", {
+helper.node("log", {
     name: "Logarithm",
     action(inputs) {
         const { number, base } = z.object({
@@ -144,7 +144,7 @@ helper.registerNodeDef("log", {
     },
 })
 
-helper.registerNodeDef("absolute", {
+helper.node("absolute", {
     name: "Absolute Value",
     action(inputs) {
         const { number } = z.object({
@@ -155,7 +155,7 @@ helper.registerNodeDef("absolute", {
     },
 })
 
-helper.registerNodeDef("clamp", {
+helper.node("clamp", {
     name: "Clamp",
     action(inputs) {
         const { number, min, max } = z.object({
@@ -168,7 +168,7 @@ helper.registerNodeDef("clamp", {
     },
 })
 
-helper.registerNodeDef("floor", {
+helper.node("floor", {
     name: "Floor",
     action(inputs) {
         const { number } = z.object({
@@ -179,7 +179,7 @@ helper.registerNodeDef("floor", {
     },
 })
 
-helper.registerNodeDef("ceil", {
+helper.node("ceil", {
     name: "Ceil",
     action(inputs) {
         const { number } = z.object({
@@ -190,7 +190,7 @@ helper.registerNodeDef("ceil", {
     },
 })
 
-helper.registerNodeDef("round", {
+helper.node("round", {
     name: "Round",
     action(inputs) {
         const { number } = z.object({
@@ -201,7 +201,7 @@ helper.registerNodeDef("round", {
     },
 })
 
-helper.registerNodeDef("random", {
+helper.node("random", {
     name: "Random Number",
     action(inputs) {
         const { min, max } = z.object({
@@ -210,5 +210,56 @@ helper.registerNodeDef("random", {
         }).parse(inputs)
 
         return { random: Math.random() * (max - min) + min }
+    },
+})
+
+helper.node("sin", {
+    name: "Sine",
+    action(inputs, ctx) {
+        const { angle } = z.object({
+            angle: z.number(),
+        }).parse(inputs)
+
+        const angleUnit = z.enum(["radians", "degrees"]).parse(ctx.node.config.angleUnit)
+
+        return {
+            result: angleUnit === "radians" ? Math.sin(angle)
+                : angleUnit === "degrees" ? Math.sin(angle * 180 / Math.PI)
+                    : undefined,
+        }
+    },
+})
+
+helper.node("cos", {
+    name: "Cosine",
+    action(inputs, ctx) {
+        const { angle } = z.object({
+            angle: z.number(),
+        }).parse(inputs)
+
+        const angleUnit = z.enum(["radians", "degrees"]).parse(ctx.node.config.angleUnit)
+
+        return {
+            result: angleUnit === "radians" ? Math.cos(angle)
+                : angleUnit === "degrees" ? Math.cos(angle * 180 / Math.PI)
+                    : undefined,
+        }
+    },
+})
+
+helper.node("tan", {
+    name: "Tangent",
+    action(inputs, ctx) {
+        const { angle } = z.object({
+            angle: z.number(),
+        }).parse(inputs)
+
+        const angleUnit = z.enum(["radians", "degrees"]).parse(ctx.node.config.angleUnit)
+
+        return {
+            result: angleUnit === "radians" ? Math.tan(angle)
+                : angleUnit === "degrees" ? Math.tan(angle * 180 / Math.PI)
+                    : undefined,
+        }
     },
 })

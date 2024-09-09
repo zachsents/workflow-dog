@@ -80,6 +80,7 @@ function WorkflowIndex() {
     const [selectedRunId, setSelectedRunId] = useSelectedRunId()
     const { data: selectedRun } = trpc.workflows.runs.byId.useQuery({
         workflowRunId: selectedRunId!,
+        withOutputs: true,
     }, {
         enabled: !!selectedRunId,
     })
@@ -215,6 +216,7 @@ function WorkflowIndex() {
                         }}
                         key="current"
                     >
+                        <TriggerPanel />
                         <div className="absolute hack-center-x z-20 bottom-4 px-4 max-w-full">
                             <MainToolbar />
                         </div>
@@ -226,12 +228,12 @@ function WorkflowIndex() {
                             nodeDefinitions: ClientNodeDefinitions,
                             initialGraph: selectedSnapshot!.graph,
                             readonly: true,
+                            runOutputs: selectedRun!.node_outputs,
                         }}
                         key={selectedRunId}
                     >
                     </GBRoot>}
 
-                    {!selectedRunId && <TriggerPanel />}
                     <RunHistoryPanel />
                 </div>
 

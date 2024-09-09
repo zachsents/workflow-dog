@@ -1,29 +1,32 @@
 import useResizeObserver from "@react-hook/resize-observer"
-import { IconClock, IconExternalLink, IconHash, IconLink, IconRouteSquare2, IconRun, IconTextSize, IconToggleLeftFilled, IconWebhook } from "@tabler/icons-react"
+import { IconBook, IconBox, IconBracketsContain, IconClock, IconExternalLink, IconHash, IconLink, IconQuestionMark, IconRouteSquare2, IconRun, IconSquare, IconSquareAsteriskFilled, IconTextSize, IconToggleLeftFilled, IconWebhook } from "@tabler/icons-react"
 import { useMemo, useRef } from "react"
 import { Link } from "react-router-dom"
 import CopyButton from "web/src/components/copy-button"
 import TI from "web/src/components/tabler-icon"
 import { Button } from "web/src/components/ui/button"
+import { DropdownMenuItem } from "web/src/components/ui/dropdown-menu"
 import { Input } from "web/src/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "web/src/components/ui/select"
 import { Switch } from "web/src/components/ui/switch"
+import { Table, TableBody, TableCell, TableRow } from "web/src/components/ui/table"
 import { Textarea } from "web/src/components/ui/textarea"
 import { useGraphBuilder, useNodeId } from "web/src/lib/graph-builder/core"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
 import { useCurrentWorkflow } from "web/src/lib/hooks"
 import { t } from "web/src/lib/utils"
-import { useValueType, ValueTypeDefinitions } from "workflow-types/react"
-import { createPackageHelper } from "../../client-registry"
+import { ClientEventTypes, ClientValueTypes } from "../../client"
+import { useValueType, ValueDisplay } from "../../lib/value-types.client"
+import { createPackage } from "../../registry/registry.client"
 import ScheduleConfig from "./components/schedule-config"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "web/src/components/ui/select"
-import { ClientEventTypes } from "../../client"
-import { DropdownMenuItem } from "web/src/components/ui/dropdown-menu"
+import ValueDisplayBlock from "./components/value-display-block"
 
 
-const helper = createPackageHelper("primitives")
+const helper = createPackage("primitives")
 
-// #region Node: Trigger Data
-helper.registerNodeDef("triggerData", {
+// #region Nodes
+
+helper.node("triggerData", {
     name: "Data from Trigger",
     description: "The data passed to this workflow from the trigger.",
     icon: IconRun,
@@ -62,7 +65,7 @@ helper.registerNodeDef("triggerData", {
                                     <p>{inputDef.displayName}</p>
                                     <p className="text-xs text-muted-foreground">
                                         {inputDef.valueType
-                                            ? ValueTypeDefinitions[inputDef.valueType.typeDefinitionId].name
+                                            ? ClientValueTypes[inputDef.valueType.typeDefinitionId].name
                                             : "Any"}
                                     </p>
                                 </SelectItem>
@@ -75,8 +78,7 @@ helper.registerNodeDef("triggerData", {
     },
 })
 
-// #region Node: Text
-helper.registerNodeDef("text", {
+helper.node("text", {
     name: "Text",
     description: "Some fixed text.",
     icon: IconTextSize,
@@ -123,8 +125,7 @@ helper.registerNodeDef("text", {
     },
 })
 
-// #region Node: Number
-helper.registerNodeDef("number", {
+helper.node("number", {
     name: "Number",
     description: "A number.",
     icon: IconHash,
@@ -155,8 +156,7 @@ helper.registerNodeDef("number", {
     },
 })
 
-// #region Node: Switch
-helper.registerNodeDef("boolean", {
+helper.node("boolean", {
     name: "Switch",
     description: "A true or false value.",
     icon: IconToggleLeftFilled,
@@ -179,8 +179,160 @@ helper.registerNodeDef("boolean", {
     },
 })
 
+helper.node("null", {
+    name: "Null",
+    description: "A null value.",
+    icon: IconSquare,
+    component: () => <StandardNode hidePackageBadge>
+        <StandardNode.Handle type="output" name="null" />
+    </StandardNode>,
+})
+
+
+// #region Value Types
+
+helper.valueType("any", {
+    name: "Any",
+    description: "Could be anything.",
+    icon: IconSquareAsteriskFilled,
+    previewComponent: () => null,
+    fullComponent: () => null,
+})
+
+helper.valueType("unknown", {
+    name: "Unknown",
+    description: "Could be anything.",
+    icon: IconQuestionMark,
+    previewComponent: () => null,
+    fullComponent: () => null,
+})
+
+helper.valueType("null", {
+    name: "Empty",
+    description: "An empty value. Null. Nothing.",
+    icon: IconSquare,
+    previewComponent: () => <b className="font-mono">Empty</b>,
+    fullComponent: () => <ValueDisplayBlock label="Null">Empty</ValueDisplayBlock>,
+})
+
+helper.valueType("string", {
+    name: "Text",
+    description: "A string of text.",
+    icon: IconTextSize,
+    previewComponent: ({ value }) => <p className="whitespace-pre max-w-[100px] flex ">
+        "<span className="truncate">{value}</span>"
+    </p>,
+    fullComponent: ({ value }) => <ValueDisplayBlock label="Text">{value}</ValueDisplayBlock>,
+})
+
+helper.valueType("number", {
+    name: "Number",
+    description: "A number.",
+    icon: IconHash,
+    previewComponent: ({ value }) => <b className="font-mono">{value}</b>,
+    fullComponent: ({ value }) => <ValueDisplayBlock label="Number">{value}</ValueDisplayBlock>,
+})
+
+helper.valueType("boolean", {
+    name: "True/False",
+    description: "A true or false value.",
+    icon: IconToggleLeftFilled,
+    previewComponent: ({ value }) => <b className="font-mono">{value ? "True" : "False"}</b>,
+    fullComponent: ({ value }) => <ValueDisplayBlock label="Boolean">{value ? "True" : "False"}</ValueDisplayBlock>,
+})
+
+helper.valueType("object", {
+    name: "Object",
+    description: "An object containing arbitrary key-value pairs.",
+    icon: IconBox,
+    previewComponent: ({ value }) => <p className="text-xs font-bold">
+        Object - {Object.keys(value).length} properties
+    </p>,
+    fullComponent: ({ value }) => <Table>
+        <TableBody>
+            {Object.entries(value).map(([k, v]) =>
+                <TableRow key={k}>
+                    <TableCell className="font-semibold text-sm">
+                        {k}
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">
+                        <ValueDisplay encodedValue={v} mode="preview" />
+                    </TableCell>
+                </TableRow>
+            )}
+        </TableBody>
+    </Table>,
+})
+
+helper.valueType("map", {
+    name: "Map",
+    description: "A map of key-value pairs with all values of the same type.",
+    icon: IconBook,
+    genericParams: 1,
+    previewComponent: ({ value }) => <p className="text-xs font-bold">
+        Map - {Object.keys(value).length} entries
+    </p>,
+    fullComponent: ({ value }) => <Table>
+        <TableBody>
+            {Object.entries(value).map(([k, v]) =>
+                <TableRow key={k}>
+                    <TableCell className="font-semibold text-sm">
+                        {k}
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">
+                        <ValueDisplay encodedValue={v} mode="preview" />
+                    </TableCell>
+                </TableRow>
+            )}
+        </TableBody>
+    </Table>,
+})
+
+helper.valueType("array", {
+    name: "List",
+    description: "An ordered list of values.",
+    icon: IconBracketsContain,
+    genericParams: 1,
+    previewComponent: ({ value }: { value: any[] }) => <p className="text-xs font-bold">
+        List - {value.length} entries
+    </p>,
+    fullComponent: ({ value }: { value: any[] }) => <Table>
+        <TableBody>
+            {value.map((v, i) =>
+                <TableRow key={i}>
+                    <TableCell className="font-semibold text-sm">
+                        {i + 1}
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">
+                        <ValueDisplay encodedValue={v} mode="preview" />
+                    </TableCell>
+                </TableRow>
+            )}
+        </TableBody>
+    </Table>,
+})
+
+helper.valueType("date", {
+    name: "Date & Time",
+    description: "A date and time.",
+    icon: IconClock,
+    previewComponent: ({ value }: { value: string }) => <p className="text-xs font-bold">
+        {new Date(value).toLocaleString(undefined, {
+            timeStyle: "short",
+            dateStyle: "short",
+        })}
+    </p>,
+    fullComponent: ({ value }: { value: Date }) => <ValueDisplayBlock label="Date & Time">
+        {new Date(value).toLocaleString(undefined, {
+            timeStyle: "long",
+            dateStyle: "long",
+        })}
+    </ValueDisplayBlock>,
+})
+
+
 // #region EventType: Callable
-helper.registerEventType("callable", {
+helper.eventType("callable", {
     name: "Callable",
     whenName: "When another workflow calls this one",
     icon: IconRouteSquare2,
@@ -222,7 +374,7 @@ helper.registerEventType("callable", {
 })
 
 // #region EventType: Webhook
-helper.registerEventType("webhook", {
+helper.eventType("webhook", {
     name: "Webhook",
     whenName: "When a webhook is received",
     icon: IconWebhook,
@@ -238,7 +390,7 @@ helper.registerEventType("webhook", {
         params: {
             displayName: "Parameters",
             description: "The parameters parsed from the webhook URL.",
-            valueType: useValueType("record", [useValueType("string")]),
+            valueType: useValueType("map", [useValueType("string")]),
         },
     },
     sourceComponent: ({ workflowId }) => {
@@ -271,7 +423,7 @@ helper.registerEventType("webhook", {
 })
 
 // #region EventType: HTTP Request
-helper.registerEventType("httpRequest", {
+helper.eventType("httpRequest", {
     name: "HTTP Request",
     whenName: "When a HTTP request is received",
     icon: IconLink,
@@ -297,12 +449,12 @@ helper.registerEventType("httpRequest", {
         headers: {
             displayName: "Headers",
             description: "The headers of the request.",
-            valueType: useValueType("record", [useValueType("string")]),
+            valueType: useValueType("map", [useValueType("string")]),
         },
         query: {
             displayName: "Query Parameters",
             description: "The query parameters of the request.",
-            valueType: useValueType("record", [useValueType("string")]),
+            valueType: useValueType("map", [useValueType("string")]),
         },
     },
     sourceComponent: ({ workflowId }) => {
@@ -335,7 +487,7 @@ helper.registerEventType("httpRequest", {
 })
 
 // #region EventType: Schedule
-helper.registerEventType("schedule", {
+helper.eventType("schedule", {
     name: "Schedule",
     whenName: "On a schedule",
     icon: IconClock,
@@ -346,7 +498,7 @@ helper.registerEventType("schedule", {
         timestamp: {
             displayName: "Timestamp",
             description: "The date & time at which the event occurred.",
-            valueType: useValueType("timestamp"),
+            valueType: useValueType("date"),
         },
     },
     requiresConfiguration: true,

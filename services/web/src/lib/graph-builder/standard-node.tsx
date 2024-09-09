@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Portal as HoverCardPortal } from "@radix-ui/react-hover-card"
 import useResizeObserver from "@react-hook/resize-observer"
-import { IconBraces, IconBracketsContain, IconChevronDown, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
+import { IconActivity, IconBraces, IconBracketsContain, IconChevronDown, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
 import { Button } from "@ui/button"
 import { Card } from "@ui/card"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@ui/dialog"
@@ -16,7 +16,9 @@ import { useDialogState } from "@web/lib/hooks"
 import { cn, getOffsetRelativeTo } from "@web/lib/utils"
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react"
 import { useForm } from "react-hook-form"
-import { useValueType, ValueTypeDefinitions, type ValueTypeUsage } from "workflow-types/react"
+import { ClientValueTypes } from "workflow-packages/client"
+import type { ValueTypeUsage } from "workflow-packages/lib/types"
+import { useValueType, ValueDisplay } from "workflow-packages/lib/value-types.client"
 import { z } from "zod"
 import { useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "./core"
 import { getDefinitionPackageName } from "./utils"
@@ -495,7 +497,9 @@ interface HandleProps {
 // #region Handle
 function Handle({
     type, name, indexingId = name,
-    displayName = name.replaceAll(/(?<!\w)[a-z]/g, c => c.toUpperCase()),
+    displayName = name
+        .replace(/^\w/, c => c.toUpperCase())
+        .replaceAll(/(?<=[a-z])([A-Z])/g, " $1"),
     valueType = useValueType("any"),
     allowNaming = false, onNameClick,
     optional = false,
@@ -528,7 +532,7 @@ function Handle({
         recalculateChildPosition()
     }, [nodeElement])
 
-    const valueTypeDef = valueType && ValueTypeDefinitions[valueType.typeDefinitionId]
+    const valueTypeDef = valueType && ClientValueTypes[valueType.typeDefinitionId]
 
     const displayNameComponent = <HandleDisplayName
         allowNaming={allowNaming}
@@ -538,81 +542,104 @@ function Handle({
         {displayName}
     </HandleDisplayName>
 
+    const outputValue = useMemo(() => {
+        const rawOutput = gbx.options.runOutputs?.[nodeId]?.[indexingId]
+        return rawOutput
+            ? JSON.parse(rawOutput)
+            : undefined
+    }, [gbx.options.runOutputs?.[nodeId]?.[indexingId]])
+
     return (
-        <HoverCard
-            openDelay={isConnectingAtAll ? 850 : 500}
-            closeDelay={isConnectingAtAll ? 0 : 100}
-        >
-            <HoverCardTrigger asChild>
-                <div
-                    className={cn(
-                        "relative bg-gray-200 text-xs px-3 py-0.5 transition-opacity flex items-center justify-between gap-2",
-                        isInput ? "rounded-r-full" : "rounded-l-full",
-                        isConnectingToUs && "outline-dashed outline-2 outline-yellow-500",
-                        (isConnectingAtAll && !canConnectToUs) && "opacity-50 pointer-events-none",
-                    )}
-                    ref={parentRef}
-                    {...!gbx.options.readonly && eventHandlers}
-                >
-                    {displayNameComponent}
-                    {valueTypeDef &&
-                        <TI className="text-muted-foreground shrink-0">
-                            <valueTypeDef.icon />
-                        </TI>}
+        <div className="relative">
+            <HoverCard
+                openDelay={isConnectingAtAll ? 850 : 500}
+                closeDelay={isConnectingAtAll ? 0 : 100}
+            >
+                <HoverCardTrigger asChild>
                     <div
                         className={cn(
-                            "absolute hack-center-y rounded-full aspect-square p-2 transition-opacity",
-                            isInput ? "left-0 -translate-x-1/2" : "right-0 translate-x-1/2",
-                            !isConnectingAtAll && `${isInput
-                                ? isConnected
-                                    ? "hover:bg-green-400/50"
-                                    : optional ? "hover:bg-yellow-400/50" : "hover:bg-red-400/50"
-                                : "hover:bg-blue-400/50"
-                            } cursor-crosshair`,
-                            (isConnectingAtAll && !canConnectToUs) && "opacity-0",
+                            "relative bg-gray-200 text-xs px-3 py-0.5 transition-opacity flex items-center justify-between gap-2",
+                            isInput ? "rounded-r-full" : "rounded-l-full",
+                            isConnectingToUs && "outline-dashed outline-2 outline-yellow-500",
+                            (isConnectingAtAll && !canConnectToUs) && "opacity-50 pointer-events-none",
                         )}
-                        ref={childRef}
-                        onPointerDownCapture={gbx.options.readonly ? undefined : onPointerDownCapture}
+                        ref={parentRef}
+                        {...!gbx.options.readonly && eventHandlers}
                     >
-                        <div className={cn(
-                            "rounded-full w-2 aspect-square transition-colors",
-                            isInput
-                                ? isConnected
-                                    ? "bg-green-600"
-                                    : optional ? "bg-yellow-500" : "bg-red-500"
-                                : "bg-blue-500",
-                        )} />
+                        {displayNameComponent}
+                        {valueTypeDef &&
+                            <TI className="text-muted-foreground shrink-0">
+                                <valueTypeDef.icon />
+                            </TI>}
+                        <div
+                            className={cn(
+                                "absolute hack-center-y rounded-full aspect-square p-2 transition-opacity",
+                                isInput ? "left-0 -translate-x-1/2" : "right-0 translate-x-1/2",
+                                !isConnectingAtAll && `${isInput
+                                    ? isConnected
+                                        ? "hover:bg-green-400/50"
+                                        : optional ? "hover:bg-yellow-400/50" : "hover:bg-red-400/50"
+                                    : "hover:bg-blue-400/50"
+                                } cursor-crosshair`,
+                                (isConnectingAtAll && !canConnectToUs) && "opacity-0",
+                            )}
+                            ref={childRef}
+                            onPointerDownCapture={gbx.options.readonly ? undefined : onPointerDownCapture}
+                        >
+                            <div className={cn(
+                                "rounded-full w-2 aspect-square transition-colors",
+                                isInput
+                                    ? isConnected
+                                        ? "bg-green-600"
+                                        : optional ? "bg-yellow-500" : "bg-red-500"
+                                    : "bg-blue-500",
+                            )} />
+                        </div>
                     </div>
-                </div>
-            </HoverCardTrigger>
-            <HoverCardPortal>
-                <HoverCardContent
-                    side={isInput ? "left" : "right"} sideOffset={16}
-                    className={cn(
-                        "cursor-default",
-                        isConnectingAtAll && "pointer-events-none",
-                    )}
-                    onPointerDownCapture={e => e.stopPropagation()}
-                >
-                    {displayNameComponent}
-                    <p className="text-sm text-muted-foreground italic">
-                        {isInput ? "Input" : "Output"}
-                    </p>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <span className="mr-1">Type:</span>
-                        {valueTypeDef
-                            ? <>
-                                <TI><valueTypeDef.icon /></TI>
-                                <span>
-                                    {valueTypeDef.specificName?.(...valueType.genericParams) ?? valueTypeDef.name}
-                                </span>
-                            </>
-                            : <span>Any</span>}
+                </HoverCardTrigger>
+                <HoverCardPortal>
+                    <HoverCardContent
+                        side={isInput ? "left" : "right"} sideOffset={16}
+                        className={cn(
+                            "cursor-default",
+                            isConnectingAtAll && "pointer-events-none",
+                        )}
+                        onPointerDownCapture={e => e.stopPropagation()}
+                    >
+                        {displayNameComponent}
+                        <p className="text-sm text-muted-foreground italic">
+                            {isInput ? "Input" : "Output"}
+                        </p>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <span className="mr-1">Type:</span>
+                            {valueTypeDef
+                                ? <>
+                                    <TI><valueTypeDef.icon /></TI>
+                                    <span>
+                                        {valueTypeDef.specificName?.(...valueType.genericParams) ?? valueTypeDef.name}
+                                    </span>
+                                </>
+                                : <span>Any</span>}
+                        </div>
+                    </HoverCardContent>
+                </HoverCardPortal>
+            </HoverCard>
 
-                    </div>
-                </HoverCardContent>
-            </HoverCardPortal>
-        </HoverCard>
+            {outputValue !== undefined &&
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button size="compact" className="absolute left-full hack-center-y rounded-full gap-2 mx-2">
+                            <TI className="shrink-0"><IconActivity /></TI>
+                            <div className="flex-1 min-w-0">
+                                <ValueDisplay encodedValue={outputValue} mode="preview" />
+                            </div>
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                        <ValueDisplay encodedValue={outputValue} mode="full" />
+                    </PopoverContent>
+                </Popover>}
+        </div>
     )
 }
 

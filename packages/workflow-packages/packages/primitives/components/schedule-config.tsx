@@ -8,7 +8,7 @@ import { Button } from "web/src/components/ui/button"
 import { cn } from "web/src/lib/utils"
 import { z } from "zod"
 import TriggerConfigForm from "../../../components/trigger-config-form"
-import type { ClientEventTypeSourceComponentProps } from "../../../types/client"
+import type { ClientEventTypeSourceComponentProps } from "../../../lib/types"
 
 
 export default function ScheduleConfig({ workflowId, eventSources }: ClientEventTypeSourceComponentProps) {

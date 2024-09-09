@@ -339,7 +339,10 @@ export default {
             }),
 
         byId: projectPermissionByWorkflowRunProcedure("read")
-            .query(async ({ ctx }) => {
+            .input(z.object({
+                withOutputs: z.boolean().default(false),
+            }))
+            .query(async ({ input, ctx }) => {
                 const queryResult = await db.selectFrom("workflow_runs")
                     .leftJoin("workflow_runs_meta", "workflow_runs.id", "workflow_runs_meta.id")
                     .selectAll("workflow_runs")
@@ -350,7 +353,19 @@ export default {
                 if (!queryResult)
                     throw new TRPCError({ code: "NOT_FOUND" })
 
-                return queryResult
+                const node_outputs = input.withOutputs ? await db.selectFrom("workflow_run_outputs")
+                    .select(["node_id", "handle_id", "value"])
+                    .where("workflow_run_id", "=", ctx.workflowRunId)
+                    .where("is_global", "=", false)
+                    .execute()
+                    .then(rows => _.mapValues(
+                        _.groupBy(rows, "node_id"),
+                        rows => Object.fromEntries(rows.map(row =>
+                            [row.handle_id, row.value] as const
+                        )),
+                    ) as Record<string, Record<string, string>>) : undefined
+
+                return { ...queryResult, node_outputs }
             }),
 
         setStarred: projectPermissionByWorkflowRunProcedure("write")

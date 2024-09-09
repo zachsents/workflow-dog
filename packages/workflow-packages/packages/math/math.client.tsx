@@ -2,14 +2,15 @@ import { IconBorderSides, IconDice, IconDivide, IconEqual, IconMath1Divide2, Ico
 import { forwardRef } from "react"
 import { RadioToggle, RadioToggleOption } from "web/src/components/radio-toggle"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
-import { useValueType } from "workflow-types/react"
-import { createPackageHelper } from "../../client-registry"
+import { createPackage } from "../../registry/registry.client"
+import { useValueType } from "../../lib/value-types.client"
 
 
-const helper = createPackageHelper("math")
+const helper = createPackage("math")
 
-helper.registerNodeDef("add", {
+helper.node("add", {
     name: "Add",
+    description: "Adds two or more numbers together.",
     icon: IconPlus,
     component: () => <StandardNode>
         {stdVariadicInput("addends")}
@@ -21,8 +22,9 @@ helper.registerNodeDef("add", {
     </StandardNode>
 })
 
-helper.registerNodeDef("subtract", {
+helper.node("subtract", {
     name: "Subtract",
+    description: "Subtracts two or more numbers from each other.",
     icon: IconMinus,
     component: () => <StandardNode>
         {stdVariadicInput("minuends")}
@@ -34,8 +36,9 @@ helper.registerNodeDef("subtract", {
     </StandardNode>
 })
 
-helper.registerNodeDef("multiply", {
+helper.node("multiply", {
     name: "Multiply",
+    description: "Multiplies two or more numbers together.",
     icon: IconX,
     component: () => <StandardNode>
         {stdVariadicInput("factors")}
@@ -47,8 +50,9 @@ helper.registerNodeDef("multiply", {
     </StandardNode>
 })
 
-helper.registerNodeDef("divide", {
+helper.node("divide", {
     name: "Divide",
+    description: "Divides one number by another, using decimal division.",
     icon: IconDivide,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -69,8 +73,37 @@ helper.registerNodeDef("divide", {
     </StandardNode>
 })
 
-helper.registerNodeDef("inverse", {
+helper.node("divideInt", {
+    name: "Divide (Integer)",
+    description: "Divides one number by another, using integer division with a remainder.",
+    icon: IconDivide,
+    component: () => <StandardNode>
+        <StandardNode.Handle
+            type="input"
+            name="dividend"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="input"
+            name="divisor"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="output"
+            name="quotient"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="output"
+            name="remainder"
+            valueType={useValueType("number")}
+        />
+    </StandardNode>,
+})
+
+helper.node("inverse", {
     name: "Inverse",
+    description: "Inverts a number, i.e. `1 / x`.",
     icon: IconMath1Divide2,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -86,8 +119,9 @@ helper.registerNodeDef("inverse", {
     </StandardNode>
 })
 
-helper.registerNodeDef("negate", {
+helper.node("negate", {
     name: "Negate",
+    description: "Negates a number, i.e. `-x`.",
     icon: IconVariableMinus,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -103,8 +137,9 @@ helper.registerNodeDef("negate", {
     </StandardNode>
 })
 
-helper.registerNodeDef("max", {
+helper.node("max", {
     name: "Max",
+    description: "Returns the largest number from a list of numbers.",
     icon: IconMathMax,
     component: () => <StandardNode>
         {stdVariadicInput("numbers")}
@@ -116,8 +151,9 @@ helper.registerNodeDef("max", {
     </StandardNode>
 })
 
-helper.registerNodeDef("min", {
+helper.node("min", {
     name: "Min",
+    description: "Returns the smallest number from a list of numbers.",
     icon: IconMathMin,
     component: () => <StandardNode>
         {stdVariadicInput("numbers")}
@@ -129,8 +165,9 @@ helper.registerNodeDef("min", {
     </StandardNode>
 })
 
-helper.registerNodeDef("power", {
+helper.node("power", {
     name: "Power",
+    description: "Raises a number to a power.",
     icon: IconSuperscript,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -151,8 +188,9 @@ helper.registerNodeDef("power", {
     </StandardNode>
 })
 
-helper.registerNodeDef("sqrt", {
+helper.node("sqrt", {
     name: "Square Root",
+    description: "Calculates the square root of a number.",
     icon: IconSquareRoot,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -168,8 +206,9 @@ helper.registerNodeDef("sqrt", {
     </StandardNode>
 })
 
-helper.registerNodeDef("log", {
+helper.node("log", {
     name: "Logarithm",
+    description: "Calculates the logarithm of a number.",
     icon: IconWood,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -190,8 +229,9 @@ helper.registerNodeDef("log", {
     </StandardNode>
 })
 
-helper.registerNodeDef("absolute", {
+helper.node("absolute", {
     name: "Absolute Value",
+    description: "Calculates the absolute value of a number.",
     icon: forwardRef<Icon, IconProps>((props, ref) =>
         <IconEqual {...props} rotate={90} ref={ref} />
     ),
@@ -209,8 +249,9 @@ helper.registerNodeDef("absolute", {
     </StandardNode>
 })
 
-helper.registerNodeDef("clamp", {
+helper.node("clamp", {
     name: "Clamp",
+    description: "Clamps a number between a minimum and maximum value.",
     icon: IconBorderSides,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -236,8 +277,9 @@ helper.registerNodeDef("clamp", {
     </StandardNode>
 })
 
-helper.registerNodeDef("floor", {
+helper.node("floor", {
     name: "Floor",
+    description: "Rounds a number down to the nearest integer.",
     icon: IconStairsDown,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -253,8 +295,9 @@ helper.registerNodeDef("floor", {
     </StandardNode>
 })
 
-helper.registerNodeDef("ceil", {
+helper.node("ceil", {
     name: "Ceil",
+    description: "Rounds a number up to the nearest integer.",
     icon: IconStairsUp,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -270,8 +313,9 @@ helper.registerNodeDef("ceil", {
     </StandardNode>
 })
 
-helper.registerNodeDef("round", {
+helper.node("round", {
     name: "Round",
+    description: "Rounds a number to the nearest integer.",
     icon: IconSquareRounded,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -287,8 +331,9 @@ helper.registerNodeDef("round", {
     </StandardNode>
 })
 
-helper.registerNodeDef("random", {
+helper.node("random", {
     name: "Random Number",
+    description: "Generates a random number between a minimum and maximum value.",
     icon: IconDice,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -309,8 +354,9 @@ helper.registerNodeDef("random", {
     </StandardNode>
 })
 
-helper.registerNodeDef("sin", {
+helper.node("sin", {
     name: "Sine",
+    description: "Calculates the sine of an angle.",
     icon: IconWaveSine,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -327,8 +373,9 @@ helper.registerNodeDef("sin", {
     </StandardNode>
 })
 
-helper.registerNodeDef("cos", {
+helper.node("cos", {
     name: "Cosine",
+    description: "Calculates the cosine of an angle.",
     icon: IconWaveSine,
     component: () => <StandardNode>
         <StandardNode.Handle
@@ -345,8 +392,9 @@ helper.registerNodeDef("cos", {
     </StandardNode>
 })
 
-helper.registerNodeDef("tan", {
+helper.node("tan", {
     name: "Tangent",
+    description: "Calculates the tangent of an angle.",
     icon: IconWaveSine,
     component: () => <StandardNode>
         <StandardNode.Handle

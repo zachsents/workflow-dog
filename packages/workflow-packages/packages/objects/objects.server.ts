@@ -1,9 +1,9 @@
 import { z } from "zod"
-import { createPackageHelper } from "../../server-registry"
+import { createPackage } from "../../registry/registry.server"
 
-const helper = createPackageHelper("objects")
+const helper = createPackage("objects")
 
-helper.registerNodeDef("getProperty", {
+helper.node("getProperty", {
     name: "Get Property",
     action(inputs) {
         const { object, property } = z.object({
@@ -15,7 +15,7 @@ helper.registerNodeDef("getProperty", {
     },
 })
 
-helper.registerNodeDef("getProperties", {
+helper.node("getProperties", {
     name: "Get Properties",
     action(inputs, ctx) {
         const { object } = z.object({
@@ -30,15 +30,27 @@ helper.registerNodeDef("getProperties", {
     },
 })
 
-helper.registerNodeDef("setProperty", {
+helper.node("setProperty", {
     name: "Set Property",
     action(inputs) {
         const { object, property, value } = z.object({
-            object: z.object({}).passthrough(),
+            object: z.object({}).passthrough().default({}),
             property: z.string(),
             value: z.any(),
         }).parse(inputs)
 
         return { newObject: { ...object, [property]: value } }
+    },
+})
+
+helper.node("setProperties", {
+    name: "Set Properties",
+    action(inputs, ctx) {
+        const { object, properties } = z.object({
+            object: z.object({}).passthrough().default({}),
+            properties: z.object({}).passthrough().default({}),
+        }).parse(inputs)
+
+        return { newObject: { ...object, ...properties } }
     },
 })

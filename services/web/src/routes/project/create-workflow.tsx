@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { ClientEventTypes } from "workflow-packages/client"
-import type { ClientEventType } from "workflow-packages/types/client"
+import type { ClientEventType } from "workflow-packages/lib/types"
 import { z } from "zod"
 
 

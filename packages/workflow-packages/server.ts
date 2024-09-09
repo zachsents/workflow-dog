@@ -1,13 +1,15 @@
 
 // import packages here
-import "./packages/primitives/primitives-server"
-import "./packages/utility/utility-server"
-import "./packages/text/text-server"
-import "./packages/math/math-server"
-import "./packages/objects/objects-server"
+import "./packages/primitives/primitives.server"
+import "./packages/utility/utility.server"
+import "./packages/text/text.server"
+import "./packages/math/math.server"
+import "./packages/objects/objects.server"
+import "./packages/time/time.server"
 
 export {
-    nodeDefs as ServerNodeDefinitions,
+    nodes as ServerNodeDefinitions,
     eventTypes as ServerEventTypes,
     eventSources as ServerEventSources,
-} from "./server-registry"
+    valueTypes as ServerValueTypes,
+} from "./registry/registry.server"

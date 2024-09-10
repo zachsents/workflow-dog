@@ -26,6 +26,8 @@
         "@react-hookz/web": "*",
         "kysely": "*",
         "zod": "*",
-        "devalue": "*"
+        "devalue": "*",
+        "lodash": "*",
+        "axios": "*"
     }
 }

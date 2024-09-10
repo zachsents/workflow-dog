@@ -3,18 +3,13 @@ import { parseCronExpression } from "cron-schedule"
 import { createHash } from "node:crypto"
 import { z } from "zod"
 import { createPackage, uniformEventData } from "../../registry/registry.server"
+import _mapValues from "lodash/mapValues"
+import { decodeValue } from "../../lib/value-types.server"
 
 
 const helper = createPackage("primitives")
 
 // #region Nodes
-
-helper.node("triggerData", {
-    name: "Data from Trigger",
-    action(inputs, ctx) {
-        return { data: ctx.eventPayload[ctx.node.config.selectedInput] }
-    },
-})
 
 helper.node("text", {
     name: "Text",
@@ -56,53 +51,53 @@ helper.valueType("unknown", {
     name: "Unknown",
 })
 
-// WILO: adding parsing on the server side to interpret trigger data
-
 helper.valueType("null", {
     name: "Empty",
     isApplicable: v => v == null,
-    toJSON: () => null,
 })
 
 helper.valueType("string", {
     name: "Text",
     isApplicable: v => typeof v === "string",
-    toJSON: v => v,
 })
 
 helper.valueType("number", {
     name: "Number",
     isApplicable: v => typeof v === "number",
-    toJSON: v => v,
 })
 
 helper.valueType("boolean", {
     name: "Boolean",
     isApplicable: v => typeof v === "boolean",
-    toJSON: v => v,
 })
 
 helper.valueType("object", {
     name: "Object",
     isApplicable: v => typeof v === "object" && v != null,
-    toJSON: (v, toJSON) => Object.fromEntries(Object.entries(v as object).map(([k, v]) => [k, toJSON(v)] as const)),
+    toJSON: (v, encode) => _mapValues(v as object, encode),
+    fromJSON: (v, decode) => _mapValues(v as object, decode),
 })
 
 helper.valueType("map", {
     name: "Map",
     isApplicable: v => v instanceof Map,
-    toJSON: (v, toJSON) => {
+    toJSON: (v, encode) => {
         const map = v as Map<string, any>
-        return Array.from(map.entries()).map(([k, v]) => [k, toJSON(v)] as const)
+        return Array.from(map.entries()).map(([k, v]) => [k, encode(v)] as const)
     },
     conversionPriority: 10,
+    fromJSON: (v, decode) => {
+        const entries = v as [string, any][]
+        return new Map(entries.map(([k, v]) => [k, decode(v)] as const))
+    },
 })
 
 helper.valueType("array", {
     name: "List",
     isApplicable: v => Array.isArray(v),
-    toJSON: (v, toJSON) => (v as any[]).map(v => toJSON(v)),
+    toJSON: (v, encode) => (v as any[]).map(v => encode(v)),
     conversionPriority: 10,
+    fromJSON: (v, decode) => (v as any[]).map(v => decode(v)),
 })
 
 helper.valueType("date", {
@@ -110,8 +105,8 @@ helper.valueType("date", {
     isApplicable: v => v instanceof Date,
     toJSON: v => (v as Date).toISOString(),
     conversionPriority: 10,
+    fromJSON: v => new Date(v as string),
 })
-
 
 
 
@@ -123,7 +118,9 @@ const callableEventSource = helper.eventSource("callable", {
         if (req.method.toUpperCase() !== "POST")
             return
 
-        const parsedBody = req.body instanceof Buffer ? req.body.toString("utf8") : null
+        const parsedBody = req.body instanceof Buffer
+            ? decodeValue(JSON.parse(req.body.toString("utf8")))
+            : null
 
         return {
             events: uniformEventData(source, { dataIn: parsedBody }),
@@ -157,13 +154,10 @@ const webhookEventSource = helper.eventSource("webhook", {
             ? JSON.parse(req.body.toString("utf8"))
             : null
 
-        const params = Object.fromEntries<string>(
-            Object.entries(req.query).map(([k, v]) => {
-                if (typeof v === "string")
-                    return [k, v] as const
-                else if (Array.isArray(v))
-                    return [k, v[0].toString()] as const
-            }).filter(x => !!x)
+        const params = new Map(
+            Object.entries(req.query)
+                .map(([k, v]) => [k, v?.toString()] as const)
+                .filter(([k, v]) => v != null)
         )
 
         return {
@@ -199,18 +193,15 @@ const httpRequestEventSource = helper.eventSource("httpRequest", {
                 method: req.method.toUpperCase(),
                 path,
                 body: req.body instanceof Buffer ? req.body.toString("base64") : null,
-                headers: Object.fromEntries(
+                headers: new Map(
                     Object.entries(req.headers)
                         .map(([k, v]) => [k.toLowerCase(), v?.toString()] as const)
                         .filter(([k, v]) => v != null)
-                ) as Record<string, string>,
-                query: Object.fromEntries<string | string[]>(
-                    Object.entries(req.query).map(([k, v]) => {
-                        if (typeof v === "string")
-                            return [k, v as string] as const
-                        else if (Array.isArray(v))
-                            return [k, v as string[]] as const
-                    }).filter(x => !!x)
+                ),
+                query: new Map(
+                    Object.entries(req.query)
+                        .map(([k, v]) => [k, v?.toString()] as const)
+                        .filter(([k, v]) => v != null)
                 ),
             }),
         }
@@ -269,7 +260,6 @@ const scheduleEventSource = helper.eventSource("schedule", {
         return {
             events: uniformEventData(source, {
                 timestamp: new Date(),
-                // TODO: figure out how to serialize data here -- workers convert to JSON
             }),
         }
     },

@@ -5,7 +5,9 @@ import type { WorkflowRuns } from "core/db"
 import cors from "cors"
 import express from "express"
 import { type Insertable } from "kysely"
-import _ from "lodash"
+import _mapValues from "lodash/mapValues"
+import _merge from "lodash/merge"
+import _groupBy from "lodash/groupBy"
 import morgan from "morgan"
 import supertokens from "supertokens-node"
 import {
@@ -21,7 +23,7 @@ import { db } from "./lib/db"
 import { useEnvVar } from "./lib/utils"
 import { createContext } from "./trpc"
 import { apiRouter } from "./trpc/router"
-import { jsonifyValue } from "workflow-packages/lib/value-types.server"
+import { encodeValue } from "workflow-packages/lib/value-types.server"
 
 
 const port = process.env.PORT || 3001
@@ -82,13 +84,13 @@ app.get("/api/run/status/:workflowRunId", async (req, res) => {
             .where("is_global", "=", false)
             .execute()
 
-    const node_data = _.merge({},
-        _.mapValues(_.groupBy(outputRows, "node_id"), rows => ({
+    const node_data = _merge({},
+        _mapValues(_groupBy(outputRows, "node_id"), rows => ({
             outputs: Object.fromEntries(rows.map(row =>
                 [row.handle_id, row.value] as const
             )),
         })),
-        _.mapValues(node_errors as any, error => ({ error })),
+        _mapValues(node_errors as any, error => ({ error })),
     )
 
     return res.json({ ...rest, node_data })
@@ -122,7 +124,7 @@ app.all(["/api/run/:eventSourceId", "/api/run/:eventSourceId/*"], bodyParser.raw
     const updateStateTask = genEventsTask.then(async r => {
         if (r.state)
             return db.updateTable("event_sources")
-                .set({ state: _.merge({}, eventSource.state, r.state) })
+                .set({ state: _merge({}, eventSource.state, r.state) })
                 .where("id", "=", eventSourceId)
                 .executeTakeFirstOrThrow()
     })
@@ -157,7 +159,7 @@ app.all(["/api/run/:eventSourceId", "/api/run/:eventSourceId/*"], bodyParser.raw
 
             const newRuns: Insertable<WorkflowRuns>[] = runData.map(data => ({
                 workflow_id: wf.id,
-                event_payload: data && _.mapValues(data, v => JSON.stringify(jsonifyValue(v))),
+                event_payload: data && _mapValues(data, v => JSON.stringify(encodeValue(v))),
             }))
 
             return newRuns

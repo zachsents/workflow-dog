@@ -30,15 +30,19 @@ export default {
                 .execute()
         }),
 
-    listCallable: projectPermissionProcedure("read")
+    listCallable: projectPermissionByWorkflowProcedure("read")
         .input(z.object({
             excluding: z.array(z.string().uuid()).optional().default([]),
         }))
         .query(async ({ ctx, input }) => {
             return db.selectFrom("workflows")
                 .selectAll()
-                .where("project_id", "=", ctx.projectId)
+                .where(
+                    "project_id", "=",
+                    eb => eb.selectFrom("workflows").select("project_id").where("id", "=", ctx.workflowId)
+                )
                 .where("trigger_event_type_id", "=", "eventType:primitives/callable")
+                .where("is_enabled", "=", true)
                 .where("id", "not in", input.excluding)
                 .orderBy("workflows.name")
                 .execute()

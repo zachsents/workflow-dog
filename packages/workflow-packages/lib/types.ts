@@ -39,6 +39,7 @@ export interface ServerNodeDefinition extends ServerDefinition {
         workflowId: string
         projectId: string
         eventPayload: any
+        respond: (data: Record<string, any>) => void
     }) => MaybePromise<Record<string, any> | void>
 }
 
@@ -57,9 +58,9 @@ export type ValueTypeUsage = {
 
 export interface ServerValueTypeDefinition extends ServerDefinition {
     isApplicable?: (value: unknown) => boolean
-    toJSON?: (value: unknown, toJSON: (value: unknown) => any) => any
+    toJSON?: (value: unknown, encode: (value: unknown) => any) => any
     conversionPriority?: number
-    parseEncodedValue: (value: unknown) => any
+    fromJSON?: (value: unknown, decode: (value: unknown) => any) => any
 }
 
 

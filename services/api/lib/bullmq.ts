@@ -8,7 +8,8 @@ import { db } from "./db"
 import { useEnvVar } from "./utils"
 import type { Insertable } from "kysely"
 import type { WorkflowRunOutputs } from "core/db"
-import { jsonifyValue } from "workflow-packages/lib/value-types.server"
+import { decodeValue, encodeValue } from "workflow-packages/lib/value-types.server"
+import _mapValues from "lodash/mapValues"
 
 
 const connection = new IORedis({
@@ -64,6 +65,9 @@ new Worker("runs", async (job) => {
             .where("id", "=", job.data.workflowRunId)
             .executeTakeFirstOrThrow(),
     ])
+
+    const eventPayload = _mapValues(event_payload as object, v => decodeValue(JSON.parse(v)))
+    let eventResponse: Record<string, any> | undefined
 
     console.log("[Bull] exec...", job.data.workflowRunId)
 
@@ -152,7 +156,10 @@ new Worker("runs", async (job) => {
                 node: n,
                 workflowId: workflow_id!,
                 projectId: project_id!,
-                eventPayload: event_payload,
+                eventPayload,
+                respond: data => {
+                    eventResponse = data
+                },
             })
         } catch (err) {
             return rejectFns[n.id](err)
@@ -210,7 +217,7 @@ new Worker("runs", async (job) => {
                         is_global: false,
                         node_id: nodeId,
                         handle_id: handleId,
-                        value: JSON.stringify(jsonifyValue(outputValue)),
+                        value: JSON.stringify(encodeValue(outputValue)),
                     }))
 
                 if (outputRecords.length > 0)
@@ -223,6 +230,17 @@ new Worker("runs", async (job) => {
         // Wait for all execution promises to settle
         Promise.allSettled(Object.values(promises)),
     ])
+
+    if (eventResponse) {
+        await db.insertInto("workflow_run_outputs")
+            .values(Object.entries(eventResponse).map(([handleId, data]) => ({
+                workflow_run_id: job.data.workflowRunId,
+                is_global: true,
+                handle_id: handleId,
+                value: JSON.stringify(encodeValue(data)),
+            })))
+            .execute()
+    }
 
     await db.updateTable("workflow_runs")
         .set({

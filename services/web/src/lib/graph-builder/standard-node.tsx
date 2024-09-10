@@ -305,7 +305,7 @@ function MultiHandle(passedProps: MultiHandleProps) {
                     name={props.name} type={props.type}
                     displayName={props.displayName}
                     valueType={useValueType(
-                        props.allowNaming ? "record" : "list",
+                        props.allowNaming ? "map" : "array",
                         [props.itemValueType],
                     )}
                 />}
@@ -500,7 +500,7 @@ function Handle({
     displayName = name
         .replace(/^\w/, c => c.toUpperCase())
         .replaceAll(/(?<=[a-z])([A-Z])/g, " $1"),
-    valueType = useValueType("any"),
+    valueType = type === "input" ? useValueType("any") : useValueType("unknown"),
     allowNaming = false, onNameClick,
     optional = false,
 }: HandleProps) {
@@ -635,7 +635,10 @@ function Handle({
                             </div>
                         </Button>
                     </PopoverTrigger>
-                    <PopoverContent>
+                    <PopoverContent
+                        className="max-h-[500px] overflow-y-scroll"
+                        onWheel={ev => ev.stopPropagation()}
+                    >
                         <ValueDisplay encodedValue={outputValue} mode="full" />
                     </PopoverContent>
                 </Popover>}

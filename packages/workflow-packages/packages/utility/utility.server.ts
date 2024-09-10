@@ -1,5 +1,7 @@
 import { z } from "zod"
 import { createPackage } from "../../registry/registry.server"
+import axios from "axios"
+import { encodeValue } from "../../lib/value-types.server"
 
 const helper = createPackage("utility")
 
@@ -85,5 +87,59 @@ helper.node("coalesce", {
         }).parse(inputs)
 
         return { value: values.find(v => v != null) ?? null }
+    },
+})
+
+helper.node("triggerData", {
+    name: "Trigger Data",
+    action(inputs, ctx) {
+        return ctx.eventPayload
+    },
+})
+
+helper.node("respond", {
+    name: "Respond",
+    action(inputs, ctx) {
+        ctx.respond(inputs)
+    },
+})
+
+helper.node("runWorkflow", {
+    name: "Run Workflow",
+    async action(inputs, ctx) {
+        const { payload } = z.object({
+            payload: z.any(),
+        }).parse(inputs)
+
+        const { selectedWorkflow } = z.object({
+            selectedWorkflow: z.string().uuid(),
+        }).parse(ctx.node.config)
+
+        const url = `http://localhost:${process.env.PORT}/api/run/callable_${selectedWorkflow}`
+
+        await axios.post(url, encodeValue(payload))
+    },
+})
+
+helper.node("loopWorkflow", {
+    name: "Loop Workflow",
+    async action(inputs, ctx) {
+
+        const { payloads } = z.object({
+            payloads: z.any().array(),
+        }).parse(inputs)
+        console.log(payloads)
+
+        console.log(ctx.node.config)
+        const { selectedWorkflow } = z.object({
+            selectedWorkflow: z.string().uuid(),
+        }).parse(ctx.node.config)
+        console.log(selectedWorkflow)
+
+        const url = `http://localhost:${process.env.PORT}/api/run/callable_${selectedWorkflow}`
+
+        await Promise.all(payloads.map(payload =>
+            axios.post(url, encodeValue(payload))
+        ))
     },
 })

@@ -1,12 +1,15 @@
-import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowsJoin2, IconArrowsSplit2, IconBraces, IconMessage, IconSquare, IconTypography } from "@tabler/icons-react"
+import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowIteration, IconArrowsJoin2, IconArrowsSplit2, IconBraces, IconChartBar, IconMessage, IconPlayerPlay, IconSpeakerphone, IconSquare, IconTypography } from "@tabler/icons-react"
 import TI from "web/src/components/tabler-icon"
 import { Textarea } from "web/src/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "web/src/components/ui/toggle-group"
 import { useGraphBuilder, useNodeId } from "web/src/lib/graph-builder/core"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
 import { cn } from "web/src/lib/utils"
-import { createPackage } from "../../registry/registry.client"
 import { useValueType } from "../../lib/value-types.client"
+import { createPackage } from "../../registry/registry.client"
+import OtherWorkflowsSelector from "./components/other-workflows-selector"
+import { useCurrentWorkflow } from "web/src/lib/hooks"
+import { ClientEventTypes } from "../../client"
 
 
 const helper = createPackage("utility")
@@ -187,9 +190,99 @@ helper.node("coalesce", {
     component: () => <StandardNode>
         <StandardNode.MultiHandle
             type="input" name="values" displayName="Values"
-            itemDisplayName="Value" itemValueType={useValueType("any")}
+            itemDisplayName="Value"
             min={1} defaultAmount={2}
         />
         <StandardNode.Handle type="output" name="value" />
     </StandardNode>,
+})
+
+helper.node("triggerData", {
+    name: "Trigger Data",
+    description: "The data passed to this workflow from the trigger.",
+    icon: IconChartBar,
+    component: () => {
+        const eventTypeId = useCurrentWorkflow().data!.trigger_event_type_id
+        const eventType = ClientEventTypes[eventTypeId]
+
+        return (
+            <StandardNode hidePackageBadge>
+                {Object.entries(eventType.workflowInputs).map(([inputId, inputDef]) =>
+                    <StandardNode.Handle
+                        key={inputId} name={inputId} type="output"
+                        displayName={inputDef.displayName}
+                        valueType={inputDef.valueType}
+                    />
+                )}
+            </StandardNode>
+        )
+    },
+})
+
+helper.node("respond", {
+    name: "Respond",
+    description: "Responds to the trigger that caused this workflow to run.",
+    icon: IconSpeakerphone,
+    component: () => {
+        const eventTypeId = useCurrentWorkflow().data!.trigger_event_type_id
+        const eventType = ClientEventTypes[eventTypeId]
+
+        return (
+            <StandardNode hidePackageBadge>
+                {Object.entries(eventType.workflowOutputs).map(([outputId, outputDef]) =>
+                    <StandardNode.Handle
+                        key={outputId} name={outputId} type="input"
+                        displayName={outputDef.displayName}
+                        valueType={outputDef.valueType}
+                    />
+                )}
+            </StandardNode>
+        )
+    },
+})
+
+helper.node("runWorkflow", {
+    name: "Run Workflow",
+    description: "Runs another workflow.",
+    icon: IconPlayerPlay,
+    color: "violet",
+    component: () => {
+        return (
+            <StandardNode hidePackageBadge>
+                <StandardNode.Handle type="input" name="payload" />
+                <StandardNode.Handle type="output" name="result" />
+                <StandardNode.Content>
+                    <OtherWorkflowsSelector />
+                </StandardNode.Content>
+            </StandardNode>
+        )
+    },
+})
+
+helper.node("loopWorkflow", {
+    name: "Loop Workflow",
+    description: "Runs another workflow for every item in a list.",
+    icon: IconArrowIteration,
+    color: "violet",
+    component: () => {
+        return (
+            <StandardNode hidePackageBadge>
+                <StandardNode.MultiHandle
+                    type="input"
+                    name="payloads" displayName="Payloads"
+                    itemDisplayName="Payload"
+                    defaultSingleMode
+                />
+                <StandardNode.MultiHandle
+                    type="output"
+                    name="results" displayName="Results"
+                    itemDisplayName="Result"
+                    defaultSingleMode
+                />
+                <StandardNode.Content>
+                    <OtherWorkflowsSelector />
+                </StandardNode.Content>
+            </StandardNode>
+        )
+    },
 })

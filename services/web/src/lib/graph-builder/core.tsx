@@ -1158,13 +1158,14 @@ function Edge({ id }: { id: string }) {
 }
 
 const edgePathDrawAnim = {
-    hidden: { pathLength: 0, opacity: 0 },
+    // hidden: { pathLength: 0, opacity: 0 },
+    hidden: { opacity: 0 },
     visible: {
-        pathLength: 1,
+        // pathLength: 1,
         opacity: 1,
         transition: {
-            pathLength: { type: "spring", duration: 1, bounce: 0 },
-            opacity: { duration: 0.5 },
+            // pathLength: { type: "spring", duration: 1, bounce: 0 },
+            opacity: { duration: 0.2 },
         },
     }
 }

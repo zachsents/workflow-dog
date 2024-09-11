@@ -18,6 +18,7 @@ import { useValueType, ValueDisplay } from "../../lib/value-types.client"
 import { createPackage } from "../../registry/registry.client"
 import ScheduleConfig from "./components/schedule-config"
 import ValueDisplayBlock from "./components/value-display-block"
+import { useDebouncedCallback } from "@react-hookz/web"
 
 
 const helper = createPackage("primitives")
@@ -37,20 +38,26 @@ helper.node("text", {
         // only want to get it once initially
         const textareaSize = useMemo(() => {
             const c = gbx.state.nodes.get(nodeId)!.config
-            return { width: c._textareaWidth as number, height: c._textareaHeight as number }
+            return {
+                width: c.textareaWidth as number | undefined,
+                height: c.textareaHeight as number | undefined,
+            }
         }, [])
 
-        const resizeRef = useRef<HTMLTextAreaElement>(null)
-        useResizeObserver(resizeRef, entry => {
+        // limit constant state updates
+        const setTextareaSize = useDebouncedCallback((entry: ResizeObserverEntry) => {
             try {
                 gbx.mutateNodeState(nodeId, n => {
-                    n.config._textareaWidth = Math.round(entry.borderBoxSize[0].inlineSize)
-                    n.config._textareaHeight = Math.round(entry.borderBoxSize[0].blockSize)
+                    n.config.textareaWidth = Math.round(entry.borderBoxSize[0].inlineSize)
+                    n.config.textareaHeight = Math.round(entry.borderBoxSize[0].blockSize)
                 })
             } catch (err) {
                 console.warn("Error resizing textarea. If this happened during deletion, it's expected.")
             }
-        })
+        }, [gbx], 100)
+
+        const resizeRef = useRef<HTMLTextAreaElement>(null)
+        useResizeObserver(resizeRef, setTextareaSize)
 
         return (
             <StandardNode hidePackageBadge>

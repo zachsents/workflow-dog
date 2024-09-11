@@ -361,13 +361,14 @@ export default {
                     .select(["node_id", "handle_id", "value"])
                     .where("workflow_run_id", "=", ctx.workflowRunId)
                     .where("is_global", "=", false)
+                    .where("node_id", "is not", null)
                     .execute()
                     .then(rows => _.mapValues(
                         _.groupBy(rows, "node_id"),
                         rows => Object.fromEntries(rows.map(row =>
                             [row.handle_id, row.value] as const
-                        )),
-                    ) as Record<string, Record<string, string>>) : undefined
+                        )) as Record<string, string>,
+                    )) : undefined
 
                 return { ...queryResult, node_outputs }
             }),

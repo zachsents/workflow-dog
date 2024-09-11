@@ -1,4 +1,4 @@
-import { IconBorderSides, IconDice, IconDivide, IconEqual, IconMath1Divide2, IconMathMax, IconMathMin, IconMinus, IconPlus, IconSquareRoot, IconSquareRounded, IconStairsDown, IconStairsUp, IconSuperscript, IconVariableMinus, IconWaveSine, IconWood, IconX, type Icon, type IconProps } from "@tabler/icons-react"
+import { IconBorderSides, IconDice, IconDivide, IconEqual, IconFeather, IconMath1Divide2, IconMathMax, IconMathMin, IconMathPi, IconMinus, IconPlus, IconSquareRoot, IconSquareRounded, IconStairsDown, IconStairsUp, IconSuperscript, IconVariableMinus, IconWaveSine, IconWood, IconX, type Icon, type IconProps } from "@tabler/icons-react"
 import { forwardRef } from "react"
 import { RadioToggle, RadioToggleOption } from "web/src/components/radio-toggle"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
@@ -354,6 +354,9 @@ helper.node("random", {
     </StandardNode>
 })
 
+
+// #region Trigonometry
+
 helper.node("sin", {
     name: "Sine",
     description: "Calculates the sine of an angle.",
@@ -411,6 +414,34 @@ helper.node("tan", {
     </StandardNode>
 })
 
+helper.node("pi", {
+    name: "Pi",
+    description: "The constant pi.",
+    icon: IconMathPi,
+    component: () => <StandardNode>
+        <StandardNode.Handle
+            type="output"
+            name="pi"
+            valueType={useValueType("number")}
+        />
+    </StandardNode>,
+})
+
+helper.node("e", {
+    name: "E",
+    description: "The constant e.",
+    icon: IconFeather,
+    component: () => <StandardNode>
+        <StandardNode.Handle
+            type="output"
+            name="e"
+            valueType={useValueType("number")}
+        />
+    </StandardNode>,
+})
+
+
+// #region Utilities
 
 const stdVariadicInput = (name: string, itemDisplayName: string = "Number") =>
     <StandardNode.MultiHandle

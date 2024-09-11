@@ -229,6 +229,7 @@ function WorkflowIndex() {
                             initialGraph: selectedSnapshot!.graph,
                             readonly: true,
                             runOutputs: selectedRun!.node_outputs,
+                            runErrors: selectedRun!.node_errors as Record<string, string>,
                         }}
                         key={selectedRunId}
                     >

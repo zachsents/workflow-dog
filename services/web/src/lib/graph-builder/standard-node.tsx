@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Portal as HoverCardPortal } from "@radix-ui/react-hover-card"
 import useResizeObserver from "@react-hook/resize-observer"
-import { IconActivity, IconBox, IconBracketsContain, IconChevronDown, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
+import { IconActivity, IconAlertTriangle, IconBox, IconBracketsContain, IconChevronDown, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
 import { Button } from "@ui/button"
 import { Card } from "@ui/card"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@ui/dialog"
@@ -22,6 +22,7 @@ import { useValueType, ValueDisplay } from "workflow-packages/lib/value-types.cl
 import { z } from "zod"
 import { useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "./core"
 import { getDefinitionPackageName } from "./utils"
+import Markdown from "react-markdown"
 
 
 // #region StandardNode
@@ -50,6 +51,8 @@ export function StandardNode({
     const showSelectHoverOutline = gbx.useStore(s => !s.connection && !s.boxSelection)
 
     const packageDisplayName = getDefinitionPackageName(n.definitionId)
+
+    const error = gbx.options.runErrors?.[id]
 
     return (
         <Card className={cn(
@@ -110,6 +113,19 @@ export function StandardNode({
                         {configItems}
                     </PopoverContent>
                 </Popover>}
+
+            {error &&
+                <div className="absolute bottom-full hack-center-x mb-2 px-4 py-2 rounded-md border-destructive border-2 shadow-md bg-white w-full z-[90] grid gap-1">
+                    <div className="flex items-center gap-1 text-destructive text-xs font-bold">
+                        <TI><IconAlertTriangle /></TI>
+                        <p>Error</p>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                        <Markdown components={{
+                            code: props => <code {...props} className={cn("bg-gray-100 rounded-sm px-1", props.className)} />,
+                        }}>{error}</Markdown>
+                    </div>
+                </div>}
         </Card>
     )
 }
@@ -543,9 +559,9 @@ function Handle({
     </HandleDisplayName>
 
     const outputValue = useMemo(() => {
-        const rawOutput = gbx.options.runOutputs?.[nodeId]?.[indexingId]
-        return rawOutput
-            ? JSON.parse(rawOutput)
+        const rawValue = gbx.options.runOutputs?.[nodeId]?.[indexingId]
+        return rawValue
+            ? JSON.parse(rawValue)
             : undefined
     }, [gbx.options.runOutputs?.[nodeId]?.[indexingId]])
 

@@ -1298,6 +1298,7 @@ export interface GraphBuilderOptions {
     onGraphChange?: (serializedGraph: string) => void
     readonly?: boolean
     runOutputs?: Record<string, Record<string, string>>
+    runErrors?: Record<string, string>
 }
 
 export class GraphBuilder {

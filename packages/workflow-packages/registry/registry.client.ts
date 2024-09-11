@@ -9,11 +9,15 @@ export const eventTypes: Record<string, ClientEventType> = {}
 export const valueTypes: Record<string, ClientValueTypeDefinition> = {}
 
 
-export function createPackage(packageName: string) {
+export function createPackage<NodeDefault extends Partial<ClientNodeDefinition>>(packageName: string, options: {
+    defaults?: {
+        node?: NodeDefault
+    }
+} = {}) {
     return {
         node: createRegistryFn(nodes, {
             idPrefix: NODE_ID_PREFIX,
-            defaults: CLIENT_NODE_DEFAULTS,
+            defaults: { ...CLIENT_NODE_DEFAULTS, ...options.defaults?.node } as NodeDefault & typeof CLIENT_NODE_DEFAULTS,
             postProcess: postProcessColors,
             packageName,
         }),

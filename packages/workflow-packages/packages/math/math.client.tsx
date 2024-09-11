@@ -1,4 +1,4 @@
-import { IconBorderSides, IconDice, IconDivide, IconEqual, IconFeather, IconMath1Divide2, IconMathMax, IconMathMin, IconMathPi, IconMinus, IconPlus, IconSquareRoot, IconSquareRounded, IconStairsDown, IconStairsUp, IconSuperscript, IconVariableMinus, IconWaveSine, IconWood, IconX, type Icon, type IconProps } from "@tabler/icons-react"
+import { IconBorderSides, IconDice, IconDivide, IconEqual, IconFeather, IconMath, IconMath1Divide2, IconMathMax, IconMathMin, IconMathPi, IconMinus, IconPlus, IconSquareRoot, IconSquareRounded, IconStairsDown, IconStairsUp, IconSuperscript, IconVariableMinus, IconWaveSine, IconWood, IconX, type Icon, type IconProps } from "@tabler/icons-react"
 import { forwardRef } from "react"
 import { RadioToggle, RadioToggleOption } from "web/src/components/radio-toggle"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
@@ -6,7 +6,13 @@ import { createPackage } from "../../registry/registry.client"
 import { useValueType } from "../../lib/value-types.client"
 
 
-const helper = createPackage("math")
+const helper = createPackage("math", {
+    defaults: {
+        node: {
+            icon: IconMath,
+        },
+    }
+})
 
 helper.node("add", {
     name: "Add",

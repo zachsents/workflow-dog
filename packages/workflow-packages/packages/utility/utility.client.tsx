@@ -220,7 +220,7 @@ helper.node("triggerData", {
 })
 
 helper.node("respond", {
-    name: "Respond",
+    name: "Respond to Trigger",
     description: "Responds to the trigger that caused this workflow to run.",
     icon: IconSpeakerphone,
     component: () => {

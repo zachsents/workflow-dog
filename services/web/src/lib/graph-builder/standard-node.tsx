@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Portal as HoverCardPortal } from "@radix-ui/react-hover-card"
 import useResizeObserver from "@react-hook/resize-observer"
-import { IconActivity, IconBraces, IconBracketsContain, IconChevronDown, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
+import { IconActivity, IconBox, IconBracketsContain, IconChevronDown, IconDots, IconList, IconPlus, IconX } from "@tabler/icons-react"
 import { Button } from "@ui/button"
 import { Card } from "@ui/card"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@ui/dialog"
@@ -215,7 +215,7 @@ function MultiHandle(passedProps: MultiHandleProps) {
             )}>
                 <div className="flex-center gap-1">
                     <TI>
-                        {props.allowNaming ? <IconBraces /> : <IconBracketsContain />}
+                        {props.allowNaming ? <IconBox /> : <IconBracketsContain />}
                     </TI>
                     <span className="font-medium">{props.displayName}</span>
                 </div>
@@ -254,9 +254,9 @@ function MultiHandle(passedProps: MultiHandleProps) {
                                 })}
                             >
                                 <TI className="text-muted-foreground">
-                                    {props.allowNaming ? <IconBraces /> : <IconBracketsContain />}
+                                    {props.allowNaming ? <IconBox /> : <IconBracketsContain />}
                                 </TI>
-                                <span>Provide entire {props.allowNaming ? "record" : "list"} as input</span>
+                                <span>Provide entire {props.allowNaming ? "object" : "list"} as input</span>
                             </DropdownMenuItem>}
 
                         {listMode === "single" &&
@@ -305,7 +305,7 @@ function MultiHandle(passedProps: MultiHandleProps) {
                     name={props.name} type={props.type}
                     displayName={props.displayName}
                     valueType={useValueType(
-                        props.allowNaming ? "map" : "array",
+                        props.allowNaming ? "object" : "array",
                         [props.itemValueType],
                     )}
                 />}

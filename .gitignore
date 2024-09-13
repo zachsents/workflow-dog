@@ -103,6 +103,8 @@ web_modules/
 
 .env*
 *.env
+!env/template.env
+!env/.env
 
 # parcel-bundler cache (https://parceljs.org/)
 

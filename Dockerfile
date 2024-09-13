@@ -14,12 +14,9 @@ RUN bun install
 FROM base as web-build
 ARG APP_ORIGIN
 ENV VITE_APP_ORIGIN=${APP_ORIGIN}
-COPY ./packages/core /app/packages/core
-COPY ./packages/workflow-packages /app/packages/workflow-packages
-COPY ./services/api /app/services/api
-COPY ./services/web /app/services/web
-WORKDIR /app/services/web
-RUN bun run build
+COPY ./packages ./packages
+COPY ./services ./services
+RUN bun --filter web build
 
 FROM nginx as web-prod
 COPY ./services/web/nginx.conf /etc/nginx/

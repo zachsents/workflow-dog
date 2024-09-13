@@ -10,6 +10,7 @@ import { cleanupEventSourcesForWorkflow } from "../../lib/internal/event-sources
 import { isProjectUnderTeamLimit } from "../../lib/internal/team"
 import { sendEmailFromTemplate } from "../../lib/resend"
 import { assertOrForbidden } from "../assertions"
+import { getPlanLimits } from "core/plans"
 
 
 export default {
@@ -349,51 +350,45 @@ export default {
             timezone: z.string().refine(tz => Intl.supportedValuesOf("timeZone").includes(tz)),
         }))
         .query(async ({ ctx, input }) => {
-            const runCounts = await sql<{ date: Date, workflow_id: string, run_count: string }>`
-            WITH date_bins AS (
-                SELECT 
-                    daterange(
-                        (now() at time zone ${input.timezone} - make_interval(days => _offset))::date, 
-                        (now() at time zone ${input.timezone} - make_interval(days => _offset - 1))::date
-                    ) as date_bin
-                FROM (SELECT generate_series(0, 30) as _offset)
-            )
-            SELECT
-                lower(date_bin)::timestamp at time zone ${input.timezone} as date,
-                workflow_runs.workflow_id,
-                count(workflow_runs.id) as run_count
-            FROM date_bins
-            LEFT JOIN workflow_runs ON date_bin @> (workflow_runs.started_at at time zone ${input.timezone})::date
-            WHERE workflow_runs.project_id = ${ctx.projectId}
-            GROUP BY date, workflow_runs.workflow_id
-            ORDER BY date;
-            `.execute(db).then(r => r.rows.map(row => ({
-                ...row,
-                run_count: parseInt(row.run_count),
-            })))
+            const { billing_start_date, billing_plan } = await db.selectFrom("projects")
+                .select(["billing_start_date", "billing_plan"])
+                .where("id", "=", ctx.projectId)
+                .executeTakeFirstOrThrow()
 
-            return { runCounts }
+            const billingPeriod = getCurrentBillingPeriod(billing_start_date)
+
+            const [runCount, runCountByWorkflow, memberCount] = await Promise.all([
+                db.selectFrom("workflow_runs")
+                    .select(sql<string>`count(*)`.as("run_count"))
+                    .where("project_id", "=", ctx.projectId)
+                    .where("created_at", ">=", billingPeriod.start)
+                    .where("created_at", "<", billingPeriod.end)
+                    .executeTakeFirstOrThrow()
+                    .then(r => parseInt(r.run_count)),
+                db.selectFrom("workflow_runs")
+                    .leftJoin("workflows", "workflow_runs.workflow_id", "workflows.id")
+                    .select(["workflows.id", "workflows.name"])
+                    .select(sql<string>`count(*)`.as("run_count"))
+                    .where("workflow_runs.project_id", "=", ctx.projectId)
+                    .where("workflow_runs.created_at", ">=", billingPeriod.start)
+                    .where("workflow_runs.created_at", "<", billingPeriod.end)
+                    .groupBy("workflows.id")
+                    .execute()
+                    .then(r => r.map(row => ({
+                        ...row,
+                        run_count: parseInt(row.run_count),
+                    }))),
+                db.selectFrom("projects_users")
+                    .select(sql<string>`count(*)`.as("member_count"))
+                    .where("project_id", "=", ctx.projectId)
+                    .executeTakeFirstOrThrow()
+                    .then(r => parseInt(r.member_count)),
+            ])
+
+            const planLimits = getPlanLimits(billing_plan)
+
+            return { runCount, memberCount, runCountByWorkflow, plan: billing_plan, planLimits }
         }),
-
-    //     remove: t.procedure
-    //         .input(z.object({
-    //             projectId: z.string().uuid(),
-    //             memberId: z.string().uuid(),
-    //         }))
-    //         .mutation(async ({ input, ctx }) => {
-    //             assertAuthenticated(ctx)
-    //             assert(
-    //                 await userHasProjectPermission(ctx.user.id, "write")
-    //                     .byProjectId(input.projectId),
-    //                 forbidden()
-    //             )
-
-    //             await db.deleteFrom("projects_users")
-    //                 .where("project_id", "=", input.projectId)
-    //                 .where("user_id", "=", input.memberId)
-    //                 .executeTakeFirst()
-    //         }),
-    // }),
 }
 
 
@@ -412,4 +407,27 @@ export function projectPermissionProcedure(permission: ProjectPermission) {
                 }
             })
         })
+}
+
+
+/**
+ * Calculates the start and end dates of the current billing period.
+ * Simply a function of the billing start date in order to avoid the
+ * need for cron jobs to reset any billing quotas.
+ */
+export function getCurrentBillingPeriod(billingStartDate: Date) {
+    const staticDay = billingStartDate.getUTCDate()
+
+    const now = new Date()
+    const currentMonth = now.getUTCMonth()
+    const currentYear = now.getUTCFullYear()
+    const thisMonthsDay = new Date(Date.UTC(currentYear, currentMonth, staticDay))
+
+    return now < thisMonthsDay ? {
+        start: new Date(Date.UTC(currentYear, currentMonth - 1, staticDay)),
+        end: thisMonthsDay,
+    } : {
+        start: thisMonthsDay,
+        end: new Date(Date.UTC(currentYear, currentMonth + 1, staticDay)),
+    }
 }

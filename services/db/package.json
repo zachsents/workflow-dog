@@ -8,6 +8,6 @@
         "pg": "^8.12.0"
     },
     "scripts": {
-        "km": "DB_URL=$(zenv -d ../../ -e dev get EXTERNAL_DATABASE_URL) kysely"
+        "km": "DB_URL=$(zenv -d ../../ -e dev -- echo 'postgresql://postgres:$POSTGRES_PASSWORD@localhost:$POSTGRES_PORT/postgres') kysely"
     }
 }

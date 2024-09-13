@@ -29,6 +29,8 @@ services:
       - .:/app
     environment:
       - VITE_APP_ORIGIN=${APP_ORIGIN}
+      - VITE_APP_DOMAIN=${APP_DOMAIN}
+      - VITE_APP_PROTOCOL=${APP_PROTOCOL}
 
   api:
     image: !reset "null"

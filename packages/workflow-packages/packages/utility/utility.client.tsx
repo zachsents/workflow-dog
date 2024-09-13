@@ -1,4 +1,4 @@
-import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowIteration, IconArrowsJoin2, IconArrowsSplit2, IconBraces, IconChartBar, IconMessage, IconPlayerPlay, IconSpeakerphone, IconSquare, IconTypography } from "@tabler/icons-react"
+import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowIteration, IconArrowsJoin2, IconArrowsSplit2, IconBraces, IconChartBar, IconEqual, IconMessage, IconPlayerPlay, IconSpeakerphone, IconSquare, IconTypography } from "@tabler/icons-react"
 import TI from "web/src/components/tabler-icon"
 import { Textarea } from "web/src/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "web/src/components/ui/toggle-group"
@@ -29,6 +29,18 @@ helper.node("ternary", {
 helper.node("router", {
     name: "Route Value",
     description: "Routes the input value to one of two outputs based on a condition.",
+    icon: IconArrowsSplit2,
+    component: () => <StandardNode>
+        <StandardNode.Handle type="input" name="condition" valueType={useValueType("boolean")} />
+        <StandardNode.Handle type="input" name="value" displayName="Value" />
+        <StandardNode.Handle type="output" name="truthy" displayName="If True" />
+        <StandardNode.Handle type="output" name="falsy" displayName="If False" />
+    </StandardNode>,
+})
+
+helper.node("routerCase", {
+    name: "Route Value by Case",
+    description: "Routes the input value to one of many outputs based on which case it matches.",
     icon: IconArrowsSplit2,
     component: () => <StandardNode>
         <StandardNode.Handle type="input" name="condition" valueType={useValueType("boolean")} />
@@ -285,4 +297,15 @@ helper.node("loopWorkflow", {
             </StandardNode>
         )
     },
+})
+
+helper.node("equals", {
+    name: "Equals",
+    description: "Checks if two values are equal.",
+    icon: IconEqual,
+    component: () => <StandardNode>
+        <StandardNode.Handle type="input" name="a" />
+        <StandardNode.Handle type="input" name="b" />
+        <StandardNode.Handle type="output" name="result" />
+    </StandardNode>,
 })

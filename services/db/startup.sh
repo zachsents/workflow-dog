@@ -8,7 +8,7 @@
     done
     
     # Wait for supertokens tables to be initialized
-    while [ "$(psql -U postgres -h localhost -tq --no-align -c 'SELECT COUNT(*) > 32 FROM information_schema.tables WHERE table_schema = '\''auth'\')" -eq "f" ]; do
+    while [ "$(psql -U postgres -h localhost -tq --no-align -c 'SELECT COUNT(*) > 32 FROM information_schema.tables WHERE table_schema = '\''auth'\')" = "f" ]; do
         echo "[WFD Migrations] Waiting for supertokens tables to be initialized..."
         sleep 1
     done
@@ -16,7 +16,7 @@
     sleep 1
 
     cd /wfd/db
-    DB_URL="$EXTERNAL_DATABASE_URL" ~/.bun/bin/bunx kysely migrate latest
+    DB_URL="postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-postgres}" ~/.bun/bin/bunx kysely migrate latest
     echo "[WFD Migrations] Finished"
 ) & 
 echo "[WFD Migrations] Starting..."

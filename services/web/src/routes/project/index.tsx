@@ -3,7 +3,7 @@ import Index from "./_index"
 import Workflows from "./workflows"
 import CreateWorkflow from "./create-workflow"
 import Team from "./team"
-import Usage from "./usage"
+import UsageBilling from "./usage-billing"
 
-const Project = { Layout, Index, Workflows, CreateWorkflow, Team, Usage }
+const Project = { Layout, Index, Workflows, CreateWorkflow, Team, UsageBilling }
 export default Project

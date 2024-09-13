@@ -2,7 +2,7 @@
 	email info@workflow.dog
 }
 
-{$APP_ORIGIN}
+{$APP_ORIGIN}, {$APP_PROTOCOL}run.{$APP_DOMAIN}
 
 root /www
 

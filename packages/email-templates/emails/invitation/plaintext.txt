@@ -4,7 +4,7 @@ WorkflowDog
 
 You can accept this invitation by clicking the link below. If you don't wish to join this project, you can simply ignore this message.
 
-[Accept invitation](https://workflow.dog/invitations/{{ INVITATION_ID }}/accept)
+[Accept invitation]({{ APP_ORIGIN }}/invitations/{{ INVITATION_ID }}/accept)
 
 ---
 

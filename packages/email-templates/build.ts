@@ -1,3 +1,4 @@
+import { useEnvVar } from "api/lib/utils"
 import { $ } from "bun"
 import fs from "fs/promises"
 import path from "path"
@@ -18,7 +19,7 @@ async function compileTemplate(templateName: string) {
     }
 
     const content = await Bun.file(path.join(EMAILS_DIR, templateName, "source.html")).text()
-    let result = await $`premailer -b "https://workflow.dog/email/" < ${new Response(content)}`
+    let result = await $`premailer -b "${useEnvVar("APP_ORIGIN")}/email/" < ${new Response(content)}`
         .cwd(path.join(EMAILS_DIR, templateName))
         .text()
 

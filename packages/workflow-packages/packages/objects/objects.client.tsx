@@ -1,10 +1,16 @@
-import { IconSelect } from "@tabler/icons-react"
+import { IconBox, IconSelect } from "@tabler/icons-react"
 import { createPackage } from "../../registry/registry.client"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
 import { useValueType } from "../../lib/value-types.client"
 
 
-const helper = createPackage("objects")
+const helper = createPackage("objects", {
+    defaults: {
+        node: {
+            icon: IconBox,
+        }
+    }
+})
 
 helper.node("getProperty", {
     name: "Get Property",
@@ -36,7 +42,6 @@ helper.node("getProperties", {
 helper.node("setProperty", {
     name: "Set Property",
     description: "Sets a property on an object.",
-    icon: IconSelect,
     component: () => <StandardNode>
         <StandardNode.Handle type="input" name="object" valueType={useValueType("object")} />
         <StandardNode.Handle type="input" name="property" valueType={useValueType("string")} />
@@ -48,7 +53,6 @@ helper.node("setProperty", {
 helper.node("setProperties", {
     name: "Set Properties",
     description: "Sets multiple properties on an object.",
-    icon: IconSelect,
     component: () => <StandardNode>
         <StandardNode.Handle type="input" name="object" valueType={useValueType("object")} />
         <StandardNode.MultiHandle

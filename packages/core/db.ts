@@ -346,7 +346,7 @@ export interface ProjectInvitations {
 
 export interface Projects {
   billing_plan: BillingPlan | null;
-  billing_start_date: Generated<Timestamp | null>;
+  billing_start_date: Generated<Timestamp>;
   created_at: Generated<Timestamp>;
   creator: string | null;
   id: Generated<string>;
@@ -391,7 +391,6 @@ export interface WorkflowRunOutputs {
   is_global: Generated<boolean>;
   node_id: string | null;
   value: string;
-  value_type: Json | null;
   workflow_run_id: string;
 }
 

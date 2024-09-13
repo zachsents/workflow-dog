@@ -115,7 +115,7 @@ helper.node("runWorkflow", {
             selectedWorkflow: z.string().uuid(),
         }).parse(ctx.node.config)
 
-        const url = `http://localhost:${process.env.PORT}/api/run/callable_${selectedWorkflow}`
+        const url = `http://localhost:${process.env.PORT}/api/run/x/callable_${selectedWorkflow}`
 
         await axios.post(url, encodeValue(payload))
     },
@@ -136,10 +136,22 @@ helper.node("loopWorkflow", {
         }).parse(ctx.node.config)
         console.log(selectedWorkflow)
 
-        const url = `http://localhost:${process.env.PORT}/api/run/callable_${selectedWorkflow}`
+        const url = `http://localhost:${process.env.PORT}/api/run/x/callable_${selectedWorkflow}`
 
         await Promise.all(payloads.map(payload =>
             axios.post(url, encodeValue(payload))
         ))
+    },
+})
+
+helper.node("equals", {
+    name: "Equals",
+    action(inputs) {
+        const { a, b } = z.object({
+            a: z.any(),
+            b: z.any(),
+        }).parse(inputs)
+
+        return { result: a == b }
     },
 })

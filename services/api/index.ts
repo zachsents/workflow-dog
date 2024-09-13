@@ -97,7 +97,7 @@ app.get("/api/run/status/:workflowRunId", async (req, res) => {
 })
 
 // Event source handler
-app.all(["/api/run/:eventSourceId", "/api/run/:eventSourceId/*"], bodyParser.raw({ type: "*/*" }), async (req, res) => {
+app.all(["/api/run/x/:eventSourceId", "/api/run/x/:eventSourceId/*"], bodyParser.raw({ type: "*/*" }), async (req, res) => {
     const eventSourceId = req.params.eventSourceId
     const eventSource = await db.selectFrom("event_sources")
         .selectAll()

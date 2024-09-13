@@ -1,4 +1,4 @@
-import { IconBook, IconChartLine, IconExternalLink, IconListDetails, IconMoneybag, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconUsers } from "@tabler/icons-react"
+import { IconBook, IconExternalLink, IconListDetails, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconUsers, IconZoomMoney } from "@tabler/icons-react"
 import AccountMenu from "@web/components/account-menu"
 import { BrandLink, FeedbackButton } from "@web/components/dashboard-header"
 import ProjectSelector from "@web/components/project-selector"
@@ -63,11 +63,8 @@ export default function ProjectLayout() {
                         <NavButton to="team" icon={IconUsers}>
                             Team
                         </NavButton>
-                        <NavButton to="usage" icon={IconChartLine}>
-                            Usage
-                        </NavButton>
-                        <NavButton to="billing" icon={IconMoneybag}>
-                            Billing
+                        <NavButton to="usage-billing" icon={IconZoomMoney}>
+                            Usage & Billing
                         </NavButton>
                     </NavGroup>
                 </nav>

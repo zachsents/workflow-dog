@@ -3,7 +3,6 @@ import Dashboard from "supertokens-node/recipe/dashboard"
 import Session from "supertokens-node/recipe/session"
 import ThirdParty from "supertokens-node/recipe/thirdparty"
 // import EmailPassword from "supertokens-node/recipe/emailpassword"
-import UserMetadata from "supertokens-node/recipe/usermetadata"
 import { db } from "./db"
 import { resend } from "./resend"
 import { useEnvVar } from "./utils"
@@ -23,7 +22,6 @@ export function initSupertokens() {
             apiBasePath: "/api/auth",
         },
         recipeList: [
-            UserMetadata.init(),
             Session.init(),
             Dashboard.init(),
             ThirdParty.init({

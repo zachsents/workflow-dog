@@ -28,7 +28,7 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("creator", "uuid", (col) => col.references("user_meta.id").onDelete("set null"))
         .addColumn("name", "text", (col) => col.notNull().defaultTo("Untitled Project"))
         .addColumn("billing_plan", sql`public.billing_plan`)
-        .addColumn("billing_start_date", "date", (col) => col.defaultTo(sql`CURRENT_DATE`))
+        .addColumn("billing_start_date", "date", (col) => col.notNull().defaultTo(sql`CURRENT_DATE`))
         .execute()
 
     await db.schema.createTable("project_invitations").ifNotExists()

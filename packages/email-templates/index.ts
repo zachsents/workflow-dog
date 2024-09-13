@@ -1,3 +1,4 @@
+import { useEnvVar } from "api/lib/utils"
 import fs from "fs/promises"
 import path from "path"
 
@@ -19,5 +20,8 @@ export async function buildEmail(templateName: string, opts: Record<string, stri
 }
 
 function substitute(template: string, opts: Record<string, string>) {
-    return Object.entries(opts).reduce((template, [key, value]) => template.replaceAll(`{{ ${key} }}`, value), template)
+    return Object.entries({
+        APP_ORIGIN: useEnvVar("APP_ORIGIN"),
+        ...opts,
+    }).reduce((template, [key, value]) => template.replaceAll(`{{ ${key} }}`, value), template)
 }

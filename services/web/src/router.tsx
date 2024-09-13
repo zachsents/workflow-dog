@@ -93,7 +93,7 @@ export const router = createBrowserRouter(createRoutesFromElements(
                     <Route path="create" element={<Project.CreateWorkflow />} />
                 </Route>
                 <Route path="team" element={<Project.Team />} />
-                <Route path="usage" element={<Project.Usage />} />
+                <Route path="usage-billing" element={<Project.UsageBilling />} />
             </Route>
         </Route>
 

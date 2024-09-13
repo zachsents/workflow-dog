@@ -1,5 +1,8 @@
 import { z } from "zod"
 import { createPackage } from "../../registry/registry.server"
+import _get from "lodash/get"
+import _set from "lodash/set"
+
 
 const helper = createPackage("objects")
 
@@ -11,7 +14,7 @@ helper.node("getProperty", {
             property: z.string(),
         }).parse(inputs)
 
-        return { value: object[property] }
+        return { value: _get(object, property) ?? null }
     },
 })
 
@@ -23,8 +26,7 @@ helper.node("getProperties", {
         }).parse(inputs)
 
         const properties = ctx.node.handleStates.properties.multi.names as string[]
-
-        const result = Object.fromEntries(properties.map(prop => [prop, object[prop]] as const))
+        const result = Object.fromEntries(properties.map(prop => [prop, _get(object, prop) ?? null] as const))
 
         return { properties: result }
     },
@@ -39,18 +41,21 @@ helper.node("setProperty", {
             value: z.any(),
         }).parse(inputs)
 
-        return { newObject: { ...object, [property]: value } }
+        return { newObject: _set(structuredClone(object), property, value) }
     },
 })
 
 helper.node("setProperties", {
     name: "Set Properties",
-    action(inputs, ctx) {
+    action(inputs) {
         const { object, properties } = z.object({
             object: z.object({}).passthrough().default({}),
             properties: z.object({}).passthrough().default({}),
         }).parse(inputs)
 
-        return { newObject: { ...object, ...properties } }
+        const newObject = structuredClone(object)
+        Object.entries(properties).forEach(([k, v]) => _set(newObject, k, v))
+
+        return { newObject }
     },
 })

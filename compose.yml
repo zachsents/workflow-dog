@@ -24,6 +24,8 @@ services:
     environment:
       - APP_ORIGIN
       - API_PORT
+      - APP_DOMAIN
+      - APP_PROTOCOL
 
   db:
     container_name: db
@@ -42,7 +44,6 @@ services:
       - PGPORT=${POSTGRES_PORT}
       - POSTGRES_PASSWORD
       - PGPASSWORD=${POSTGRES_PASSWORD}
-      - EXTERNAL_DATABASE_URL # needed for migrations
     volumes:
       - db-data:/var/lib/postgresql/data
 

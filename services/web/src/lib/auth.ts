@@ -10,7 +10,7 @@ import { trpc } from "./trpc"
 SuperTokens.init({
     appInfo: {
         appName: "WorkflowDog",
-        apiDomain: import.meta.env.VITE_APP_ORIGIN,
+        apiDomain: location.origin,
         apiBasePath: "/api/auth",
     },
     recipeList: [
@@ -55,7 +55,7 @@ export function useUser() {
 export async function getGoogleSignInUrl(email?: string) {
     const url = new URL(await getAuthorisationURLWithQueryParamsAndSetState({
         thirdPartyId: "google",
-        frontendRedirectURI: `${import.meta.env.VITE_APP_ORIGIN}/login/callback`,
+        frontendRedirectURI: `${location.origin}/login/callback`,
     }))
     if (email)
         url.searchParams.set("login_hint", email)

@@ -50,8 +50,6 @@ services:
     image: registry.digitalocean.com/workflow-dog/web
     build:
       target: web-prod
-      args:
-        - APP_ORIGIN=${APP_ORIGIN}
     restart: unless-stopped
 
   api:

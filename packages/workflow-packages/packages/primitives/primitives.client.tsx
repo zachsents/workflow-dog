@@ -371,7 +371,7 @@ helper.eventType("webhook", {
         },
     },
     sourceComponent: ({ workflowId }) => {
-        const url = `${import.meta.env.VITE_APP_ORIGIN}/run/x/webhook_${workflowId}`
+        const url = `${location.origin}/run/x/webhook_${workflowId}`
 
         return (
             <div className="grid gap-4">
@@ -387,7 +387,7 @@ helper.eventType("webhook", {
     },
     additionalDropdownItems: ({ workflowId }) => (
         <DropdownMenuItem onClick={() => {
-            const url = `${import.meta.env.VITE_APP_ORIGIN}/run/x/webhook_${workflowId}`
+            const url = `${location.origin}/run/x/webhook_${workflowId}`
             navigator.clipboard.writeText(url)
         }}>
             <TI><IconLink /></TI>
@@ -444,7 +444,7 @@ helper.eventType("httpRequest", {
         },
     },
     sourceComponent: ({ workflowId }) => {
-        const url = `${import.meta.env.VITE_APP_ORIGIN}/run/x/request_${workflowId}`
+        const url = `${location.origin}/run/x/request_${workflowId}`
 
         return (
             <div className="grid gap-4">
@@ -460,7 +460,7 @@ helper.eventType("httpRequest", {
     },
     additionalDropdownItems: ({ workflowId }) => (
         <DropdownMenuItem onClick={() => {
-            const url = `${import.meta.env.VITE_APP_ORIGIN}/run/x/request_${workflowId}`
+            const url = `${location.origin}/run/x/request_${workflowId}`
             navigator.clipboard.writeText(url)
         }}>
             <TI><IconLink /></TI>

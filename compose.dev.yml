@@ -22,13 +22,10 @@ services:
     image: !reset "null"
     build:
       target: base
-      args: !reset []
     working_dir: /app/services/web
     command: bun run dev --host
     volumes:
       - .:/app
-    environment:
-      - VITE_APP_ORIGIN=${APP_ORIGIN}
 
   api:
     image: !reset "null"

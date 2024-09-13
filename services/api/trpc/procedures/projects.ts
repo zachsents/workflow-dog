@@ -96,7 +96,12 @@ export default {
                     COALESCE(sum((error_count > 0)::int), 0) as error,
                     COALESCE(sum((error_count = 0)::int), 0) as success
                 FROM date_bins
-                LEFT JOIN workflow_runs ON date_bin @> (workflow_runs.started_at at time zone ${input.timezone})::date
+                LEFT JOIN LATERAL (
+                    SELECT * FROM workflow_runs
+                    WHERE
+                        project_id = ${ctx.projectId} AND
+                        date_bin @> (started_at at time zone ${input.timezone})::date
+                ) runs ON true
                 GROUP BY date_bin
                 ORDER BY date_bin;
                 `.execute(db).then(r => r.rows.map(row => ({

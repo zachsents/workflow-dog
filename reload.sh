@@ -6,4 +6,4 @@ if [ -z "$1" ] || [ -z "$2" ]; then
     exit 1
 fi
 
-./run.sh "$1" pull "$2" && ./run.sh "$1" up "$2" -d
+./run.sh "$1" pull "$@" && ./run.sh "$1" up "$@" -d

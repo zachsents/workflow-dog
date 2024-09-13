@@ -12,7 +12,6 @@ services:
     build:
       target: proxy
     ports:
-      - "80:80"
       - "443:443"
     restart: unless-stopped
     healthcheck:
@@ -24,8 +23,6 @@ services:
     environment:
       - APP_ORIGIN
       - API_PORT
-      - APP_DOMAIN
-      - APP_PROTOCOL
 
   db:
     container_name: db

@@ -1,9 +1,5 @@
 #!/bin/bash
 
-PORT=$(bunx zenv -e dev get POSTGRES_PORT)
-DB=$(bunx zenv -e dev get POSTGRES_DB)
-USER=$(bunx zenv -e dev get POSTGRES_USER)
-PASS=$(bunx zenv -e dev get POSTGRES_PASSWORD)
-export DATABASE_URL="postgresql://${USER:-postgres}:$PASS@localhost:${PORT:-5432}/${DB:-postgres}"
+export DATABASE_URL=$(bun --env-file=env/dev.env --env-file=env/.env -e 'console.log(`postgresql://${Bun.env.POSTGRES_USER || "postgres"}:${Bun.env.POSTGRES_PASSWORD}@localhost:${Bun.env.POSTGRES_PORT || 5432}/${Bun.env.POSTGRES_DB || "postgres"}`)')
 
 bunx kysely-codegen --out-file packages/core/db.ts --dialect postgres

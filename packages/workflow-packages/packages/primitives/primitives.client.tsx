@@ -371,9 +371,7 @@ helper.eventType("webhook", {
         },
     },
     sourceComponent: ({ workflowId }) => {
-        const url = import.meta.env.DEV
-            ? `${import.meta.env.VITE_APP_ORIGIN}/api/run/x/webhook_${workflowId}`
-            : `https://run.${import.meta.env.VITE_APP_DOMAIN}/x/webhook_${workflowId}`
+        const url = `${import.meta.env.VITE_APP_ORIGIN}/run/x/webhook_${workflowId}`
 
         return (
             <div className="grid gap-4">
@@ -389,9 +387,8 @@ helper.eventType("webhook", {
     },
     additionalDropdownItems: ({ workflowId }) => (
         <DropdownMenuItem onClick={() => {
-            navigator.clipboard.writeText(import.meta.env.DEV
-                ? `http://localhost:8080/api/run/x/webhook_${workflowId}`
-                : `https://run.${import.meta.env.VITE_APP_DOMAIN}/x/webhook_${workflowId}`)
+            const url = `${import.meta.env.VITE_APP_ORIGIN}/run/x/webhook_${workflowId}`
+            navigator.clipboard.writeText(url)
         }}>
             <TI><IconLink /></TI>
             Copy webhook URL
@@ -447,9 +444,7 @@ helper.eventType("httpRequest", {
         },
     },
     sourceComponent: ({ workflowId }) => {
-        const url = import.meta.env.DEV
-            ? `${import.meta.env.VITE_APP_ORIGIN}/api/run/x/request_${workflowId}`
-            : `https://run.${import.meta.env.VITE_APP_DOMAIN}/x/request_${workflowId}`
+        const url = `${import.meta.env.VITE_APP_ORIGIN}/run/x/request_${workflowId}`
 
         return (
             <div className="grid gap-4">
@@ -465,9 +460,8 @@ helper.eventType("httpRequest", {
     },
     additionalDropdownItems: ({ workflowId }) => (
         <DropdownMenuItem onClick={() => {
-            navigator.clipboard.writeText(import.meta.env.DEV
-                ? `http://localhost:8080/api/run/x/request_${workflowId}`
-                : `https://run.${import.meta.env.VITE_APP_DOMAIN}/x/request_${workflowId}`)
+            const url = `${import.meta.env.VITE_APP_ORIGIN}/run/x/request_${workflowId}`
+            navigator.clipboard.writeText(url)
         }}>
             <TI><IconLink /></TI>
             Copy webhook URL

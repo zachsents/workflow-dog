@@ -6,8 +6,5 @@
         "kysely": "^0.27.3",
         "kysely-ctl": "^0.8.7",
         "pg": "^8.12.0"
-    },
-    "scripts": {
-        "km": "DB_URL=$(zenv -d ../../ -e dev -- echo 'postgresql://postgres:$POSTGRES_PASSWORD@localhost:$POSTGRES_PORT/postgres') kysely"
     }
 }

@@ -1,7 +1,7 @@
 services:
   proxy:
     ports: !override
-      - ${APP_PORT:-8080}:${APP_PORT:-8080}
+      - "8080:8080"
     develop:
       watch:
         - path: ./services/proxy
@@ -29,8 +29,6 @@ services:
       - .:/app
     environment:
       - VITE_APP_ORIGIN=${APP_ORIGIN}
-      - VITE_APP_DOMAIN=${APP_DOMAIN}
-      - VITE_APP_PROTOCOL=${APP_PROTOCOL}
 
   api:
     image: !reset "null"
@@ -40,8 +38,6 @@ services:
     command: bun --watch .
     ports:
       - ${API_PORT}:${API_PORT}
-    environment:
-      - DEV
     volumes:
       - .:/app
 

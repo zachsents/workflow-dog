@@ -2,7 +2,7 @@
 	email info@workflow.dog
 }
 
-{$APP_ORIGIN}, {$APP_PROTOCOL}run.{$APP_DOMAIN}
+{$APP_ORIGIN}
 
 root /www
 
@@ -11,7 +11,7 @@ root /www
 }
 
 @api {
-	path /api/* /auth/*
+	path /api/* /auth/* /run/*
 }
 
 # Directive order in Caddy is funky

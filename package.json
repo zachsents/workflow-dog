@@ -3,8 +3,7 @@
     "type": "module",
     "scripts": {
         "gentypes": "bash scripts/gen_db_types.sh",
-        "dev": "zenv -e dev run -- docker compose -f compose.yml -f compose.dev.yml",
-        "prod": "zenv -e prod run -- docker compose"
+        "ky": "bash scripts/kysely.sh"
     },
     "workspaces": [
         "packages/*",

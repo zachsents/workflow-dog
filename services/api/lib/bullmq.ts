@@ -33,7 +33,7 @@ export const EVENT_QUEUE = new Queue("events", {
 
 new Worker("events", async (job) => {
     console.log("[Bull] running job", job.name)
-    const res = await axios.post(`http://api:${useEnvVar("PORT")}/api/run/x/${job.name}`, job.data)
+    const res = await axios.post(`http://api:${useEnvVar("PORT")}/run/x/${job.name}`, job.data)
     console.log("[Bull] job", job.name, "returned status", res.status)
 }, { connection })
 

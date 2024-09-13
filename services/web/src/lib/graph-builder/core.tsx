@@ -1248,6 +1248,7 @@ function useTapControls(callback: NonNullable<TapHandlers["onTap"]>): {
 }
 
 
+// @ts-ignore
 function Debug() {
 
     const gbx = useGraphBuilder()

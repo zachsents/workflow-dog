@@ -459,10 +459,8 @@ const stdVariadicInput = (name: string, itemDisplayName: string = "Number") =>
     />
 
 
-type AngleUnit = "radians" | "degrees"
-
 const angleUnitConfig = () =>
-    <StandardNode.Config<AngleUnit>
+    <StandardNode.Config
         id="angleUnit" label="Angle Unit" defaultValue="radians"
     >
         {({ value, onChange }) =>

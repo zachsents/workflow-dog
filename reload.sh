@@ -6,4 +6,7 @@ if [ -z "$1" ] || [ -z "$2" ]; then
     exit 1
 fi
 
-./run.sh "$1" pull "$@" && ./run.sh "$1" up "$@" -d
+ENV="$1"
+shift
+
+./run.sh "$ENV" pull "$@" && ./run.sh "$ENV" up "$@" -d

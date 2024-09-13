@@ -26,17 +26,8 @@ COPY --from=web-build /app/services/web/dist /www
 # Proxy + landing page ----------------------------------- #
 
 FROM base as landing-build
-COPY ./services/landing /app/services/landing
-RUN bun run --filter landing build
-
-# Old proxy -- not using
-# FROM nginx as proxy
-# ARG HTUSER
-# ARG HTPASS
-# RUN apt-get update && apt-get install -y apache2-utils && rm -rf /var/lib/apt/lists/*
-# RUN htpasswd -c -b /etc/nginx/.htpasswd "${HTUSER}" "${HTPASS}"
-# COPY ./services/proxy/nginx.conf /etc/nginx/
-# COPY --from=landing-build /app/services/landing/dist /www
+COPY ./services/landing ./services/landing
+RUN bun --filter landing build
 
 FROM caddy as proxy
 COPY ./services/proxy/Caddyfile /etc/caddy/

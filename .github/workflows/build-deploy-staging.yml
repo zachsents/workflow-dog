@@ -1,0 +1,31 @@
+name: Build & Deploy (Staging)
+
+on:
+  push:
+    branches:
+      - insane-reboot
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    env:
+      STAGING_ENV_FILE: ${{ secrets.StagingEnvFile }}
+      SSH_PRIVATE_KEY: ${{ secrets.StagingServerPrivateKey }}
+      STAGING_SERVER_IP: 137.184.244.77
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Create env file
+        run: echo $STAGING_ENV_FILE > env/staging.env
+      - name: Build everything
+        run: ./run.sh staging build
+      - name: Push images
+        run: ./run.sh staging push
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$STAGING_SERVER_IP" >> ~/.ssh/known_hosts
+      - name: Reload services on staging server
+        run: ssh root@$STAGING_SERVER_IP "cd app && ./run.sh staging up -d"

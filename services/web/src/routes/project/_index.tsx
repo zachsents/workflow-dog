@@ -20,7 +20,7 @@ import { getPlanData } from "@web/lib/plans"
 import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
 import { PROJECT_NAME_SCHEMA } from "core/schemas"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
@@ -41,6 +41,11 @@ export default function ProjectIndex({ deleting }: { deleting?: boolean }) {
     const hasNoWorkflows = overview?.workflowCount === 0
 
     const renameDialog = useDialogState()
+
+    const totalDataPoints = useMemo(
+        () => overview?.recentRunResults.reduce((acc, cur) => acc + cur.error + cur.success, 0) ?? 0,
+        [overview?.recentRunResults]
+    )
 
     return (
         <ProjectDashboardLayout currentSegment="Overview">
@@ -105,11 +110,20 @@ export default function ProjectIndex({ deleting }: { deleting?: boolean }) {
                     <h3 className="font-medium text-xl">
                         Recent Workflow Runs
                     </h3>
-                    <p className="text-muted-foreground">
-                        These are the workflow runs from the last 7 days.
-                    </p>
-                    {!!overview?.recentRunResults &&
-                        <RecentActivityChart data={overview.recentRunResults} height={200} />}
+
+                    {overview?.recentRunResults
+                        ? totalDataPoints > 0
+                            ? <>
+                                <p className="text-muted-foreground">
+                                    These are the workflow runs from the last 7 days.
+                                </p>
+                                <RecentActivityChart data={overview.recentRunResults} height={200} />
+                            </>
+                            : <p className="text-muted-foreground">
+                                No runs yet.
+                            </p>
+                        : null}
+
                     <Button asChild variant="outline" className="self-start flex-center gap-2 mt-4">
                         <Link to="workflows">
                             <TI><IconRouteSquare2 /></TI>

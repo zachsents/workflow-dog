@@ -50,6 +50,10 @@ export async function createProject(projectData: {
                     price: useEnvVar("STRIPE_FREE_PRICE_ID"),
                 }],
                 description: `Subscription for Project "${projectData.name}"`,
+                metadata: {
+                    projectId: projectData.creator,
+                    site: useEnvVar("APP_ORIGIN"),
+                },
             })
             return [customer.id, sub.id] as const
         }).then(([customerId, subscriptionId]) =>

@@ -9,6 +9,8 @@ import type { ServerEvent } from "workflow-packages/lib/types"
 import { encodeValue } from "workflow-packages/lib/value-types.server"
 import { useEnvVar } from "../utils"
 import { RUN_QUEUE } from "../bullmq"
+import { getCurrentBillingPeriod } from "./projects"
+import { getPlanData } from "core/plans"
 
 
 export async function handleEventSourceRequest(req: Request, res: Response) {
@@ -46,7 +48,7 @@ export async function handleEventSourceRequest(req: Request, res: Response) {
 
     const queryWorkflowsTask = db.selectFrom("workflows_event_sources")
         .innerJoin("workflows", "workflows.id", "workflows_event_sources.workflow_id")
-        .select(["workflows.id", "trigger_config", "trigger_event_type_id"])
+        .select(["workflows.id", "workflows.project_id", "trigger_config", "trigger_event_type_id"])
         .where("event_source_id", "=", eventSourceId)
         .where("workflows.is_enabled", "=", true)
         .execute()
@@ -56,7 +58,7 @@ export async function handleEventSourceRequest(req: Request, res: Response) {
     console.log(`Generated events (${events.length}):` + events.map(e => `\n\t- ${e.type}`).join(""))
     console.log(`Found subscribed workflows (${subscribedWorkflows.length}):` + subscribedWorkflows.map(w => `\n\t- ${w.id}`).join(""))
 
-    const newRunsData = await Promise.all(
+    let newRunsData = await Promise.all(
         subscribedWorkflows.map(async wf => {
             const eventType = ServerEventTypes[wf.trigger_event_type_id]
             const relevantEvents = events.filter(ev => ev.type === wf.trigger_event_type_id)
@@ -74,12 +76,41 @@ export async function handleEventSourceRequest(req: Request, res: Response) {
 
             const newRuns: Insertable<WorkflowRuns>[] = runData.map(data => ({
                 workflow_id: wf.id,
+                project_id: wf.project_id,
                 event_payload: data && _mapValues(data, v => JSON.stringify(encodeValue(v))),
             }))
 
             return newRuns
         })
     ).then(r => r.flat())
+
+    // filter out runs that put its respective project over the workflow run limit
+    await Promise.all(
+        Array.from(new Set(subscribedWorkflows.map(wf => wf.project_id))).map(async projectId => {
+            const { billing_plan, billing_start_date } = await db.selectFrom("projects")
+                .select(["billing_plan", "billing_start_date"])
+                .where("id", "=", projectId)
+                .executeTakeFirstOrThrow()
+
+            const billingPeriod = getCurrentBillingPeriod(billing_start_date)
+
+            const runCount = await db.selectFrom("workflow_runs")
+                .select(sql<string>`count(*)`.as("run_count"))
+                .where("project_id", "=", projectId)
+                .where("created_at", ">=", billingPeriod.start)
+                .where("created_at", "<", billingPeriod.end)
+                .executeTakeFirstOrThrow()
+                .then(r => parseInt(r.run_count))
+
+            let remaining = getPlanData(billing_plan).workflowRunLimit - runCount
+            const before = newRunsData.length
+            newRunsData = newRunsData.filter(r =>
+                r.project_id !== projectId || remaining-- > 0
+            )
+            if (before !== newRunsData.length)
+                console.log(`Removed ${before - newRunsData.length} run(s) for project (${projectId}) because it went over the workflow run limit.`)
+        })
+    )
 
     const generatedAnyRuns = newRunsData.length > 0
 
@@ -105,7 +136,6 @@ export async function handleEventSourceRequest(req: Request, res: Response) {
             statusUrl: useEnvVar("APP_ORIGIN") + "/api/workflow-runs/" + runId + "/status?with_outputs",
         }))
     })
-
 }
 
 

@@ -16,7 +16,7 @@ import { Separator } from "@web/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import { plural } from "@web/lib/grammar"
 import { useCurrentProject, useCurrentProjectId, useDialogState } from "@web/lib/hooks"
-import { getPlanData } from "@web/lib/plans"
+import { getPlanInfo } from "@web/lib/plans"
 import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
 import { PROJECT_NAME_SCHEMA } from "core/schemas"
@@ -32,7 +32,7 @@ export default function ProjectIndex({ deleting }: { deleting?: boolean }) {
 
     const projectId = useCurrentProjectId()
     const project = useCurrentProject().data!
-    const planData = getPlanData(project.billing_plan)
+    const planInfo = getPlanInfo(project.billing_plan)
     const { data: overview } = trpc.projects.overview.useQuery({
         projectId,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -56,8 +56,8 @@ export default function ProjectIndex({ deleting }: { deleting?: boolean }) {
                             <h1 className="text-2xl font-medium">
                                 {project.name}
                             </h1>
-                            <Badge className={cn("pointer-events-none shadow-none", planData.badgeClassName)}>
-                                {planData.name}
+                            <Badge className={cn("pointer-events-none shadow-none", planInfo.badgeClassName)}>
+                                {planInfo.name}
                             </Badge>
                         </div>
                         <div className="flex items-center gap-6 text-muted-foreground hover:*:underline">

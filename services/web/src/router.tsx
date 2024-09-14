@@ -94,6 +94,7 @@ export const router = createBrowserRouter(createRoutesFromElements(
                 </Route>
                 <Route path="team" element={<Project.Team />} />
                 <Route path="usage-billing" element={<Project.UsageBilling />} />
+                <Route path="billing" loader={() => replace("../usage-billing")} />
             </Route>
         </Route>
 

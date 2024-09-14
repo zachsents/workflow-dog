@@ -74,6 +74,13 @@ services:
       - RESEND_GENERAL_AUDIENCE_ID
       - REDIS_PORT
       - REDIS_PASSWORD
+      - STRIPE_KEY
+      - STRIPE_WEBHOOK_SIGNING_SECRET
+      - STRIPE_FREE_PRICE_ID
+      - STRIPE_BASIC_MONTHLY_PRICE_ID
+      - STRIPE_BASIC_YEARLY_PRICE_ID
+      - STRIPE_PRO_MONTHLY_PRICE_ID
+      - STRIPE_PRO_YEARLY_PRICE_ID
 
   supertokens:
     container_name: supertokens

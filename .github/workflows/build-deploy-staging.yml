@@ -28,5 +28,7 @@ jobs:
         run: ./run.sh staging build
       - name: Push images
         run: ./run.sh staging push
+      - name: Copy compose.yml file to server
+        run: scp compose.yml root@$STAGING_SERVER_IP:app/
       - name: Reload services on staging server
         run: ssh root@$STAGING_SERVER_IP "cd app && ./run.sh staging pull && ./run.sh staging up -d"

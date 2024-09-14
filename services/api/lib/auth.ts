@@ -6,6 +6,7 @@ import ThirdParty from "supertokens-node/recipe/thirdparty"
 import { db } from "./db"
 import { resend } from "./resend"
 import { useEnvVar } from "./utils"
+import { createProject } from "./internal/projects"
 
 
 export function initSupertokens() {
@@ -75,27 +76,18 @@ export function initSupertokens() {
                             if (isNewUser) {
                                 console.log("New user sign up:", email || "<unknown email>")
 
-                                // Create user metadata row starter project
+                                // Create starter project
                                 const dbPromise = userMetadataPromise.then(() => db.transaction().execute(async trx => {
                                     let nameForProject: string | undefined = firstName ?? profile?.name
                                     if (nameForProject)
                                         nameForProject += nameForProject.endsWith("s") ? "'" : "'s"
 
-                                    const { id: newProjectId } = await trx.insertInto("projects")
-                                        .values({
-                                            name: `${nameForProject || "My"} Project`,
-                                            creator: res.user.id,
-                                        })
-                                        .returning("id")
-                                        .executeTakeFirstOrThrow()
-
-                                    await trx.insertInto("projects_users")
-                                        .values({
-                                            project_id: newProjectId,
-                                            user_id: res.user.id,
-                                            permissions: ["read", "write"],
-                                        })
-                                        .executeTakeFirstOrThrow()
+                                    await createProject({
+                                        name: `${nameForProject || "My"} Project`,
+                                        creator: res.user.id,
+                                    }, {
+                                        dbHandle: trx,
+                                    })
                                 }))
                                 tasks.push(dbPromise)
 

@@ -102,7 +102,7 @@ export default {
                 .executeTakeFirstOrThrow()
         }),
 
-    "delete": projectPermissionByWorkflowProcedure("write")
+    delete: projectPermissionByWorkflowProcedure("write")
         .mutation(async ({ ctx }) => {
             return db.transaction().execute(async trx => {
                 await cleanupEventSourcesForWorkflow(ctx.workflowId, {

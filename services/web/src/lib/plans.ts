@@ -1,50 +1,67 @@
-import { IconBuildingFactory, IconCoffee } from "@tabler/icons-react"
+import { IconBuildingFactory, IconCoffee, IconFeather, IconPencilBolt } from "@tabler/icons-react"
 import type { BillingPlan } from "core/db"
-import { getPlanLimits } from "core/plans"
+import { getPlanData } from "core/plans"
 
 
 export type PlanData = {
     name: string
     icon: React.ComponentType
     included: string[]
-    showBillingButton: boolean
     badgeClassName: string
     upgradeButtonClassName?: string
     upsell?: BillingPlan,
-    limits: ReturnType<typeof getPlanLimits>
-}
+    emailSubject?: string
+} & ReturnType<typeof getPlanData>
 
-export const PlanData: {
-    [k in BillingPlan | "free"]: PlanData
-} = {
+const planData: Record<BillingPlan, PlanData> = {
     free: {
         name: "Free",
         icon: IconCoffee,
         included: [
             "100 workflow runs per month",
+            "No additional team members",
+        ],
+        badgeClassName: "bg-gray-300 text-gray-800",
+        upsell: "basic",
+        ...getPlanData("free"),
+    },
+    basic: {
+        name: "Basic",
+        icon: IconFeather,
+        included: [
+            "1000 workflow runs per month",
             "Up to 3 team members",
         ],
-        showBillingButton: false,
-        badgeClassName: "bg-gray-300 text-gray-800",
+        badgeClassName: "bg-yellow-300 text-yellow-800",
         upsell: "pro",
-        limits: getPlanLimits("free"),
+        ...getPlanData("basic"),
     },
     pro: {
-        name: "Pro",
+        name: "Business",
         icon: IconBuildingFactory,
         included: [
             "10,000 workflow runs per month",
             "Up to 20 team members",
         ],
-        showBillingButton: true,
         badgeClassName: "bg-primary text-primary-foreground",
         upgradeButtonClassName: "bg-neutral-800",
-        limits: getPlanLimits("pro"),
+        upsell: "custom",
+        ...getPlanData("pro"),
+    },
+    custom: {
+        name: "Custom",
+        icon: IconPencilBolt,
+        included: [
+            "Custom pricing",
+            "Workflow runs charged by usage",
+            "Unlimited team members",
+        ],
+        badgeClassName: "bg-neutral-800 text-neutral-100",
+        emailSubject: "Custom plan request",
+        ...getPlanData("custom"),
     },
 }
 
-export function getPlanData(plan: BillingPlanArg) {
-    return PlanData[plan || "free"]
+export function getPlanInfo(plan: BillingPlan) {
+    return planData[plan]
 }
-
-export type BillingPlanArg = BillingPlan | "free" | null

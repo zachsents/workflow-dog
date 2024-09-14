@@ -7,18 +7,19 @@ import { authenticatedProcedure } from ".."
 import { userHasProjectPermission } from "../../lib/auth-checks"
 import { db } from "../../lib/db"
 import { cleanupEventSourcesForWorkflow } from "../../lib/internal/event-sources"
+import { createProject, getCurrentBillingPeriod } from "../../lib/internal/projects"
 import { isProjectUnderTeamLimit } from "../../lib/internal/team"
 import { sendEmailFromTemplate } from "../../lib/resend"
 import { assertOrForbidden } from "../assertions"
-import { getPlanLimits } from "core/plans"
+import { stripe } from "../../lib/stripe"
 
 
 export default {
     list: authenticatedProcedure
         .query(async ({ ctx }) => {
             const queryResult = await db.selectFrom("projects")
-                .fullJoin("projects_users", "projects.id", "project_id")
-                .fullJoin("user_meta", "user_meta.id", "user_id")
+                .innerJoin("projects_users", "projects.id", "project_id")
+                .innerJoin("user_meta", "user_meta.id", "user_id")
                 .selectAll("projects")
                 .select([
                     sql<string[]>`array_agg(user_id)`.as("member_ids"),
@@ -131,47 +132,65 @@ export default {
     create: authenticatedProcedure
         .input(z.object({ name: PROJECT_NAME_SCHEMA }))
         .mutation(async ({ input, ctx }) => db.transaction().execute(async trx => {
-            const newProject = await trx.insertInto("projects")
-                .values({
-                    name: input.name,
-                    creator: ctx.user.id,
-                })
-                .returning("id")
-                .executeTakeFirstOrThrow()
-
-            await trx.insertInto("projects_users")
-                .values({
-                    project_id: newProject.id,
-                    user_id: ctx.user.id,
-                })
-                .executeTakeFirst()
-
-            return newProject
+            return createProject({
+                name: input.name,
+                creator: ctx.user.id,
+            }, {
+                dbHandle: trx,
+            })
         })),
 
     rename: projectPermissionProcedure("write")
         .input(z.object({ name: PROJECT_NAME_SCHEMA }))
         .mutation(async ({ input, ctx }) => {
-            await db.updateTable("projects")
+            const project = await db.updateTable("projects")
                 .set({ name: input.name })
                 .where("id", "=", ctx.projectId)
+                .returning(["stripe_customer_id", "stripe_subscription_id", "name"])
                 .executeTakeFirstOrThrow()
+
+            await Promise.all([
+                project.stripe_customer_id
+                    ? stripe.customers.update(project.stripe_customer_id, {
+                        description: `Project "${project.name}"`,
+                    })
+                    : null,
+                project.stripe_subscription_id
+                    ? stripe.subscriptions.update(project.stripe_subscription_id, {
+                        description: `Subscription for Project "${project.name}"`,
+                    })
+                    : null,
+            ])
         }),
 
     delete: projectPermissionProcedure("write")
         .mutation(async ({ ctx }) => {
             return db.transaction().execute(async trx => {
 
-                const workflows = await trx.selectFrom("workflows")
-                    .select("id")
-                    .where("project_id", "=", ctx.projectId)
-                    .execute()
+                async function deleteWorkflows() {
+                    const workflows = await trx.selectFrom("workflows")
+                        .select("id")
+                        .where("project_id", "=", ctx.projectId)
+                        .execute()
 
-                await Promise.all(workflows.map(wf =>
-                    cleanupEventSourcesForWorkflow(wf.id, {
-                        dbHandle: trx,
-                    })
-                ))
+                    await Promise.all(workflows.map(wf =>
+                        cleanupEventSourcesForWorkflow(wf.id, {
+                            dbHandle: trx,
+                        })
+                    ))
+                }
+
+                async function deleteStripeObjects() {
+                    const { stripe_customer_id } = await trx.selectFrom("projects")
+                        .select("stripe_customer_id")
+                        .where("id", "=", ctx.projectId)
+                        .executeTakeFirstOrThrow()
+
+                    if (stripe_customer_id)
+                        await stripe.customers.del(stripe_customer_id)
+                }
+
+                await Promise.all([deleteWorkflows(), deleteStripeObjects()])
 
                 return trx.deleteFrom("projects")
                     .where("id", "=", ctx.projectId)
@@ -351,10 +370,7 @@ export default {
     },
 
     usage: projectPermissionProcedure("read")
-        .input(z.object({
-            timezone: z.string().refine(tz => Intl.supportedValuesOf("timeZone").includes(tz)),
-        }))
-        .query(async ({ ctx, input }) => {
+        .query(async ({ ctx }) => {
             const { billing_start_date, billing_plan } = await db.selectFrom("projects")
                 .select(["billing_start_date", "billing_plan"])
                 .where("id", "=", ctx.projectId)
@@ -390,9 +406,7 @@ export default {
                     .then(r => parseInt(r.member_count)),
             ])
 
-            const planLimits = getPlanLimits(billing_plan)
-
-            return { runCount, memberCount, runCountByWorkflow, plan: billing_plan, planLimits }
+            return { runCount, memberCount, runCountByWorkflow, plan: billing_plan }
         }),
 }
 
@@ -412,27 +426,4 @@ export function projectPermissionProcedure(permission: ProjectPermission) {
                 }
             })
         })
-}
-
-
-/**
- * Calculates the start and end dates of the current billing period.
- * Simply a function of the billing start date in order to avoid the
- * need for cron jobs to reset any billing quotas.
- */
-export function getCurrentBillingPeriod(billingStartDate: Date) {
-    const staticDay = billingStartDate.getUTCDate()
-
-    const now = new Date()
-    const currentMonth = now.getUTCMonth()
-    const currentYear = now.getUTCFullYear()
-    const thisMonthsDay = new Date(Date.UTC(currentYear, currentMonth, staticDay))
-
-    return now < thisMonthsDay ? {
-        start: new Date(Date.UTC(currentYear, currentMonth - 1, staticDay)),
-        end: thisMonthsDay,
-    } : {
-        start: thisMonthsDay,
-        end: new Date(Date.UTC(currentYear, currentMonth + 1, staticDay)),
-    }
 }

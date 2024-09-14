@@ -5,7 +5,7 @@ import Kbd from "@web/components/kbd"
 import { Badge } from "@web/components/ui/badge"
 import { useCurrentProjectId, useDialogState } from "@web/lib/hooks"
 import { trpc } from "@web/lib/trpc"
-import { getPlanData } from "@web/lib/plans"
+import { getPlanInfo } from "@web/lib/plans"
 import { IconCheck, IconChevronDown } from "@tabler/icons-react"
 import { cn } from "@web/lib/utils"
 import { useMemo } from "react"
@@ -65,7 +65,7 @@ export default function ProjectSelector() {
                     <CommandList>
                         <CommandEmpty>No project found.</CommandEmpty>
                         {projects?.map(project => {
-                            const plan = getPlanData(project.billing_plan)
+                            const plan = getPlanInfo(project.billing_plan)
                             const href = `/projects/${project.id}${currentSegment}`
                             return (
                                 <CommandItem

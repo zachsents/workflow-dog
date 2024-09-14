@@ -1,4 +1,4 @@
-import { IconExternalLink, IconMail } from "@tabler/icons-react"
+import { IconMail } from "@tabler/icons-react"
 import { ProjectDashboardLayout } from "@web/components/layouts/project-dashboard-layout"
 import SimpleTooltip from "@web/components/simple-tooltip"
 import TI from "@web/components/tabler-icon"
@@ -6,7 +6,7 @@ import { Button } from "@web/components/ui/button"
 import { Progress } from "@web/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@web/components/ui/table"
 import { useCurrentProjectId } from "@web/lib/hooks"
-import { getPlanData } from "@web/lib/plans"
+import { getPlanInfo } from "@web/lib/plans"
 import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
 
@@ -14,23 +14,20 @@ import { cn } from "@web/lib/utils"
 export default function ProjectUsageBilling() {
 
     const projectId = useCurrentProjectId()
-    const { data: usage } = trpc.projects.usage.useQuery({
-        projectId,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    })
+    const { data: usage } = trpc.projects.usage.useQuery({ projectId })
+    const planInfo = usage ? getPlanInfo(usage.plan) : undefined
 
     const runCount = usage?.runCount ?? 0
-    const runLimit = usage?.planLimits?.workflowRuns ?? 1
+    const runLimit = planInfo?.workflowRunLimit ?? 1
     const workflowRunsProgress = Math.min(1, Math.max(0, runCount / runLimit))
 
     const memberCount = usage?.memberCount ?? 0
-    const memberLimit = usage?.planLimits?.teamMembers ?? 1
+    const memberLimit = planInfo?.teamMemberLimit ?? 1
     const teamMembersProgress = Math.min(1, Math.max(0, memberCount / memberLimit))
 
     const maxRunCount = usage?.runCountByWorkflow.reduce((acc, cur) => cur.run_count > acc ? cur.run_count : acc, 0) ?? 1
 
-    const planInfo = usage ? getPlanData(usage.plan) : undefined
-    const upsellPlanInfo = planInfo?.upsell ? getPlanData(planInfo.upsell) : undefined
+    const upsellPlanInfo = planInfo?.upsell ? getPlanInfo(planInfo.upsell) : undefined
 
     return (
         <ProjectDashboardLayout currentSegment="Usage & Billing">
@@ -80,16 +77,15 @@ export default function ProjectUsageBilling() {
                             </ul>
                         </>}
                     </div>
-                    <Button variant="secondary" className="gap-2" asChild>
-                        <a href="#">
+                    <form action="billing/portal" method="post">
+                        <Button variant="secondary" className="gap-2 w-full" type="submit">
                             Manage Billing
-                            <TI><IconExternalLink /></TI>
-                        </a>
-                    </Button>
+                        </Button>
+                    </form>
                 </div>
 
-                <div className="rounded-xl p-8 flex-col justify-between items-stretch gap-4 bg-gradient-to-tr from-pink-600 to-yellow-500 text-white">
-                    {upsellPlanInfo ? <>
+                {upsellPlanInfo &&
+                    <div className="relative rounded-xl p-8 flex-col justify-between items-stretch gap-4 bg-gradient-to-tr from-pink-600 to-yellow-500 text-white">
                         <div className="gap-4 flex-col items-start">
                             <h3 className="text-xl font-bold">
                                 Upgrade to {upsellPlanInfo.name}
@@ -102,26 +98,21 @@ export default function ProjectUsageBilling() {
                                 )}
                             </ul>
                         </div>
-                        <Button variant="secondary" className="gap-2" asChild>
-                            <a href="#">
-                                Upgrade Now
-                                <TI><IconExternalLink /></TI>
-                            </a>
-                        </Button>
-                    </> : <>
-                        <div className="gap-4 flex-col items-start">
-                            <h3 className="text-xl font-bold">
-                                Need more runs?
-                            </h3>
-                        </div>
-                        <Button variant="secondary" className="gap-2" asChild>
-                            <a href="mailto:info@workflow.dog?subject=Custom plan request">
-                                Send us an email
-                                <TI><IconMail /></TI>
-                            </a>
-                        </Button>
-                    </>}
-                </div>
+                        <TI className="absolute top-0 right-0 text-[16rem] stroke-[0.5px] opacity-30"><upsellPlanInfo.icon /></TI>
+
+                        {upsellPlanInfo.emailSubject
+                            ? <Button variant="secondary" className="gap-2 relative" asChild>
+                                <a href={`mailto:info@workflow.dog?subject=${upsellPlanInfo.emailSubject}`}>
+                                    Send us an email
+                                    <TI><IconMail /></TI>
+                                </a>
+                            </Button>
+                            : <form action="billing/upgrade" method="post">
+                                <Button variant="secondary" className="gap-2 w-full relative" type="submit">
+                                    Upgrade Now
+                                </Button>
+                            </form>}
+                    </div>}
 
                 <div className="col-span-full border rounded-xl p-8 grid gap-4">
                     <h3 className="col-span-full text-lg font-medium">

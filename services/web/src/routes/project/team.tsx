@@ -66,7 +66,7 @@ export default function ProjectTeam() {
                                 Invite someone to your project
                             </Button>
                             : <Button className="gap-2" asChild>
-                                <Link to="billing">
+                                <Link to="../usage-billing">
                                     <TI><IconUserPlus /></TI>
                                     Upgrade to add more team members
                                 </Link>

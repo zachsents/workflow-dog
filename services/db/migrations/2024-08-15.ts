@@ -4,7 +4,7 @@ import { createTypeIfNotExists } from "../utils"
 export async function up(db: Kysely<any>): Promise<void> {
 
     // Create custom types
-    createTypeIfNotExists(db, "billing_plan", ["pro"])
+    createTypeIfNotExists(db, "billing_plan", ["free", "basic", "pro"])
     createTypeIfNotExists(db, "project_permission", ["read", "write"])
     createTypeIfNotExists(db, "workflow_run_status", [
         "pending", "scheduled", "cancelled",
@@ -27,8 +27,10 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("created_at", "timestamptz", (col) => col.notNull().defaultTo(sql`now()`))
         .addColumn("creator", "uuid", (col) => col.references("user_meta.id").onDelete("set null"))
         .addColumn("name", "text", (col) => col.notNull().defaultTo("Untitled Project"))
-        .addColumn("billing_plan", sql`public.billing_plan`)
+        .addColumn("billing_plan", sql`public.billing_plan`, col => col.notNull().defaultTo("free"))
         .addColumn("billing_start_date", "date", (col) => col.notNull().defaultTo(sql`CURRENT_DATE`))
+        .addColumn("stripe_customer_id", "text")
+        .addColumn("stripe_subscription_id", "text")
         .execute()
 
     await db.schema.createTable("project_invitations").ifNotExists()

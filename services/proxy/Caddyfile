@@ -10,9 +10,17 @@ root /www
 	file {path} {path}/ {path}.html
 }
 
-@api {
-	path /api/* /auth/* /run/*
-}
+# @api {
+# 	path /api/* /auth/* /run/* /projects/*/billing
+# }
+
+# see https://caddyserver.com/docs/caddyfile/matchers#expression
+@api <<CEL
+	{path}.startsWith("/api/")
+	|| {path}.startsWith("/auth/")
+	|| {path}.startsWith("/run/")
+	|| (path_regexp("^/projects/[\\w\\-]+/billing") && {method} == "POST")
+	CEL
 
 # Directive order in Caddy is funky
 # See https://caddyserver.com/docs/caddyfile/directives#directive-order

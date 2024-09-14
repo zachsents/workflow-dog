@@ -11,8 +11,10 @@ import {
 } from "supertokens-node/framework/express"
 import { initSupertokens } from "./lib/auth"
 import "./lib/bullmq"
+import { db } from "./lib/db"
 import { handleEventSourceRequest } from "./lib/internal/event-sources"
 import { getWorkflowRunStatus } from "./lib/internal/workflow-runs"
+import { handleWebhookRequest as handleStripeWebhookRequest, stripe } from "./lib/stripe"
 import { useEnvVar } from "./lib/utils"
 import { createContext } from "./trpc"
 import { apiRouter } from "./trpc/router"
@@ -78,6 +80,61 @@ app.all(
     bodyParser.raw({ type: "*/*" }),
     handleEventSourceRequest,
 )
+
+// Stripe webhooks
+app.post("/api/stripe/webhook", bodyParser.raw({ type: "application/json" }), handleStripeWebhookRequest)
+
+// Stripe customer portal
+app.post("/projects/:projectId/billing/portal", async (req, res) => {
+    const projectId = req.params.projectId
+
+    // TODO: check permissions here
+
+    const project = await db.selectFrom("projects")
+        .select("stripe_customer_id")
+        .where("id", "=", projectId)
+        .executeTakeFirst()
+
+    if (!project)
+        return res.status(404).send("Project not found")
+    if (!project.stripe_customer_id)
+        return res.status(500).send("Project has no Stripe customer ID. This is a bug.")
+
+    const session = await stripe.billingPortal.sessions.create({
+        customer: project.stripe_customer_id,
+        return_url: `${useEnvVar("APP_ORIGIN")}/projects/${projectId}/usage-billing`,
+    })
+    return res.status(303).redirect(session.url)
+})
+
+app.post("/projects/:projectId/billing/upgrade", async (req, res) => {
+    const projectId = req.params.projectId
+
+    const project = await db.selectFrom("projects")
+        .select(["stripe_customer_id", "stripe_subscription_id"])
+        .where("id", "=", projectId)
+        .executeTakeFirst()
+
+    if (!project)
+        return res.status(404).send("Project not found")
+    if (!project.stripe_customer_id)
+        return res.status(500).send("Project has no Stripe customer ID. This is a bug.")
+    if (!project.stripe_subscription_id)
+        return res.status(500).send("Project has no Stripe subscription ID. This is a bug.")
+
+    const session = await stripe.billingPortal.sessions.create({
+        customer: project.stripe_customer_id,
+        return_url: `${useEnvVar("APP_ORIGIN")}/projects/${projectId}/usage-billing`,
+        flow_data: {
+            type: "subscription_update",
+            subscription_update: {
+                subscription: project.stripe_subscription_id,
+            },
+        },
+    })
+    return res.status(303).redirect(session.url)
+})
+
 
 // Error handlers come after routes
 app.use(supertokensErrorHandler())

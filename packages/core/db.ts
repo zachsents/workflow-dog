@@ -8,7 +8,7 @@ export type ArrayTypeImpl<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S[], I[], U[]>
   : T[];
 
-export type BillingPlan = "pro";
+export type BillingPlan = "basic" | "custom" | "free" | "pro";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
@@ -345,12 +345,14 @@ export interface ProjectInvitations {
 }
 
 export interface Projects {
-  billing_plan: BillingPlan | null;
+  billing_plan: Generated<BillingPlan>;
   billing_start_date: Generated<Timestamp>;
   created_at: Generated<Timestamp>;
   creator: string | null;
   id: Generated<string>;
   name: Generated<string>;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
 }
 
 export interface ProjectsThirdPartyAccounts {

@@ -7,7 +7,8 @@ import morgan from "morgan"
 import supertokens from "supertokens-node"
 import {
     errorHandler as supertokensErrorHandler,
-    middleware as supertokensMiddleware
+    middleware as supertokensMiddleware,
+    type SessionRequest
 } from "supertokens-node/framework/express"
 import { initSupertokens } from "./lib/auth"
 import "./lib/bullmq"
@@ -18,6 +19,8 @@ import { handleWebhookRequest as handleStripeWebhookRequest, stripe } from "./li
 import { useEnvVar } from "./lib/utils"
 import { createContext } from "./trpc"
 import { apiRouter } from "./trpc/router"
+import { verifySession } from "supertokens-node/recipe/session/framework/express"
+import { sql } from "kysely"
 
 
 const port = useEnvVar("PORT")
@@ -82,13 +85,25 @@ app.all(
 )
 
 // Stripe webhooks
-app.post("/api/stripe/webhook", bodyParser.raw({ type: "application/json" }), handleStripeWebhookRequest)
+app.post("/api/stripe/webhook", bodyParser.text({ type: "*/*" }), handleStripeWebhookRequest)
 
 // Stripe customer portal
-app.post("/projects/:projectId/billing/portal", async (req, res) => {
+app.post("/projects/:projectId/billing/portal", verifySession({
+    checkDatabase: true,
+    antiCsrfCheck: true,
+    sessionRequired: true,
+}), async (req, res) => {
     const projectId = req.params.projectId
 
-    // TODO: check permissions here
+    const { has_permission } = await db.selectNoFrom(eb => eb.exists(
+        eb.selectFrom("projects_users")
+            .where("project_id", "=", projectId)
+            .where("user_id", "=", (req as SessionRequest).session!.getUserId())
+            .where(sql<boolean>`'write'::project_permission = any(permissions)`)
+    ).as("has_permission")).executeTakeFirstOrThrow()
+
+    if (!has_permission)
+        return res.status(403).send("You don't have permission to do that.")
 
     const project = await db.selectFrom("projects")
         .select("stripe_customer_id")
@@ -107,8 +122,22 @@ app.post("/projects/:projectId/billing/portal", async (req, res) => {
     return res.status(303).redirect(session.url)
 })
 
-app.post("/projects/:projectId/billing/upgrade", async (req, res) => {
+app.post("/projects/:projectId/billing/upgrade", verifySession({
+    checkDatabase: true,
+    antiCsrfCheck: true,
+    sessionRequired: true,
+}), async (req, res) => {
     const projectId = req.params.projectId
+
+    const { has_permission } = await db.selectNoFrom(eb => eb.exists(
+        eb.selectFrom("projects_users")
+            .where("project_id", "=", projectId)
+            .where("user_id", "=", (req as SessionRequest).session!.getUserId())
+            .where(sql<boolean>`'write'::project_permission = any(permissions)`)
+    ).as("has_permission")).executeTakeFirstOrThrow()
+
+    if (!has_permission)
+        return res.status(403).send("You don't have permission to do that.")
 
     const project = await db.selectFrom("projects")
         .select(["stripe_customer_id", "stripe_subscription_id"])

@@ -15,7 +15,7 @@ export async function handleWebhookRequest(req: Request, res: Response) {
         return res.status(400).send("No signature header provided")
 
     try {
-        var event = api.webhooks.constructEvent(req.body, signature, useEnvVar("STRIPE_WEBHOOK_SIGNING_SECRET"))
+        var event = await api.webhooks.constructEventAsync(req.body, signature, useEnvVar("STRIPE_WEBHOOK_SIGNING_SECRET"))
     } catch (err) {
         if (err instanceof Error)
             return res.status(400).send(`Webhook Error: ${err.message}`)

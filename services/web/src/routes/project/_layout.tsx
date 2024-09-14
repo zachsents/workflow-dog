@@ -1,4 +1,4 @@
-import { IconBook, IconExternalLink, IconListDetails, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconUsers, IconZoomMoney } from "@tabler/icons-react"
+import { IconBook, IconBrandXFilled, IconExternalLink, IconListDetails, IconPuzzle, IconReport, IconRouteSquare2, IconScript, IconUsers, IconZoomMoney } from "@tabler/icons-react"
 import AccountMenu from "@web/components/account-menu"
 import { BrandLink, FeedbackButton } from "@web/components/dashboard-header"
 import ProjectSelector from "@web/components/project-selector"
@@ -69,13 +69,14 @@ export default function ProjectLayout() {
                     </NavGroup>
                 </nav>
 
-                <p className="text-muted-foreground text-xs text-center p-2 mb-4">
-                    🔥 Made by{" "}
-                    <a href="https://x.com/ZachSents" target="_blank" className="inline-flex items-center gap-1 hover:underline">
-                        Zach Sents
-                        <TI><IconExternalLink /></TI>
-                    </a>
-                </p>
+                <a
+                    href="https://x.com/WorkflowDog" target="_blank"
+                    className="text-muted-foreground text-xs text-center p-2 mb-4 flex-center gap-1 hover:underline"
+                >
+                    <TI><IconBrandXFilled /></TI>
+                    Check us out on X
+                    <TI className="ml-1"><IconExternalLink /></TI>
+                </a>
             </div>
 
             <div className="flex items-stretch justify-between gap-4 p-2 border-b">

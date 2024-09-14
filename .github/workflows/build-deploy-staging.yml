@@ -29,4 +29,4 @@ jobs:
       - name: Push images
         run: ./run.sh staging push
       - name: Reload services on staging server
-        run: ssh root@$STAGING_SERVER_IP "cd app && ./run.sh staging up -d"
+        run: ssh root@$STAGING_SERVER_IP "cd app && ./run.sh staging pull && ./run.sh staging up -d"

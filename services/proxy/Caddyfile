@@ -2,29 +2,33 @@
 	email info@workflow.dog
 }
 
-{$APP_ORIGIN}
-
-@marketing {
-	path `/` /privacy /terms /waitlist /__marketing/*
+www.{$APP_ORIGIN} {
+	redir {$APP_ORIGIN}{uri}
 }
 
-# see https://caddyserver.com/docs/caddyfile/matchers#expression
-@api <<CEL
-	{path}.startsWith("/api/")
-	|| {path}.startsWith("/auth/")
-	|| {path}.startsWith("/run/")
-	|| (path_regexp("^/projects/[\\w\\-]+/billing") && {method} == "POST")
-	CEL
+{$APP_ORIGIN} {
+	@marketing {
+		path `/` /privacy /terms /waitlist /__marketing/*
+	}
 
-# Directive order in Caddy is funky
-# See https://caddyserver.com/docs/caddyfile/directives#directive-order
-# Putting everything in a route block forces the order we want
-route {
-	redir /feedback "https://forms.gle/SwmPPmUg45LnJ2nx7"
-	respond /__proxy_health "healthy\n" 200
+	# see https://caddyserver.com/docs/caddyfile/matchers#expression
+	@api <<CEL
+		{path}.startsWith("/api/")
+		|| {path}.startsWith("/auth/")
+		|| {path}.startsWith("/run/")
+		|| (path_regexp("^/projects/[\\w\\-]+/billing") && {method} == "POST")
+		CEL
 
-	reverse_proxy @marketing http://marketing-site:5174
-	reverse_proxy @api http://api:{$API_PORT}
+	# Directive order in Caddy is funky
+	# See https://caddyserver.com/docs/caddyfile/directives#directive-order
+	# Putting everything in a route block forces the order we want
+	route {
+		redir /feedback "https://forms.gle/SwmPPmUg45LnJ2nx7"
+		respond /__proxy_health "healthy\n" 200
 
-	reverse_proxy http://webapp:5173
+		reverse_proxy @marketing http://marketing-site:5174
+		reverse_proxy @api http://api:{$API_PORT}
+
+		reverse_proxy http://webapp:5173
+	}
 }

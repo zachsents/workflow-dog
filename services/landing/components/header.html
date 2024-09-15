@@ -1,41 +1,70 @@
 <header>
     <nav
-         class="section-md flex-between gap-10 sm:gap-20 py-4"
-         x-data="{ open: false }"
-         @pointerdown.window="if (open && !$el.contains($event.target)) open = false">
-        <a href="/" class="text-xl sm:text-2xl flex-center gap-4 font-bold">
-            <img src="/logo.svg" class="h-[1.75em]" />
+        class="section-md flex-between gap-10 sm:gap-20 py-4"
+        x-data="{ open: false }"
+        @pointerdown.window="if (open && !$el.contains($event.target)) open = false"
+    >
+        <a
+            href="/"
+            class="text-xl sm:text-2xl flex-center gap-4 font-bold"
+        >
+            <img
+                src="/logo.svg"
+                class="h-[1.75em]"
+            />
             <p>WorkflowDog</p>
         </a>
 
         <div class="relative shrink-0">
-            <button class="p-6 md:hidden" @click="open = !open">
-                <img src="icons/menu-2.svg" class="h-8 transition-transform" :class="open && 'rotate-90'" />
+            <button
+                class="p-6 md:hidden"
+                @click="open = !open"
+            >
+                <img
+                    src="icons/menu-2.svg"
+                    class="h-8 transition-transform"
+                    :class="open && 'rotate-90'"
+                />
             </button>
 
             <ul
                 class="absolute top-full right-0 bg-white px-6 py-4 rounded-lg shadow-xl md:static md:bg-transparent md:p-0 md:rounded-none md:shadow-none flex flex-col items-stretch md:flex-center md:flex-row md:gap-8 text-md text-center transition md:opacity-100 md:transform-none md:pointer-events-auto md:transition-none"
-                :class="!open && 'opacity-0 -translate-y-10 pointer-events-none'">
+                :class="!open && 'opacity-0 -translate-y-10 pointer-events-none'"
+            >
                 <li>
-                    <a href="/#examples" class="hover:text-primary-700 block py-2" @click="open = false">
+                    <a
+                        href="/#examples"
+                        class="hover:text-primary-700 block py-2"
+                        @click="open = false"
+                    >
                         Examples
                     </a>
                 </li>
                 <li>
-                    <a href="/#pricing" class="hover:text-primary-700 block py-2" @click="open = false">
+                    <a
+                        href="/#pricing"
+                        class="hover:text-primary-700 block py-2"
+                        @click="open = false"
+                    >
                         Pricing
                     </a>
                 </li>
                 <div class="w-[1px] h-[1.25em] bg-gray-300 -mx-2 hidden md:block"></div>
                 <li>
-                    <a href="https://learn.workflow.dog" class="hover:text-primary-700 block py-2" @click="open = false">
+                    <a
+                        href="https://learn.workflow.dog"
+                        class="hover:text-primary-700 block py-2"
+                        @click="open = false"
+                    >
                         Learn
                     </a>
                 </li>
                 <li class="my-2 md:my-0">
-                    <a href="/projects" @click="open = false">
-                        <button
-                                class="bg-gray-700 hover:bg-gray-900 text-white fun-button text-nowrap">
+                    <a
+                        href="/app"
+                        @click="open = false"
+                    >
+                        <button class="bg-gray-700 hover:bg-gray-900 text-white fun-button text-nowrap">
                             Go to app
                         </button>
                     </a>

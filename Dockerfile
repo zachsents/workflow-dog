@@ -9,6 +9,17 @@ COPY --from=base-build /app/base ./
 RUN bun install
 
 
+# Marketing site ----------------------------------------- #
+
+FROM base as marketing-site-build
+COPY ./services/marketing-site ./services/marketing-site
+RUN bun --filter marketing-site build
+
+FROM nginx as marketing-site-prod
+COPY ./services/marketing-site/nginx.conf /etc/nginx/
+COPY --from=marketing-site-build /app/services/marketing-site/dist /www
+
+
 # Web app ------------------------------------------------ #
 
 FROM base as web-build
@@ -21,15 +32,10 @@ COPY ./services/web/nginx.conf /etc/nginx/
 COPY --from=web-build /app/services/web/dist /www
 
 
-# Proxy + landing page ----------------------------------- #
-
-FROM base as landing-build
-COPY ./services/landing ./services/landing
-RUN bun --filter landing build
+# Proxy -------------------------------------------------- #
 
 FROM caddy as proxy
 COPY ./services/proxy/Caddyfile /etc/caddy/
-COPY --from=landing-build /app/services/landing/dist /www
 
 
 # API ---------------------------------------------------- #

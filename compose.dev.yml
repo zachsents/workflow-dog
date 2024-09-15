@@ -10,13 +10,15 @@ services:
             - "*"
             - "!Caddyfile"
           action: sync+restart
-        - path: ./services/landing
-          action: rebuild
 
   db:
     volumes:
       - ./services/db/migrations:/wfd/db/migrations
       - ./services/db/startup.sh:/docker-entrypoint-initdb.d/startup.sh
+
+  marketing-site:
+    volumes:
+      - ./services/marketing-site/nginx.conf:/etc/nginx/nginx.conf
 
   webapp:
     image: !reset "null"

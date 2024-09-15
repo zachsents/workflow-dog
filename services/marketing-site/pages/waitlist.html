@@ -1,0 +1,339 @@
+<html>
+
+<include src="head.html">
+    { "title": "WorkflowDog - Powerful automations for business" }
+</include>
+
+<body class="min-h-screen bg-gray-50 load-in">
+    <header>
+        <nav
+            class="flex items-center justify-between gap-12 p-6 md:px-12 md:py-4"
+            x-data="{ open: false }"
+            @pointerdown.window="if (open && !$el.contains($event.target)) open = false"
+            @focusin.window="if (open && !$el.contains($event.target)) open = false"
+        >
+            <a
+                href="/"
+                class="text-xl sm:text-2xl flex items-center gap-4 font-bold"
+            >
+                <img
+                    src="/logo.svg"
+                    class="h-[1.75em]"
+                />
+                <p>WorkflowDog</p>
+            </a>
+
+            <div class="relative shrink-0">
+                <button
+                    class="p-6 -m-6 md:hidden"
+                    @click="open = !open"
+                >
+                    <img
+                        src="icons/menu-2.svg"
+                        class="h-8 transition-opacity"
+                        :class="open && 'opacity-60'"
+                    />
+                </button>
+
+                <ul
+                    class="absolute top-full right-0 bg-white border md:border-none px-6 py-4 rounded-md shadow-xl md:static md:bg-transparent md:p-0 md:rounded-none md:shadow-none flex flex-col items-stretch md:flex-row md:items-center md:gap-8 text-md text-center transition md:opacity-100 md:transform-none md:pointer-events-auto md:transition-none"
+                    :class="!open && 'opacity-0 -translate-y-10 pointer-events-none'"
+                >
+                    <li>
+                        <a
+                            href="#demo"
+                            class="hover:text-primary-700 block py-2 font-semibold"
+                            @click="open = false"
+                        >
+                            Demo
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#pricing"
+                            class="hover:text-primary-700 block py-2 font-semibold"
+                            @click="open = false"
+                        >
+                            Pricing
+                        </a>
+                    </li>
+                    <li>
+                        <button
+                            class="fun-button bg-primary-700 hover:bg-primary-800 text-white md:my-0 my-4"
+                            onclick="focusWaitlistForm()"
+                        >
+                            Join the Waitlist
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="grid gap-24 justify-center px-4">
+        <section class="max-w-5xl pt-[12vh] flex flex-col items-center gap-6 text-center">
+            <h1 class="text-5xl sm:text-7xl font-bold">
+                Create
+                <span class="block gradient-text">
+                    powerful automations
+                </span>
+                without coding
+            </h1>
+            <p class="text-xl text-balance">
+                It's now fast, fun, and easy to build powerful automated systems.
+            </p>
+
+            <div
+                id="form-overlay"
+                class="fixed top-0 left-0 w-full h-full bg-black z-30 opacity-0 data-[show]:opacity-30 pointer-events-none data-[show]:pointer-events-auto transition-opacity"
+                onpointerdown="delete this.dataset.show"
+            ></div>
+
+            <form
+                id="waitlist-form"
+                class="max-w-[400px] w-full flex justify-center items-stretch gap-4 group mt-6 px-4 relative z-40"
+            >
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Enter your email to join the waitlist"
+                    class="min-w-0 flex-1 bg-white rounded-md border p-2 group-data-[success]:hidden"
+                    onblur="delete document.querySelector('#form-overlay').dataset.show"
+                    onkeydown="if(event.key === 'Escape') this.blur()"
+                />
+                <button class="shrink-0 bg-primary-700 hover:bg-primary-800 text-white aspect-square grid place-items-center rounded-md p-3 group-data-[success]:hidden">
+                    <img
+                        src="/icons/check.svg"
+                        class="invert group-data-[loading]:hidden"
+                    />
+                    <img
+                        src="/icons/loader-2.svg"
+                        class="invert hidden group-data-[loading]:block group-data-[loading]:animate-spin"
+                    />
+                </button>
+                <p class="hidden group-data-[success]:block text-gray-600 bg-primary-100 rounded-md p-4 text-center">
+                    Thanks for signing up! <a
+                        class="text-primary-700 hover:underline"
+                        href="https://x.com/WorkflowDog"
+                        target="_blank"
+                    >Go follow us on X!</a>
+                </p>
+            </form>
+        </section>
+
+        <section
+            id="demo"
+            class="max-w-5xl scroll-m-10"
+        >
+            <figure class="flex place-items-center flex-col gap-4">
+                <div class="border-2 shadow-xl rounded-2xl overflow-clip">
+                    <video
+                        autoplay
+                        loop
+                        muted
+                        controls
+                        controlslist="nodownload"
+                        class="-mt-[20px] sm:-mt-[29px] -mb-[3px] min-h-[400px] object-cover"
+                    >
+                        <source
+                            src="/media/demo.mp4"
+                            type="video/mp4"
+                        />
+                    </video>
+                </div>
+                <p class="text-center px-4 py-1 bg-neutral-900/75 rounded-md text-sm text-white">
+                    This workflow detects interested leads in your Gmail inbox and sends you a notification.
+                </p>
+            </figure>
+        </section>
+        <section
+            id="pricing"
+            class="max-w-5xl grid gap-10 scroll-m-10"
+        >
+            <h3 class="font-bold text-4xl text-center">
+                Pricing
+            </h3>
+            <div class="grid md:grid-cols-3 gap-10">
+                <div class="bg-white rounded-xl border p-8 shadow-lg flex flex-col items-center gap-4">
+                    <p class="text-2xl font-bold text-center">
+                        Free
+                    </p>
+                    <p class="text-balance text-center">
+                        Try out the future of automation.
+                    </p>
+                    <button
+                        onclick="focusWaitlistForm()"
+                        class="fun-button bg-gray-400 hover:bg-gray-500 text-white my-2"
+                    >
+                        Join the Waitlist
+                    </button>
+                    <ul class="text-md grid gap-2 mt-6 *:flex *:items-center *:gap-2">
+                        <li>
+                            <div class="text-green-500">
+                                <include src="icons/circle-dashed-check.svg"></include>
+                            </div>
+                            <span>100 workflow runs</span>
+                        </li>
+                        <li>
+                            <div class="text-green-500">
+                                <include src="icons/circle-dashed-check.svg"></include>
+                            </div>
+                            <span>Unlimited workflows</span>
+                        </li>
+                        <li>
+                            <div class="text-green-500">
+                                <include src="icons/circle-dashed-check.svg"></include>
+                            </div>
+                            <span>Unlimited app integrations</span>
+                        </li>
+                        <li>
+                            <div class="text-red-500">
+                                <include src="icons/x.svg"></include>
+                            </div>
+                            <span>No additional team members</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-xl border p-8 shadow-lg flex flex-col items-center gap-4">
+                    <p class="text-2xl font-bold text-center">
+                        Basic
+                    </p>
+                    <p class="text-center">
+                        <span class="font-bold">$27 / mo</span>
+                        <span>&mdash;</span>
+                        <span class="text-center font-bold">$267 / year</span>
+                    </p>
+                    <p class="text-balance text-center">
+                        For small teams looking for a simple way to automate.
+                    </p>
+                    <button
+                        onclick="focusWaitlistForm()"
+                        class="fun-button bg-gray-400 hover:bg-gray-500 text-white my-2"
+                    >
+                        Join the Waitlist
+                    </button>
+                    <ul class="text-md grid gap-2 mt-6 *:flex *:items-center *:gap-2">
+                        <li>
+                            <div class="text-green-500">
+                                <include src="icons/circle-dashed-check.svg"></include>
+                            </div>
+                            <span>1,000 workflow runs</span>
+                        </li>
+                        <li>
+                            <div class="text-green-500">
+                                <include src="icons/circle-dashed-check.svg"></include>
+                            </div>
+                            <span>Up to 3 team members</span>
+                        </li>
+                        <li>
+                            <div class="text-green-500">
+                                <include src="icons/circle-dashed-check.svg"></include>
+                            </div>
+                            <span>Unlimited workflows</span>
+                        </li>
+                        <li>
+                            <div class="text-green-500">
+                                <include src="icons/circle-dashed-check.svg"></include>
+                            </div>
+                            <span>Unlimited app integrations</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-xl p-8 shadow-xl flex flex-col items-center gap-4 outline outline-primary-300 outline-4 overflow-clip">
+                    <div class="relative font-bold text-center self-stretch">
+                        <p class="text-6xl uppercase italic absolute text-primary-500 opacity-15 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none text-nowrap -rotate-6">
+                            Pro Pro Pro
+                        </p>
+                        <p class="text-3xl uppercase italic relative">Pro</p>
+                    </div>
+                    <p class="text-center">
+                        <span class="font-bold">$97 / mo</span>
+                        <span>&mdash;</span>
+                        <span class="text-center font-bold">$927 / year</span>
+                    </p>
+                    <p class="text-balance text-center">
+                        For highly efficient teams serious about automation.
+                    </p>
+                    <button
+                        onclick="focusWaitlistForm()"
+                        class="fun-button bg-primary-700 hover:bg-primary-800 text-white my-2"
+                    >
+                        Join the Waitlist
+                    </button>
+                    <ul class="text-md grid gap-2 mt-6 *:flex *:items-center *:gap-2">
+                        <li>
+                            <div class="text-green-500">
+                                <include src="icons/circle-dashed-check.svg"></include>
+                            </div>
+                            <span>10,000 workflow runs</span>
+                        </li>
+                        <li>
+                            <div class="text-green-500">
+                                <include src="icons/circle-dashed-check.svg"></include>
+                            </div>
+                            <span>Up to 20 team members</span>
+                        </li>
+                        <li>
+                            <div class="text-green-500">
+                                <include src="icons/circle-dashed-check.svg"></include>
+                            </div>
+                            <span>Unlimited workflows</span>
+                        </li>
+                        <li>
+                            <div class="text-green-500">
+                                <include src="icons/circle-dashed-check.svg"></include>
+                            </div>
+                            <span>Unlimited app integrations</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="max-w-5xl rounded-xl flex items-center justify-center sm:justify-between flex-wrap gap-6 p-10 bg-gradient-to-br from-violet-700 via-pink-700 to-yellow-400">
+            <p class="text-3xl sm:text-4xl text-nowrap font-bold text-white text-center">
+                Let's automate.
+            </p>
+            <button
+                onclick="focusWaitlistForm()"
+                class="fun-button bg-white text-xl text-nowrap"
+            >
+                Join the Waitlist
+            </button>
+        </section>
+    </main>
+
+    <include src="footer.html"></include>
+</body>
+
+<!-- <script src="https://dirtab.com/dirtab.js" id="dirt-ab-site-script" data-site-id="bqqj6BOkU1lvxAgHPuDW"></script> -->
+
+<script>
+
+    function focusWaitlistForm() {
+        document.querySelector("#form-overlay").dataset.show = true
+        document.querySelector("#waitlist-form input").focus()
+        document.querySelector("#waitlist-form input").select()
+    }
+
+    window.onload = () => {
+        document.getElementById("waitlist-form").addEventListener("submit", async ev => {
+            ev.preventDefault()
+            ev.target.dataset.loading = true
+            const formData = new FormData(ev.target)
+            fetch("https://us-central1-nameless-948a8.cloudfunctions.net/flow-runFromUrl?flow_id=jl9aEYXvN4XAcm0sdfgh", {
+                method: "POST",
+                body: formData.get("email"),
+            })
+            await new Promise(resolve => setTimeout(resolve, 800))
+            delete ev.target.dataset.loading
+            ev.target.dataset.success = true
+        })
+
+        Array.from(document.querySelectorAll(".load-in")).forEach(el => {
+            el.style.transformOrigin = `50% ${window.scrollY}px`
+            el.dataset.loaded = true
+        })
+    }
+</script>
+
+</html>

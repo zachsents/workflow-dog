@@ -4,15 +4,9 @@
 
 {$APP_ORIGIN}
 
-root /www
-
-@static {
-	file {path} {path}/ {path}.html
+@marketing {
+	path `/` /privacy /terms /waitlist /__marketing/*
 }
-
-# @api {
-# 	path /api/* /auth/* /run/* /projects/*/billing
-# }
 
 # see https://caddyserver.com/docs/caddyfile/matchers#expression
 @api <<CEL
@@ -29,10 +23,8 @@ route {
 	redir /feedback "https://forms.gle/SwmPPmUg45LnJ2nx7"
 	respond /__proxy_health "healthy\n" 200
 
+	reverse_proxy @marketing http://marketing-site:5174
 	reverse_proxy @api http://api:{$API_PORT}
-
-	rewrite @static {file_match.relative}
-	file_server @static
 
 	reverse_proxy http://webapp:5173
 }

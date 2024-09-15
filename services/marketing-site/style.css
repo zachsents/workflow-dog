@@ -31,6 +31,10 @@
     .section-sm {
         @apply max-w-4xl w-full mx-auto px-6 sm:px-10;
     }
+
+    .gradient-text {
+        @apply bg-gradient-to-r from-violet-600 via-pink-600 to-yellow-500 bg-clip-text text-transparent;
+    }
 }
 
 
@@ -41,8 +45,8 @@ html {
 body {
     background-image:
         linear-gradient(white, transparent),
-        radial-gradient(circle, var(--color-gray-200) 0%, var(--color-gray-200) 8%, transparent 9%);
-    background-size: 100% 150vh, 2rem 2rem;
+        radial-gradient(circle, var(--color-gray-200) 0%, var(--color-gray-200) 7%, transparent 9%);
+    background-size: 100% 75vh, 2rem 2rem;
     background-repeat: no-repeat, repeat;
 }
 
@@ -53,7 +57,7 @@ body {
 }
 
 .fun-button {
-    @apply rounded-md px-[1em] py-[0.35em] font-bold hover:scale-105 active:scale-95 transition shadow-md hover:shadow-lg active:shadow-sm;
+    @apply rounded-md px-[1em] py-[0.35em] font-bold hover:scale-105 active:scale-95 transition shadow-md hover:shadow-lg active:shadow-sm whitespace-nowrap;
 }
 
 .load-in {

@@ -45,6 +45,13 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
 
+  marketing-site:
+    container_name: marketing-site
+    image: registry.digitalocean.com/workflow-dog/marketing-site
+    build:
+      target: marketing-site-prod
+    restart: unless-stopped
+
   webapp:
     container_name: webapp
     image: registry.digitalocean.com/workflow-dog/web

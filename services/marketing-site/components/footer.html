@@ -1,0 +1,40 @@
+<footer class="section-md mt-32 p-10">
+    <div class="flex flex-col gap-4 flex-between md:flex-row md:gap-20 text-center md:text-left">
+        <div class="flex-col sm:flex-row flex-center gap-4 sm:gap-8 text-sm text-gray-600">
+            <a
+                class="text-primary-600 hover:underline"
+                href="https://x.com/WorkflowDog"
+                target="_blank"
+            >
+                Follow us on X
+            </a>
+
+            <!-- <a
+                href="/feedback"
+                target="_blank"
+                class="hover:underline"
+            >
+                Leave Feedback
+            </a> -->
+        </div>
+
+        <div class="h-[1px] w-full bg-gray-300 sm:hidden"></div>
+
+        <div class="flex-col sm:flex-row flex-center gap-4 text-xs text-gray-500">
+            <a
+                href="/terms"
+                class="hover:underline"
+            >Terms of Service</a>
+            <a
+                href="/privacy"
+                class="hover:underline"
+            >Privacy Policy</a>
+            <p>
+                &copy; <span
+                    x-data
+                    x-text="new Date().getFullYear()"
+                ></span> WorkflowDog
+            </p>
+        </div>
+    </div>
+</footer>

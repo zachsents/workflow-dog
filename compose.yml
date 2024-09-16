@@ -22,7 +22,7 @@ services:
       api:
         condition: service_healthy
     environment:
-      - APP_ORIGIN
+      - APP_HOST
       - API_PORT
 
   db:

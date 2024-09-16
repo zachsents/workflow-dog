@@ -2,11 +2,11 @@
 	email info@workflow.dog
 }
 
-www.{$APP_ORIGIN} {
-	redir {$APP_ORIGIN}{uri}
+www.{$APP_HOST} {
+	redir {$APP_HOST}{uri}
 }
 
-{$APP_ORIGIN} {
+{$APP_HOST} {
 	@marketing {
 		path `/` /privacy /terms /waitlist /__marketing/*
 	}

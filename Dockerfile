@@ -13,7 +13,7 @@ RUN bun install
 
 FROM base as marketing-site-build
 COPY ./services/marketing-site ./services/marketing-site
-RUN bun --filter marketing-site build
+RUN bun --filter marketing-site build dist
 
 FROM nginx as marketing-site-prod
 COPY ./services/marketing-site/nginx.conf /etc/nginx/

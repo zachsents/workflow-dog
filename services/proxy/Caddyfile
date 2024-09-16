@@ -2,11 +2,7 @@
 	email info@workflow.dog
 }
 
-www.{$APP_HOST} {
-	redir {$APP_HOST}{uri}
-}
-
-{$APP_HOST} {
+{$APP_ORIGIN} {
 	@marketing {
 		path `/` /privacy /terms /waitlist /__marketing/*
 	}
@@ -31,4 +27,9 @@ www.{$APP_HOST} {
 
 		reverse_proxy http://webapp:5173
 	}
+}
+
+# most commonly used for www.*
+{$CADDY_SECONDARY_ADDRESSES:`:9999`} {
+	redir {$APP_ORIGIN}{uri}
 }

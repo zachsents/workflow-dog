@@ -18,12 +18,13 @@ services:
     healthcheck:
       <<: *std_healthcheck
       test: curl -f http://localhost/__proxy_health || exit 1
-    depends_on:
-      api:
-        condition: service_healthy
+    # depends_on:
+    #   api:
+    #     condition: service_healthy
     environment:
-      - APP_HOST
+      - APP_ORIGIN
       - API_PORT
+      - CADDY_SECONDARY_ADDRESSES
 
   db:
     container_name: db

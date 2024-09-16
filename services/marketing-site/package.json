@@ -1,19 +1,20 @@
 {
-    "name": "marketing-site",
-    "scripts": {
-        "build": "bun build.js",
-        "dev": "conc \"chokidar '**/*.{html,css}' 'public/**/*' --ignore 'dist/**/*' -c 'bun run build'\" \"live-server --port=5174 dist\" --names \"build,server\""
-    },
-    "devDependencies": {
-        "chokidar-cli": "^3.0.0",
-        "concurrently": "^8.2.2",
-        "live-server": "1.2.1",
-        "posthtml": "^0.16.6",
-        "posthtml-include": "^2.0.1",
-        "tailwindcss": "^3.4.1"
-    },
-    "type": "module",
-    "dependencies": {
-        "posthtml-base-url": "^3.1.4"
-    }
+  "name": "marketing-site",
+  "scripts": {
+    "build": "bun build.js",
+    "dev": "conc \"chokidar '**/*.{html,css}' 'public/**/*' --ignore 'dist/**/*' -c 'bun run build dist'\" \"live-server --port=5174 dist\" --names \"build,server\"",
+    "dev-in-container": "bun run build /www && SHELL=/bin/bash chokidar '**/*.{html,css}' 'public/**/*' --ignore 'dist/**/*' -c 'bun run build /www'"
+  },
+  "devDependencies": {
+    "chokidar-cli": "^3.0.0",
+    "concurrently": "^8.2.2",
+    "live-server": "1.2.1",
+    "posthtml": "^0.16.6",
+    "posthtml-include": "^2.0.1",
+    "tailwindcss": "^3.4.1"
+  },
+  "type": "module",
+  "dependencies": {
+    "posthtml-base-url": "^3.1.4"
+  }
 }

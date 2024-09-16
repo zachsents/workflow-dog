@@ -17,8 +17,11 @@ services:
       - ./services/db/startup.sh:/docker-entrypoint-initdb.d/startup.sh
 
   marketing-site:
+    image: !reset "null"
+    build: !override
+      target: marketing-site-dev
     volumes:
-      - ./services/marketing-site/nginx.conf:/etc/nginx/nginx.conf
+      - ./services/marketing-site:/app/services/marketing-site
 
   webapp:
     image: !reset "null"

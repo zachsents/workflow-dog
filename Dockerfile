@@ -19,6 +19,11 @@ FROM nginx as marketing-site-prod
 COPY ./services/marketing-site/nginx.conf /etc/nginx/
 COPY --from=marketing-site-build /app/services/marketing-site/dist /www
 
+FROM base as marketing-site-dev
+RUN apt update && apt install -y nginx
+COPY ./services/marketing-site/nginx.conf /etc/nginx/nginx.conf
+WORKDIR /app/services/marketing-site
+CMD bun run dev-in-container & nginx -g "daemon off;"
 
 # Web app ------------------------------------------------ #
 

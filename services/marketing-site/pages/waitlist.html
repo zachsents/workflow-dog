@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <include src="head.html">
     { "title": "WorkflowDog - Powerful automations for business" }
@@ -19,6 +20,7 @@
                 <img
                     src="/logo.svg"
                     class="h-[1.75em]"
+                    alt="WorkflowDog logo"
                 />
                 <p>WorkflowDog</p>
             </a>
@@ -97,19 +99,21 @@
                     type="email"
                     name="email"
                     placeholder="Enter your email to join the waitlist"
-                    class="min-w-0 flex-1 bg-white rounded-md border p-2 group-data-[success]:hidden"
+                    class="min-w-0 flex-1 bg-white rounded-md border p-2 group-data-[success]:hidden placeholder:text-sm sm:placeholder:text-base"
                     onblur="delete document.querySelector('#form-overlay').dataset.show"
                     onkeydown="if(event.key === 'Escape') this.blur()"
+                    required
                 />
-                <button class="shrink-0 bg-primary-700 hover:bg-primary-800 text-white aspect-square grid place-items-center rounded-md p-3 group-data-[success]:hidden">
-                    <img
-                        src="/icons/check.svg"
-                        class="invert group-data-[loading]:hidden"
-                    />
-                    <img
-                        src="/icons/loader-2.svg"
-                        class="invert hidden group-data-[loading]:block group-data-[loading]:animate-spin"
-                    />
+                <button
+                    class="shrink-0 bg-primary-700 hover:bg-primary-800 text-white grid place-items-center gap-2 rounded-md p-3 group-data-[success]:hidden"
+                    aria-label="Join the Waitlist"
+                >
+                    <div class="group-data-[loading]:hidden">
+                        <include src="icons/check.svg" />
+                    </div>
+                    <div class="hidden group-data-[loading]:block group-data-[loading]:animate-spin">
+                        <include src="icons/loader-2.svg" />
+                    </div>
                 </button>
                 <p class="hidden group-data-[success]:block text-gray-600 bg-primary-100 rounded-md p-4 text-center">
                     Thanks for signing up! <a
@@ -141,29 +145,32 @@
                         />
                     </video>
                 </div>
-                <p class="text-center px-4 py-1 bg-neutral-900/75 rounded-md text-sm text-white">
+                <figcaption class="text-center px-4 py-1 bg-neutral-900/75 rounded-md text-sm text-white">
                     This workflow detects interested leads in your Gmail inbox and sends you a notification.
-                </p>
+                </figcaption>
             </figure>
         </section>
         <section
             id="pricing"
             class="max-w-5xl grid gap-10 scroll-m-10"
         >
-            <h3 class="font-bold text-4xl text-center">
+            <h2 class="font-bold text-4xl text-center">
                 Pricing
-            </h3>
+            </h2>
             <div class="grid md:grid-cols-3 gap-10">
                 <div class="bg-white rounded-xl border p-8 shadow-lg flex flex-col items-center gap-4">
                     <p class="text-2xl font-bold text-center">
                         Free
+                    </p>
+                    <p class="text-center">
+                        <span class="font-bold">Free forever</span>
                     </p>
                     <p class="text-balance text-center">
                         Try out the future of automation.
                     </p>
                     <button
                         onclick="focusWaitlistForm()"
-                        class="fun-button bg-gray-400 hover:bg-gray-500 text-white my-2"
+                        class="fun-button !shadow-none bg-gray-100 hover:bg-gray-200 text-gray-800 my-2"
                     >
                         Join the Waitlist
                     </button>
@@ -208,7 +215,7 @@
                     </p>
                     <button
                         onclick="focusWaitlistForm()"
-                        class="fun-button bg-gray-400 hover:bg-gray-500 text-white my-2"
+                        class="fun-button !shadow-none bg-gray-100 hover:bg-gray-200 text-gray-800 my-2"
                     >
                         Join the Waitlist
                     </button>
@@ -311,8 +318,10 @@
 
     function focusWaitlistForm() {
         document.querySelector("#form-overlay").dataset.show = true
-        document.querySelector("#waitlist-form input").focus()
-        document.querySelector("#waitlist-form input").select()
+        const input = document.querySelector("#waitlist-form input")
+        input.focus()
+        input.select()
+        input.scrollIntoView({ block: "center", inline: "center" })
     }
 
     window.onload = () => {

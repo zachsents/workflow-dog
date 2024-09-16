@@ -50,3 +50,11 @@ services:
   redis:
     ports:
       - ${REDIS_PORT}:${REDIS_PORT}
+
+  stripe:
+    container_name: stripe
+    image: stripe/stripe-cli:latest
+    entrypoint: stripe listen --api-key "$STRIPE_KEY" --forward-to "http://api:${API_PORT}/api/stripe/webhook"
+    environment:
+      - API_PORT
+      - STRIPE_KEY

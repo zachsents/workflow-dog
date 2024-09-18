@@ -9,7 +9,6 @@ jobs:
   build-deploy:
     runs-on: ubuntu-latest
     env:
-      # STAGING_ENV_FILE: ${{ secrets.StagingEnvFile }}
       STAGING_SERVER_IP: 137.184.244.77
     steps:
       - name: Check out code
@@ -22,8 +21,6 @@ jobs:
           ssh-keyscan -H "$STAGING_SERVER_IP" >> ~/.ssh/known_hosts
       - name: Authenticate with DigitalOcean registry
         run: echo "${{ secrets.DORegistryKey }}" | docker login registry.digitalocean.com -u "${{ secrets.DORegistryUser }}" --password-stdin
-      # - name: Create env file
-      #   run: echo $STAGING_ENV_FILE > env/staging.env
       - name: Build services
         run: ./run.sh staging build
       - name: Push images
@@ -32,3 +29,5 @@ jobs:
         run: scp compose.yml root@$STAGING_SERVER_IP:app/
       - name: Reload services on staging server
         run: ssh root@$STAGING_SERVER_IP "cd app && ./run.sh staging pull && ./run.sh staging up -d"
+      - name: Sync Stripe products
+        run: ssh root@$STAGING_SERVER_IP "cd app/services/api && bun ./scripts/stripe-sync.ts"

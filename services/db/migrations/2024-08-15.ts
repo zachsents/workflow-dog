@@ -12,6 +12,11 @@ export async function up(db: Kysely<any>): Promise<void> {
     ])
 
     // Create tables
+    await db.schema.createTable("general_config").ifNotExists()
+        .addColumn("key", "text", col => col.primaryKey())
+        .addColumn("value", "text")
+        .execute()
+
     await db.schema.createTable("user_meta").ifNotExists()
         .addColumn("id", "uuid", (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
         .addColumn("created_at", "timestamptz", (col) => col.notNull().defaultTo(sql`now()`))

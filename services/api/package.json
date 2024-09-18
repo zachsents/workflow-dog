@@ -2,9 +2,7 @@
     "name": "api",
     "module": "index.ts",
     "type": "module",
-    "scripts": {
-        "sync-stripe": "bun -e 'import { migrate } from \"./lib/stripe\"; await migrate()'"
-    },
+    "scripts": {},
     "devDependencies": {
         "@types/bun": "latest",
         "@types/cookie-parser": "^1.4.7",

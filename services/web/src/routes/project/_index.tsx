@@ -16,7 +16,7 @@ import { Separator } from "@web/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import { plural } from "@web/lib/grammar"
 import { useCurrentProject, useCurrentProjectId, useDialogState } from "@web/lib/hooks"
-import { getPlanInfo } from "@web/lib/plans"
+import { getClientPlanData } from "@web/lib/plans"
 import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
 import { PROJECT_NAME_SCHEMA } from "core/schemas"
@@ -32,7 +32,7 @@ export default function ProjectIndex({ deleting }: { deleting?: boolean }) {
 
     const projectId = useCurrentProjectId()
     const project = useCurrentProject().data!
-    const planInfo = getPlanInfo(project.billing_plan)
+    const planInfo = getClientPlanData(project.billing_plan)
     const { data: overview } = trpc.projects.overview.useQuery({
         projectId,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,

@@ -6,7 +6,7 @@ import { Button } from "@web/components/ui/button"
 import { Progress } from "@web/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@web/components/ui/table"
 import { useCurrentProjectId } from "@web/lib/hooks"
-import { getPlanInfo } from "@web/lib/plans"
+import { getClientPlanData } from "@web/lib/plans"
 import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
 
@@ -15,7 +15,7 @@ export default function ProjectUsageBilling() {
 
     const projectId = useCurrentProjectId()
     const { data: usage } = trpc.projects.usage.useQuery({ projectId })
-    const planInfo = usage ? getPlanInfo(usage.plan) : undefined
+    const planInfo = usage ? getClientPlanData(usage.plan) : undefined
 
     const runCount = usage?.runCount ?? 0
     const runLimit = planInfo?.workflowRunLimit ?? 1
@@ -27,7 +27,7 @@ export default function ProjectUsageBilling() {
 
     const maxRunCount = usage?.runCountByWorkflow.reduce((acc, cur) => cur.run_count > acc ? cur.run_count : acc, 0) ?? 1
 
-    const upsellPlanInfo = planInfo?.upsell ? getPlanInfo(planInfo.upsell) : undefined
+    const upsellPlanInfo = planInfo?.upsellsTo ? getClientPlanData(planInfo.upsellsTo) : undefined
 
     return (
         <ProjectDashboardLayout currentSegment="Usage & Billing">

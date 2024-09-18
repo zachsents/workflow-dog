@@ -337,6 +337,11 @@ export interface EventSources {
   state: Generated<Json>;
 }
 
+export interface GeneralConfig {
+  key: string;
+  value: string | null;
+}
+
 export interface ProjectInvitations {
   created_at: Generated<Timestamp>;
   id: Generated<string>;
@@ -482,6 +487,7 @@ export interface DB {
   "auth.user_roles": AuthUserRoles;
   "auth.userid_mapping": AuthUseridMapping;
   event_sources: EventSources;
+  general_config: GeneralConfig;
   project_invitations: ProjectInvitations;
   projects: Projects;
   projects_third_party_accounts: ProjectsThirdPartyAccounts;

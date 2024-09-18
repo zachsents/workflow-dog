@@ -1,8 +1,9 @@
-import _ from "lodash"
+import _mergeWith from "lodash/mergeWith"
+import _omit from "lodash/omit"
 
 
 export function mergeObjectsOverwriteArrays<A extends Record<string, any>, B extends Record<string, any>>(a: A, b: B) {
-    return _.mergeWith({}, a, b, (objValue, srcValue) => {
+    return _mergeWith({}, a, b, (objValue, srcValue) => {
         if (Array.isArray(objValue) && Array.isArray(srcValue))
             return srcValue
     })
@@ -26,7 +27,7 @@ export async function promiseChain<T extends Record<string, any>>(input: {
     Object.entries(input).forEach(([k, v]) => {
         Promise.resolve(
             typeof v === "function"
-                ? v(_.omit(promises, k))
+                ? v(_omit(promises, k))
                 : v
         ).then(resolveFns[k])
     })
@@ -48,4 +49,14 @@ export async function tryAsync<T>(promise: Promise<T>): Promise<readonly [T | un
     return promise
         .then(r => [r, undefined] as const)
         .catch((err: Error) => [undefined, err] as const)
+}
+
+
+export function getObjectPaths(obj: any, startingPath: string = ""): string[] {
+    if (typeof obj !== "object" || obj === null || Object.keys(obj).length === 0)
+        return startingPath ? [startingPath] : []
+
+    return Object.entries(obj).flatMap(
+        ([k, v]) => getObjectPaths(v, `${startingPath}${startingPath ? "." : ""}${k}`)
+    )
 }

@@ -36,8 +36,6 @@ export function getClientPlanData(plan: BillingPlan) {
 type ClientPlanData = {
     icon: React.ComponentType
     badgeClassName: string
-} & ({
-    upsellsTo: BillingPlan,
-} | {
-    emailSubject: string
-})
+    upsellsTo?: BillingPlan,
+    emailSubject?: string
+}

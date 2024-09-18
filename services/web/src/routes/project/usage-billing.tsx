@@ -69,7 +69,7 @@ export default function ProjectUsageBilling() {
                                 {planInfo.name}
                             </div>
                             <ul className="*:list-disc text-muted-foreground pl-4">
-                                {planInfo.included.map(feature =>
+                                {planInfo.features.map(feature =>
                                     <li key={feature}>
                                         {feature}
                                     </li>
@@ -91,7 +91,7 @@ export default function ProjectUsageBilling() {
                                 Upgrade to {upsellPlanInfo.name}
                             </h3>
                             <ul className="*:list-disc pl-4">
-                                {upsellPlanInfo.included.map(feature =>
+                                {upsellPlanInfo.features.map(feature =>
                                     <li key={feature}>
                                         {feature}
                                     </li>

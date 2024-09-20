@@ -51,7 +51,7 @@ RUN gem install premailer nokogiri
 COPY ./packages ./packages
 COPY ./services/api /app/services/api
 WORKDIR /app/services/api
-CMD ["bun", "."]
+CMD bun .
 
 
 # Database ----------------------------------------------- #

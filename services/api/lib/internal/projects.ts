@@ -1,7 +1,7 @@
 import type { DB } from "core/db"
 import type { Kysely, Transaction } from "kysely"
 import { db } from "../db"
-import { stripe } from "../stripe"
+import { stripe, STRIPE_FREE_PRICE_CONFIG_KEY } from "../stripe"
 import { useEnvVar } from "../utils"
 
 
@@ -13,6 +13,15 @@ export async function createProject(projectData: {
 }: {
     dbHandle?: Kysely<DB> | Transaction<DB>
 } = {}) {
+    const freePriceId = await db.selectFrom("general_config")
+        .select("value")
+        .where("key", "=", STRIPE_FREE_PRICE_CONFIG_KEY)
+        .executeTakeFirst()
+        .then(r => r?.value)
+
+    if (!freePriceId)
+        throw new Error("Free price ID not found. Sync to Stripe.")
+
     const [newProject, userInfo] = await Promise.all([
         dbHandle.insertInto("projects")
             .values({
@@ -47,7 +56,7 @@ export async function createProject(projectData: {
             const sub = await stripe.subscriptions.create({
                 customer: customer.id,
                 items: [{
-                    price: useEnvVar("STRIPE_FREE_PRICE_ID"),
+                    price: freePriceId,
                 }],
                 description: `Subscription for Project "${projectData.name}"`,
                 metadata: {

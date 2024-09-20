@@ -1,6 +1,7 @@
 import { IconMail } from "@tabler/icons-react"
 import { ProjectDashboardLayout } from "@web/components/layouts/project-dashboard-layout"
 import SimpleTooltip from "@web/components/simple-tooltip"
+import SpinningLoader from "@web/components/spinning-loader"
 import TI from "@web/components/tabler-icon"
 import { Button } from "@web/components/ui/button"
 import { Progress } from "@web/components/ui/progress"
@@ -28,6 +29,17 @@ export default function ProjectUsageBilling() {
     const maxRunCount = usage?.runCountByWorkflow.reduce((acc, cur) => cur.run_count > acc ? cur.run_count : acc, 0) ?? 1
 
     const upsellPlanInfo = planInfo?.upsellsTo ? getClientPlanData(planInfo.upsellsTo) : undefined
+
+    const manageBillingMutation = trpc.projects.billing.getPortalLink.useMutation({
+        onSuccess: ({ url }) => {
+            window.location.assign(url)
+        },
+    })
+    const upgradeBillingMutation = trpc.projects.billing.getPortalLink.useMutation({
+        onSuccess: ({ url }) => {
+            window.location.assign(url)
+        },
+    })
 
     return (
         <ProjectDashboardLayout currentSegment="Usage & Billing">
@@ -77,11 +89,16 @@ export default function ProjectUsageBilling() {
                             </ul>
                         </>}
                     </div>
-                    <form action="billing/portal" method="post">
-                        <Button variant="secondary" className="gap-2 w-full" type="submit">
-                            Manage Billing
-                        </Button>
-                    </form>
+                    <Button
+                        variant="secondary" className="gap-2"
+                        onClick={() => manageBillingMutation.mutate({ projectId })}
+                        disabled={manageBillingMutation.isPending || upgradeBillingMutation.isPending}
+                    >
+                        {manageBillingMutation.isPending ? <>
+                            <SpinningLoader />
+                            One sec...
+                        </> : "Manage Billing"}
+                    </Button>
                 </div>
 
                 {upsellPlanInfo &&
@@ -107,18 +124,24 @@ export default function ProjectUsageBilling() {
                                     <TI><IconMail /></TI>
                                 </a>
                             </Button>
-                            : <form action="billing/upgrade" method="post">
-                                <Button variant="secondary" className="gap-2 w-full relative" type="submit">
-                                    Upgrade Now
-                                </Button>
-                            </form>}
+                            : <Button
+                                variant="secondary" className="gap-2"
+                                onClick={() => upgradeBillingMutation.mutate({ projectId, mode: "upgrade" })}
+                                disabled={upgradeBillingMutation.isPending || manageBillingMutation.isPending}
+                            >
+                                {upgradeBillingMutation.isPending ? <>
+                                    <SpinningLoader />
+                                    One sec...
+                                </> : "Upgrade Now"}
+                            </Button>
+                        }
                     </div>}
 
                 <div className="col-span-full border rounded-xl p-8 grid gap-4">
                     <h3 className="col-span-full text-lg font-medium">
                         Breakdown by Workflow
                     </h3>
-                    <Table className="">
+                    <Table>
                         <TableHeader>
                             <TableRow className="*:whitespace-nowrap">
                                 <TableHead>Workflow</TableHead>

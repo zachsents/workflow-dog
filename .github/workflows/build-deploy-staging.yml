@@ -29,5 +29,3 @@ jobs:
         run: scp compose.yml root@$STAGING_SERVER_IP:app/
       - name: Reload services on staging server
         run: ssh root@$STAGING_SERVER_IP "cd app && ./run.sh staging pull && ./run.sh staging up -d"
-      - name: Sync Stripe products
-        run: ssh root@$STAGING_SERVER_IP "cd app/services/api && bun ./scripts/stripe-sync.ts"

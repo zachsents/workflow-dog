@@ -71,6 +71,7 @@ services:
       test: bun -e 'await fetch("http://localhost:${API_PORT}/api/health").then(r => !r.ok && Promise.reject(r.statusText))' || exit 1
     environment:
       - PORT=${API_PORT}
+      - ENVIRONMENT
       - APP_ORIGIN
       - APP_NAME
       - DATABASE_URL
@@ -84,11 +85,6 @@ services:
       - REDIS_PASSWORD
       - STRIPE_KEY
       - STRIPE_WEBHOOK_SIGNING_SECRET
-      - STRIPE_FREE_PRICE_ID
-      - STRIPE_BASIC_MONTHLY_PRICE_ID
-      - STRIPE_BASIC_YEARLY_PRICE_ID
-      - STRIPE_PRO_MONTHLY_PRICE_ID
-      - STRIPE_PRO_YEARLY_PRICE_ID
 
   supertokens:
     container_name: supertokens

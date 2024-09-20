@@ -1,7 +1,7 @@
 import type { BillingPlan } from "./db"
 
 
-const planData: Record<BillingPlan, BillingPlanData> = {
+export const planData: Record<BillingPlan, BillingPlanData> = {
     free: {
         name: "Free",
         description: "Try out automating with WorkflowDog.",

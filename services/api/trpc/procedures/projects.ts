@@ -11,7 +11,8 @@ import { createProject, getCurrentBillingPeriod } from "../../lib/internal/proje
 import { isProjectUnderTeamLimit } from "../../lib/internal/team"
 import { sendEmailFromTemplate } from "../../lib/resend"
 import { assertOrForbidden } from "../assertions"
-import { stripe } from "../../lib/stripe"
+import { stripe, STRIPE_PORTAL_CONFIG_KEY } from "../../lib/stripe"
+import { useEnvVar } from "../../lib/utils"
 
 
 export default {
@@ -408,6 +409,59 @@ export default {
 
             return { runCount, memberCount, runCountByWorkflow, plan: billing_plan }
         }),
+
+    billing: {
+        getPortalLink: projectPermissionProcedure("write")
+            .input(z.object({ mode: z.enum(["manage", "upgrade"]).default("manage") }))
+            .mutation(async ({ input, ctx }) => {
+                const [project, portalConfigId] = await Promise.all([
+                    db.selectFrom("projects")
+                        .select(["stripe_customer_id", "stripe_subscription_id"])
+                        .where("id", "=", ctx.projectId)
+                        .executeTakeFirst(),
+                    db.selectFrom("general_config")
+                        .select("value")
+                        .where("key", "=", STRIPE_PORTAL_CONFIG_KEY)
+                        .executeTakeFirst()
+                        .then(r => r?.value),
+                ])
+
+                if (!portalConfigId)
+                    throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Billing portal config not found. Sync to Stripe.",
+                    })
+
+                if (!project)
+                    throw new TRPCError({ code: "NOT_FOUND" })
+                if (!project.stripe_customer_id)
+                    throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Project has no Stripe customer ID. This is a bug.",
+                    })
+                if (!project.stripe_subscription_id)
+                    throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Project has no Stripe subscription ID. This is a bug.",
+                    })
+
+                const session = await stripe.billingPortal.sessions.create({
+                    customer: project.stripe_customer_id,
+                    configuration: portalConfigId,
+                    return_url: `${useEnvVar("APP_ORIGIN")}/projects/${ctx.projectId}/usage-billing`,
+                    ...input.mode === "upgrade" && {
+                        flow_data: {
+                            type: "subscription_update",
+                            subscription_update: {
+                                subscription: project.stripe_subscription_id,
+                            },
+                        }
+                    },
+                })
+
+                return { url: session.url }
+            }),
+    },
 }
 
 

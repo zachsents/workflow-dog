@@ -4,15 +4,14 @@ import { getObjectPaths } from "core/utils"
 import _isEqual from "lodash/isEqual"
 import _omit from "lodash/omit"
 import _pick from "lodash/pick"
-import _get from "lodash/get"
 import type Stripe from "stripe"
-import { stripe as api } from "../lib/stripe"
 import { db } from "../lib/db"
+import { stripe as api, STRIPE_FREE_PRICE_CONFIG_KEY, STRIPE_METADATA_KEYS, STRIPE_PORTAL_CONFIG_KEY } from "../lib/stripe"
+import { useEnvVar } from "../lib/utils"
 
 
-const WFD_KEY = "wfd"
-const PLAN_KEY_KEY = "wfd_plan_key"
 const NON_UPDATABLE_PRICE_PROPERTIES = ["unit_amount", "product", "currency", "recurring"]
+
 
 const createBillingPortalConfig = (products: { product: string, prices: string[] }[]): Stripe.BillingPortal.ConfigurationCreateParams => ({
     business_profile: {
@@ -46,28 +45,24 @@ const createBillingPortalConfig = (products: { product: string, prices: string[]
         enabled: false,
     },
     metadata: {
-        [WFD_KEY]: "true",
+        [STRIPE_METADATA_KEYS.WFD]: "true",
+        [STRIPE_METADATA_KEYS.ENVIRONMENT]: useEnvVar("ENVIRONMENT"),
     },
 })
 
 
 await syncProductsToStripe()
 
-
 export async function syncProductsToStripe() {
-    const [, freeMonthlyPrice] = await createOrUpdatePlan("free")
-    const [, basicMonthlyPrice, basicYearlyPrice] = await createOrUpdatePlan("basic")
-    const [, proMonthlyPrice, proYearlyPrice] = await createOrUpdatePlan("pro")
+    const [, freePrice] = await createOrUpdatePlan("free")
+    await createOrUpdatePlan("basic")
+    await createOrUpdatePlan("pro")
     const portalConfig = await createOrUpdateBillingPortalConfig(["free", "basic", "pro"])
 
     await db.insertInto("general_config")
         .values([
-            { key: "stripe_free_price_id", value: freeMonthlyPrice?.id ?? null },
-            { key: "stripe_basic_monthly_price_id", value: basicMonthlyPrice?.id ?? null },
-            { key: "stripe_basic_yearly_price_id", value: basicYearlyPrice?.id ?? null },
-            { key: "stripe_pro_monthly_price_id", value: proMonthlyPrice?.id ?? null },
-            { key: "stripe_pro_yearly_price_id", value: proYearlyPrice?.id ?? null },
-            { key: "stripe_billing_portal_config_id", value: portalConfig.id ?? null },
+            { key: STRIPE_PORTAL_CONFIG_KEY, value: portalConfig.id ?? null },
+            { key: STRIPE_FREE_PRICE_CONFIG_KEY, value: freePrice?.id ?? null },
         ])
         .onConflict(oc => oc.column("key").doUpdateSet(eb => ({ value: eb.ref("excluded.value") })))
         .execute()
@@ -77,6 +72,11 @@ export async function syncProductsToStripe() {
 }
 
 
+/**
+ * Creates or updates a plan for a given plan key. Consists
+ * of creating or updating the product and whatever associated
+ * prices are needed.
+ */
 async function createOrUpdatePlan(planKey: BillingPlan) {
     const planData = getPlanData(planKey)
     if (!planData.syncToStripe)
@@ -92,13 +92,26 @@ async function createOrUpdatePlan(planKey: BillingPlan) {
 }
 
 
+/**
+ * Searches for a product by plan key. Checks that this product has
+ * metadata saying it's for WorkflowDog, for the current environment,
+ * and for the given plan key.
+ */
 async function findProduct(planKey: BillingPlan) {
     return api.products.search({
-        query: `metadata["${WFD_KEY}"]:"true" AND metadata["${PLAN_KEY_KEY}"]:"${planKey}" AND active:"true"`,
+        query: [
+            `metadata["${STRIPE_METADATA_KEYS.WFD}"]:"true"`,
+            `metadata["${STRIPE_METADATA_KEYS.ENVIRONMENT}"]:"${useEnvVar("ENVIRONMENT")}"`,
+            `metadata["${STRIPE_METADATA_KEYS.PLAN_KEY}"]:"${planKey}"`,
+            `active:"true"`,
+        ].join(" AND "),
     }).then(r => r.data[0])
 }
 
 
+/**
+ * Creates or updates a product for a given plan key.
+ */
 async function createOrUpdateProduct(planKey: BillingPlan) {
     const planData = getPlanData(planKey)
 
@@ -111,8 +124,9 @@ async function createOrUpdateProduct(planKey: BillingPlan) {
         description: planData.description,
         marketing_features: planData.features.map(f => ({ name: f })),
         metadata: {
-            [WFD_KEY]: "true",
-            [PLAN_KEY_KEY]: planKey,
+            [STRIPE_METADATA_KEYS.WFD]: "true",
+            [STRIPE_METADATA_KEYS.ENVIRONMENT]: useEnvVar("ENVIRONMENT"),
+            [STRIPE_METADATA_KEYS.PLAN_KEY]: planKey,
         },
     }
 
@@ -136,18 +150,32 @@ async function createOrUpdateProduct(planKey: BillingPlan) {
 }
 
 
+/**
+ * Searches for a product by plan key. Checks that this product has
+ * metadata saying it's for WorkflowDog, for the current environment,
+ * for the given plan key, and for the given frequency.
+ */
 async function findPrice(planKey: BillingPlan, frequency: "monthly" | "yearly") {
     return api.prices.search({
         query: [
-            `metadata["${WFD_KEY}"]:"true"`,
-            `metadata["${PLAN_KEY_KEY}"]:"${planKey}"`,
-            `metadata["frequency"]:"${frequency}"`,
+            `metadata["${STRIPE_METADATA_KEYS.WFD}"]:"true"`,
+            `metadata["${STRIPE_METADATA_KEYS.ENVIRONMENT}"]:"${useEnvVar("ENVIRONMENT")}"`,
+            `metadata["${STRIPE_METADATA_KEYS.PLAN_KEY}"]:"${planKey}"`,
+            `metadata["${STRIPE_METADATA_KEYS.FREQUENCY}"]:"${frequency}"`,
             `active:"true"`,
         ].join(" AND "),
     }).then(r => r.data[0])
 }
 
 
+/**
+ * Creates or updates a price for a given plan key and frequency.
+ * Certain properties of prices cannot be updated, so this function
+ * will archive the price and create a new one with the updated
+ * properties.
+ * 
+ * Oh yeah, you can't delete prices from the API either...
+ */
 async function createOrUpdatePrice(
     planKey: BillingPlan,
     frequency: "monthly" | "yearly",
@@ -166,9 +194,10 @@ async function createOrUpdatePrice(
         },
         product: stripeProduct.id,
         metadata: {
-            [WFD_KEY]: "true",
-            [PLAN_KEY_KEY]: planKey,
-            frequency,
+            [STRIPE_METADATA_KEYS.WFD]: "true",
+            [STRIPE_METADATA_KEYS.ENVIRONMENT]: useEnvVar("ENVIRONMENT"),
+            [STRIPE_METADATA_KEYS.PLAN_KEY]: planKey,
+            [STRIPE_METADATA_KEYS.FREQUENCY]: frequency,
         },
     }
 
@@ -213,6 +242,14 @@ async function createOrUpdatePrice(
 }
 
 
+/**
+ * Creates or updates the billing portal configuration for the given
+ * plan keys.
+ * 
+ * Unfortantely, the list endpoint doesn't return the products, which is 
+ * the most likely thing to change. So this will end up triggering an
+ * update even if things haven't changed. However, it's not a big deal.
+ */
 async function createOrUpdateBillingPortalConfig(planKeys: BillingPlan[]) {
     const products = await Promise.all(
         planKeys.filter(planKey => getPlanData(planKey).syncToStripe).map(async planKey => {
@@ -235,16 +272,13 @@ async function createOrUpdateBillingPortalConfig(planKeys: BillingPlan[]) {
 
     const existingConfig = await api.billingPortal.configurations.list({
         active: true,
-    }).then(r => r.data.find(config => config.metadata?.[WFD_KEY] === "true"))
+    }).then(r => r.data.find(config => config.metadata?.[STRIPE_METADATA_KEYS.WFD] === "true"))
 
     if (!existingConfig) {
         console.log(`Creating billing portal config`)
         return api.billingPortal.configurations.create(stripeBillingPortalConfig)
     }
 
-    // Unfortantely, the list endpoint doesn't return the products, which is 
-    // the most likely thing to change. So this will end up triggering every
-    // time, but it's not a big deal.
     const shouldUpdate = !_isEqual(
         _pick(existingConfig, getObjectPaths(stripeBillingPortalConfig)),
         stripeBillingPortalConfig,

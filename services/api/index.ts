@@ -7,20 +7,16 @@ import morgan from "morgan"
 import supertokens from "supertokens-node"
 import {
     errorHandler as supertokensErrorHandler,
-    middleware as supertokensMiddleware,
-    type SessionRequest
+    middleware as supertokensMiddleware
 } from "supertokens-node/framework/express"
 import { initSupertokens } from "./lib/auth"
 import "./lib/bullmq"
-import { db } from "./lib/db"
 import { handleEventSourceRequest } from "./lib/internal/event-sources"
 import { getWorkflowRunStatus } from "./lib/internal/workflow-runs"
-import { handleWebhookRequest as handleStripeWebhookRequest, stripe } from "./lib/stripe"
+import { handleWebhookRequest as handleStripeWebhookRequest } from "./lib/stripe"
 import { useEnvVar } from "./lib/utils"
 import { createContext } from "./trpc"
 import { apiRouter } from "./trpc/router"
-import { verifySession } from "supertokens-node/recipe/session/framework/express"
-import { sql } from "kysely"
 
 
 const port = useEnvVar("PORT")
@@ -86,83 +82,6 @@ app.all(
 
 // Stripe webhooks
 app.post("/api/stripe/webhook", bodyParser.text({ type: "*/*" }), handleStripeWebhookRequest)
-
-// Stripe customer portal
-app.post("/projects/:projectId/billing/portal", verifySession({
-    checkDatabase: true,
-    antiCsrfCheck: true,
-    sessionRequired: true,
-}), async (req, res) => {
-    const projectId = req.params.projectId
-
-    const { has_permission } = await db.selectNoFrom(eb => eb.exists(
-        eb.selectFrom("projects_users")
-            .where("project_id", "=", projectId)
-            .where("user_id", "=", (req as SessionRequest).session!.getUserId())
-            .where(sql<boolean>`'write'::project_permission = any(permissions)`)
-    ).as("has_permission")).executeTakeFirstOrThrow()
-
-    if (!has_permission)
-        return res.status(403).send("You don't have permission to do that.")
-
-    const project = await db.selectFrom("projects")
-        .select("stripe_customer_id")
-        .where("id", "=", projectId)
-        .executeTakeFirst()
-
-    if (!project)
-        return res.status(404).send("Project not found")
-    if (!project.stripe_customer_id)
-        return res.status(500).send("Project has no Stripe customer ID. This is a bug.")
-
-    const session = await stripe.billingPortal.sessions.create({
-        customer: project.stripe_customer_id,
-        return_url: `${useEnvVar("APP_ORIGIN")}/projects/${projectId}/usage-billing`,
-    })
-    return res.status(303).redirect(session.url)
-})
-
-app.post("/projects/:projectId/billing/upgrade", verifySession({
-    checkDatabase: true,
-    antiCsrfCheck: true,
-    sessionRequired: true,
-}), async (req, res) => {
-    const projectId = req.params.projectId
-
-    const { has_permission } = await db.selectNoFrom(eb => eb.exists(
-        eb.selectFrom("projects_users")
-            .where("project_id", "=", projectId)
-            .where("user_id", "=", (req as SessionRequest).session!.getUserId())
-            .where(sql<boolean>`'write'::project_permission = any(permissions)`)
-    ).as("has_permission")).executeTakeFirstOrThrow()
-
-    if (!has_permission)
-        return res.status(403).send("You don't have permission to do that.")
-
-    const project = await db.selectFrom("projects")
-        .select(["stripe_customer_id", "stripe_subscription_id"])
-        .where("id", "=", projectId)
-        .executeTakeFirst()
-
-    if (!project)
-        return res.status(404).send("Project not found")
-    if (!project.stripe_customer_id)
-        return res.status(500).send("Project has no Stripe customer ID. This is a bug.")
-    if (!project.stripe_subscription_id)
-        return res.status(500).send("Project has no Stripe subscription ID. This is a bug.")
-
-    const session = await stripe.billingPortal.sessions.create({
-        customer: project.stripe_customer_id,
-        return_url: `${useEnvVar("APP_ORIGIN")}/projects/${projectId}/usage-billing`,
-        flow_data: {
-            type: "subscription_update",
-            subscription_update: {
-                subscription: project.stripe_subscription_id,
-            },
-        },
-    })
-    return res.status(303).redirect(session.url)
-})
 
 
 // Error handlers come after routes

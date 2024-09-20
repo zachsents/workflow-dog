@@ -280,6 +280,7 @@ export async function down(db: Kysely<any>): Promise<void> {
     await db.schema.dropTable("project_invitations").ifExists().execute()
     await db.schema.dropTable("projects").ifExists().execute()
     await db.schema.dropTable("user_meta").ifExists().execute()
+    await db.schema.dropTable("general_config").ifExists().execute()
 
     // Drop function
     await sql`DROP FUNCTION IF EXISTS public.workflows_on_update`.execute(db)

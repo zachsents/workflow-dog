@@ -12,7 +12,6 @@
 		{path}.startsWith("/api/")
 		|| {path}.startsWith("/auth/")
 		|| {path}.startsWith("/run/")
-		|| (path_regexp("^/projects/[\\w\\-]+/billing") && {method} == "POST")
 		CEL
 
 	# Directive order in Caddy is funky

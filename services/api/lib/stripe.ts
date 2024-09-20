@@ -5,6 +5,16 @@ import { db } from "./db"
 import { useEnvVar } from "./utils"
 
 
+export const STRIPE_METADATA_KEYS = {
+    WFD: "wfd",
+    ENVIRONMENT: "wfd_environment",
+    PLAN_KEY: "wfd_plan_key",
+    FREQUENCY: "wfd_frequency",
+}
+export const STRIPE_PORTAL_CONFIG_KEY = "stripe_billing_portal_config_id"
+export const STRIPE_FREE_PRICE_CONFIG_KEY = "stripe_free_price_id"
+
+
 const api = new Stripe(useEnvVar("STRIPE_KEY"))
 export { api as stripe }
 
@@ -27,42 +37,33 @@ export async function handleWebhookRequest(req: Request, res: Response) {
             // shouldn't need anything here
             break
         case "customer.subscription.deleted":
-            // shouldn't need anything here
+            // this shouldn't happen, but just in case:
+            console.log(`Subscription deleted for project ${event.data.object.metadata.projectId}.This is a bug.`)
             break
         case "customer.subscription.updated": {
             const projectId = event.data.object.metadata.projectId
             if (!projectId)
                 break
 
-            let plan: BillingPlan
-            switch (event.data.object.items.data[0].price.id) {
-                case useEnvVar("STRIPE_FREE_PRICE_ID"):
-                    plan = "free"
-                    break
-                case useEnvVar("STRIPE_BASIC_MONTHLY_PRICE_ID"):
-                case useEnvVar("STRIPE_BASIC_YEARLY_PRICE_ID"):
-                    plan = "basic"
-                    break
-                case useEnvVar("STRIPE_PRO_MONTHLY_PRICE_ID"):
-                case useEnvVar("STRIPE_PRO_YEARLY_PRICE_ID"):
-                    plan = "pro"
-                    break
-                default:
-                    plan = "custom"
-            }
+            const priceMetadata = event.data.object.items.data[0].price.metadata
+            const isPriceForCurrentEnvironment =
+                priceMetadata[STRIPE_METADATA_KEYS.WFD] === "true"
+                && priceMetadata[STRIPE_METADATA_KEYS.ENVIRONMENT] === useEnvVar("ENVIRONMENT")
 
-            console.log(plan)
+            if (!isPriceForCurrentEnvironment)
+                break
 
+            const planKey = priceMetadata[STRIPE_METADATA_KEYS.PLAN_KEY] as BillingPlan
             await db.updateTable("projects")
-                .set({ billing_plan: plan })
+                .set({ billing_plan: planKey })
                 .where("id", "=", projectId)
                 .execute()
 
+            console.log(`Updated project ${projectId} to plan ${planKey}`)
             break
         }
-        default:
-            console.log(`Unhandled Stripe event type ${event.type}`)
-            return res.status(500).send("Unhandled Stripe event type")
     }
+
     res.status(200).send("OK")
 }
+

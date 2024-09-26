@@ -1,7 +1,6 @@
 import type { BillingPlan } from "core/db"
 import { getPlanData } from "core/plans"
-import { getObjectPaths } from "core/utils"
-import _isEqual from "lodash/isEqual"
+import _isMatch from "lodash/isMatch"
 import _omit from "lodash/omit"
 import _pick from "lodash/pick"
 import type Stripe from "stripe"
@@ -13,62 +12,64 @@ import { useEnvVar } from "../lib/utils"
 const NON_UPDATABLE_PRICE_PROPERTIES = ["unit_amount", "product", "currency", "recurring"]
 
 
-const createBillingPortalConfig = (products: { product: string, prices: string[] }[]): Stripe.BillingPortal.ConfigurationCreateParams => ({
-    business_profile: {
-        headline: "WorkflowDog",
-        privacy_policy_url: "https://workflow.dog/privacy",
-        terms_of_service_url: "https://workflow.dog/terms",
-    },
-    features: {
-        customer_update: {
-            enabled: true,
-            allowed_updates: ["name", "email", "phone"],
-        },
-        invoice_history: {
-            enabled: true,
-        },
-        payment_method_update: {
-            enabled: true,
-        },
-        subscription_update: {
-            enabled: true,
-            default_allowed_updates: ["price", "promotion_code"],
-            products,
-        },
-        // I'm not a scumbag, I'm just using a price of 0 for the free plan
-        // so that every project always has a subscription
-        subscription_cancel: {
-            enabled: false,
-        },
-    },
-    login_page: {
-        enabled: false,
-    },
-    metadata: {
-        [STRIPE_METADATA_KEYS.WFD]: "true",
-        [STRIPE_METADATA_KEYS.ENVIRONMENT]: useEnvVar("ENVIRONMENT"),
-    },
-})
+/* THE ACTION ------------------------------------------- */
+
+switch (process.argv[2]) {
+    case "sync":
+        await syncProductsToStripe()
+        break
+    case "purge":
+        await purgeConfigs()
+        await purgeProducts("free")
+        await purgeProducts("basic")
+        await purgeProducts("pro")
+        break
+    case "list-billing-configs":
+        await api.billingPortal.configurations.list({
+            active: true,
+            limit: 100,
+        }).then(r => r.data.filter(config =>
+            config.metadata?.[STRIPE_METADATA_KEYS.WFD] === "true"
+            && config.metadata?.[STRIPE_METADATA_KEYS.ENVIRONMENT] === useEnvVar("ENVIRONMENT")
+        ))
+            // .then(console.log) // more verbose option for debugging
+            .then(configs => console.log(configs.map(c => c.id).join("\n")))
+        break
+    default:
+        console.log("Usage: sync-stripe.ts [sync|purge]")
+        process.exit(1)
+}
+
+/* - ---------------------------------------------------- */
 
 
-await syncProductsToStripe()
+export async function syncProductsToStripe({
+    dryRun = false,
+}: SyncOptions = {}) {
+    console.log("Syncing products to Stripe...", dryRun ? "(dry run)" : "")
 
-export async function syncProductsToStripe() {
-    const [, freePrice] = await createOrUpdatePlan("free")
-    await createOrUpdatePlan("basic")
-    await createOrUpdatePlan("pro")
-    const portalConfig = await createOrUpdateBillingPortalConfig(["free", "basic", "pro"])
+    const { monthlyPrice: freePrice } = await upsertPlan("free", { dryRun })
+    await upsertPlan("basic", { dryRun })
+    await upsertPlan("pro", { dryRun })
 
-    await db.insertInto("general_config")
-        .values([
-            { key: STRIPE_PORTAL_CONFIG_KEY, value: portalConfig.id ?? null },
-            { key: STRIPE_FREE_PRICE_CONFIG_KEY, value: freePrice?.id ?? null },
-        ])
-        .onConflict(oc => oc.column("key").doUpdateSet(eb => ({ value: eb.ref("excluded.value") })))
-        .execute()
+    const portalConfig = await upsertBillingPortalConfig(["free", "basic", "pro"], { dryRun })
+
+    if (!dryRun) {
+        // update app config
+        await db.insertInto("general_config")
+            .values([
+                { key: STRIPE_PORTAL_CONFIG_KEY, value: portalConfig?.id ?? null },
+                { key: STRIPE_FREE_PRICE_CONFIG_KEY, value: freePrice?.id ?? null },
+            ])
+            .onConflict(
+                oc => oc.column("key")
+                    .doUpdateSet(eb => ({ value: eb.ref("excluded.value") }))
+            )
+            .execute()
+    }
 
     await db.destroy()
-    console.log("Synced products to Stripe")
+    console.log("Finished sync.", dryRun ? "(dry run)" : "")
 }
 
 
@@ -77,18 +78,32 @@ export async function syncProductsToStripe() {
  * of creating or updating the product and whatever associated
  * prices are needed.
  */
-async function createOrUpdatePlan(planKey: BillingPlan) {
+async function upsertPlan(planKey: BillingPlan, {
+    dryRun = false,
+}: SyncOptions = {}) {
     const planData = getPlanData(planKey)
     if (!planData.syncToStripe)
-        return []
+        throw new Error(`Plan ${planKey} is not meant to be synced to Stripe`)
 
-    const product = await createOrUpdateProduct(planKey)
+    const product = await upsertProduct(planKey, { dryRun })
+    let monthlyPrice: Stripe.Price | null = null
+    let yearlyPrice: Stripe.Price | null = null
 
-    const monthlyPrice = await createOrUpdatePrice(planKey, "monthly", product)
-    if (planData.yearlyPrice)
-        var yearlyPrice = await createOrUpdatePrice(planKey, "yearly", product)
+    if (product) {
+        monthlyPrice = await upsertPrice(planKey, {
+            frequency: "monthly",
+            productId: product.id,
+            dryRun,
+        })
+        if (planData.yearlyPrice)
+            yearlyPrice = await upsertPrice(planKey, {
+                frequency: "yearly",
+                productId: product.id,
+                dryRun,
+            })
+    }
 
-    return [product, monthlyPrice, yearlyPrice] as const
+    return { product, monthlyPrice, yearlyPrice }
 }
 
 
@@ -97,7 +112,7 @@ async function createOrUpdatePlan(planKey: BillingPlan) {
  * metadata saying it's for WorkflowDog, for the current environment,
  * and for the given plan key.
  */
-async function findProduct(planKey: BillingPlan) {
+async function findProduct(planKey: BillingPlan): Promise<Stripe.Product | undefined> {
     return api.products.search({
         query: [
             `metadata["${STRIPE_METADATA_KEYS.WFD}"]:"true"`,
@@ -112,10 +127,13 @@ async function findProduct(planKey: BillingPlan) {
 /**
  * Creates or updates a product for a given plan key.
  */
-async function createOrUpdateProduct(planKey: BillingPlan) {
-    const planData = getPlanData(planKey)
+async function upsertProduct(planKey: BillingPlan, {
+    dryRun = false,
+}: SyncOptions = {}) {
 
-    const existingProduct = await findProduct(planKey)
+    const planData = getPlanData(planKey)
+    if (!planData.syncToStripe)
+        throw new Error(`Plan ${planKey} is not meant to be synced to Stripe`)
 
     const stripeProductData: Stripe.ProductCreateParams = {
         statement_descriptor: "WFD " + planKey.toUpperCase(),
@@ -130,19 +148,16 @@ async function createOrUpdateProduct(planKey: BillingPlan) {
         },
     }
 
+    const existingProduct = await findProduct(planKey)
     if (!existingProduct) {
         console.log(`Creating product ${planKey}`)
-        return api.products.create(stripeProductData)
+        return dryRun ? null : api.products.create(stripeProductData)
     }
 
-    const shouldUpdate = !_isEqual(
-        _pick(existingProduct, getObjectPaths(stripeProductData)),
-        stripeProductData,
-    )
-
+    const shouldUpdate = !_isMatch(existingProduct, stripeProductData)
     if (shouldUpdate) {
         console.log(`Updating product ${planKey}`)
-        return api.products.update(existingProduct.id, stripeProductData)
+        return dryRun ? null : api.products.update(existingProduct.id, stripeProductData)
     }
 
     console.log(`Nothing to update for product ${planKey}`)
@@ -155,7 +170,7 @@ async function createOrUpdateProduct(planKey: BillingPlan) {
  * metadata saying it's for WorkflowDog, for the current environment,
  * for the given plan key, and for the given frequency.
  */
-async function findPrice(planKey: BillingPlan, frequency: "monthly" | "yearly") {
+async function findPrice(planKey: BillingPlan, frequency: "monthly" | "yearly"): Promise<Stripe.Price | undefined> {
     return api.prices.search({
         query: [
             `metadata["${STRIPE_METADATA_KEYS.WFD}"]:"true"`,
@@ -176,23 +191,30 @@ async function findPrice(planKey: BillingPlan, frequency: "monthly" | "yearly") 
  * 
  * Oh yeah, you can't delete prices from the API either...
  */
-async function createOrUpdatePrice(
-    planKey: BillingPlan,
+async function upsertPrice(planKey: BillingPlan, {
+    frequency,
+    productId,
+    skipSearch = false,
+    dryRun = false,
+}: {
     frequency: "monthly" | "yearly",
-    stripeProduct: Stripe.Product,
+    productId: string,
     skipSearch?: boolean,
-): Promise<Stripe.Price | undefined> {
+} & SyncOptions): Promise<Stripe.Price | null> {
+
     const planData = getPlanData(planKey)
     if (!planData.syncToStripe)
-        return
+        throw new Error(`Plan ${planKey} is not meant to be synced to Stripe`)
 
     const stripePriceData: Stripe.PriceCreateParams = {
         currency: "usd",
-        unit_amount: frequency === "monthly" ? planData.monthlyPrice : planData.yearlyPrice!,
+        unit_amount: frequency === "monthly"
+            ? planData.monthlyPrice
+            : planData.yearlyPrice!,
         recurring: {
             interval: frequency === "monthly" ? "month" : "year",
         },
-        product: stripeProduct.id,
+        product: productId,
         metadata: {
             [STRIPE_METADATA_KEYS.WFD]: "true",
             [STRIPE_METADATA_KEYS.ENVIRONMENT]: useEnvVar("ENVIRONMENT"),
@@ -201,40 +223,43 @@ async function createOrUpdatePrice(
         },
     }
 
-    const existingPrice = skipSearch ? undefined : await findPrice(planKey, frequency)
+    const existingPrice = skipSearch ? null : await findPrice(planKey, frequency)
 
     if (!existingPrice) {
         console.log(`Creating price ${planKey} / ${frequency}`)
-        return api.prices.create(stripePriceData).then(async r => {
-            if (frequency === "monthly") {
-                await api.products.update(stripeProduct.id, { default_price: r.id })
-            }
-            return r
-        })
-    }
+        if (dryRun)
+            return null
 
-    const pickedPriceData = _pick(stripePriceData, NON_UPDATABLE_PRICE_PROPERTIES)
-    const canUpdate = _isEqual(
-        _pick(existingPrice, getObjectPaths(pickedPriceData)),
-        pickedPriceData,
-    )
+        const newPrice = await api.prices.create(stripePriceData)
+        if (frequency === "monthly")
+            await api.products.update(productId, { default_price: newPrice.id })
 
-    if (!canUpdate) {
-        console.log(`Price ${planKey} / ${frequency} changed non-updatable properties, deleting and recreating`)
-        const newPrice = await createOrUpdatePrice(planKey, frequency, stripeProduct, true)
-        await api.prices.update(existingPrice.id, { active: false })
         return newPrice
     }
 
-    const omittedPriceData = _omit(stripePriceData, NON_UPDATABLE_PRICE_PROPERTIES)
-    const shouldUpdate = !_isEqual(
-        _pick(existingPrice, getObjectPaths(omittedPriceData)),
-        omittedPriceData,
-    )
+    const nonUpdatablePriceData = _pick(stripePriceData, NON_UPDATABLE_PRICE_PROPERTIES)
+    const canUpdate = _isMatch(existingPrice, nonUpdatablePriceData)
+
+    if (!canUpdate) {
+        console.log(`Price ${planKey} / ${frequency} changed non-updatable properties, deleting and recreating`)
+        if (dryRun)
+            return null
+
+        const newPrice = await upsertPrice(planKey, {
+            frequency, productId, dryRun,
+            skipSearch: true,
+        })
+        await api.prices.update(existingPrice.id, { active: false })
+
+        return newPrice
+    }
+
+    const updatablePriceData = _omit(stripePriceData, NON_UPDATABLE_PRICE_PROPERTIES)
+    const shouldUpdate = !_isMatch(existingPrice, updatablePriceData)
 
     if (shouldUpdate) {
         console.log(`Updating price ${planKey} / ${frequency}`)
-        return api.prices.update(existingPrice.id, omittedPriceData)
+        return dryRun ? null : api.prices.update(existingPrice.id, updatablePriceData)
     }
 
     console.log(`Nothing to update for price ${planKey} / ${frequency}`)
@@ -250,45 +275,161 @@ async function createOrUpdatePrice(
  * the most likely thing to change. So this will end up triggering an
  * update even if things haven't changed. However, it's not a big deal.
  */
-async function createOrUpdateBillingPortalConfig(planKeys: BillingPlan[]) {
-    const products = await Promise.all(
-        planKeys.filter(planKey => getPlanData(planKey).syncToStripe).map(async planKey => {
-            const planData = getPlanData(planKey)
-            const [product, monthlyPrice, yearlyPrice] = await Promise.all([
-                findProduct(planKey),
-                findPrice(planKey, "monthly"),
-                (planData.syncToStripe && planData.yearlyPrice)
-                    ? findPrice(planKey, "yearly")
-                    : undefined,
-            ])
-            return {
-                product: product.id,
-                prices: [monthlyPrice.id, yearlyPrice?.id].filter(Boolean) as string[],
-            }
-        })
-    )
+async function upsertBillingPortalConfig(planKeys: BillingPlan[], {
+    dryRun = false,
+}: SyncOptions = {}) {
+    const products = await Promise.all(planKeys.map(async planKey => {
+        const planData = getPlanData(planKey)
+        if (!planData.syncToStripe)
+            throw new Error(`Plan ${planKey} is not meant to be synced to Stripe`)
 
-    const stripeBillingPortalConfig = createBillingPortalConfig(products)
+        const [product, monthlyPrice, yearlyPrice] = await Promise.all([
+            findProduct(planKey),
+            findPrice(planKey, "monthly"),
+            planData.yearlyPrice ? findPrice(planKey, "yearly") : undefined,
+        ])
+
+        if (!product || !monthlyPrice)
+            return undefined
+
+        return {
+            product: product.id,
+            prices: [monthlyPrice.id, yearlyPrice?.id].filter(Boolean) as string[],
+        }
+    })).then(r => r.filter(x => !!x))
+
+    const stripeBillingPortalConfig: Stripe.BillingPortal.ConfigurationCreateParams = {
+        business_profile: {
+            headline: "WorkflowDog",
+            privacy_policy_url: "https://workflow.dog/privacy",
+            terms_of_service_url: "https://workflow.dog/terms",
+        },
+        features: {
+            customer_update: {
+                enabled: true,
+                allowed_updates: ["name", "email", "phone"],
+            },
+            invoice_history: {
+                enabled: true,
+            },
+            payment_method_update: {
+                enabled: true,
+            },
+            subscription_update: {
+                enabled: true,
+                default_allowed_updates: ["price", "promotion_code"],
+                products,
+            },
+            // I'm not a scumbag, I'm just using a price of 0 for the free plan
+            // so that every project always has a subscription
+            subscription_cancel: {
+                enabled: false,
+            },
+        },
+        login_page: {
+            enabled: false,
+        },
+        metadata: {
+            [STRIPE_METADATA_KEYS.WFD]: "true",
+            [STRIPE_METADATA_KEYS.ENVIRONMENT]: useEnvVar("ENVIRONMENT"),
+        },
+    }
 
     const existingConfig = await api.billingPortal.configurations.list({
         active: true,
-    }).then(r => r.data.find(config => config.metadata?.[STRIPE_METADATA_KEYS.WFD] === "true"))
+        limit: 100,
+    }).then(r => r.data.find(config =>
+        config.metadata?.[STRIPE_METADATA_KEYS.WFD] === "true"
+        && config.metadata?.[STRIPE_METADATA_KEYS.ENVIRONMENT] === useEnvVar("ENVIRONMENT")
+    ))
 
     if (!existingConfig) {
         console.log(`Creating billing portal config`)
-        return api.billingPortal.configurations.create(stripeBillingPortalConfig)
+        return dryRun ? null : api.billingPortal.configurations.create(stripeBillingPortalConfig)
     }
 
-    const shouldUpdate = !_isEqual(
-        _pick(existingConfig, getObjectPaths(stripeBillingPortalConfig)),
-        stripeBillingPortalConfig,
-    )
+    const shouldUpdate = !_isMatch(existingConfig, stripeBillingPortalConfig)
 
     if (shouldUpdate) {
         console.log(`Updating billing portal config`)
-        return api.billingPortal.configurations.update(existingConfig.id, stripeBillingPortalConfig)
+        return dryRun
+            ? null
+            : api.billingPortal.configurations.update(existingConfig.id, stripeBillingPortalConfig)
     }
 
     console.log(`Nothing to update for billing portal config`)
     return existingConfig
+}
+
+
+async function purgeConfigs() {
+    const configs = await api.billingPortal.configurations.list({
+        active: true,
+        limit: 100,
+    }).then(r => r.data.filter(c =>
+        c.metadata?.[STRIPE_METADATA_KEYS.WFD] === "true"
+        && c.metadata?.[STRIPE_METADATA_KEYS.ENVIRONMENT] === useEnvVar("ENVIRONMENT")
+    ))
+
+    for (const c of configs) {
+        try {
+            await api.billingPortal.configurations.update(c.id, { active: false })
+            console.log(`Deactivated billing portal config ${c.id}`)
+        } catch (err: any) {
+            console.log(`Failed to deactivate billing portal config ${c.id}:`, err.message)
+        }
+    }
+}
+
+
+async function purgeProducts(planKey: BillingPlan) {
+
+    const prices = await api.prices.search({
+        query: [
+            `metadata["${STRIPE_METADATA_KEYS.WFD}"]:"true"`,
+            `metadata["${STRIPE_METADATA_KEYS.ENVIRONMENT}"]:"${useEnvVar("ENVIRONMENT")}"`,
+            `metadata["${STRIPE_METADATA_KEYS.PLAN_KEY}"]:"${planKey}"`,
+            `active:"true"`,
+        ].join(" AND "),
+    }).then(r => r.data)
+
+    for (const p of prices) {
+        try {
+            await api.prices.update(p.id, { active: false })
+            console.log(`Deactivated price ${p.id}`)
+        } catch (err: any) {
+            console.log(`Failed to deactivate price ${p.id}:`, err.message)
+        }
+    }
+
+    const products = await api.products.search({
+        query: [
+            `metadata["${STRIPE_METADATA_KEYS.WFD}"]:"true"`,
+            `metadata["${STRIPE_METADATA_KEYS.ENVIRONMENT}"]:"${useEnvVar("ENVIRONMENT")}"`,
+            `metadata["${STRIPE_METADATA_KEYS.PLAN_KEY}"]:"${planKey}"`,
+            `active:"true"`,
+        ].join(" AND "),
+    }).then(r => r.data)
+
+    for (const p of products) {
+        try {
+            await api.products.del(p.id)
+            console.log(`Deleted product ${p.id}`)
+        } catch (err: any) {
+            console.log(`Failed to delete product ${p.id}:`, err.message)
+            console.log("Gonna try deactivating")
+
+            try {
+                await api.products.update(p.id, { active: false })
+                console.log(`Deactivated product ${p.id}`)
+            } catch (err: any) {
+                console.log(`Failed to deactivate product ${p.id}:`, err.message)
+            }
+        }
+    }
+}
+
+
+interface SyncOptions {
+    dryRun?: boolean
 }

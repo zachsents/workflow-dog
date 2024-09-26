@@ -92,9 +92,11 @@ export default function ProjectUsageBilling() {
                     <Button
                         variant="secondary" className="gap-2"
                         onClick={() => manageBillingMutation.mutate({ projectId })}
-                        disabled={manageBillingMutation.isPending || upgradeBillingMutation.isPending}
+                        disabled={manageBillingMutation.isPending
+                            || manageBillingMutation.isSuccess
+                            || upgradeBillingMutation.isPending}
                     >
-                        {manageBillingMutation.isPending ? <>
+                        {(manageBillingMutation.isPending || manageBillingMutation.isSuccess) ? <>
                             <SpinningLoader />
                             One sec...
                         </> : "Manage Billing"}
@@ -127,9 +129,11 @@ export default function ProjectUsageBilling() {
                             : <Button
                                 variant="secondary" className="gap-2"
                                 onClick={() => upgradeBillingMutation.mutate({ projectId, mode: "upgrade" })}
-                                disabled={upgradeBillingMutation.isPending || manageBillingMutation.isPending}
+                                disabled={upgradeBillingMutation.isPending
+                                    || upgradeBillingMutation.isSuccess
+                                    || manageBillingMutation.isPending}
                             >
-                                {upgradeBillingMutation.isPending ? <>
+                                {(upgradeBillingMutation.isPending || upgradeBillingMutation.isSuccess) ? <>
                                     <SpinningLoader />
                                     One sec...
                                 </> : "Upgrade Now"}

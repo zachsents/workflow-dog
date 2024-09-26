@@ -41,10 +41,6 @@ export async function handleWebhookRequest(req: Request, res: Response) {
             console.log(`Subscription deleted for project ${event.data.object.metadata.projectId}.This is a bug.`)
             break
         case "customer.subscription.updated": {
-            const projectId = event.data.object.metadata.projectId
-            if (!projectId)
-                break
-
             const priceMetadata = event.data.object.items.data[0].price.metadata
             const isPriceForCurrentEnvironment =
                 priceMetadata[STRIPE_METADATA_KEYS.WFD] === "true"
@@ -56,10 +52,10 @@ export async function handleWebhookRequest(req: Request, res: Response) {
             const planKey = priceMetadata[STRIPE_METADATA_KEYS.PLAN_KEY] as BillingPlan
             await db.updateTable("projects")
                 .set({ billing_plan: planKey })
-                .where("id", "=", projectId)
+                .where("stripe_subscription_id", "=", event.data.object.id)
                 .execute()
 
-            console.log(`Updated project ${projectId} to plan ${planKey}`)
+            console.log(`Updated project ${event.data.object.metadata.projectId} to plan ${planKey}`)
             break
         }
     }

@@ -199,7 +199,7 @@ new Worker("runs", async (job) => {
                         return [
                             ...Object.values(flat.formErrors),
                             ...Object.values(flat.fieldErrors),
-                        ].join("\n")
+                        ].flat().join("\n")
                     }
 
                     return err.message

@@ -370,7 +370,10 @@ function RunHistoryPanel() {
 
     const utils = trpc.useUtils()
     const refreshMutation = useMutation({
-        mutationFn: () => utils.workflows.runs.list.invalidate(),
+        mutationFn: () => Promise.all([
+            utils.workflows.runs.list.invalidate(),
+            utils.workflows.byId.invalidate({ workflowId: workflow.id }),
+        ]),
     })
 
     return <>

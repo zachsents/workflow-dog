@@ -23,6 +23,7 @@ switch (process.argv[2]) {
         await purgeProducts("free")
         await purgeProducts("basic")
         await purgeProducts("pro")
+        await purgeWebhooks()
         break
     case "list-billing-configs":
         await api.billingPortal.configurations.list({
@@ -53,6 +54,9 @@ export async function syncProductsToStripe({
     await upsertPlan("pro", { dryRun })
 
     const portalConfig = await upsertBillingPortalConfig(["free", "basic", "pro"], { dryRun })
+
+    if (!useEnvVar("APP_ORIGIN").includes("localhost"))
+        await upsertWebhook({ dryRun })
 
     if (!dryRun) {
         // update app config
@@ -362,23 +366,42 @@ async function upsertBillingPortalConfig(planKeys: BillingPlan[], {
 }
 
 
-async function purgeConfigs() {
-    const configs = await api.billingPortal.configurations.list({
-        active: true,
+/**
+ * Creates or updates a webhook endpoint for Stripe to send events to.
+ */
+async function upsertWebhook({
+    dryRun = false,
+}: SyncOptions = {}) {
+
+    const stripeWebhookData: Stripe.WebhookEndpointCreateParams = {
+        enabled_events: ["customer.subscription.updated"],
+        url: `${useEnvVar("APP_ORIGIN")}/api/stripe/webhook`,
+        metadata: {
+            [STRIPE_METADATA_KEYS.WFD]: "true",
+            [STRIPE_METADATA_KEYS.ENVIRONMENT]: useEnvVar("ENVIRONMENT"),
+        },
+    }
+
+    const existingWebhook = await api.webhookEndpoints.list({
         limit: 100,
-    }).then(r => r.data.filter(c =>
-        c.metadata?.[STRIPE_METADATA_KEYS.WFD] === "true"
-        && c.metadata?.[STRIPE_METADATA_KEYS.ENVIRONMENT] === useEnvVar("ENVIRONMENT")
+    }).then(r => r.data.find(wh =>
+        wh.metadata?.[STRIPE_METADATA_KEYS.WFD] === "true"
+        && wh.metadata?.[STRIPE_METADATA_KEYS.ENVIRONMENT] === useEnvVar("ENVIRONMENT")
     ))
 
-    for (const c of configs) {
-        try {
-            await api.billingPortal.configurations.update(c.id, { active: false })
-            console.log(`Deactivated billing portal config ${c.id}`)
-        } catch (err: any) {
-            console.log(`Failed to deactivate billing portal config ${c.id}:`, err.message)
-        }
+    if (!existingWebhook) {
+        console.log("Creating webhook endpoint")
+        return dryRun ? null : api.webhookEndpoints.create(stripeWebhookData)
     }
+
+    const shouldUpdate = !_isMatch(existingWebhook, stripeWebhookData)
+    if (shouldUpdate) {
+        console.log("Updating webhook endpoint")
+        return dryRun ? null : api.webhookEndpoints.update(existingWebhook.id, stripeWebhookData)
+    }
+
+    console.log("Nothing to update for webhook endpoint")
+    return existingWebhook
 }
 
 
@@ -425,6 +448,45 @@ async function purgeProducts(planKey: BillingPlan) {
             } catch (err: any) {
                 console.log(`Failed to deactivate product ${p.id}:`, err.message)
             }
+        }
+    }
+}
+
+
+async function purgeConfigs() {
+    const configs = await api.billingPortal.configurations.list({
+        active: true,
+        limit: 100,
+    }).then(r => r.data.filter(c =>
+        c.metadata?.[STRIPE_METADATA_KEYS.WFD] === "true"
+        && c.metadata?.[STRIPE_METADATA_KEYS.ENVIRONMENT] === useEnvVar("ENVIRONMENT")
+    ))
+
+    for (const c of configs) {
+        try {
+            await api.billingPortal.configurations.update(c.id, { active: false })
+            console.log(`Deactivated billing portal config ${c.id}`)
+        } catch (err: any) {
+            console.log(`Failed to deactivate billing portal config ${c.id}:`, err.message)
+        }
+    }
+}
+
+
+async function purgeWebhooks() {
+    const webhooks = await api.webhookEndpoints.list({
+        limit: 100,
+    }).then(r => r.data.filter(wh =>
+        wh.metadata?.[STRIPE_METADATA_KEYS.WFD] === "true"
+        && wh.metadata?.[STRIPE_METADATA_KEYS.ENVIRONMENT] === useEnvVar("ENVIRONMENT")
+    ))
+
+    for (const wh of webhooks) {
+        try {
+            await api.webhookEndpoints.del(wh.id)
+            console.log(`Deleted webhook endpoint ${wh.id}`)
+        } catch (err: any) {
+            console.log(`Failed to delete webhook endpoint ${wh.id}:`, err.message)
         }
     }
 }

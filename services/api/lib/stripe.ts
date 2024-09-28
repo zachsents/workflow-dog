@@ -33,13 +33,6 @@ export async function handleWebhookRequest(req: Request, res: Response) {
     }
 
     switch (event.type) {
-        case "customer.subscription.created":
-            // shouldn't need anything here
-            break
-        case "customer.subscription.deleted":
-            // this shouldn't happen, but just in case:
-            console.log(`Subscription deleted for project ${event.data.object.metadata.projectId}.This is a bug.`)
-            break
         case "customer.subscription.updated": {
             const priceMetadata = event.data.object.items.data[0].price.metadata
             const isPriceForCurrentEnvironment =
@@ -55,7 +48,7 @@ export async function handleWebhookRequest(req: Request, res: Response) {
                 .where("stripe_subscription_id", "=", event.data.object.id)
                 .execute()
 
-            console.log(`Updated project ${event.data.object.metadata.projectId} to plan ${planKey}`)
+            console.log(`Updated project ${event.data.object.metadata.projectId} to plan "${planKey}"`)
             break
         }
     }

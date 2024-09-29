@@ -413,7 +413,7 @@ function RecentActivityChart({ data, height = 300 }: {
             {data.map(d =>
                 <p
                     key={"label-" + d.date.toString()}
-                    className="text-xs text-muted-foreground text-center place-self-center"
+                    className="text-xs text-muted-foreground text-center place-self-center writing-vertical xl:writing-reset"
                 >
                     {d.date.toLocaleDateString()}
                 </p>

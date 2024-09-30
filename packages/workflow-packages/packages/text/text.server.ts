@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { createPackage } from "../../registry/registry.server"
+import { escapeHTML } from "bun"
 
 
 const helper = createPackage("text")
@@ -58,5 +59,13 @@ helper.node("length", {
     action(inputs) {
         const { text } = z.object({ text: z.string() }).parse(inputs)
         return { length: text.length }
+    },
+})
+
+helper.node("escapeHtml", {
+    name: "Escape HTML",
+    action(inputs) {
+        const { text } = z.object({ text: z.string() }).parse(inputs)
+        return { escaped: escapeHTML(text) }
     },
 })

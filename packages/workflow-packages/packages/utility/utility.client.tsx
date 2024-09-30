@@ -1,15 +1,15 @@
-import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowIteration, IconArrowsJoin2, IconArrowsSplit2, IconBraces, IconChartBar, IconEqual, IconMessage, IconPlayerPlay, IconSpeakerphone, IconSquare, IconTypography } from "@tabler/icons-react"
+import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowIteration, IconArrowsJoin2, IconArrowsSplit2, IconBraces, IconChartBar, IconEqual, IconMessage, IconPlayerPlay, IconSquare, IconTypography } from "@tabler/icons-react"
 import TI from "web/src/components/tabler-icon"
 import { Textarea } from "web/src/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "web/src/components/ui/toggle-group"
 import { useGraphBuilder, useNodeId } from "web/src/lib/graph-builder/core"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
+import { useCurrentWorkflow } from "web/src/lib/hooks"
 import { cn } from "web/src/lib/utils"
+import { ClientEventTypes } from "../../client"
 import { useValueType } from "../../lib/value-types.client"
 import { createPackage } from "../../registry/registry.client"
 import OtherWorkflowsSelector from "./components/other-workflows-selector"
-import { useCurrentWorkflow } from "web/src/lib/hooks"
-import { ClientEventTypes } from "../../client"
 
 
 const helper = createPackage("utility")
@@ -195,14 +195,24 @@ helper.node("jsonStringify", {
     </StandardNode>,
 })
 
+helper.node("toString", {
+    name: "Convert to Text",
+    description: "Converts a value to text.",
+    icon: IconTypography,
+    component: () => <StandardNode>
+        <StandardNode.Handle type="input" name="value" />
+        <StandardNode.Handle type="output" name="text" valueType={useValueType("string")} />
+    </StandardNode>,
+})
+
 helper.node("coalesce", {
-    name: "Coalesce",
+    name: "Fallback",
     description: "Returns the first non-null value from the input.",
     icon: IconSquare,
     component: () => <StandardNode>
         <StandardNode.MultiHandle
             type="input" name="values" displayName="Values"
-            itemDisplayName="Value"
+            itemDisplayName="Try"
             min={1} defaultAmount={2}
         />
         <StandardNode.Handle type="output" name="value" />
@@ -231,26 +241,14 @@ helper.node("triggerData", {
     },
 })
 
-helper.node("respond", {
-    name: "Respond to Trigger",
-    description: "Responds to the trigger that caused this workflow to run.",
-    icon: IconSpeakerphone,
-    component: () => {
-        const eventTypeId = useCurrentWorkflow().data!.trigger_event_type_id
-        const eventType = ClientEventTypes[eventTypeId]
-
-        return (
-            <StandardNode hidePackageBadge>
-                {Object.entries(eventType.workflowOutputs).map(([outputId, outputDef]) =>
-                    <StandardNode.Handle
-                        key={outputId} name={outputId} type="input"
-                        displayName={outputDef.displayName}
-                        valueType={outputDef.valueType}
-                    />
-                )}
-            </StandardNode>
-        )
-    },
+helper.node("returnData", {
+    name: "Return Data",
+    description: "Returns data to the trigger that caused this workflow to run.",
+    icon: IconArrowIteration,
+    component: () => <StandardNode>
+        <StandardNode.Handle type="input" name="data" />
+    </StandardNode>,
+    whitelistedTriggers: ["eventType:primitives/callable"],
 })
 
 helper.node("runWorkflow", {

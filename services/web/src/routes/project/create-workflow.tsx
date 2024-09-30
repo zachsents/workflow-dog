@@ -34,7 +34,8 @@ const eventTypeSearchList = Object.values(ClientEventTypes)
 const mostPopularTriggers = [
     "eventType:primitives/callable",
     "eventType:primitives/schedule",
-    "eventType:primitives/webhook",
+    "eventType:http/request",
+    "eventType:http/webhook",
 ]
 
 export default function ProjectCreateWorkflow() {

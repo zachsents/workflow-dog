@@ -1,6 +1,6 @@
 import type { ApiRouterOutput } from "api/trpc/router"
 import type { EventSources } from "core/db"
-import type { Request } from "express"
+import type { Request, Response } from "express"
 import type { Selectable } from "kysely"
 
 
@@ -31,6 +31,7 @@ export interface ServerDefinition {
 
 export interface ClientNodeDefinition extends ClientDefinition {
     component: React.ComponentType
+    whitelistedTriggers?: string[]
 }
 
 export interface ServerNodeDefinition extends ServerDefinition {
@@ -39,8 +40,9 @@ export interface ServerNodeDefinition extends ServerDefinition {
         workflowId: string
         projectId: string
         eventPayload: any
-        respond: (data: Record<string, any>) => void
+        respond: <T extends Record<string, any> = Record<string, any>>(data: T) => void
     }) => MaybePromise<Record<string, any> | void>
+    respondsToTriggerSynchronously?: boolean
 }
 
 
@@ -121,6 +123,7 @@ export interface ServerEventSourceDefinition extends ServerDefinition {
         events?: Omit<ServerEvent, "source">[]
         state?: any
     } | void>
+    handleResponse?: <T extends Record<string, any>>(res: Response, responseData: T) => MaybePromise<void>
 }
 
 export type EventSourceInitializer = {

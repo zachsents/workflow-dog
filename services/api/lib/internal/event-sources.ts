@@ -1,16 +1,18 @@
 import type { DB, WorkflowRuns } from "core/db"
-import { sql, type Insertable, type Kysely, type Transaction } from "kysely"
-import { db } from "../db"
-import { ServerEventSources, ServerEventTypes } from "workflow-packages/server"
-import _merge from "lodash/merge"
-import _mapValues from "lodash/mapValues"
-import type { Request, Response } from "express"
-import type { ServerEvent } from "workflow-packages/lib/types"
-import { encodeValue } from "workflow-packages/lib/value-types.server"
-import { useEnvVar } from "../utils"
-import { RUN_QUEUE } from "../bullmq"
-import { getCurrentBillingPeriod } from "./projects"
 import { getPlanData } from "core/plans"
+import type { Request, Response } from "express"
+import { sql, type Insertable, type Kysely, type Transaction } from "kysely"
+import _mapValues from "lodash/mapValues"
+import _merge from "lodash/merge"
+import SuperJSON from "superjson"
+import type { ServerEvent } from "workflow-packages/lib/types"
+import { decodeValue, encodeValue } from "workflow-packages/lib/value-types.server"
+import { ServerEventSources, ServerEventTypes, ServerNodeDefinitions } from "workflow-packages/server"
+import { z } from "zod"
+import { RUN_QUEUE, RUN_QUEUE_EVENTS } from "../bullmq"
+import { db } from "../db"
+import { useEnvVar } from "../utils"
+import { getCurrentBillingPeriod } from "./projects"
 
 
 export async function handleEventSourceRequest(req: Request, res: Response) {
@@ -113,29 +115,109 @@ export async function handleEventSourceRequest(req: Request, res: Response) {
     )
 
     const generatedAnyRuns = newRunsData.length > 0
-
-    const newRunIds = generatedAnyRuns
-        ? await db.insertInto("workflow_runs")
-            .values(newRunsData)
-            .returning("id")
-            .execute()
-            .then(r => r.map(r => r.id))
-        : []
-
-    if (newRunIds.length > 0)
-        await RUN_QUEUE.addBulk(newRunIds.map(id => ({
-            name: id,
-            data: { workflowRunId: id },
-        })))
-
     await updateStateTask // has been running in background
 
-    res.status(generatedAnyRuns ? 202 : 200).json({
-        runs: newRunIds.map(runId => ({
-            id: runId,
-            statusUrl: useEnvVar("APP_ORIGIN") + "/api/workflow-runs/" + runId + "/status?with_outputs",
-        }))
+    if (!generatedAnyRuns) {
+        return res.status(200).json({ runs: [] })
+    }
+
+    // insert new runs into the database
+    const newRuns = await db.insertInto("workflow_runs")
+        .values(newRunsData)
+        .returning(["id"])
+        .execute()
+
+    //  check if any of these runs will need to respond synchronously
+    const runsThatRespond = await db.selectFrom("workflow_runs")
+        .innerJoin("workflow_snapshots", "workflow_runs.snapshot_id", "workflow_snapshots.id")
+        .select(["workflow_runs.id", "snapshot_id", "workflow_snapshots.graph"])
+        .where("workflow_runs.id", "in", newRuns.map(r => r.id))
+        .execute()
+        .then(rows => {
+            // the boolean represents whether the workflow responds synchronously
+            const analyzedSnapshots = new Map<string, boolean>()
+
+            return rows.filter(r => {
+                if (!analyzedSnapshots.has(r.snapshot_id!)) {
+                    const { success, data } = z.object({
+                        nodes: z.object({
+                            id: z.string(),
+                            definitionId: z.string(),
+                        }).passthrough().array(),
+                    }).strip().safeParse(SuperJSON.parse(r.graph))
+
+                    if (!success)
+                        return false
+
+                    const respondsSync = data.nodes.some(n => ServerNodeDefinitions[n.definitionId].respondsToTriggerSynchronously)
+                    analyzedSnapshots.set(r.snapshot_id!, respondsSync)
+                }
+
+                return analyzedSnapshots.get(r.snapshot_id!)!
+            }).map(r => r.id)
+        })
+
+    // add new runs to the queue
+    const jobs = await RUN_QUEUE.addBulk(newRuns.map(r => ({
+        name: r.id,
+        data: { workflowRunId: r.id },
+    })))
+
+    // if there are no runs that respond synchronously, we can just respond immediately with a 202
+    if (runsThatRespond.length === 0) {
+        return res.status(202).json({
+            runs: newRuns.map(r => ({
+                id: r.id,
+                statusUrl: useEnvVar("APP_ORIGIN") + "/api/workflow-runs/" + r.id + "/status?with_outputs",
+            }))
+        })
+    }
+
+    // otheriwse, wait for the first valid response
+    const winningResponseData = await new Promise<Record<string, any> | undefined>((resolve) => {
+        let completed = 0
+
+        const completionHandler = async ({ jobId }: { jobId: string }) => {
+            const runId: string | undefined = jobs.find(j => j.id === jobId)?.data?.workflowRunId
+
+            if (!runId || !runsThatRespond.includes(runId)) return
+            completed++
+
+            const responseData = await db.selectFrom("workflow_run_outputs")
+                .select(["handle_id", "value"])
+                .where("workflow_run_id", "=", runId)
+                .where("is_global", "=", true)
+                .execute()
+                .then(rows => Object.fromEntries(
+                    rows.map(r => [r.handle_id, decodeValue(JSON.parse(r.value))] as const)
+                ))
+
+            // good response -- resolve with it
+            if (Object.keys(responseData).length > 0) {
+                resolve(responseData)
+                RUN_QUEUE_EVENTS.off("completed", completionHandler)
+                return
+            }
+
+            // there's still more runs to check -- keep waiting
+            if (completed < runsThatRespond.length)
+                return
+
+            // no more runs to check -- resolve with undefined
+            resolve(undefined)
+            RUN_QUEUE_EVENTS.off("completed", completionHandler)
+            return
+        }
+
+        RUN_QUEUE_EVENTS.on("completed", completionHandler)
     })
+
+    if (winningResponseData)
+        await eventSourceDef.handleResponse?.(res, winningResponseData)
+
+    // fallback to 204 if the response handler didn't do it
+    if (!res.writableEnded)
+        res.sendStatus(204)
 }
 
 

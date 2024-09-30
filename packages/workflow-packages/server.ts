@@ -6,6 +6,7 @@ import "./packages/text/text.server"
 import "./packages/math/math.server"
 import "./packages/objects/objects.server"
 import "./packages/time/time.server"
+import "./packages/http/http.server"
 
 export {
     nodes as ServerNodeDefinitions,

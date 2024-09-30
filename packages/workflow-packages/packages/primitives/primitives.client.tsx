@@ -1,11 +1,10 @@
 import useResizeObserver from "@react-hook/resize-observer"
-import { IconAsteriskSimple, IconBook, IconBox, IconBracketsContain, IconClock, IconExternalLink, IconHash, IconLink, IconQuestionMark, IconRouteSquare2, IconSquare, IconTextSize, IconToggleLeftFilled, IconWebhook } from "@tabler/icons-react"
+import { useDebouncedCallback } from "@react-hookz/web"
+import { IconAsteriskSimple, IconBox, IconBracketsContain, IconClock, IconExternalLink, IconHash, IconQuestionMark, IconRouteSquare2, IconSquare, IconTextSize, IconToggleLeftFilled } from "@tabler/icons-react"
 import { useMemo, useRef } from "react"
 import { Link } from "react-router-dom"
-import CopyButton from "web/src/components/copy-button"
 import TI from "web/src/components/tabler-icon"
 import { Button } from "web/src/components/ui/button"
-import { DropdownMenuItem } from "web/src/components/ui/dropdown-menu"
 import { Input } from "web/src/components/ui/input"
 import { Switch } from "web/src/components/ui/switch"
 import { Table, TableBody, TableCell, TableRow } from "web/src/components/ui/table"
@@ -18,7 +17,6 @@ import { useValueType, ValueDisplay } from "../../lib/value-types.client"
 import { createPackage } from "../../registry/registry.client"
 import ScheduleConfig from "./components/schedule-config"
 import ValueDisplayBlock from "./components/value-display-block"
-import { useDebouncedCallback } from "@react-hookz/web"
 
 
 const helper = createPackage("primitives")
@@ -225,40 +223,6 @@ helper.valueType("object", {
     </Table>,
 })
 
-helper.valueType("map", {
-    name: "Map",
-    description: "A map of key-value pairs with all values of the same type.",
-    icon: IconBook,
-    genericParams: 1,
-    previewComponent: ({ value }: { value: [string, any][] }) => <p className="text-xs font-bold">
-        Map - {value.length} entries
-    </p>,
-    fullComponent: ({ value }: { value: [string, any][] }) => {
-        return (
-            <Table>
-                <TableBody>
-                    {value.map(([k, v]) =>
-                        <TableRow key={k}>
-                            <TableCell className="font-semibold text-sm">
-                                {k}
-                            </TableCell>
-                            <TableCell className="font-mono text-sm">
-                                <ValueDisplay encodedValue={v} mode="preview" />
-                            </TableCell>
-                        </TableRow>
-                    )}
-
-                    {value.length === 0 && <TableRow>
-                        <TableCell className="text-muted-foreground text-xs text-center">
-                            No entries
-                        </TableCell>
-                    </TableRow>}
-                </TableBody>
-            </Table>
-        )
-    },
-})
-
 helper.valueType("array", {
     name: "List",
     description: "An ordered list of values.",
@@ -308,7 +272,8 @@ helper.valueType("date", {
 })
 
 
-// #region EventType: Callable
+// #region Triggers
+
 helper.eventType("callable", {
     name: "Callable",
     whenName: "When another workflow calls this one",
@@ -350,126 +315,6 @@ helper.eventType("callable", {
     },
 })
 
-// #region EventType: Webhook
-helper.eventType("webhook", {
-    name: "Webhook",
-    whenName: "When a webhook is received",
-    icon: IconWebhook,
-    color: "gray.800",
-    description: "Triggers when a webhook is received. You'll be provided with a URL that you can use with any external service. Only accepts HTTP POST requests.",
-    keywords: ["webhook", "http", "external", "service", "url"],
-    workflowInputs: {
-        data: {
-            displayName: "Data",
-            description: "The JSON data passed from the webhook.",
-            valueType: useValueType("any"),
-        },
-        params: {
-            displayName: "Parameters",
-            description: "The parameters parsed from the webhook URL.",
-            valueType: useValueType("map", [useValueType("string")]),
-        },
-    },
-    sourceComponent: ({ workflowId }) => {
-        const url = `${location.origin}/run/x/webhook_${workflowId}`
-
-        return (
-            <div className="grid gap-4">
-                <p className="text-sm">
-                    This is a unique URL that triggers this workflow. Copy it and paste it into any service that accepts webhooks.
-                </p>
-                <pre className="break-all whitespace-normal text-xs p-2 bg-gray-100 rounded-md">
-                    {url}
-                </pre>
-                <CopyButton content={url} copyText="Copy URL" />
-            </div>
-        )
-    },
-    additionalDropdownItems: ({ workflowId }) => (
-        <DropdownMenuItem onClick={() => {
-            const url = `${location.origin}/run/x/webhook_${workflowId}`
-            navigator.clipboard.writeText(url)
-        }}>
-            <TI><IconLink /></TI>
-            Copy webhook URL
-        </DropdownMenuItem>
-    ),
-})
-
-// #region EventType: HTTP Request
-helper.eventType("httpRequest", {
-    name: "HTTP Request",
-    whenName: "When a HTTP request is received",
-    icon: IconLink,
-    color: "gray.800",
-    description: "Triggers when a HTTP request is received. You can specify a custom URL path, which can be shared between multiple workflows. Accepts common HTTP methods e.g. GET, POST, PUT, PATCH, DELETE, etc.",
-    keywords: ["http", "request", "url", "path", "method"],
-    workflowInputs: {
-        path: {
-            displayName: "Path",
-            description: "The path on the URL that was called.",
-            valueType: useValueType("string"),
-        },
-        method: {
-            displayName: "Method",
-            description: "The HTTP method that was called.",
-            valueType: useValueType("string"),
-        },
-        body: {
-            displayName: "Body",
-            description: "The body of the request as a base64 encoded string.",
-            valueType: useValueType("string"),
-        },
-        headers: {
-            displayName: "Headers",
-            description: "The headers of the request.",
-            valueType: useValueType("map", [useValueType("string")]),
-        },
-        query: {
-            displayName: "Query Parameters",
-            description: "The query parameters of the request.",
-            valueType: useValueType("map", [useValueType("string")]),
-        },
-    },
-    workflowOutputs: {
-        body: {
-            displayName: "Body",
-            description: "The body of the response.",
-            valueType: useValueType("string"),
-        },
-        status: {
-            displayName: "Status Code",
-            description: "The status code of the response. Defaults to 200 (OK).",
-            valueType: useValueType("number"),
-        },
-    },
-    sourceComponent: ({ workflowId }) => {
-        const url = `${location.origin}/run/x/request_${workflowId}`
-
-        return (
-            <div className="grid gap-4">
-                <p className="text-sm">
-                    This is a unique URL that triggers this workflow. Copy it and use it for any HTTP request.
-                </p>
-                <pre className="break-all whitespace-normal text-xs p-2 bg-gray-100 rounded-md">
-                    {url}
-                </pre>
-                <CopyButton content={url} copyText="Copy URL" />
-            </div>
-        )
-    },
-    additionalDropdownItems: ({ workflowId }) => (
-        <DropdownMenuItem onClick={() => {
-            const url = `${location.origin}/run/x/request_${workflowId}`
-            navigator.clipboard.writeText(url)
-        }}>
-            <TI><IconLink /></TI>
-            Copy webhook URL
-        </DropdownMenuItem>
-    ),
-})
-
-// #region EventType: Schedule
 helper.eventType("schedule", {
     name: "Schedule",
     whenName: "On a schedule",

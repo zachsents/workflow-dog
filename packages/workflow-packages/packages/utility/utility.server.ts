@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { createPackage } from "../../registry/registry.server"
 import axios from "axios"
-import { encodeValue } from "../../lib/value-types.server"
+import { decodeValue, encodeValue } from "../../lib/value-types.server"
 
 const helper = createPackage("utility")
 
@@ -79,6 +79,17 @@ helper.node("jsonStringify", {
     },
 })
 
+helper.node("toString", {
+    name: "Convert to Text",
+    action(inputs) {
+        const { value } = z.object({
+            value: z.any(),
+        }).parse(inputs)
+
+        return { text: `${value}` }
+    },
+})
+
 helper.node("coalesce", {
     name: "Coalesce",
     action(inputs) {
@@ -97,11 +108,15 @@ helper.node("triggerData", {
     },
 })
 
-helper.node("respond", {
-    name: "Respond",
+helper.node("returnData", {
+    name: "Return Data",
     action(inputs, ctx) {
-        ctx.respond(inputs)
+        const { data } = z.object({
+            data: z.any().refine(v => v !== undefined, "Required"),
+        }).parse(inputs)
+        ctx.respond({ dataOut: data })
     },
+    respondsToTriggerSynchronously: true,
 })
 
 helper.node("runWorkflow", {
@@ -117,30 +132,29 @@ helper.node("runWorkflow", {
 
         const url = `http://localhost:${process.env.PORT}/run/x/callable_${selectedWorkflow}`
 
-        await axios.post(url, encodeValue(payload))
+        const result = await axios.post(url, encodeValue(payload))
+            .then(r => decodeValue(r.data))
+        return { result }
     },
 })
 
 helper.node("loopWorkflow", {
     name: "Loop Workflow",
     async action(inputs, ctx) {
-
         const { payloads } = z.object({
             payloads: z.any().array(),
         }).parse(inputs)
-        console.log(payloads)
 
-        console.log(ctx.node.config)
         const { selectedWorkflow } = z.object({
             selectedWorkflow: z.string().uuid(),
         }).parse(ctx.node.config)
-        console.log(selectedWorkflow)
 
         const url = `http://localhost:${process.env.PORT}/run/x/callable_${selectedWorkflow}`
 
-        await Promise.all(payloads.map(payload =>
-            axios.post(url, encodeValue(payload))
+        const results = await Promise.all(payloads.map(payload =>
+            axios.post(url, encodeValue(payload)).then(r => decodeValue(r.data))
         ))
+        return { results }
     },
 })
 

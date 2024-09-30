@@ -1,4 +1,4 @@
-import { IconBraces, IconLetterCaseLower, IconLetterCaseUpper, IconRuler } from "@tabler/icons-react"
+import { IconBraces, IconCode, IconLetterCaseLower, IconLetterCaseUpper, IconRuler } from "@tabler/icons-react"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
 import { createPackage } from "../../registry/registry.client"
 import { useValueType } from "../../lib/value-types.client"
@@ -76,4 +76,16 @@ helper.node("length", {
             displayName="Length"
         />
     </StandardNode>
+})
+
+helper.node("escapeHtml", {
+    name: "Escape HTML",
+    description: "Escapes HTML characters in a string.",
+    icon: IconCode,
+    component: () => <StandardNode>
+        <StandardNode.Handle type="input" name="text" valueType={useValueType("string")} />
+        <StandardNode.Handle
+            type="output" name="escaped" valueType={useValueType("string")}
+        />
+    </StandardNode>,
 })

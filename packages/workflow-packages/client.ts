@@ -6,6 +6,7 @@ import "./packages/text/text.client"
 import "./packages/math/math.client"
 import "./packages/objects/objects.client"
 import "./packages/time/time.client"
+import "./packages/http/http.client"
 
 export {
     nodes as ClientNodeDefinitions,

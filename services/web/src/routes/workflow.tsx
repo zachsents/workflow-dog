@@ -20,6 +20,7 @@ import dayjs from "@web/lib/dayjs"
 import RunHistoryTable from "@web/components/run-history-table"
 import SimpleTooltip from "@web/components/simple-tooltip"
 import { useMutation } from "@tanstack/react-query"
+import { useMemo } from "react"
 
 
 function WorkflowIndex() {
@@ -91,6 +92,14 @@ function WorkflowIndex() {
     }, {
         enabled: !!selectedRun?.snapshot_id,
     })
+
+    const nodeDefinitions = useMemo(() => {
+        return Object.fromEntries(
+            Object.entries(ClientNodeDefinitions).filter(([, def]) =>
+                def.whitelistedTriggers?.includes(workflow?.trigger_event_type_id ?? "") ?? true
+            )
+        )
+    }, [ClientNodeDefinitions, workflow?.trigger_event_type_id])
 
     return <>
         <Helmet>
@@ -207,7 +216,7 @@ function WorkflowIndex() {
                     {!selectedRunId && <GBRoot
                         className="w-full h-full"
                         options={{
-                            nodeDefinitions: ClientNodeDefinitions,
+                            nodeDefinitions,
                             initialGraph: workflow.graph,
                             onGraphChange: graph => {
                                 console.debug("Saving graph...")

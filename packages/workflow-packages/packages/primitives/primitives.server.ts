@@ -4,7 +4,7 @@ import { createHash } from "node:crypto"
 import { z } from "zod"
 import { createPackage, uniformEventData } from "../../registry/registry.server"
 import _mapValues from "lodash/mapValues"
-import { decodeValue } from "../../lib/value-types.server"
+import { decodeValue, encodeValue } from "../../lib/value-types.server"
 
 
 const helper = createPackage("primitives")
@@ -78,20 +78,6 @@ helper.valueType("object", {
     fromJSON: (v, decode) => _mapValues(v as object, decode),
 })
 
-helper.valueType("map", {
-    name: "Map",
-    isApplicable: v => v instanceof Map,
-    toJSON: (v, encode) => {
-        const map = v as Map<string, any>
-        return Array.from(map.entries()).map(([k, v]) => [k, encode(v)] as const)
-    },
-    conversionPriority: 10,
-    fromJSON: (v, decode) => {
-        const entries = v as [string, any][]
-        return new Map(entries.map(([k, v]) => [k, decode(v)] as const))
-    },
-})
-
 helper.valueType("array", {
     name: "List",
     isApplicable: v => Array.isArray(v),
@@ -126,6 +112,10 @@ const callableEventSource = helper.eventSource("callable", {
             events: uniformEventData(source, { dataIn: parsedBody }),
         }
     },
+    handleResponse(res, responseData) {
+        if (responseData.dataOut !== undefined)
+            res.json(encodeValue(responseData.dataOut))
+    },
 })
 
 helper.eventType("callable", {
@@ -134,86 +124,6 @@ helper.eventType("callable", {
         return [{
             id: "callable_" + workflowId,
             definitionId: callableEventSource.id,
-        }]
-    },
-    generateRunsFromEvent(event) {
-        return [event.data]
-    },
-})
-
-
-// #region Webhook
-
-const webhookEventSource = helper.eventSource("webhook", {
-    name: "Webhook Endpoint",
-    generateEvents(req, source) {
-        if (req.method.toUpperCase() !== "POST")
-            return
-
-        const data = req.body instanceof Buffer
-            ? JSON.parse(req.body.toString("utf8"))
-            : null
-
-        const params = new Map(
-            Object.entries(req.query)
-                .map(([k, v]) => [k, v?.toString()] as const)
-                .filter(([k, v]) => v != null)
-        )
-
-        return {
-            events: uniformEventData(source, { data, params }),
-        }
-    },
-})
-
-helper.eventType("webhook", {
-    name: "Webhook",
-    createEventSources({ workflowId }) {
-        return [{
-            id: "webhook_" + workflowId,
-            definitionId: webhookEventSource.id,
-        }]
-    },
-    generateRunsFromEvent(event) {
-        return [event.data]
-    },
-})
-
-
-// #region HTTP Request
-
-const httpRequestEventSource = helper.eventSource("httpRequest", {
-    name: "HTTP Endpoint",
-    generateEvents(req, source) {
-        const pathSegments = req.path.split("/")
-        const path = "/" + pathSegments.slice(pathSegments.indexOf(source.id) + 1).join("/")
-
-        return {
-            events: uniformEventData(source, {
-                method: req.method.toUpperCase(),
-                path,
-                body: req.body instanceof Buffer ? req.body.toString("base64") : null,
-                headers: new Map(
-                    Object.entries(req.headers)
-                        .map(([k, v]) => [k.toLowerCase(), v?.toString()] as const)
-                        .filter(([k, v]) => v != null)
-                ),
-                query: new Map(
-                    Object.entries(req.query)
-                        .map(([k, v]) => [k, v?.toString()] as const)
-                        .filter(([k, v]) => v != null)
-                ),
-            }),
-        }
-    },
-})
-
-helper.eventType("httpRequest", {
-    name: "HTTP Request",
-    async createEventSources({ workflowId }) {
-        return [{
-            id: "request_" + workflowId,
-            definitionId: httpRequestEventSource.id,
         }]
     },
     generateRunsFromEvent(event) {

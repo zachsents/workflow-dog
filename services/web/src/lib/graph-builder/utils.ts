@@ -1,15 +1,16 @@
-import { useMemo } from "react"
-import { createNode, useGraphBuilder, type Edge, type Node } from "./core"
-import { useSearch } from "../hooks"
-import SuperJSON from "superjson"
-import { stripUnderscoredProperties } from "../utils"
-import _ from "lodash"
 import { isMotionValue, motionValue, MotionValue } from "framer-motion"
+import _ from "lodash"
+import { useMemo } from "react"
+import SuperJSON from "superjson"
 import { z } from "zod"
+import { useSearch } from "../hooks"
+import { stripUnderscoredProperties } from "../utils"
+import { createNode, useGraphBuilder, type Edge, type Node } from "./core"
 
 
 export function useNodeDefinitionsSearch() {
     const gbx = useGraphBuilder()
+
     const nodeDefinitionsList = useMemo(() => Object.entries(gbx.options.nodeDefinitions).map(([id, def]) => ({
         id,
         name: def.name,

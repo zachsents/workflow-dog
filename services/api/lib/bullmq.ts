@@ -1,5 +1,5 @@
 import axios from "axios"
-import { Queue, Worker } from "bullmq"
+import { Queue, QueueEvents, Worker } from "bullmq"
 import IORedis from "ioredis"
 import SuperJSON from "superjson"
 import { ServerNodeDefinitions } from "workflow-packages/server"
@@ -51,8 +51,10 @@ export const RUN_QUEUE = new Queue("runs", {
     },
 })
 
+export const RUN_QUEUE_EVENTS = new QueueEvents("runs", { connection })
+
 new Worker("runs", async (job) => {
-    console.log("[Bull] starting dry workflow run", job.data.workflowRunId)
+    console.log("[Bull] starting workflow run", job.data.workflowRunId)
     const [{ graph, workflow_id, project_id, event_payload }] = await Promise.all([
         db.selectFrom("workflow_runs")
             .innerJoin("workflow_snapshots", "workflow_snapshots.id", "workflow_runs.snapshot_id")

@@ -364,7 +364,12 @@ const DraggableNodeButton = forwardRef<HTMLDivElement, DraggableNodeButtonProps 
     ...props
 }, ref) => {
     const gbx = useGraphBuilder()
-    const def = gbx.getNodeDefinition(definitionId)
+    let def: ClientNodeDefinition | undefined
+    try {
+        def = gbx.getNodeDefinition(definitionId)
+    } catch (err) {
+        console.error(err)
+    }
 
     const animationControls = useAnimationControls()
 
@@ -378,6 +383,8 @@ const DraggableNodeButton = forwardRef<HTMLDivElement, DraggableNodeButtonProps 
             onAdd?.()
         }
     })
+
+    if (!def) return <div>No def</div>
 
     return (
         <DropdownMenu

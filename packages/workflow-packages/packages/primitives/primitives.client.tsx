@@ -65,8 +65,10 @@ helper.node("text", {
                         value={value}
                         onChange={e => gbx.mutateNodeState(nodeId, n => n.config.value = e.currentTarget.value)}
                         placeholder="Type something..."
-                        onPointerDownCapture={(e) => e.stopPropagation()}
-                        className="resize box-border"
+                        onPointerDownCapture={ev => ev.stopPropagation()}
+                        onWheel={ev => ev.stopPropagation()}
+                        className="resize box-border min-h-[2em]"
+                        rows={1}
                         style={textareaSize}
                         ref={resizeRef}
                     />

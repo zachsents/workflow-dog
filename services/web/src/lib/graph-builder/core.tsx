@@ -89,11 +89,13 @@ function GraphRenderer({ children, ...props }: React.ComponentProps<"div">) {
     )
 }
 
+const MAX_ZOOM = 5
+const MIN_ZOOM = 0.2
 
+// #region Viewport
 /**
  * Handles panning, zooming, etc.
  */
-// #region Viewport
 function Viewport({ children }: { children: React.ReactNode }) {
 
     const gbx = useGraphBuilder()
@@ -154,7 +156,7 @@ function Viewport({ children }: { children: React.ReactNode }) {
                     gbx.store.setState({ viewportElement: el })
             }}
             onWheel={(e) => {
-                const newZoom = Math.min(5, Math.max(0.2,
+                const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM,
                     zoom.get() * (1 + e.deltaY * -0.001)
                 ))
                 const zoomRatio = newZoom / zoom.get()
@@ -1371,9 +1373,11 @@ export class GraphBuilder {
             const maxY = Math.max(...nodesArr.map(n => n.position.y.get() + n._height.get()))
 
             const nodeBoxAspectRatio = (maxX - minX) / (maxY - minY)
-            const initialZoom = nodeBoxAspectRatio > targetAspectRatio
-                ? targetRect.width / (maxX - minX)
-                : targetRect.height / (maxY - minY)
+            const initialZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM,
+                nodeBoxAspectRatio > targetAspectRatio
+                    ? targetRect.width / (maxX - minX)
+                    : targetRect.height / (maxY - minY)
+            ))
             const initialPanX = -initialZoom * (maxX + minX) / 2 + viewportRect.width / 2
             const initialPanY = -initialZoom * (maxY + minY) / 2 + viewportRect.height / 2
 

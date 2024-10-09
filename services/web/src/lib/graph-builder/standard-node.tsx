@@ -320,10 +320,9 @@ function MultiHandle(passedProps: MultiHandleProps) {
                 <Handle
                     name={props.name} type={props.type}
                     displayName={props.displayName}
-                    valueType={useValueType(
-                        props.allowNaming ? "object" : "array",
-                        [props.itemValueType],
-                    )}
+                    valueType={props.allowNaming
+                        ? useValueType("object")
+                        : useValueType("array", [props.itemValueType])}
                 />}
         </div>
     )

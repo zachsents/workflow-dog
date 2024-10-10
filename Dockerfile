@@ -1,9 +1,9 @@
-FROM oven/bun as base-build
+FROM oven/bun AS base-build
 WORKDIR /app/full
 COPY . .
 RUN sh ./scripts/make_skeleton.sh ../base && rm -rf /app/full
 
-FROM oven/bun as base
+FROM oven/bun AS base
 WORKDIR /app
 COPY --from=base-build /app/base ./
 RUN bun install
@@ -11,15 +11,15 @@ RUN bun install
 
 # Marketing site ----------------------------------------- #
 
-FROM base as marketing-site-build
+FROM base AS marketing-site-build
 COPY ./services/marketing-site ./services/marketing-site
 RUN bun --filter marketing-site build dist
 
-FROM nginx as marketing-site-prod
+FROM nginx AS marketing-site-prod
 COPY ./services/marketing-site/nginx.conf /etc/nginx/
 COPY --from=marketing-site-build /app/services/marketing-site/dist /www
 
-FROM base as marketing-site-dev
+FROM base AS marketing-site-dev
 RUN apt update && apt install -y nginx
 COPY ./services/marketing-site/nginx.conf /etc/nginx/nginx.conf
 WORKDIR /app/services/marketing-site
@@ -27,25 +27,25 @@ CMD bun run dev-in-container & nginx -g "daemon off;"
 
 # Web app ------------------------------------------------ #
 
-FROM base as web-build
+FROM base AS web-build
 COPY ./packages ./packages
 COPY ./services ./services
 RUN bun --filter web build
 
-FROM nginx as web-prod
+FROM nginx AS web-prod
 COPY ./services/web/nginx.conf /etc/nginx/
 COPY --from=web-build /app/services/web/dist /www
 
 
 # Proxy -------------------------------------------------- #
 
-FROM caddy as proxy
+FROM caddy AS proxy
 COPY ./services/proxy/Caddyfile /etc/caddy/
 
 
 # API ---------------------------------------------------- #
 
-FROM base as api
+FROM base AS api
 RUN apt-get update && apt-get install -y ruby-full
 RUN gem install premailer nokogiri
 COPY ./packages ./packages
@@ -56,7 +56,7 @@ CMD bun .
 
 # Database ----------------------------------------------- #
 
-FROM postgres as db
+FROM postgres AS db
 RUN apt-get update && apt-get install -y curl unzip
 USER postgres
 RUN curl -fsSL https://bun.sh/install | bash

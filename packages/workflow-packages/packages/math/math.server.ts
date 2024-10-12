@@ -231,6 +231,56 @@ helper.node("random", {
 })
 
 
+// #region Comparison
+helper.node("greaterThan", {
+    name: "Greater Than",
+    action(inputs) {
+        const { a, b } = z.object({
+            a: NUMBER_SCHEMA,
+            b: NUMBER_SCHEMA,
+        }).parse(inputs)
+
+        return { result: a > b }
+    },
+})
+
+helper.node("greaterThanOrEqual", {
+    name: "Greater Than or Equal",
+    action(inputs) {
+        const { a, b } = z.object({
+            a: NUMBER_SCHEMA,
+            b: NUMBER_SCHEMA,
+        }).parse(inputs)
+
+        return { result: a >= b }
+    },
+})
+
+helper.node("lessThan", {
+    name: "Less Than",
+    action(inputs) {
+        const { a, b } = z.object({
+            a: NUMBER_SCHEMA,
+            b: NUMBER_SCHEMA,
+        }).parse(inputs)
+
+        return { result: a < b }
+    },
+})
+
+helper.node("lessThanOrEqual", {
+    name: "Less Than or Equal",
+    action(inputs) {
+        const { a, b } = z.object({
+            a: NUMBER_SCHEMA,
+            b: NUMBER_SCHEMA,
+        }).parse(inputs)
+
+        return { result: a <= b }
+    },
+})
+
+
 // #region Trigonometry
 
 helper.node("sin", {

@@ -1,4 +1,4 @@
-import { IconBorderSides, IconDice, IconDivide, IconEqual, IconFeather, IconMath, IconMath1Divide2, IconMathMax, IconMathMin, IconMathPi, IconMinus, IconPlus, IconSquareRoot, IconSquareRounded, IconStairsDown, IconStairsUp, IconSuperscript, IconVariableMinus, IconWaveSine, IconWood, IconX, type Icon, type IconProps } from "@tabler/icons-react"
+import { IconBorderSides, IconDice, IconDivide, IconEqual, IconFeather, IconMath, IconMath1Divide2, IconMathEqualGreater, IconMathEqualLower, IconMathGreater, IconMathLower, IconMathMax, IconMathMin, IconMathPi, IconMinus, IconPlus, IconSquareRoot, IconSquareRounded, IconStairsDown, IconStairsUp, IconSuperscript, IconVariableMinus, IconWaveSine, IconWood, IconX, type Icon, type IconProps } from "@tabler/icons-react"
 import { forwardRef } from "react"
 import { RadioToggle, RadioToggleOption } from "web/src/components/radio-toggle"
 import { StandardNode } from "web/src/lib/graph-builder/standard-node"
@@ -356,6 +356,100 @@ helper.node("random", {
             type="output"
             name="random"
             valueType={useValueType("number")}
+        />
+    </StandardNode>
+})
+
+
+// #region Comparison
+helper.node("greaterThan", {
+    name: "Greater Than",
+    description: "Checks if one number is greater than another.",
+    icon: IconMathGreater,
+    component: () => <StandardNode>
+        <StandardNode.Handle
+            type="input"
+            name="a"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="input"
+            name="b"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="output"
+            name="result"
+            valueType={useValueType("boolean")}
+        />
+    </StandardNode>
+})
+
+helper.node("greaterThanOrEqual", {
+    name: "Greater Than or Equal",
+    description: "Checks if one number is greater than or equal to another.",
+    icon: IconMathEqualGreater,
+    component: () => <StandardNode>
+        <StandardNode.Handle
+            type="input"
+            name="a"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="input"
+            name="b"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="output"
+            name="result"
+            valueType={useValueType("boolean")}
+        />
+    </StandardNode>
+})
+
+helper.node("lessThan", {
+    name: "Less Than",
+    description: "Checks if one number is less than another.",
+    icon: IconMathLower,
+    component: () => <StandardNode>
+        <StandardNode.Handle
+            type="input"
+            name="a"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="input"
+            name="b"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="output"
+            name="result"
+            valueType={useValueType("boolean")}
+        />
+    </StandardNode>
+})
+
+helper.node("lessThanOrEqual", {
+    name: "Less Than or Equal",
+    description: "Checks if one number is less than or equal to another.",
+    icon: IconMathEqualLower,
+    component: () => <StandardNode>
+        <StandardNode.Handle
+            type="input"
+            name="a"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="input"
+            name="b"
+            valueType={useValueType("number")}
+        />
+        <StandardNode.Handle
+            type="output"
+            name="result"
+            valueType={useValueType("boolean")}
         />
     </StandardNode>
 })

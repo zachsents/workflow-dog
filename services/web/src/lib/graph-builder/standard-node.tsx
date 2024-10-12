@@ -16,13 +16,13 @@ import { useDialogState } from "@web/lib/hooks"
 import { cn, getOffsetRelativeTo } from "@web/lib/utils"
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react"
 import { useForm } from "react-hook-form"
+import Markdown from "react-markdown"
 import { ClientValueTypes } from "workflow-packages/client"
 import type { ValueTypeUsage } from "workflow-packages/lib/types"
 import { useValueType, ValueDisplay } from "workflow-packages/lib/value-types.client"
 import { z } from "zod"
 import { useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "./core"
 import { getDefinitionPackageName } from "./utils"
-import Markdown from "react-markdown"
 
 
 // #region StandardNode
@@ -55,78 +55,97 @@ export function StandardNode({
     const error = gbx.options.runErrors?.[id]
 
     return (
-        <Card className={cn(
-            "select-none outline-primary outline-2 outline-offset-2 flex flex-col items-stretch gap-4 py-1",
-            n.highlightColor && `shadow-[0_0_0px_20px] shadow-${n.highlightColor}-400/40`,
+        <div className={cn(
+            "select-none outline-primary outline-2 outline-offset-2 rounded-xl",
             !gbx.options.readonly && (
                 isSelected ? "outline" : (showSelectHoverOutline && "hover:outline-dashed")
             ),
         )}>
-            <div
-                className={cn(
-                    "font-bold px-4 py-1 text-center text-white mx-1 rounded-t-lg rounded-b-sm flex justify-center items-center gap-2",
-                    n.disabled && "opacity-50",
-                )}
-                style={{ backgroundColor: def.color }}
-            >
-                <def.icon />
-                <span className={cn(
-                    n.disabled && "line-through decoration-2",
+            <div className={cn(
+                (n.modifiers.size > 0 || !!n.highlightColor) && `p-4 rounded-xl bg-${n.highlightColor || "gray"}-500/20`,
+            )}>
+                <div className={cn(
+                    "grid grid-cols-2 gap-4",
+                    n.modifiers.size > 0 && "mb-2",
                 )}>
-                    {def.name}
-                </span>
-
-                {!hidePackageBadge && packageDisplayName &&
-                    <span className="bg-white/30 px-2 py-0.5 rounded-sm ml-3 text-xs font-medium leading-none">
-                        {packageDisplayName}
-                    </span>}
-            </div>
-
-            <div className="flex items-start justify-between gap-4 last:mb-3">
-                <div className="flex flex-col items-stretch gap-2">
-                    {inputs}
+                    <div className={cn(
+                        (n.modifiers.has("conditional")
+                            || n.modifiers.has("await")
+                        ) && "flex-col justify-start items-stretch gap-1 relative -left-4 bg-white/75 py-2 pr-2 rounded-r-md border border-l-0",
+                    )}>
+                        {n.modifiers.has("conditional") && <StandardNode.Handle
+                            type="input" name="__condition" displayName="Condition"
+                        />}
+                        {n.modifiers.has("await") && <StandardNode.Handle
+                            type="input" name="__await" displayName="Wait For"
+                        />}
+                    </div>
                 </div>
-                {contentItems.length > 0 &&
-                    <div className="grow flex flex-col items-stretch">
-                        {contentItems}
-                    </div>}
-                <div className="flex flex-col items-stretch gap-2">
-                    {outputs}
-                </div>
-            </div>
-
-            {configItems.length > 0 &&
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                            size="compact" variant="ghost"
-                            className="self-center gap-1 text-[0.65em] text-muted-foreground"
-                        >
-                            Configure {configItems.length} option{configItems.length > 1 && "s"}
-                            <TI><IconChevronDown /></TI>
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                        side="bottom" sideOffset={16}
-                        className="px-2 py-4 flex flex-col items-stretch gap-4"
+                <Card className={cn("flex flex-col items-stretch gap-4 py-1")}>
+                    <div
+                        className={cn(
+                            "font-bold px-4 py-1 text-center text-white mx-1 rounded-t-lg rounded-b-sm flex justify-center items-center gap-2",
+                            n.disabled && "opacity-50",
+                        )}
+                        style={{ backgroundColor: def.color }}
                     >
-                        {configItems}
-                    </PopoverContent>
-                </Popover>}
+                        <def.icon />
+                        <span className={cn(
+                            n.disabled && "line-through decoration-2",
+                        )}>
+                            {def.name}
+                        </span>
+                        {!hidePackageBadge && packageDisplayName &&
+                            <span className="bg-white/30 px-2 py-0.5 rounded-sm ml-3 text-xs font-medium leading-none">
+                                {packageDisplayName}
+                            </span>}
+                    </div>
+                    <div className="flex items-start justify-between gap-4 last:mb-3">
+                        <div className="flex flex-col items-stretch gap-2">
+                            {inputs}
+                        </div>
+                        {contentItems.length > 0 &&
+                            <div className="grow flex flex-col items-stretch">
+                                {contentItems}
+                            </div>}
+                        <div className="flex flex-col items-stretch gap-2">
+                            {outputs}
+                        </div>
+                    </div>
+                    {configItems.length > 0 &&
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    size="compact" variant="ghost"
+                                    className="self-center gap-1 text-[0.65em] text-muted-foreground"
+                                >
+                                    Configure {configItems.length} option{configItems.length > 1 && "s"}
+                                    <TI><IconChevronDown /></TI>
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                                side="bottom" sideOffset={16}
+                                className="px-2 py-4 flex flex-col items-stretch gap-4"
+                            >
+                                {configItems}
+                            </PopoverContent>
+                        </Popover>}
 
-            {error &&
-                <div className="absolute bottom-full hack-center-x mb-2 px-4 py-2 rounded-md border-destructive border-2 shadow-md bg-white w-full z-[90] grid gap-1">
-                    <div className="flex items-center gap-1 text-destructive text-xs font-bold">
-                        <TI><IconAlertTriangle /></TI>
-                        <p>Error</p>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                        <Markdown components={{
-                            code: props => <code {...props} className={cn("bg-gray-100 rounded-sm px-1", props.className)} />,
-                        }}>{error}</Markdown>
-                    </div>
-                </div>}
-        </Card>
+                    {error &&
+                        <div className="absolute bottom-full hack-center-x mb-2 px-4 py-2 rounded-md border-destructive border-2 shadow-md bg-white w-full z-[90] grid gap-1">
+                            <div className="flex items-center gap-1 text-destructive text-xs font-bold">
+                                <TI><IconAlertTriangle /></TI>
+                                <p>Error</p>
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                                <Markdown components={{
+                                    code: props => <code {...props} className={cn("bg-gray-100 rounded-sm px-1", props.className)} />,
+                                }}>{error}</Markdown>
+                            </div>
+                        </div>}
+                </Card>
+            </div>
+        </div>
     )
 }
 
@@ -742,30 +761,28 @@ function NodeContent({
 }
 
 
-
-
 /*
 So tailwind loads all these colors for node highlights.
-shadow-slate-400/40
-shadow-gray-400/40
-shadow-zinc-400/40
-shadow-neutral-400/40
-shadow-stone-400/40
-shadow-red-400/40
-shadow-orange-400/40
-shadow-amber-400/40
-shadow-yellow-400/40
-shadow-lime-400/40
-shadow-green-400/40
-shadow-emerald-400/40
-shadow-teal-400/40
-shadow-cyan-400/40
-shadow-sky-400/40
-shadow-blue-400/40
-shadow-indigo-400/40
-shadow-violet-400/40
-shadow-purple-400/40
-shadow-fuchsia-400/40
-shadow-pink-400/40
-shadow-rose-400/40
+bg-slate-500/20
+bg-gray-500/20
+bg-zinc-500/20
+bg-neutral-500/20
+bg-stone-500/20
+bg-red-500/20
+bg-orange-500/20
+bg-amber-500/20
+bg-yellow-500/20
+bg-lime-500/20
+bg-green-500/20
+bg-emerald-500/20
+bg-teal-500/20
+bg-cyan-500/20
+bg-sky-500/20
+bg-blue-500/20
+bg-indigo-500/20
+bg-violet-500/20
+bg-purple-500/20
+bg-fuchsia-500/20
+bg-pink-500/20
+bg-rose-500/20
  */

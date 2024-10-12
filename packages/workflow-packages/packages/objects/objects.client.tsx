@@ -43,7 +43,7 @@ helper.node("setProperty", {
     name: "Set Property",
     description: "Sets a property on an object.",
     component: () => <StandardNode>
-        <StandardNode.Handle type="input" name="object" valueType={useValueType("object")} />
+        <StandardNode.Handle type="input" name="object" valueType={useValueType("object")} optional />
         <StandardNode.Handle type="input" name="property" valueType={useValueType("string")} />
         <StandardNode.Handle type="input" name="value" />
         <StandardNode.Handle type="output" name="newObject" valueType={useValueType("object")} />
@@ -54,7 +54,7 @@ helper.node("setProperties", {
     name: "Set Properties",
     description: "Sets multiple properties on an object.",
     component: () => <StandardNode>
-        <StandardNode.Handle type="input" name="object" valueType={useValueType("object")} />
+        <StandardNode.Handle type="input" name="object" valueType={useValueType("object")} optional />
         <StandardNode.MultiHandle
             type="input" name="properties"
             displayName="Properties"

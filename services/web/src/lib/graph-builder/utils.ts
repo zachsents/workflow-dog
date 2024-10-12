@@ -68,12 +68,3 @@ export function shouldBeMotionValue<T>(value: T | MotionValue<T>) {
     return (isMotionValue(value) ? value : motionValue(value)) as MotionValue<T>
 }
 
-export type AllowPrimitiveForMotionValue<T extends MotionValue> = T extends MotionValue<infer R> ? MotionValue<R> | R : T
-
-export type AllowPrimitivesForMotionValues<T extends { [key: string]: any }> = {
-    [K in keyof T]: T[K] extends MotionValue
-    ? AllowPrimitiveForMotionValue<T[K]>
-    : T[K] extends { [key: string]: any }
-    ? AllowPrimitivesForMotionValues<T[K]>
-    : T[K]
-}

@@ -296,14 +296,3 @@ helper.node("loopWorkflow", {
         )
     },
 })
-
-helper.node("equals", {
-    name: "Equals",
-    description: "Checks if two values are equal.",
-    icon: IconEqual,
-    component: () => <StandardNode>
-        <StandardNode.Handle type="input" name="a" />
-        <StandardNode.Handle type="input" name="b" />
-        <StandardNode.Handle type="output" name="result" />
-    </StandardNode>,
-})

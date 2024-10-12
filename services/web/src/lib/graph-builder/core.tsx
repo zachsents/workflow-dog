@@ -2,7 +2,7 @@ import { Anchor as PopoverAnchor } from "@radix-ui/react-popover"
 import useMergedRef from "@react-hook/merged-ref"
 import useResizeObserver from "@react-hook/resize-observer"
 import { useDebouncedCallback, useLocalStorageValue, useRerender } from "@react-hookz/web"
-import { IconArrowLeftSquare, IconArrowRightSquare, IconBook, IconClipboard, IconConfetti, IconConfettiOff, IconCopy, IconExternalLink, IconFlame, IconPalette, IconPaletteOff, IconPin, IconPinnedOff, IconScissors, IconTrash, IconX } from "@tabler/icons-react"
+import { IconActivity, IconArrowLeftSquare, IconArrowRightSquare, IconArrowsSplit2, IconBook, IconChevronDown, IconClipboard, IconConfetti, IconConfettiOff, IconCopy, IconExternalLink, IconPalette, IconPaletteOff, IconPin, IconPinnedOff, IconScissors, IconTrash, IconX } from "@tabler/icons-react"
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@ui/command"
 import Kbd from "@web/components/kbd"
 import SearchInput from "@web/components/search-input"
@@ -19,14 +19,17 @@ import { cn } from "@web/lib/utils"
 import { createRandomId, IdNamespace } from "core/ids"
 import { AnimatePresence, motion, motionValue, useAnimationControls, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform, type MotionValue, type PanHandlers, type SpringOptions, type TapHandlers, type Transition } from "framer-motion"
 import { produce } from "immer"
+import _mapValues from "lodash/mapValues"
 import React, { forwardRef, useContext, useEffect, useMemo, useRef } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import { toast } from "sonner"
+import type { SetRequired } from "type-fest"
 import type { ClientNodeDefinition } from "workflow-packages/lib/types"
 import { createStore, useStore, type StoreApi } from "zustand"
 import { useShallow } from "zustand/react/shallow"
+import { plural } from "../grammar"
 import { GraphBuilderContext, NodeContext } from "./context"
-import { deserializeGraph, serializeGraph, shouldBeMotionValue, useNodeDefinitionsSearch, type AllowPrimitivesForMotionValues } from "./utils"
+import { deserializeGraph, serializeGraph, shouldBeMotionValue, useNodeDefinitionsSearch } from "./utils"
 
 
 /**
@@ -124,21 +127,21 @@ function Viewport({ children }: { children: React.ReactNode }) {
         gbx.store.setState({ selection: new Set(gbx.state.nodes.keys()) })
     }, { preventDefault: true })
 
-    const [hotslot, setHotslot] = useHotSlot()
-    useHotkeys("z", () => {
-        if (gbx.options.readonly)
-            return
+    // const [hotslot, setHotslot] = useHotSlot()
+    // useHotkeys("z", () => {
+    //     if (gbx.options.readonly)
+    //         return
 
-        if (gbx.state.currentlyHoveredNodeDefId)
-            setHotslot(gbx.state.currentlyHoveredNodeDefId)
-        else if (hotslot)
-            gbx.addNodeAtMouse({ definitionId: hotslot })
-    })
-    useHotkeys("shift+z", () => {
-        if (gbx.options.readonly)
-            return
-        setHotslot(null)
-    })
+    //     if (gbx.state.currentlyHoveredNodeDefId)
+    //         setHotslot(gbx.state.currentlyHoveredNodeDefId)
+    //     else if (hotslot)
+    //         gbx.addNodeAtMouse({ definitionId: hotslot })
+    // })
+    // useHotkeys("shift+z", () => {
+    //     if (gbx.options.readonly)
+    //         return
+    //     setHotslot(null)
+    // })
 
     useHotkeys("ctrl+v", () => {
         if (gbx.options.readonly)
@@ -265,11 +268,11 @@ export function MainToolbar() {
     const resultsPopover = useDialogState()
 
     const [pinnedNodes] = usePinnedNodes()
-    const [hotslot] = useHotSlot()
+    // const [hotslot] = useHotSlot()
 
     return (<>
         <Card className="flex items-stretch justify-center gap-1 p-1">
-            <SimpleTooltip delay={500} tooltip={<div className="flex flex-col items-stretch gap-2">
+            {/* <SimpleTooltip delay={500} tooltip={<div className="flex flex-col items-stretch gap-2">
                 <b className="text-orange-700 flex-center gap-1 font-bold text-center">Hot Slot <TI><IconFlame /></TI></b>
                 <p>Press <Kbd>Z</Kbd> over an action to put it in the hot slot.</p>
                 <p>Press <Kbd>Z</Kbd> somewhere else to place one of those actions.</p>
@@ -293,20 +296,22 @@ export function MainToolbar() {
                     </Button>}
             </SimpleTooltip>
 
-            <VerticalDivider className="mx-1 -my-1" />
+            <VerticalDivider className="mx-1 -my-1" /> */}
 
-            <div className="flex-center gap-1 flex-wrap w-max max-w-[600px]">
-                {pinnedNodes.map((nodeDefId, i) =>
-                    <DraggableNodeButton
-                        key={nodeDefId}
-                        definitionId={nodeDefId} variant="outline"
-                        className="gap-2 h-auto shadow-none text-xs"
-                        hotkey={i < 9 ? `${i + 1}` : undefined}
-                    />
-                )}
-            </div>
+            {pinnedNodes.length > 0 && <>
+                <div className="flex-center gap-1 flex-wrap w-max max-w-[600px]">
+                    {pinnedNodes.map((nodeDefId, i) =>
+                        <DraggableNodeButton
+                            key={nodeDefId}
+                            definitionId={nodeDefId} variant="outline"
+                            className="gap-2 h-auto shadow-none text-xs"
+                            hotkey={(i + 3) <= 9 ? `${i + 3}` : undefined}
+                        />
+                    )}
+                </div>
 
-            <VerticalDivider className="mx-1 -my-1" />
+                <VerticalDivider className="mx-1 -my-1" />
+            </>}
 
             <Popover {...resultsPopover.dialogProps}>
                 <PopoverAnchor className="shrink-0 w-[300px]">
@@ -651,6 +656,11 @@ function SelectionToolbar() {
 
     const allDisabled = gbx.useStore(s => Array.from(s.selection).every(id => s.nodes.get(id)?.disabled))
 
+    const isSingleNode = selection.size === 1
+    const modifiers = gbx.useStore(s => isSingleNode
+        ? s.nodes.get(Array.from(selection)[0])?.modifiers
+        : undefined)
+
     return (
         <TooltipProvider delayDuration={0}>
             <motion.div
@@ -805,6 +815,76 @@ function SelectionToolbar() {
                         icon={IconTrash}
                         shortcut={["Del"]}
                     />
+                    {isSingleNode && modifiers && <>
+                        <VerticalDivider className="mx-1" />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    className="gap-2 h-auto self-stretch text-muted-foreground"
+                                    variant="ghost" size="sm"
+                                >
+                                    {modifiers?.size || "No"} {plural("modifier", modifiers?.size ?? 0)}
+                                    <TI><IconChevronDown /></TI>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[300px] z-[110]">
+                                <DropdownMenuItem
+                                    className="flex items-center gap-4 no-shrink-children cursor-pointer transition-colors"
+                                    onSelect={ev => {
+                                        ev.preventDefault()
+                                        gbx.mutateNodeState(Array.from(selection)[0], n => {
+                                            n.modifiers[modifiers?.has("await") ? "delete" : "add"]("await")
+                                        })
+                                    }}
+                                >
+                                    <div className={cn(
+                                        "p-2 rounded-md text-md flex-center",
+                                        modifiers?.has("await") && "bg-primary text-primary-foreground",
+                                    )}>
+                                        <TI><IconActivity /></TI>
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <b>Wait For</b>
+                                            {modifiers?.has("await") && <span className="text-muted-foreground text-xs">
+                                                Enabled
+                                            </span>}
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">
+                                            Makes this action wait for the connected value to emit before running.
+                                        </p>
+                                    </div>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className="flex items-center gap-4 no-shrink-children cursor-pointer transition-colors"
+                                    onSelect={ev => {
+                                        ev.preventDefault()
+                                        gbx.mutateNodeState(Array.from(selection)[0], n => {
+                                            n.modifiers[modifiers?.has("conditional") ? "delete" : "add"]("conditional")
+                                        })
+                                    }}
+                                >
+                                    <div className={cn(
+                                        "p-2 rounded-md text-md flex-center",
+                                        modifiers?.has("conditional") && "bg-primary text-primary-foreground",
+                                    )}>
+                                        <TI><IconArrowsSplit2 /></TI>
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <b>Conditional</b>
+                                            {modifiers?.has("conditional") && <span className="text-muted-foreground text-xs">
+                                                Enabled
+                                            </span>}
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">
+                                            Makes this action only run when the connected condition is true.
+                                        </p>
+                                    </div>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </>}
                 </Card>
             </motion.div>
         </TooltipProvider>
@@ -889,6 +969,8 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
             gbx.setNodeState(n.id, updates)
     })
 
+    const isSelected = gbx.useStore(s => s.selection.has(n.id))
+
     return (
         <NodeContext.Provider value={n.id}>
             <motion.div
@@ -896,6 +978,7 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
                     "absolute pointer-events-auto",
                     gbx.options.readonly ? "cursor-default"
                         : isDragging ? "cursor-grabbing" : "cursor-pointer",
+                    (isSelected || isDragging) ? "z-20" : "z-10",
                 )}
                 style={{
                     x: n.position.x,
@@ -925,6 +1008,12 @@ function NodeContainer({ node: n, children }: { node: Node, children: React.Reac
                     onPanEnd: (e, info) => {
                         tapControls.registerPanEnd(e, info)
                         endDrag()
+                        gbx.store.setState(s => ({
+                            nodes: new Map([
+                                ...Array.from(s.nodes.entries()).filter(([id]) => id !== n.id),
+                                [n.id, s.nodes.get(n.id)!] as const,
+                            ]),
+                        }))
                     },
                     onPointerEnter: () => gbx.store.setState({ currentlyHoveredNodeDefId: n.definitionId }),
                     onPointerLeave: () => gbx.store.setState({ currentlyHoveredNodeDefId: null }),
@@ -1674,17 +1763,17 @@ export type GraphBuilderStoreState = {
     selection: Set<string>
 
     viewportElement: HTMLDivElement | null
-    pan: MotionCoordPair
+    pan: CoordPair<MotionValue<number>>
     zoom: MotionValue<number>
 
     boxSelection: null | {
-        start: MotionCoordPair
-        offset: MotionCoordPair
+        start: CoordPair<MotionValue<number>>
+        offset: CoordPair<MotionValue<number>>
     }
 
     connection: null | Connection
 
-    screenMousePosition: MotionCoordPair
+    screenMousePosition: CoordPair<MotionValue<number>>
     currentlyHoveredNodeDefId: string | null
 
     contextMenuPosition: { x: number, y: number } | null
@@ -1696,21 +1785,23 @@ export type GraphBuilderStoreState = {
     }
 }
 
+
 /**
  * Properties prefixed with underscores are considered private and 
  * will not be serialized when saving the graph state.
  */
-export type Node = {
+export type Node<TNum = MotionValue<number>> = {
     id: string
-    // definition: string
-    position: MotionCoordPair
+
+    position: CoordPair<TNum>
     _element?: HTMLElement
-    _width: MotionValue<number>
-    _height: MotionValue<number>
-    _handlePositions?: Record<string, MotionCoordPair>
+    _width: TNum
+    _height: TNum
+    _handlePositions?: Record<string, CoordPair<TNum>>
 
     definitionId: string
     handleStates: Record<string, HandleState>
+    modifiers: Set<string>
 
     config: Record<string, any>
     highlightColor?: string
@@ -1719,13 +1810,14 @@ export type Node = {
     _shouldCenterSelf?: boolean
 }
 
-export type ExternalNode = Omit<Partial<AllowPrimitivesForMotionValues<Node>>, "definitionId"> & { definitionId: string }
-
-export function createNode(data: ExternalNode): Node {
-    const { id, position, _width, _height, ...rest } = data
+export function createNode(
+    data: SetRequired<Partial<Node<number | MotionValue<number>>>, "definitionId">
+): Node {
+    const { id, position, _width, _height, _handlePositions, ...rest } = data
     return {
         handleStates: {},
         config: {},
+        modifiers: new Set(),
         ...rest,
         id: id ?? createRandomId(IdNamespace.ActionNode),
         position: {
@@ -1734,6 +1826,10 @@ export function createNode(data: ExternalNode): Node {
         },
         _width: shouldBeMotionValue(_width ?? 0),
         _height: shouldBeMotionValue(_height ?? 0),
+        _handlePositions: _mapValues(_handlePositions ?? {}, pos => ({
+            x: shouldBeMotionValue(pos.x),
+            y: shouldBeMotionValue(pos.y),
+        })),
     }
 }
 
@@ -1756,6 +1852,11 @@ export type Connection = {
     t?: string
     th?: string
     startType: HandleType
+}
+
+export type CoordPair<T> = {
+    x: T
+    y: T
 }
 
 export type MotionCoordPair = {

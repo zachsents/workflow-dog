@@ -109,6 +109,15 @@ new Worker("runs", async (job) => {
             return resolveFns[n.id](undefined)
         }
 
+        if ("__condition" in rawInputs && !rawInputs["__condition"]) {
+            return resolveFns[n.id](undefined)
+        }
+        delete rawInputs["__condition"]
+
+        // shouldn't have to do anything for await because the node will await all connected
+        // inputs before running
+        delete rawInputs["__await"]
+
         const formedInputs = Object.entries(rawInputs).reduce((acc, [k, v]) => {
             if (/^\w+$/.test(k))
                 return { ...acc, [k]: v }

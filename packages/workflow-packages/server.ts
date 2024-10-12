@@ -7,6 +7,7 @@ import "./packages/math/math.server"
 import "./packages/objects/objects.server"
 import "./packages/time/time.server"
 import "./packages/http/http.server"
+import "./packages/logic/logic.server"
 
 export {
     nodes as ServerNodeDefinitions,

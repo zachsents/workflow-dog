@@ -7,6 +7,7 @@ import "./packages/math/math.client"
 import "./packages/objects/objects.client"
 import "./packages/time/time.client"
 import "./packages/http/http.client"
+import "./packages/logic/logic.client"
 
 export {
     nodes as ClientNodeDefinitions,

@@ -1,26 +1,25 @@
-import { IconArrowLeft, IconChevronDown, IconClock, IconLayoutSidebarLeftExpandFilled, IconLayoutSidebarRightExpandFilled, IconPencil, IconPlayerPauseFilled, IconPlayerPlayFilled, IconPointFilled, IconRefresh, IconRouteSquare2, IconRun, IconTrash, IconX } from "@tabler/icons-react"
+import { IconArrowLeft, IconChevronDown, IconClock, IconDots, IconEyeOff, IconPencil, IconPlayerPauseFilled, IconPlayerPlay, IconPlayerPlayFilled, IconPointFilled, IconRefresh, IconRouteSquare2, IconTestPipe, IconTrash, IconX } from "@tabler/icons-react"
+import { useMutation } from "@tanstack/react-query"
 import ConfirmDialog from "@web/components/confirm-dialog"
 import RenameWorkflowDialog from "@web/components/rename-workflow-dialog"
+import RunHistoryTable from "@web/components/run-history-table"
+import SimpleTooltip from "@web/components/simple-tooltip"
 import SpinningLoader from "@web/components/spinning-loader"
 import TI from "@web/components/tabler-icon"
 import { Button } from "@web/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@web/components/ui/dropdown-menu"
 import { ScrollArea } from "@web/components/ui/scroll-area"
-import VerticalDivider from "@web/components/vertical-divider"
 import { GBRoot, MainToolbar } from "@web/lib/graph-builder/core"
 import { useCurrentWorkflow, useCurrentWorkflowId, useDialogState, usePreventUnloadWhileSaving, useSelectedRunId } from "@web/lib/hooks"
 import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
+import { useMemo } from "react"
+import { createPortal } from "react-dom"
 import { Helmet } from "react-helmet"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { ClientEventTypes, ClientNodeDefinitions } from "workflow-packages/client"
-import dayjs from "@web/lib/dayjs"
-import RunHistoryTable from "@web/components/run-history-table"
-import SimpleTooltip from "@web/components/simple-tooltip"
-import { useMutation } from "@tanstack/react-query"
-import { useMemo } from "react"
 
 
 function WorkflowIndex() {
@@ -109,38 +108,43 @@ function WorkflowIndex() {
             <div
                 className="w-screen h-screen bg-gray-700 grid grid-flow-row auto-rows-auto"
                 style={{
-                    gridTemplateRows: "auto 1fr",
-                    gridTemplateColumns: "1fr",
+                    gridTemplateRows: "auto auto 1fr",
+                    gridTemplateColumns: "1fr auto",
                 }}
             >
-                <div className="col-span-full text-background p-1 flex items-stretch justify-between gap-2">
-                    <div className="flex items-stretch gap-2">
-                        <Button variant="ghost" size="compact" asChild className="gap-2 h-auto">
+                <div className="col-span-full bg-white p-1 border-b flex items-stretch justify-center gap-2 min-h-8">
+                    <div className="flex-1 flex items-stretch justify-start gap-2">
+                        <Button variant="ghost" size="auto" asChild className="gap-2 text-muted-foreground text-xs">
                             <Link to={`/projects/${workflow.project_id}/workflows`}>
                                 <TI><IconArrowLeft /></TI>
                                 Back to Workflows
                             </Link>
                         </Button>
-                        <VerticalDivider />
-                        <DropdownMenu>
-                            <DropdownMenuTrigger className="group text-sm px-2 py-1 flex-center gap-2 hover:bg-background/10 rounded-sm transition-colors">
-                                <TI><IconRouteSquare2 /></TI>
-                                <p>
-                                    {workflow.name}
-                                </p>
-                                <TI className="text-muted-foreground group-hover:text-background transition-colors"><IconChevronDown /></TI>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent side="bottom" className="*:flex *:items-center *:gap-2 w-[200px] z-[200]">
-                                <DropdownMenuItem onSelect={renameDialog.open}>
-                                    <TI><IconPencil /></TI>
-                                    Rename Workflow
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-red-600" onSelect={deleteDialog.open}>
-                                    <TI><IconTrash /></TI>
-                                    Delete Workflow
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                    </div>
+                    <div className="flex items-stretch justify-center gap-2 text-xs">
+                        <TI className="text-muted-foreground self-center"><IconRouteSquare2 /></TI>
+
+                        <Button
+                            variant="ghost" size="auto" className="group cursor-text -mx-2"
+                            onClick={renameDialog.open}
+                        >
+                            {workflow.name}
+                        </Button>
+
+                        <p className="self-center text-muted-foreground select-none w-[100px]">
+                            {!selectedRunId && <>&#8212;&nbsp;</>}
+                            {selectedRunId
+                                ? ""
+                                : saveGraphMutation.isPending
+                                    ? "Saving..."
+                                    : saveGraphMutation.isSuccess
+                                        ? "Saved!"
+                                        : saveGraphMutation.isError
+                                            ? "Failed to save"
+                                            : "Waiting to save"}
+                        </p>
+                    </div>
+                    <div className="flex-1 flex items-stretch justify-end gap-2">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -181,35 +185,43 @@ function WorkflowIndex() {
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <p className="self-center mx-4 text-xs text-center text-muted-foreground select-none">
-                            {selectedRunId
-                                ? "This will not be saved."
-                                : saveGraphMutation.isPending
-                                    ? "Saving..."
-                                    : saveGraphMutation.isSuccess
-                                        ? "Saved!"
-                                        : saveGraphMutation.isError
-                                            ? "Failed to save"
-                                            : "Waiting to save"}
-                        </p>
-                    </div>
-
-                    {!!selectedRunId &&
-                        <div className="flex-center gap-2 self-center mx-4">
-                            <Button
-                                variant="default" size="compact" className="gap-1"
-                                onClick={() => setSelectedRunId(null)}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="auto" className="aspect-square text-xs">
+                                    <TI><IconDots /></TI>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                side="bottom" align="end" alignOffset={4}
+                                className="*:flex *:items-center *:gap-2 w-[200px] z-[200]"
                             >
-                                <TI><IconArrowLeft /></TI>
-                                Back to Current Workflow
-                            </Button>
-                            <div className={cn(
-                                "bg-background rounded-sm text-xs flex-center px-2 py-0.5 transition-colors",
-                                selectedRun ? "text-foreground" : "text-background",
-                            )}>
-                                Currently Viewing Run #<span className="font-semibold">{selectedRun?.row_number}</span>
-                            </div>
-                        </div>}
+                                <DropdownMenuItem onSelect={renameDialog.open}>
+                                    <TI><IconPencil /></TI>
+                                    Rename Workflow
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-red-600" onSelect={deleteDialog.open}>
+                                    <TI><IconTrash /></TI>
+                                    Delete Workflow
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </div>
+
+                <div className="col-span-full bg-white border-b flex items-stretch justify-between gap-2 min-h-8">
+                    <div className="flex items-stretch justify-start gap-2 p-1 border-r">
+                        <TriggerPanel />
+                    </div>
+                    <div className="flex items-stretch justify-end gap-2 p-1 border-l">
+                        <Button
+                            variant="ghost" size="auto"
+                            className="gap-2 text-xs no-shrink-children"
+                        >
+                            <TI className="text-md"><IconTestPipe /></TI>
+                            Test Run
+                        </Button>
+                        <RunHistoryPanel />
+                    </div>
                 </div>
 
                 <div className="relative w-full h-full overflow-clip bg-gray-50">
@@ -225,7 +237,6 @@ function WorkflowIndex() {
                         }}
                         key="current"
                     >
-                        <TriggerPanel />
                         <div className="absolute hack-center-x z-20 bottom-4 px-4 max-w-full">
                             <MainToolbar />
                         </div>
@@ -242,9 +253,16 @@ function WorkflowIndex() {
                         }}
                         key={selectedRunId}
                     >
+                        <div className="absolute z-20 right-2 top-2 max-w-full pointer-events-none">
+                            <Button
+                                variant="default" size="compact" className="gap-2 pointer-events-auto"
+                                onClick={() => setSelectedRunId(null)}
+                            >
+                                <TI><IconEyeOff /></TI>
+                                <span>Hide Run #{selectedRun?.row_number}</span>
+                            </Button>
+                        </div>
                     </GBRoot>}
-
-                    <RunHistoryPanel />
                 </div>
 
                 <RenameWorkflowDialog workflow={workflow} {...renameDialog.dialogProps} />
@@ -255,7 +273,7 @@ function WorkflowIndex() {
                     onConfirm={async () => void await deleteWorkflow.mutateAsync({ workflowId: workflow.id })}
                     isPending={deleteWorkflow.isPending || deleteWorkflow.isSuccess}
                 />
-            </div>}
+            </div >}
 
         <AnimatePresence>
             {!workflow &&
@@ -290,24 +308,16 @@ function TriggerPanel() {
     if (!eventType) throw new Error(`Unknown event type: ${workflow.trigger_event_type_id}`)
 
     return <>
-        <Button
-            variant="outline"
-            className={cn(
-                "absolute top-2 left-2 z-[100] gap-4 text-sm shadow-md bg-white/90 transition-opacity",
-                isOpen && "opacity-0 pointer-events-none",
-            )}
-            onClick={() => setOpen(true)}
-        >
-            <div className="flex-center gap-1 text-xs text-muted-foreground">
-                <TI><IconRun /></TI>
-                Trigger
-            </div>
-            <VerticalDivider className="self-stretch" />
-            <span>
+        <SimpleTooltip tooltip="Configure Trigger" contentProps={{ side: "bottom" }}>
+            <Button
+                variant="ghost" size="auto"
+                className="gap-2 text-xs no-shrink-children"
+                onClick={() => setOpen(true)}
+            >
+                <TI className="text-md"><IconPlayerPlay /></TI>
                 {ClientEventTypes[workflow.trigger_event_type_id]?.whenName ?? "Unknown trigger"}
-            </span>
-            <TI className="text-muted-foreground"><IconLayoutSidebarLeftExpandFilled /></TI>
-        </Button>
+            </Button>
+        </SimpleTooltip>
 
         <div
             className={cn(
@@ -375,7 +385,7 @@ function RunHistoryPanel() {
         setParams(params.toString())
     }
 
-    const hasRanBefore = workflow.last_ran_at && workflow.last_ran_at.getTime() > 0
+    const [selectedRunId, setSelectedRunId] = useSelectedRunId()
 
     const utils = trpc.useUtils()
     const refreshMutation = useMutation({
@@ -387,64 +397,60 @@ function RunHistoryPanel() {
 
     return <>
         <Button
-            variant="outline"
-            className={cn(
-                "absolute top-2 right-2 z-[100] gap-4 text-sm shadow-md bg-white/90 transition-opacity",
-                isOpen && "opacity-0 pointer-events-none",
-            )}
+            variant="ghost" size="auto"
+            className="gap-2 text-xs no-shrink-children"
             onClick={() => setOpen(true)}
         >
-            <TI className="text-muted-foreground"><IconLayoutSidebarRightExpandFilled /></TI>
-            <div className="flex-center gap-1">
-                <TI><IconClock /></TI>
-                Run History
-            </div>
-            <VerticalDivider className="self-stretch" />
-            <span className="text-xs text-muted-foreground">
-                {hasRanBefore
-                    ? `Last ran ${dayjs(workflow.last_ran_at).fromNow()}`
-                    : "Never ran"}
-            </span>
+            <TI className="text-md"><IconClock /></TI>
+            Run History
         </Button>
 
-        <div
-            className={cn(
-                "absolute z-[101] top-0 left-0 w-full h-full bg-black/10 transition-opacity",
-                !isOpen && "opacity-0 pointer-events-none",
-            )}
-            onPointerDown={() => setOpen(false)}
-        />
+        {createPortal(<>
+            <div
+                className={cn(
+                    "fixed z-[101] top-0 left-0 w-full h-full bg-black/10 transition-opacity",
+                    !isOpen && "opacity-0 pointer-events-none",
+                )}
+                onPointerDown={() => setOpen(false)}
+            />
 
-        <div className={cn(
-            "absolute top-0 right-0 z-[102] h-full bg-white w-[500px] border-l shadow-xl transition flex-col items-stretch",
-            !isOpen && "opacity-0 translate-x-2 pointer-events-none",
-        )}>
-            <div className="flex items-center justify-between gap-4 no-shrink-children p-4 border-b">
-                <div className="flex items-center gap-4 no-shrink-children">
-                    <h2 className="text-xl font-medium">Run History</h2>
-                    <SimpleTooltip tooltip="Refresh" contentProps={{ side: "right" }}>
-                        <Button
-                            variant="ghost" size="icon"
-                            className="text-lg text-muted-foreground"
-                            onClick={() => void refreshMutation.mutate()}
-                            disabled={refreshMutation.isPending}
-                        >
-                            <TI className={cn(refreshMutation.isPending && "animate-spin")}>
-                                <IconRefresh />
-                            </TI>
-                        </Button>
-                    </SimpleTooltip>
+            <div className={cn(
+                "fixed top-0 right-0 z-[102] h-full bg-white w-[500px] border-l shadow-xl transition flex-col items-stretch",
+                !isOpen && "opacity-0 translate-x-2 pointer-events-none",
+            )}>
+                <div className="flex items-center justify-between gap-4 no-shrink-children p-4 border-b">
+                    <div className="flex items-center gap-4 no-shrink-children">
+                        <h2 className="text-xl font-medium">Run History</h2>
+                        <SimpleTooltip tooltip="Refresh" contentProps={{ side: "right" }}>
+                            <Button
+                                variant="ghost" size="icon"
+                                className="text-lg text-muted-foreground"
+                                onClick={() => void refreshMutation.mutate()}
+                                disabled={refreshMutation.isPending}
+                            >
+                                <TI className={cn(refreshMutation.isPending && "animate-spin")}>
+                                    <IconRefresh />
+                                </TI>
+                            </Button>
+                        </SimpleTooltip>
+
+                        {!!selectedRunId &&
+                            <Button size="compact" className="gap-2" onClick={() => setSelectedRunId(null)}>
+                                <TI><IconX /></TI>
+                                Deselect Run
+                            </Button>}
+                    </div>
+                    <Button variant="ghost" size="icon" className="text-md" onClick={() => setOpen(false)}>
+                        <TI><IconX /></TI>
+                    </Button>
                 </div>
-                <Button variant="ghost" size="icon" className="text-md" onClick={() => setOpen(false)}>
-                    <TI><IconX /></TI>
-                </Button>
+
+                <ScrollArea className="flex-1 min-h-0 w-full relative">
+                    <div className="p-4">
+                        <RunHistoryTable />
+                    </div>
+                </ScrollArea>
             </div>
-
-            <ScrollArea className="flex-1 min-h-0 w-full relative">
-                <div className="p-4">
-                    <RunHistoryTable />
-                </div>
-            </ScrollArea>
-        </div>
+        </>, document.body)}
     </>
 }

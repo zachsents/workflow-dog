@@ -239,8 +239,8 @@ function Viewport({ children }: { children: React.ReactNode }) {
                 className="relative z-10 pointer-events-none origin-top-left"
                 style={{ x: pan.x, y: pan.y, scale: zoom }}
             >
-                <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[4px] h-[100px] bg-blue-600 rounded-full pointer-events-none" />
-                <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[100px] h-[4px] bg-red-600 rounded-full pointer-events-none" />
+                {/* <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[4px] h-[100px] bg-blue-600 rounded-full pointer-events-none" />
+                <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[100px] h-[4px] bg-red-600 rounded-full pointer-events-none" /> */}
 
                 {children}
             </motion.div>

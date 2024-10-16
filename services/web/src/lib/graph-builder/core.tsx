@@ -305,7 +305,7 @@ export function MainToolbar() {
                             key={nodeDefId}
                             definitionId={nodeDefId} variant="outline"
                             className="gap-2 h-auto shadow-none text-xs"
-                            hotkey={(i + 3) <= 9 ? `${i + 3}` : undefined}
+                            hotkey={(i + 1) <= 9 ? `${i + 1}` : undefined}
                         />
                     )}
                 </div>

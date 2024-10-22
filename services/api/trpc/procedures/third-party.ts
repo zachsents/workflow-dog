@@ -1,16 +1,21 @@
 import { TRPCError } from "@trpc/server"
 import _omit from "lodash/omit"
 import _pick from "lodash/pick"
-import { randomBytes } from "node:crypto"
+import { createHash, randomBytes } from "node:crypto"
 import { ServerThirdPartyProviders } from "workflow-packages/server"
 import { z } from "zod"
 import { db } from "../../lib/db"
-import { OAUTH2_CALLBACK_URL } from "../../lib/internal/third-party"
+import { fetchProfile, OAUTH2_CALLBACK_URL } from "../../lib/internal/third-party"
 import { projectPermissionProcedure } from "./projects"
+import { encryptJSON } from "../../lib/encryption"
+import { useEnvVar } from "../../lib/utils"
 
 
 const OAUTH2_PROVIDER_IDS = Object.entries(ServerThirdPartyProviders)
     .filter(([, v]) => v.type === "oauth2")
+    .map(([k]) => k)
+const API_KEY_PROVIDER_IDS = Object.entries(ServerThirdPartyProviders)
+    .filter(([, v]) => v.type === "api_key")
     .map(([k]) => k)
 
 
@@ -84,56 +89,62 @@ export default {
             }).executeTakeFirstOrThrow()
 
             return { url: url.toString() }
-        })
+        }),
 
-    // getToken: t.procedure
-    //     .input(z.object({
-    //         accountId: z.string(),
-    //         requestingWorkflowId: z.string().uuid().optional(),
-    //         requestingProjectId: z.string().uuid().optional(),
-    //     }))
-    //     .query(async ({ input, ctx }) => {
-    //         assertAdmin(ctx)
+    addApiKeyAccount: projectPermissionProcedure("write")
+        .input(z.object({
+            providerId: z.enum(API_KEY_PROVIDER_IDS as [string, ...string[]]),
+            apiKey: z.string().min(1),
+        }))
+        .mutation(async ({ input, ctx }) => {
+            const provider = ServerThirdPartyProviders[input.providerId]
 
-    //         if (input.requestingProjectId) {
-    //             const isValid = await db.selectNoFrom(eb => eb.exists(
-    //                 eb.selectFrom("projects_service_accounts")
-    //                     .where("service_account_id", "=", input.accountId)
-    //                     .where("project_id", "=", input.requestingProjectId!)
-    //             ).as("exists"))
-    //                 .executeTakeFirstOrThrow()
-    //                 .then(r => Boolean(r.exists))
+            if (provider.type !== "api_key")
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: `Provider "${input.providerId}" is not an API key provider`,
+                })
 
-    //             if (!isValid)
-    //                 throw new TRPCError({
-    //                     code: "FORBIDDEN",
-    //                     message: `Service account (${input.accountId}) is not linked to the project (${input.requestingProjectId}).`,
-    //                 })
-    //         }
+            const profile = await fetchProfile(provider.config.profileUrl, input.apiKey)
+            const tokenObj = { apiKey: input.apiKey }
 
-    //         if (input.requestingWorkflowId) {
-    //             const isValid = await db.selectNoFrom(eb => eb.exists(
-    //                 eb.selectFrom("projects_service_accounts")
-    //                     .where("service_account_id", "=", input.accountId)
-    //                     .where(eb => eb(
-    //                         "project_id", "=",
-    //                         eb.selectFrom("workflows")
-    //                             .select("workflows.project_id")
-    //                             .where("workflows.id", "=", input.requestingWorkflowId!)
-    //                     ))
-    //             ).as("exists"))
-    //                 .executeTakeFirstOrThrow()
-    //                 .then(r => Boolean(r.exists))
+            const displayName = provider.config.getDisplayName
+                ? provider.config.getDisplayName({ profile, token: tokenObj })
+                : tokenObj.apiKey.slice(0, 8) + `... (${profile.email || profile.id || profile.sub || "?"})`
 
-    //             if (!isValid)
-    //                 throw new TRPCError({
-    //                     code: "FORBIDDEN",
-    //                     message: `Service account (${input.accountId}) is not linked to the project that workflow (${input.requestingWorkflowId}) is a part of.`,
-    //                 })
-    //         }
+            const accountId = await db.transaction().execute(async trx => {
+                const { id: accountId } = await trx.insertInto("third_party_accounts")
+                    .values({
+                        display_name: displayName,
+                        provider_id: input.providerId,
+                        provider_user_id: createHash("md5").update(input.apiKey).digest("hex"),
+                        encrypted_auth_data: encryptJSON({
+                            ...tokenObj,
+                            profile,
+                        }, useEnvVar("SERVICE_ACCOUNT_ENCRYPTION_KEY")),
+                        scopes: [],
+                        email: profile.email || null,
+                    })
+                    .onConflict(oc => oc.columns(["provider_id", "provider_user_id"]).doUpdateSet(eb => ({
+                        display_name: eb.ref("excluded.display_name"),
+                        provider_user_id: eb.ref("excluded.provider_user_id"),
+                        encrypted_auth_data: eb.ref("excluded.encrypted_auth_data"),
+                        email: eb.ref("excluded.email"),
+                    })))
+                    .returning("id")
+                    .executeTakeFirstOrThrow()
 
-    //         const token = await getServiceAccountToken(input.accountId)
+                await trx.insertInto("projects_third_party_accounts")
+                    .values({
+                        project_id: ctx.projectId,
+                        third_party_account_id: accountId,
+                    })
+                    .onConflict(oc => oc.columns(["project_id", "third_party_account_id"]).doNothing())
+                    .executeTakeFirstOrThrow()
 
-    //         return token
-    //     }),
+                return accountId
+            })
+
+            return { accountId }
+        }),
 }

@@ -9,6 +9,7 @@ import "./packages/time/time.client"
 import "./packages/http/http.client"
 import "./packages/logic/logic.client"
 import "./packages/google/google.client"
+import "./packages/openai/openai.client"
 
 export {
     nodes as ClientNodeDefinitions,

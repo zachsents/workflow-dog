@@ -130,7 +130,7 @@ export async function getThirdPartyAccountToken(accountId: string) {
                 account,
             }
         case "api_key":
-            return { key: authData.key, account }
+            return { apiKey: authData.apiKey, account }
         default:
             return authData
     }

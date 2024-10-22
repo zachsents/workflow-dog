@@ -9,6 +9,7 @@ import "./packages/time/time.server"
 import "./packages/http/http.server"
 import "./packages/logic/logic.server"
 import "./packages/google/google.server"
+import "./packages/openai/openai.server"
 
 export {
     nodes as ServerNodeDefinitions,

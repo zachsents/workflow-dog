@@ -6,11 +6,18 @@ import SimpleTooltip from "web/src/components/simple-tooltip"
 import TI from "web/src/components/tabler-icon"
 import { Button } from "web/src/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "web/src/components/ui/dropdown-menu"
-import { useCurrentWorkflow } from "web/src/lib/hooks"
+import { useCurrentWorkflow, useDialogState } from "web/src/lib/hooks"
 import { trpc } from "web/src/lib/trpc"
 import { ClientThirdPartyProviders } from "../client"
 import { cn } from "web/src/lib/utils"
 import { useMutation } from "@tanstack/react-query"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "web/src/components/ui/dialog"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "web/src/components/ui/form"
+import { Input } from "web/src/components/ui/input"
+import SpinningLoader from "web/src/components/spinning-loader"
 
 
 export default function ThirdPartyAccountSelector({
@@ -66,7 +73,13 @@ export default function ThirdPartyAccountSelector({
         })
     }
 
-    return (
+    const apiKeyDialog = useDialogState()
+    useEffect(() => {
+        if (!apiKeyDialog.isOpen)
+            refreshMutation.mutate()
+    }, [apiKeyDialog.isOpen])
+
+    return (<>
         <div className="flex-center gap-2 no-shrink-children">
             <TI style={{
                 color: provider.color,
@@ -78,11 +91,15 @@ export default function ThirdPartyAccountSelector({
                         disabled={isLoading}
                     >
                         <p className="min-w-0 flex-1 truncate">
-                            {value
-                                ? (selectedAccount?.display_name ?? "...")
-                                : <span className="text-muted-foreground">
-                                    Select {provider.name} account
-                                </span>}
+                            {isLoading
+                                ? <span className="text-muted-foreground">
+                                    Loading...
+                                </span>
+                                : value
+                                    ? (selectedAccount?.display_name ?? "...")
+                                    : <span className="text-muted-foreground">
+                                        Select {provider.name} account
+                                    </span>}
                         </p>
                         <TI><IconChevronDown /></TI>
                     </Button>
@@ -91,12 +108,16 @@ export default function ThirdPartyAccountSelector({
                     <DropdownMenuItem
                         className="font-bold flex items-center gap-2"
                         style={{ color: provider.color }}
-                        onSelect={isOAuth2 ? () => openAuthLink() : undefined}
+                        onSelect={() => isOAuth2 ? openAuthLink() : apiKeyDialog.open()}
                     >
                         <TI><IconPlus /></TI>
                         Connect new {provider.name} Account
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
+
+                    {accounts?.length === 0 && <p className="text-center text-xs text-muted-foreground py-2">
+                        No {provider.name} accounts found.
+                    </p>}
 
                     {accounts?.map(account => {
                         const hasAllScopes = hasScopes(account.scopes, requiredScopes)
@@ -147,8 +168,9 @@ export default function ThirdPartyAccountSelector({
                     )}><IconRefresh /></TI>
                 </Button>
             </SimpleTooltip>
-        </div >
-    )
+        </div>
+        <APIKeyDialog providerId={providerId} {...apiKeyDialog} />
+    </>)
 }
 
 
@@ -156,5 +178,105 @@ function hasScopes(scopes: string[], required: (string | string[])[]) {
     return required.every(required => Array.isArray(required)
         ? required.some(r => scopes.includes(r))
         : scopes.includes(required)
+    )
+}
+
+
+const apiKeySchema = z.object({
+    key: z.string().min(1),
+})
+
+interface APIKeyDialogProps extends ReturnType<typeof useDialogState> {
+    providerId: string
+}
+
+function APIKeyDialog({ providerId, ...props }: APIKeyDialogProps) {
+
+    const { data: workflow } = useCurrentWorkflow()
+    const service = ClientThirdPartyProviders[providerId]
+
+    const addApiKeyMutation = trpc.thirdParty.addApiKeyAccount.useMutation({
+        onSuccess: () => {
+            toast.success("Account connected!")
+            props.close()
+        },
+    })
+
+    const form = useForm<z.infer<typeof apiKeySchema>>({
+        resolver: zodResolver(apiKeySchema),
+        defaultValues: { key: "" },
+    })
+
+    const { isSubmitting } = form.formState
+
+    async function onSubmit(values: z.infer<typeof apiKeySchema>) {
+        await addApiKeyMutation.mutateAsync({
+            providerId,
+            projectId: workflow!.project_id,
+            apiKey: values.key.trim(),
+        }).then(x => void console.debug("Connected account", x))
+    }
+
+    useEffect(() => {
+        if (!props.isOpen)
+            form.reset()
+    }, [props.isOpen])
+
+    return (
+        <Dialog {...props.dialogProps}>
+            <DialogContent onPaste={ev => ev.stopPropagation()}>
+                <DialogHeader>
+                    <DialogTitle>
+                        Connect {service?.name}
+                    </DialogTitle>
+                    <DialogDescription>
+                        Enter your API key.
+                        {service?.generateKeyUrl && <>
+                            {" "}You can find your key{" "}
+                            <a
+                                href={service.generateKeyUrl}
+                                target="_blank"
+                                className="text-primary underline"
+                            >
+                                here
+                            </a>.
+                        </>}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="flex-v items-stretch gap-4"
+                    >
+                        <FormField
+                            control={form.control}
+                            name="key"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>API Key</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="xxx..."
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                            disabled={isSubmitting}
+                        />
+
+                        <Button
+                            type="submit" className="gap-2"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting && <SpinningLoader />}
+                            Connect
+                        </Button>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
     )
 }

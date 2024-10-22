@@ -138,3 +138,64 @@ export interface ServerEvent {
     type: string
     data: any
 }
+
+
+export type ThirdPartyServiceAuthType = "oauth2" | "api_key" | "user_pass"
+
+export interface ClientThirdPartyServiceDefinition extends ClientDefinition {
+    transformScopeForDisplay?: (scope: string) => string
+    authType: ThirdPartyServiceAuthType
+    generateKeyUrl?: string
+}
+
+export type ServerThirdPartyServiceDefinition = ServerDefinition & ({
+    type: "oauth2"
+    config: OAuth2Config
+} | {
+    type: "api_key"
+    config: KeyConfig
+} | {
+    type: "user_pass"
+    config: UserPassConfig
+}) & ({
+    tokenUsage: "auth_header_bearer" | "auth_header_basic"
+} | {
+    tokenUsage: "query_param"
+    tokenParamName: string
+})
+
+export interface OAuth2Config {
+    clientId: string
+    clientSecret: string
+    authUrl: string
+    tokenUrl: string
+    scopeDelimiter: string
+    additionalParams?: Record<string, string>
+    allowAdditionalParams?: string[] | boolean
+    stateLength?: number
+    scopes: string[]
+    allowAdditionalScopes: boolean
+    profileUrl: string
+    getDisplayName: (accountData: {
+        profile: Record<string, any>
+        token: Record<string, any>
+    }) => string
+    getProviderUserId: (accountData: {
+        profile: Record<string, any>
+        token: Record<string, any>
+    }) => string
+    includeRedirectUriInTokenRequest: boolean
+}
+
+export interface KeyConfig {
+    profileUrl: string
+    getDisplayName?: (accountData: {
+        profile: Record<string, any>
+        token: Record<string, any>
+    }) => string
+}
+
+export interface UserPassConfig {
+    profileUrl: string
+    getDisplayName: (accountData: { profile: Record<string, any> }) => string
+}

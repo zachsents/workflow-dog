@@ -1,4 +1,4 @@
-import type { ServerDefinition, ServerEventSourceDefinition, ServerEventType, ServerNodeDefinition, ServerValueTypeDefinition } from "../lib/types"
+import type { ServerDefinition, ServerEventSourceDefinition, ServerEventType, ServerNodeDefinition, ServerThirdPartyServiceDefinition, ServerValueTypeDefinition } from "../lib/types"
 
 export const GLOBAL_SERVER_DEFAULTS = {
     // none yet
@@ -19,3 +19,7 @@ export const SERVER_EVENT_SOURCE_DEFAULTS = {
 export const SERVER_VALUE_TYPE_DEFAULTS = {
     ...GLOBAL_SERVER_DEFAULTS,
 } satisfies Partial<ServerValueTypeDefinition>
+
+export const SERVER_THIRD_PARTY_SERVICE_DEFAULTS = {
+    ...GLOBAL_SERVER_DEFAULTS,
+} satisfies Partial<ServerThirdPartyServiceDefinition>

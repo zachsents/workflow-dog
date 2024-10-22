@@ -62,7 +62,15 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn("display_name", "text", col => col.notNull())
         .addColumn("encrypted_auth_data", "text", col => col.notNull())
         .addColumn("scopes", sql`text[]`, col => col.notNull().defaultTo(sql`ARRAY[]::text[]`))
+        .addColumn("email", "text")
         .addUniqueConstraint("third_party_accounts_unqiue_provider_user", ["provider_id", "provider_user_id"])
+        .execute()
+
+    await db.schema.createTable("third_party_oauth2_requests").ifNotExists()
+        .addColumn("id", "text", col => col.primaryKey().notNull())
+        .addColumn("created_at", "timestamptz", (col) => col.notNull().defaultTo(sql`now()`))
+        .addColumn("project_id", "uuid", (col) => col.notNull().references("projects.id").onDelete("cascade"))
+        .addColumn("provider_id", "text", col => col.notNull())
         .execute()
 
     await db.schema.createTable("projects_third_party_accounts").ifNotExists()
@@ -275,6 +283,7 @@ export async function down(db: Kysely<any>): Promise<void> {
     await db.schema.dropTable("workflow_snapshots").ifExists().execute()
     await db.schema.dropTable("workflows").ifExists().execute()
     await db.schema.dropTable("projects_third_party_accounts").ifExists().execute()
+    await db.schema.dropTable("third_party_oauth2_requests").ifExists().execute()
     await db.schema.dropTable("third_party_accounts").ifExists().execute()
     await db.schema.dropTable("projects_users").ifExists().execute()
     await db.schema.dropTable("project_invitations").ifExists().execute()

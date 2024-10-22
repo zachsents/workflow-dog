@@ -30,6 +30,7 @@ import { useShallow } from "zustand/react/shallow"
 import { plural } from "../grammar"
 import { GraphBuilderContext, NodeContext } from "./context"
 import { deserializeGraph, serializeGraph, shouldBeMotionValue, useNodeDefinitionsSearch } from "./utils"
+import { $id } from "workflow-packages/lib/utils"
 
 
 /**
@@ -1940,7 +1941,7 @@ function EdgeLabel({
 
 function usePinnedNodes() {
     const pinnedNodes = useLocalStorageValue("graph-builder-pinned-nodes", {
-        defaultValue: ["node:primitives/text", "node:primitives/number"],
+        defaultValue: [$id.node("primitives/text"), $id.node("primitives/number")],
         initializeWithValue: true,
     })
     const addPinnedNode = (defId: string) => pinnedNodes.set(Array.from(new Set([...pinnedNodes.value, defId])))

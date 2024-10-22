@@ -75,6 +75,7 @@ services:
       - APP_ORIGIN
       - APP_NAME
       - DATABASE_URL
+      - SERVICE_ACCOUNT_ENCRYPTION_KEY
       - SUPERTOKENS_CORE_URL
       - SUPERTOKENS_API_KEY
       - AUTH_GOOGLE_CLIENT_ID
@@ -85,6 +86,8 @@ services:
       - REDIS_PASSWORD
       - STRIPE_KEY
       - STRIPE_WEBHOOK_SIGNING_SECRET
+      - TP_GOOGLE_CLIENT_ID
+      - TP_GOOGLE_CLIENT_SECRET
 
   supertokens:
     container_name: supertokens

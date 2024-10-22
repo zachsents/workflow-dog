@@ -30,7 +30,7 @@ helper.node("respond", {
                 <StandardNode.Config<ContentType> id="contentType" label="Content Type" defaultValue="text/plain">
                     {({ value, onChange }) =>
                         <Select value={value!} onValueChange={onChange}>
-                            <SelectTrigger >
+                            <SelectTrigger>
                                 <SelectValue placeholder="Pick a content type" />
                             </SelectTrigger>
                             <SelectContent>

@@ -17,6 +17,7 @@ import { handleWebhookRequest as handleStripeWebhookRequest } from "./lib/stripe
 import { useEnvVar } from "./lib/utils"
 import { createContext } from "./trpc"
 import { apiRouter } from "./trpc/router"
+import { handleThirdPartyOAuth2Callback } from "./lib/internal/third-party"
 
 
 const port = useEnvVar("PORT")
@@ -79,6 +80,9 @@ app.all(
     bodyParser.raw({ type: "*/*" }),
     handleEventSourceRequest,
 )
+
+// Third party OAuth2 callback
+app.get("/api/thirdparty/oauth2/callback", handleThirdPartyOAuth2Callback)
 
 // Stripe webhooks
 app.post("/api/stripe/webhook", bodyParser.text({ type: "*/*" }), handleStripeWebhookRequest)

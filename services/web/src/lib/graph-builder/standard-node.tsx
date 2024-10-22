@@ -117,7 +117,10 @@ export function StandardNode({
                             <PopoverTrigger asChild>
                                 <Button
                                     size="compact" variant="ghost"
-                                    className="self-center gap-1 text-[0.65em] text-muted-foreground"
+                                    className={cn(
+                                        "self-center gap-1 text-[0.65em] text-muted-foreground",
+                                        configItems.some((c: any) => c?.props.required && n.config[c.props.id] == null) && "text-destructive font-bold",
+                                    )}
                                 >
                                     Configure {configItems.length} option{configItems.length > 1 && "s"}
                                     <TI><IconChevronDown /></TI>
@@ -125,7 +128,7 @@ export function StandardNode({
                             </PopoverTrigger>
                             <PopoverContent
                                 side="bottom" sideOffset={16}
-                                className="px-2 py-4 flex flex-col items-stretch gap-4"
+                                className="px-4 py-4 flex flex-col items-stretch gap-4 w-auto"
                             >
                                 {configItems}
                             </PopoverContent>
@@ -718,10 +721,17 @@ interface ConfigProps<T> {
         onChange: (value: T) => void
     }>
     defaultValue?: T
+    required?: boolean
 }
 
 // #region Config
-function Config<T = any>({ children: Child, id = "value", label, defaultValue }: ConfigProps<T>) {
+function Config<T = any>({
+    children: Child,
+    id = "value",
+    label,
+    defaultValue,
+    required,
+}: ConfigProps<T>) {
 
     const gbx = useGraphBuilder()
     const nodeId = useNodeId()
@@ -742,7 +752,13 @@ function Config<T = any>({ children: Child, id = "value", label, defaultValue }:
 
     return (
         <div className="flex flex-col items-stretch gap-2">
-            <Label>{label}</Label>
+            <div className="flex items-center gap-2">
+                <Label>{label}</Label>
+                {(required && passedValue == null) &&
+                    <p className="text-xs text-destructive">
+                        Required
+                    </p>}
+            </div>
             <MemoizedChild id={id} value={passedValue} onChange={onChange} />
         </div>
     )

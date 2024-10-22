@@ -1,5 +1,5 @@
 import { IconSquare } from "@tabler/icons-react"
-import type { ClientDefinition, ClientEventType, ClientEventTypeIO, ClientNodeDefinition, ClientValueTypeDefinition } from "../lib/types"
+import type { ClientDefinition, ClientEventType, ClientEventTypeIO, ClientNodeDefinition, ClientThirdPartyServiceDefinition, ClientValueTypeDefinition } from "../lib/types"
 
 
 export const GLOBAL_CLIENT_DEFAULTS = {
@@ -22,3 +22,7 @@ export const CLIENT_VALUE_TYPE_DEFAULTS = {
     ...GLOBAL_CLIENT_DEFAULTS,
     genericParams: 0,
 } satisfies Partial<ClientValueTypeDefinition>
+
+export const CLIENT_THIRD_PARTY_SERVICE_DEFAULTS = {
+    ...GLOBAL_CLIENT_DEFAULTS,
+} satisfies Partial<ClientThirdPartyServiceDefinition>

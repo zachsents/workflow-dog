@@ -3,11 +3,13 @@ import { t } from "."
 import auth from "./procedures/auth"
 import projects from "./procedures/projects"
 import workflows from "./procedures/workflows"
+import thirdParty from "./procedures/third-party"
 
 export const apiRouter = t.router({
     projects,
     workflows,
     auth,
+    thirdParty,
     health: t.procedure.query(() => "ok"),
 })
 

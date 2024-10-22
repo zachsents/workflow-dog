@@ -8,7 +8,7 @@ export type ArrayTypeImpl<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S[], I[], U[]>
   : T[];
 
-export type BillingPlan = "basic" | "custom" | "free" | "pro";
+export type BillingPlan = "basic" | "free" | "pro";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
@@ -374,11 +374,19 @@ export interface ProjectsUsers {
 export interface ThirdPartyAccounts {
   created_at: Generated<Timestamp>;
   display_name: string;
+  email: string | null;
   encrypted_auth_data: string;
   id: Generated<string>;
   provider_id: string;
   provider_user_id: string;
   scopes: Generated<string[]>;
+}
+
+export interface ThirdPartyOauth2Requests {
+  created_at: Generated<Timestamp>;
+  id: string;
+  project_id: string;
+  provider_id: string;
 }
 
 export interface UserMeta {
@@ -493,6 +501,7 @@ export interface DB {
   projects_third_party_accounts: ProjectsThirdPartyAccounts;
   projects_users: ProjectsUsers;
   third_party_accounts: ThirdPartyAccounts;
+  third_party_oauth2_requests: ThirdPartyOauth2Requests;
   user_meta: UserMeta;
   workflow_run_outputs: WorkflowRunOutputs;
   workflow_runs: WorkflowRuns;

@@ -1,14 +1,15 @@
 import type { EventSources } from "core/db"
 import type { Selectable } from "kysely"
-import type { ServerEventSourceDefinition, ServerEventType, ServerNodeDefinition, ServerValueTypeDefinition } from "../lib/types"
-import { createRegistryFn, EVENT_SOURCE_ID_PREFIX, EVENT_TYPE_ID_PREFIX, NODE_ID_PREFIX, VALUE_TYPE_ID_PREFIX } from "../lib/utils"
-import { SERVER_EVENT_SOURCE_DEFAULTS, SERVER_EVENT_TYPE_DEFAULTS, SERVER_NODE_DEFAULTS, SERVER_VALUE_TYPE_DEFAULTS } from "./defaults.server"
+import type { ServerEventSourceDefinition, ServerEventType, ServerNodeDefinition, ServerThirdPartyServiceDefinition, ServerValueTypeDefinition } from "../lib/types"
+import { createRegistryFn, EVENT_SOURCE_ID_PREFIX, EVENT_TYPE_ID_PREFIX, NODE_ID_PREFIX, THIRD_PARTY_PROVIDER_ID_PREFIX, VALUE_TYPE_ID_PREFIX } from "../lib/utils"
+import { SERVER_EVENT_SOURCE_DEFAULTS, SERVER_EVENT_TYPE_DEFAULTS, SERVER_NODE_DEFAULTS, SERVER_THIRD_PARTY_SERVICE_DEFAULTS, SERVER_VALUE_TYPE_DEFAULTS } from "./defaults.server"
 
 
 export const nodes: Record<string, ServerNodeDefinition> = {}
 export const eventTypes: Record<string, ServerEventType> = {}
 export const eventSources: Record<string, ServerEventSourceDefinition> = {}
 export const valueTypes: Record<string, ServerValueTypeDefinition> = {}
+export const thirdPartyProviders: Record<string, ServerThirdPartyServiceDefinition> = {}
 
 
 export function createPackage(packageName: string) {
@@ -31,6 +32,11 @@ export function createPackage(packageName: string) {
         valueType: createRegistryFn(valueTypes, {
             idPrefix: VALUE_TYPE_ID_PREFIX,
             defaults: SERVER_VALUE_TYPE_DEFAULTS,
+            packageName,
+        }),
+        thirdPartyProvider: createRegistryFn(thirdPartyProviders, {
+            idPrefix: THIRD_PARTY_PROVIDER_ID_PREFIX,
+            defaults: SERVER_THIRD_PARTY_SERVICE_DEFAULTS,
             packageName,
         }),
     }

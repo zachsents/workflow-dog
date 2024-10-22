@@ -8,10 +8,12 @@ import "./packages/objects/objects.server"
 import "./packages/time/time.server"
 import "./packages/http/http.server"
 import "./packages/logic/logic.server"
+import "./packages/google/google.server"
 
 export {
     nodes as ServerNodeDefinitions,
     eventTypes as ServerEventTypes,
     eventSources as ServerEventSources,
     valueTypes as ServerValueTypes,
+    thirdPartyProviders as ServerThirdPartyProviders,
 } from "./registry/registry.server"

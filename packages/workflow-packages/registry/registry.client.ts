@@ -1,12 +1,13 @@
 import defaultColors from "tailwindcss/colors"
-import type { ClientDefinition, ClientEventType, ClientNodeDefinition, ClientValueTypeDefinition } from "../lib/types"
-import { createRegistryFn, EVENT_TYPE_ID_PREFIX, NODE_ID_PREFIX, VALUE_TYPE_ID_PREFIX } from "../lib/utils"
-import { CLIENT_EVENT_TYPE_DEFAULTS, CLIENT_NODE_DEFAULTS, CLIENT_VALUE_TYPE_DEFAULTS } from "./defaults.client"
+import type { ClientDefinition, ClientEventType, ClientNodeDefinition, ClientThirdPartyServiceDefinition, ClientValueTypeDefinition } from "../lib/types"
+import { createRegistryFn, EVENT_TYPE_ID_PREFIX, NODE_ID_PREFIX, THIRD_PARTY_PROVIDER_ID_PREFIX, VALUE_TYPE_ID_PREFIX } from "../lib/utils"
+import { CLIENT_EVENT_TYPE_DEFAULTS, CLIENT_NODE_DEFAULTS, CLIENT_THIRD_PARTY_SERVICE_DEFAULTS, CLIENT_VALUE_TYPE_DEFAULTS } from "./defaults.client"
 
 
 export const nodes: Record<string, ClientNodeDefinition> = {}
 export const eventTypes: Record<string, ClientEventType> = {}
 export const valueTypes: Record<string, ClientValueTypeDefinition> = {}
+export const thirdPartyProviders: Record<string, ClientThirdPartyServiceDefinition> = {}
 
 
 export function createPackage<NodeDefault extends Partial<ClientNodeDefinition>>(packageName: string, options: {
@@ -30,6 +31,12 @@ export function createPackage<NodeDefault extends Partial<ClientNodeDefinition>>
         valueType: createRegistryFn(valueTypes, {
             idPrefix: VALUE_TYPE_ID_PREFIX,
             defaults: CLIENT_VALUE_TYPE_DEFAULTS,
+            postProcess: postProcessColors,
+            packageName,
+        }),
+        thirdPartyProvider: createRegistryFn(thirdPartyProviders, {
+            idPrefix: THIRD_PARTY_PROVIDER_ID_PREFIX,
+            defaults: CLIENT_THIRD_PARTY_SERVICE_DEFAULTS,
             postProcess: postProcessColors,
             packageName,
         }),

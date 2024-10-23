@@ -104,6 +104,8 @@ export async function handleThirdPartyOAuth2Callback(req: Request, res: Response
 
 export async function getThirdPartyAccountToken(accountId: string) {
 
+    // WILO: add permission checking to this
+
     const { encrypted_auth_data, ...account } = await db.selectFrom("third_party_accounts")
         .select(["encrypted_auth_data", "provider_id", "provider_user_id", "email"])
         .where("id", "=", accountId)

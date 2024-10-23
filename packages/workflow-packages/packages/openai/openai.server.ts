@@ -11,7 +11,6 @@ helper.thirdPartyProvider(null, {
     tokenUsage: "auth_header_bearer",
     config: {
         profileUrl: "https://api.openai.com/v1/me",
-        // getDisplayName: ({ profile }: { profile: any }) => profile.email,
     },
 })
 
@@ -23,23 +22,35 @@ helper.node("chatgpt", {
             model: z.enum(["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"]).default("gpt-4o"),
         }).parse(ctx.node.config)
 
-        const { prompt } = z.object({
+        const { prompt, historyIn } = z.object({
             prompt: z.string(),
+            historyIn: z.object({
+                role: z.enum(["user", "assistant"]),
+                content: z.string(),
+            }).array().default([]),
         }).parse(inputs)
 
         const { apiKey } = await getThirdPartyAccountToken(accountId)
 
+        const historyOut = [
+            ...historyIn,
+            { role: "user", content: prompt },
+        ]
+
         const { data } = await axios.post("https://api.openai.com/v1/chat/completions", {
             model,
-            messages: [{ role: "user", content: prompt }],
+            messages: historyOut,
         }, {
             headers: {
                 Authorization: `Bearer ${apiKey}`,
             },
         })
 
+        historyOut.push(data.choices[0].message)
+
         return {
             response: data.choices[0].message.content,
+            historyOut,
         }
     },
 })

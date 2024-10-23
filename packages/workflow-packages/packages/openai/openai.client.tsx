@@ -31,7 +31,15 @@ helper.node("chatgpt", {
     description: "Send a prompt to ChatGPT and receive a response.",
     component: () => <StandardNode>
         <StandardNode.Handle type="input" name="prompt" valueType={useValueType("string")} />
+        <StandardNode.Handle
+            type="input" name="historyIn" displayName="History"
+            valueType={useValueType("array", [useValueType("object")])}
+        />
         <StandardNode.Handle type="output" name="response" valueType={useValueType("string")} />
+        <StandardNode.Handle
+            type="output" name="historyOut" displayName="History"
+            valueType={useValueType("array", [useValueType("object")])}
+        />
 
         <StandardNode.Config id="account" label="OpenAI Account" required>
             {({ value, onChange }) => <ThirdPartyAccountSelector

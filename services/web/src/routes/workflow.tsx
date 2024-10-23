@@ -6,6 +6,7 @@ import RunHistoryTable from "@web/components/run-history-table"
 import SimpleTooltip from "@web/components/simple-tooltip"
 import SpinningLoader from "@web/components/spinning-loader"
 import TI from "@web/components/tabler-icon"
+import { Badge } from "@web/components/ui/badge"
 import { Button } from "@web/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@web/components/ui/dropdown-menu"
 import { ScrollArea } from "@web/components/ui/scroll-area"
@@ -216,9 +217,13 @@ function WorkflowIndex() {
                         <Button
                             variant="ghost" size="auto"
                             className="gap-2 text-xs no-shrink-children"
+                            disabled
                         >
                             <TI className="text-md"><IconTestPipe /></TI>
                             Test Run
+                            <Badge variant="secondary" >
+                                Coming Soon
+                            </Badge>
                         </Button>
                         <RunHistoryPanel />
                     </div>

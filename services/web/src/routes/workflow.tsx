@@ -15,7 +15,7 @@ import { useCurrentWorkflow, useCurrentWorkflowId, useDialogState, usePreventUnl
 import { trpc } from "@web/lib/trpc"
 import { cn } from "@web/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { createPortal } from "react-dom"
 import { Helmet } from "react-helmet"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
@@ -399,6 +399,11 @@ function RunHistoryPanel() {
             utils.workflows.byId.invalidate({ workflowId: workflow.id }),
         ]),
     })
+
+    useEffect(() => {
+        if (isOpen)
+            refreshMutation.mutate()
+    }, [isOpen])
 
     return <>
         <Button

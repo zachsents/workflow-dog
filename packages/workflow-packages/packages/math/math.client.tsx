@@ -472,8 +472,10 @@ helper.node("sin", {
             name="result"
             valueType={useValueType("number")}
         />
+    </StandardNode>,
+    configComponent: () => <>
         {angleUnitConfig()}
-    </StandardNode>
+    </>,
 })
 
 helper.node("cos", {
@@ -491,8 +493,10 @@ helper.node("cos", {
             name="result"
             valueType={useValueType("number")}
         />
+    </StandardNode>,
+    configComponent: () => <>
         {angleUnitConfig()}
-    </StandardNode>
+    </>,
 })
 
 helper.node("tan", {
@@ -510,8 +514,10 @@ helper.node("tan", {
             name="result"
             valueType={useValueType("number")}
         />
+    </StandardNode>,
+    configComponent: () => <>
         {angleUnitConfig()}
-    </StandardNode>
+    </>,
 })
 
 helper.node("pi", {

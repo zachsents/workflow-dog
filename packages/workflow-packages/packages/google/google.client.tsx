@@ -62,7 +62,8 @@ helper.node("gmail_sendEmail", {
         />
         <StandardNode.Handle type="input" name="subject" valueType={useValueType("string")} />
         <StandardNode.Handle type="input" name="body" valueType={useValueType("string")} />
-
+    </StandardNode>,
+    configComponent: () => <>
         <StandardNode.Config id="account" label="Google Account" required>
             {({ value, onChange }) => <ThirdPartyAccountSelector
                 value={value}
@@ -77,5 +78,5 @@ helper.node("gmail_sendEmail", {
                 ]]}
             />}
         </StandardNode.Config>
-    </StandardNode>,
+    </>,
 })

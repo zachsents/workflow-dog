@@ -33,14 +33,15 @@ helper.node("chatgpt", {
         <StandardNode.Handle type="input" name="prompt" valueType={useValueType("string")} />
         <StandardNode.Handle
             type="input" name="historyIn" displayName="History"
-            valueType={useValueType("array", [useValueType("object")])}
+            valueType={useValueType("array", [useValueType("object")])} optional
         />
         <StandardNode.Handle type="output" name="response" valueType={useValueType("string")} />
         <StandardNode.Handle
             type="output" name="historyOut" displayName="History"
             valueType={useValueType("array", [useValueType("object")])}
         />
-
+    </StandardNode>,
+    configComponent: () => <>
         <StandardNode.Config id="account" label="OpenAI Account" required>
             {({ value, onChange }) => <ThirdPartyAccountSelector
                 value={value}
@@ -54,12 +55,12 @@ helper.node("chatgpt", {
                     <SelectTrigger>
                         <SelectValue placeholder="Pick a model" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[101]">
                         <SelectItem value="gpt-4o">GPT-4o</SelectItem>
                         <SelectItem value="gpt-4o-mini">GPT-4o mini</SelectItem>
                         <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
                     </SelectContent>
                 </Select>}
         </StandardNode.Config>
-    </StandardNode>,
+    </>
 })

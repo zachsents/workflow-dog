@@ -735,7 +735,7 @@ function Config<T = any>({
 
     const gbx = useGraphBuilder()
     const nodeId = useNodeId()
-    const value = gbx.useStore(s => s.nodes.get(nodeId)!.config[id] as T | undefined)
+    const value = gbx.useStore(s => s.nodes.get(nodeId)?.config[id] as T | undefined)
     const onChange = (newValue: T) => {
         gbx.mutateNodeState(nodeId, n => {
             n.config[id] = newValue
@@ -753,7 +753,7 @@ function Config<T = any>({
     return (
         <div className="flex flex-col items-stretch gap-2">
             <div className="flex items-center gap-2">
-                <Label>{label}</Label>
+                <Label className="text-xs font-bold">{label}</Label>
                 {(required && passedValue == null) &&
                     <p className="text-xs text-destructive">
                         Required

@@ -84,10 +84,11 @@ export default function ThirdPartyAccountSelector({
             <TI style={{
                 color: provider.color,
             }}><provider.icon /></TI>
+
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
-                        className="gap-2  no-shrink-children w-[280px]" variant="outline"
+                        className="gap-2 min-w-0 w-0 flex-1 max-w-[280px] no-shrink-children" variant="outline"
                         disabled={isLoading}
                     >
                         <p className="min-w-0 flex-1 truncate">
@@ -104,7 +105,7 @@ export default function ThirdPartyAccountSelector({
                         <TI><IconChevronDown /></TI>
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
+                <DropdownMenuContent className="z-[101]">
                     <DropdownMenuItem
                         className="font-bold flex items-center gap-2"
                         style={{ color: provider.color }}
@@ -157,9 +158,10 @@ export default function ThirdPartyAccountSelector({
                     })}
                 </DropdownMenuContent>
             </DropdownMenu>
+
             <SimpleTooltip tooltip="Refresh list">
                 <Button
-                    className="shrink-0" variant="ghost" size="icon"
+                    variant="ghost" size="icon"
                     onClick={() => refreshMutation.mutate()}
                 >
                     <TI className={cn(

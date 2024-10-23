@@ -12,6 +12,7 @@ import { Button } from "@web/components/ui/button"
 import { Card } from "@web/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@web/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@web/components/ui/popover"
+import { Separator } from "@web/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@web/components/ui/tooltip"
 import VerticalDivider from "@web/components/vertical-divider"
 import { useBooleanState, useDialogState, useKeyState, useMotionValueState, useOnceEffect } from "@web/lib/hooks"
@@ -24,13 +25,14 @@ import React, { forwardRef, useContext, useEffect, useMemo, useRef } from "react
 import { useHotkeys } from "react-hotkeys-hook"
 import { toast } from "sonner"
 import type { SetRequired } from "type-fest"
+import { ClientNodeDefinitions } from "workflow-packages/client"
 import type { ClientNodeDefinition } from "workflow-packages/lib/types"
+import { $id } from "workflow-packages/lib/utils"
 import { createStore, useStore, type StoreApi } from "zustand"
 import { useShallow } from "zustand/react/shallow"
 import { plural } from "../grammar"
 import { GraphBuilderContext, NodeContext } from "./context"
-import { deserializeGraph, serializeGraph, shouldBeMotionValue, useNodeDefinitionsSearch } from "./utils"
-import { $id } from "workflow-packages/lib/utils"
+import { deserializeGraph, getDefinitionPackageName, serializeGraph, shouldBeMotionValue, useNodeDefinitionsSearch } from "./utils"
 
 
 /**
@@ -86,6 +88,7 @@ function GraphRenderer({ children, ...props }: React.ComponentProps<"div">) {
             {!gbx.options.readonly && <>
                 <ContextMenu />
                 <SelectionToolbar />
+                <ConfigSidepanel />
             </>}
 
             {children}
@@ -454,6 +457,149 @@ const DraggableNodeButton = forwardRef<HTMLDivElement, DraggableNodeButtonProps 
     )
 })
 // #endregion MainToolbar
+
+
+// #region ConfigSidepanel
+function ConfigSidepanel() {
+
+    const gbx = useGraphBuilder()
+    const selection = gbx.useStore(s => s.selection)
+    const isSingleNode = selection.size === 1
+
+    const selectedNodeId = Array.from(selection)[0]
+    const node = gbx.useStore(s => isSingleNode ? s.nodes.get(selectedNodeId) : undefined)
+    const def = node && ClientNodeDefinitions[node.definitionId]
+
+    const packageDisplayName = node && getDefinitionPackageName(node.definitionId)
+
+    const modifiers = gbx.useStore(s => isSingleNode
+        ? s.nodes.get(selectedNodeId)?.modifiers
+        : undefined)
+
+    const ConfigComponent = useMemo(() => def?.configComponent, [def])
+    console.log(selectedNodeId, node, ConfigComponent)
+
+    return (
+        <AnimatePresence>
+            {(isSingleNode && node && def) ?
+                <motion.div
+                    className="absolute top-0 right-0 h-full z-[100] pointer-events-none p-4 grid place-items-stretch"
+                    key={selectedNodeId}
+                >
+                    <NodeContext.Provider value={selectedNodeId}>
+                        <Card className="pointer-events-auto w-[350px] opacity-80 hover:opacity-100 focus-within:opacity-100 transition-opacity flex-col items-stretch gap-4">
+                            <div
+                                className={cn(
+                                    "font-bold px-4 py-1 mx-1 mt-1 text-center text-white rounded-t-lg rounded-b-sm flex justify-center items-center gap-2 shrink-0",
+                                    node.disabled && "opacity-50",
+                                )}
+                                style={{ backgroundColor: def.color }}
+                            >
+                                <def.icon />
+                                <span className={cn(
+                                    node.disabled && "line-through decoration-2",
+                                )}>
+                                    {def.name}
+                                </span>
+                                {packageDisplayName &&
+                                    <span className="bg-white/30 px-2 py-0.5 rounded-sm ml-3 text-xs font-medium leading-none">
+                                        {packageDisplayName}
+                                    </span>}
+                            </div>
+                            <div className="min-h-0 flex-1 overflow-y-scroll grid gap-4 content-start">
+                                <p className="text-xs text-muted-foreground px-4">
+                                    {def.description}
+                                </p>
+
+                                <Separator />
+
+                                <div className="px-4">
+                                    <p className="text-xs font-bold mb-2">Modifiers</p>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button
+                                                className="gap-2 w-full"
+                                                variant="outline" size="sm"
+                                            >
+                                                {modifiers?.size || "No"} {plural("modifier", modifiers?.size ?? 0)}
+                                                <TI><IconChevronDown /></TI>
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent className="w-[300px] z-[110]">
+                                            <DropdownMenuItem
+                                                className="flex items-center gap-4 no-shrink-children cursor-pointer transition-colors"
+                                                onSelect={ev => {
+                                                    ev.preventDefault()
+                                                    gbx.mutateNodeState(Array.from(selection)[0], n => {
+                                                        n.modifiers[modifiers?.has("await") ? "delete" : "add"]("await")
+                                                    })
+                                                }}
+                                            >
+                                                <div className={cn(
+                                                    "p-2 rounded-md text-md flex-center",
+                                                    modifiers?.has("await") && "bg-primary text-primary-foreground",
+                                                )}>
+                                                    <TI><IconActivity /></TI>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <b>Wait For</b>
+                                                        {modifiers?.has("await") && <span className="text-muted-foreground text-xs">
+                                                            Enabled
+                                                        </span>}
+                                                    </div>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        Makes this action wait for the connected value to emit before running.
+                                                    </p>
+                                                </div>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                className="flex items-center gap-4 no-shrink-children cursor-pointer transition-colors"
+                                                onSelect={ev => {
+                                                    ev.preventDefault()
+                                                    gbx.mutateNodeState(Array.from(selection)[0], n => {
+                                                        n.modifiers[modifiers?.has("conditional") ? "delete" : "add"]("conditional")
+                                                    })
+                                                }}
+                                            >
+                                                <div className={cn(
+                                                    "p-2 rounded-md text-md flex-center",
+                                                    modifiers?.has("conditional") && "bg-primary text-primary-foreground",
+                                                )}>
+                                                    <TI><IconArrowsSplit2 /></TI>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <b>Conditional</b>
+                                                        {modifiers?.has("conditional") && <span className="text-muted-foreground text-xs">
+                                                            Enabled
+                                                        </span>}
+                                                    </div>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        Makes this action only run when the connected condition is true.
+                                                    </p>
+                                                </div>
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+
+                                <Separator />
+
+                                <div className="px-4">
+                                    {/* <p className="text-xs font-bold mb-2">Action Settings</p> */}
+                                    <div className="flex flex-col items-stretch gap-4">
+                                        {(node && ConfigComponent) ? <ConfigComponent /> : null}
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+                    </NodeContext.Provider>
+                </motion.div> : null}
+        </AnimatePresence>
+    )
+}
+// #endregion ConfigSidepanel
 
 
 // #region ContextMenu

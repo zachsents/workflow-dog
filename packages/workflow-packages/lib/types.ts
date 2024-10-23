@@ -31,6 +31,7 @@ export interface ServerDefinition {
 
 export interface ClientNodeDefinition extends ClientDefinition {
     component: React.ComponentType
+    configComponent?: React.ComponentType
     whitelistedTriggers?: string[]
 }
 

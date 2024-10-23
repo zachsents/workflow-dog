@@ -1,4 +1,4 @@
-import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowIteration, IconArrowsJoin2, IconArrowsSplit2, IconBraces, IconChartBar, IconEqual, IconMessage, IconPlayerPlay, IconSquare, IconTypography } from "@tabler/icons-react"
+import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowIteration, IconArrowsJoin2, IconArrowsSplit2, IconBraces, IconChartBar, IconMessage, IconPlayerPlay, IconSquare, IconTypography } from "@tabler/icons-react"
 import TI from "web/src/components/tabler-icon"
 import { Textarea } from "web/src/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "web/src/components/ui/toggle-group"
@@ -88,67 +88,6 @@ helper.node("comment", {
         })
         return (
             <StandardNode hidePackageBadge>
-                <StandardNode.Config<string> label="Comment Text">
-                    {({ value, onChange }) => <Textarea
-                        value={value ?? ""}
-                        onChange={e => onChange(e.currentTarget.value)}
-                        placeholder="Write your comment..."
-                        onPointerDownCapture={e => e.stopPropagation()}
-                        className="resize-none"
-                    />}
-                </StandardNode.Config>
-                <StandardNode.Config<CommentTextAlign>
-                    id="align" label="Text Align" defaultValue="center"
-                >
-                    {({ value, onChange }) =>
-                        <ToggleGroup
-                            type="single"
-                            value={value!} onValueChange={(val: CommentTextAlign | "") => {
-                                if (val) onChange(val)
-                            }}
-                            className="*:flex-center *:gap-2 grid grid-cols-3"
-                        >
-                            <ToggleGroupItem value="left">
-                                <TI><IconAlignLeft /></TI>
-                                Left
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="center">
-                                <TI><IconAlignCenter /></TI>
-                                Center
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="right">
-                                <TI><IconAlignRight /></TI>
-                                Right
-                            </ToggleGroupItem>
-                        </ToggleGroup>}
-                </StandardNode.Config>
-
-                <StandardNode.Config<CommentTextSize>
-                    id="size" label="Text Size" defaultValue="sm"
-                >
-                    {({ value, onChange }) =>
-                        <ToggleGroup
-                            type="single"
-                            value={value!} onValueChange={(val: CommentTextSize | "") => {
-                                if (val) onChange(val)
-                            }}
-                            className="*:flex-center *:gap-2 grid grid-cols-3 *:no-shrink-children"
-                        >
-                            <ToggleGroupItem value="sm">
-                                <TI className="text-xs"><IconTypography /></TI>
-                                Small
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="md">
-                                <TI className="text-md"><IconTypography /></TI>
-                                Medium
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="lg">
-                                <TI className="text-lg"><IconTypography /></TI>
-                                Large
-                            </ToggleGroupItem>
-                        </ToggleGroup>}
-                </StandardNode.Config>
-
                 <StandardNode.Content>
                     {commentValue
                         ? <p
@@ -169,6 +108,68 @@ helper.node("comment", {
             </StandardNode>
         )
     },
+    configComponent: () => <>
+        <StandardNode.Config<string> label="Comment Text">
+            {({ value, onChange }) => <Textarea
+                value={value ?? ""}
+                onChange={e => onChange(e.currentTarget.value)}
+                placeholder="Write your comment..."
+                onPointerDownCapture={e => e.stopPropagation()}
+                className="resize-none"
+            />}
+        </StandardNode.Config>
+        <StandardNode.Config<CommentTextAlign>
+            id="align" label="Text Align" defaultValue="center"
+        >
+            {({ value, onChange }) =>
+                <ToggleGroup
+                    type="single"
+                    value={value!} onValueChange={(val: CommentTextAlign | "") => {
+                        if (val) onChange(val)
+                    }}
+                    className="*:flex-center *:gap-2 grid grid-cols-3"
+                >
+                    <ToggleGroupItem value="left">
+                        <TI><IconAlignLeft /></TI>
+                        Left
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="center">
+                        <TI><IconAlignCenter /></TI>
+                        Center
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="right">
+                        <TI><IconAlignRight /></TI>
+                        Right
+                    </ToggleGroupItem>
+                </ToggleGroup>}
+        </StandardNode.Config>
+
+        <StandardNode.Config<CommentTextSize>
+            id="size" label="Text Size" defaultValue="sm"
+        >
+            {({ value, onChange }) =>
+                <ToggleGroup
+                    type="single"
+                    value={value!} onValueChange={(val: CommentTextSize | "") => {
+                        if (val) onChange(val)
+                    }}
+                    className="*:flex-center *:gap-2 grid grid-cols-3 *:no-shrink-children"
+                >
+                    <ToggleGroupItem value="sm">
+                        <TI className="text-xs"><IconTypography /></TI>
+                        Small
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="md">
+                        <TI className="text-md"><IconTypography /></TI>
+                        Medium
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="lg">
+                        <TI className="text-lg"><IconTypography /></TI>
+                        Large
+                    </ToggleGroupItem>
+                </ToggleGroup>}
+        </StandardNode.Config>
+    </>,
 })
 
 type CommentTextAlign = "left" | "center" | "right"

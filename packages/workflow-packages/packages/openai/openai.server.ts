@@ -30,12 +30,16 @@ helper.node("chatgpt", {
             }).array().default([]),
         }).parse(inputs)
 
+        console.log(accountId)
+
         const { apiKey } = await getThirdPartyAccountToken(accountId)
 
         const historyOut = [
             ...historyIn,
             { role: "user", content: prompt },
         ]
+
+        console.log(apiKey)
 
         const { data } = await axios.post("https://api.openai.com/v1/chat/completions", {
             model,
@@ -45,6 +49,8 @@ helper.node("chatgpt", {
                 Authorization: `Bearer ${apiKey}`,
             },
         })
+
+        console.log(data)
 
         historyOut.push(data.choices[0].message)
 

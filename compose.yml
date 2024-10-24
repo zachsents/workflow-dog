@@ -105,7 +105,7 @@ services:
 
   redis:
     container_name: redis
-    image: bitnami/redis:latest
+    image: bitnami/redis:7.4.1
     restart: unless-stopped
     volumes:
       - redis-data:/bitnami/redis/data

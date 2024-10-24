@@ -32,14 +32,14 @@ COPY ./packages ./packages
 COPY ./services ./services
 RUN bun --filter web build
 
-FROM nginx AS web-prod
+FROM nginx:1 AS web-prod
 COPY ./services/web/nginx.conf /etc/nginx/
 COPY --from=web-build /app/services/web/dist /www
 
 
 # Proxy -------------------------------------------------- #
 
-FROM caddy AS proxy
+FROM caddy:2 AS proxy
 COPY ./services/proxy/Caddyfile /etc/caddy/
 
 
@@ -56,7 +56,7 @@ CMD bun .
 
 # Database ----------------------------------------------- #
 
-FROM postgres AS db
+FROM postgres:16 AS db
 RUN apt-get update && apt-get install -y curl unzip
 USER postgres
 RUN curl -fsSL https://bun.sh/install | bash

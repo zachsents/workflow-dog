@@ -77,6 +77,7 @@ new Worker("runs", async (job) => {
         nodes: z.object({
             id: z.string(),
             definitionId: z.string(),
+            disabled: z.boolean().default(false),
         }).passthrough().array(),
         edges: z.object({
             id: z.string(),
@@ -96,6 +97,11 @@ new Worker("runs", async (job) => {
     })] as const))
 
     nodes.forEach(async n => {
+        if (n.disabled) {
+            console.log("Skipping node", n.id, "because it's disabled")
+            return resolveFns[n.id](undefined)
+        }
+
         const rawInputs = Object.fromEntries(
             await Promise.all(edges.filter(e => e.t === n.id).map(edge =>
                 promises[edge.s]

@@ -22,7 +22,7 @@ import type { ValueTypeUsage } from "workflow-packages/lib/types"
 import { $id } from "workflow-packages/lib/utils"
 import { useValueType, ValueDisplay } from "workflow-packages/lib/value-types.client"
 import { z } from "zod"
-import { useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "./core"
+import { MODIFIER_HANDLE_IDS, useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "./core"
 import { getDefinitionPackageName } from "./utils"
 
 
@@ -75,10 +75,10 @@ export function StandardNode({
                         ) && "flex-col justify-start items-stretch gap-1 relative -left-4 bg-white/75 py-2 pr-2 rounded-r-md border border-l-0",
                     )}>
                         {n.modifiers.has("conditional") && <StandardNode.Handle
-                            type="input" name="__condition" displayName="Condition"
+                            type="input" name={MODIFIER_HANDLE_IDS.conditional} displayName="Condition"
                         />}
                         {n.modifiers.has("await") && <StandardNode.Handle
-                            type="input" name="__await" displayName="Wait For"
+                            type="input" name={MODIFIER_HANDLE_IDS.await} displayName="Wait For"
                         />}
                     </div>
                 </div>

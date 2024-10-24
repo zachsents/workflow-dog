@@ -35,6 +35,12 @@ import { GraphBuilderContext, NodeContext } from "./context"
 import { deserializeGraph, getDefinitionPackageName, serializeGraph, shouldBeMotionValue, useNodeDefinitionsSearch } from "./utils"
 
 
+export const MODIFIER_HANDLE_IDS = {
+    conditional: "__condition",
+    await: "__await",
+}
+
+
 /**
  * Component used to create a graph builder instance. Ensures that a 
  * GraphBuilderProvider is present in the component tree, but allows
@@ -472,10 +478,6 @@ function ConfigSidepanel() {
 
     const packageDisplayName = node && getDefinitionPackageName(node.definitionId)
 
-    const modifiers = gbx.useStore(s => isSingleNode
-        ? s.nodes.get(selectedNodeId)?.modifiers
-        : undefined)
-
     const ConfigComponent = useMemo(() => def?.configComponent, [def])
 
     return (
@@ -514,73 +516,7 @@ function ConfigSidepanel() {
 
                                 <div className="px-4">
                                     <p className="text-xs font-bold mb-2">Modifiers</p>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                className="gap-2 w-full"
-                                                variant="outline" size="sm"
-                                            >
-                                                {modifiers?.size || "No"} {plural("modifier", modifiers?.size ?? 0)}
-                                                <TI><IconChevronDown /></TI>
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent className="w-[300px] z-[110]">
-                                            <DropdownMenuItem
-                                                className="flex items-center gap-4 no-shrink-children cursor-pointer transition-colors"
-                                                onSelect={ev => {
-                                                    ev.preventDefault()
-                                                    gbx.mutateNodeState(Array.from(selection)[0], n => {
-                                                        n.modifiers[modifiers?.has("await") ? "delete" : "add"]("await")
-                                                    })
-                                                }}
-                                            >
-                                                <div className={cn(
-                                                    "p-2 rounded-md text-md flex-center",
-                                                    modifiers?.has("await") && "bg-primary text-primary-foreground",
-                                                )}>
-                                                    <TI><IconActivity /></TI>
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <b>Wait For</b>
-                                                        {modifiers?.has("await") && <span className="text-muted-foreground text-xs">
-                                                            Enabled
-                                                        </span>}
-                                                    </div>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        Makes this action wait for the connected value to emit before running.
-                                                    </p>
-                                                </div>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                className="flex items-center gap-4 no-shrink-children cursor-pointer transition-colors"
-                                                onSelect={ev => {
-                                                    ev.preventDefault()
-                                                    gbx.mutateNodeState(Array.from(selection)[0], n => {
-                                                        n.modifiers[modifiers?.has("conditional") ? "delete" : "add"]("conditional")
-                                                    })
-                                                }}
-                                            >
-                                                <div className={cn(
-                                                    "p-2 rounded-md text-md flex-center",
-                                                    modifiers?.has("conditional") && "bg-primary text-primary-foreground",
-                                                )}>
-                                                    <TI><IconArrowsSplit2 /></TI>
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <b>Conditional</b>
-                                                        {modifiers?.has("conditional") && <span className="text-muted-foreground text-xs">
-                                                            Enabled
-                                                        </span>}
-                                                    </div>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        Makes this action only run when the connected condition is true.
-                                                    </p>
-                                                </div>
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                                    <ModifiersSelector buttonProps={{ className: "w-full" }} />
                                 </div>
 
                                 <Separator />
@@ -802,9 +738,6 @@ function SelectionToolbar() {
     const allDisabled = gbx.useStore(s => Array.from(s.selection).every(id => s.nodes.get(id)?.disabled))
 
     const isSingleNode = selection.size === 1
-    const modifiers = gbx.useStore(s => isSingleNode
-        ? s.nodes.get(Array.from(selection)[0])?.modifiers
-        : undefined)
 
     return (
         <TooltipProvider delayDuration={0}>
@@ -960,75 +893,9 @@ function SelectionToolbar() {
                         icon={IconTrash}
                         shortcut={["Del"]}
                     />
-                    {isSingleNode && modifiers && <>
+                    {isSingleNode && <>
                         <VerticalDivider className="mx-1" />
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    className="gap-2 h-auto self-stretch text-muted-foreground"
-                                    variant="ghost" size="sm"
-                                >
-                                    {modifiers?.size || "No"} {plural("modifier", modifiers?.size ?? 0)}
-                                    <TI><IconChevronDown /></TI>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-[300px] z-[110]">
-                                <DropdownMenuItem
-                                    className="flex items-center gap-4 no-shrink-children cursor-pointer transition-colors"
-                                    onSelect={ev => {
-                                        ev.preventDefault()
-                                        gbx.mutateNodeState(Array.from(selection)[0], n => {
-                                            n.modifiers[modifiers?.has("await") ? "delete" : "add"]("await")
-                                        })
-                                    }}
-                                >
-                                    <div className={cn(
-                                        "p-2 rounded-md text-md flex-center",
-                                        modifiers?.has("await") && "bg-primary text-primary-foreground",
-                                    )}>
-                                        <TI><IconActivity /></TI>
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <b>Wait For</b>
-                                            {modifiers?.has("await") && <span className="text-muted-foreground text-xs">
-                                                Enabled
-                                            </span>}
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">
-                                            Makes this action wait for the connected value to emit before running.
-                                        </p>
-                                    </div>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    className="flex items-center gap-4 no-shrink-children cursor-pointer transition-colors"
-                                    onSelect={ev => {
-                                        ev.preventDefault()
-                                        gbx.mutateNodeState(Array.from(selection)[0], n => {
-                                            n.modifiers[modifiers?.has("conditional") ? "delete" : "add"]("conditional")
-                                        })
-                                    }}
-                                >
-                                    <div className={cn(
-                                        "p-2 rounded-md text-md flex-center",
-                                        modifiers?.has("conditional") && "bg-primary text-primary-foreground",
-                                    )}>
-                                        <TI><IconArrowsSplit2 /></TI>
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <b>Conditional</b>
-                                            {modifiers?.has("conditional") && <span className="text-muted-foreground text-xs">
-                                                Enabled
-                                            </span>}
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">
-                                            Makes this action only run when the connected condition is true.
-                                        </p>
-                                    </div>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <ModifiersSelector buttonProps={{ variant: "ghost", className: "h-auto self-stretch" }} />
                     </>}
                 </Card>
             </motion.div>
@@ -1072,6 +939,104 @@ const SelectionToolbarButton = forwardRef<HTMLButtonElement, React.ComponentProp
         </Tooltip>
     )
 })
+
+
+function ModifiersSelector({ buttonProps }: { buttonProps?: React.ComponentProps<typeof Button> }) {
+
+    const gbx = useGraphBuilder()
+    const nodeId = gbx.useStore(s => s.selection.size === 1
+        ? Array.from(s.selection)[0]
+        : undefined)
+    const modifiers = gbx.useStore(s => nodeId
+        ? s.nodes.get(nodeId)?.modifiers
+        : undefined)
+
+    const toggleModifier = (modifier: keyof typeof MODIFIER_HANDLE_IDS) => {
+        if (!nodeId)
+            return
+        gbx.mutateState(s => {
+            const n = s.nodes.get(nodeId)!
+            if (n.modifiers?.has(modifier)) {
+                n.modifiers.delete(modifier)
+                s.edges.forEach(e => {
+                    if (e.t === nodeId && e.th === MODIFIER_HANDLE_IDS[modifier])
+                        s.edges.delete(e.id)
+                })
+            } else {
+                n.modifiers.add(modifier)
+            }
+        })
+    }
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="outline" size="sm"
+                    {...buttonProps}
+                    className={cn("gap-2", buttonProps?.className)}
+                >
+                    {modifiers?.size || "No"} {plural("modifier", modifiers?.size ?? 0)}
+                    <TI><IconChevronDown /></TI>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[300px] z-[110]">
+                <DropdownMenuItem
+                    className="flex items-center gap-4 no-shrink-children cursor-pointer transition-colors"
+                    onSelect={(ev) => {
+                        ev.preventDefault()
+                        toggleModifier("await")
+                    }}
+                >
+                    <div className={cn(
+                        "p-2 rounded-md text-md flex-center",
+                        modifiers?.has("await") && "bg-primary text-primary-foreground",
+                    )}>
+                        <TI><IconActivity /></TI>
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                            <b>Wait For</b>
+                            {modifiers?.has("await") &&
+                                <span className="text-muted-foreground text-xs">
+                                    Enabled
+                                </span>}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                            Makes this action wait for the connected value to emit before running.
+                        </p>
+                    </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    className="flex items-center gap-4 no-shrink-children cursor-pointer transition-colors"
+                    onSelect={ev => {
+                        ev.preventDefault()
+                        toggleModifier("conditional")
+                    }}
+                >
+                    <div className={cn(
+                        "p-2 rounded-md text-md flex-center",
+                        modifiers?.has("conditional") && "bg-primary text-primary-foreground",
+                    )}>
+                        <TI><IconArrowsSplit2 /></TI>
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                            <b>Conditional</b>
+                            {modifiers?.has("conditional") &&
+                                <span className="text-muted-foreground text-xs">
+                                    Enabled
+                                </span>}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                            Makes this action only run when the connected condition is true.
+                        </p>
+                    </div>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+}
 
 
 // #region NodeContainer

@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import SpinningLoader from "@web/components/spinning-loader"
 import { Button } from "@web/components/ui/button"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@web/components/ui/dialog"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@web/components/ui/dialog"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from "@web/components/ui/form"
 import { Input } from "@web/components/ui/input"
 import { trpc } from "@web/lib/trpc"

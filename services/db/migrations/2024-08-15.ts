@@ -4,7 +4,7 @@ import { createTypeIfNotExists } from "../utils"
 export async function up(db: Kysely<any>): Promise<void> {
 
     // Create custom types
-    createTypeIfNotExists(db, "billing_plan", ["free", "basic", "pro"])
+    createTypeIfNotExists(db, "billing_plan", ["free", "basic", "pro", "custom"])
     createTypeIfNotExists(db, "project_permission", ["read", "write"])
     createTypeIfNotExists(db, "workflow_run_status", [
         "pending", "scheduled", "cancelled",

@@ -2058,6 +2058,8 @@ function usePinnedNodes() {
     return [pinnedNodes.value, addPinnedNode, removePinnedNode] as const
 }
 
+
+// @ts-ignore
 function useHotSlot() {
     const hotSlot = useLocalStorageValue("graph-builder-hot-slot", {
         defaultValue: "",

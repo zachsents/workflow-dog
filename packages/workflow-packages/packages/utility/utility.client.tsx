@@ -1,4 +1,4 @@
-import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowIteration, IconArrowsJoin2, IconArrowsSplit2, IconBraces, IconChartBar, IconMessage, IconPlayerPlay, IconSquare, IconTypography } from "@tabler/icons-react"
+import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconArrowIteration, IconArrowsJoin2, IconArrowsSplit2, IconBraces, IconChartBar, IconMessage, IconNumber, IconPlayerPlay, IconSquare, IconTypography } from "@tabler/icons-react"
 import TI from "web/src/components/tabler-icon"
 import { Textarea } from "web/src/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "web/src/components/ui/toggle-group"
@@ -203,6 +203,16 @@ helper.node("toString", {
     component: () => <StandardNode>
         <StandardNode.Handle type="input" name="value" />
         <StandardNode.Handle type="output" name="text" valueType={useValueType("string")} />
+    </StandardNode>,
+})
+
+helper.node("toNumber", {
+    name: "Convert to Number",
+    description: "Converts a value to a number.",
+    icon: IconNumber,
+    component: () => <StandardNode>
+        <StandardNode.Handle type="input" name="value" />
+        <StandardNode.Handle type="output" name="number" valueType={useValueType("number")} />
     </StandardNode>,
 })
 

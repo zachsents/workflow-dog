@@ -834,6 +834,7 @@ export function NodeTiedConfigField({
                         ? thisNodesPosition.y.get()
                         : thisNodesPosition.y.get() + handleY - 100,
                 },
+                config: { value: newValue },
             })
             gbx.addEdge({
                 s: newNode.id, sh: "text",

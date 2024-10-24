@@ -90,6 +90,17 @@ helper.node("toString", {
     },
 })
 
+helper.node("toNumber", {
+    name: "Convert to Number",
+    action(inputs) {
+        const { value } = z.object({
+            value: z.any(),
+        }).parse(inputs)
+
+        return { number: parseFloat(value) }
+    },
+})
+
 helper.node("coalesce", {
     name: "Coalesce",
     action(inputs) {

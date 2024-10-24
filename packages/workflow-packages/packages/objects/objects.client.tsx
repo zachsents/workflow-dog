@@ -1,6 +1,6 @@
 import { IconBox, IconSelect } from "@tabler/icons-react"
 import { createPackage } from "../../registry/registry.client"
-import { StandardNode } from "web/src/lib/graph-builder/standard-node"
+import { NodeTiedConfigField, StandardNode } from "web/src/lib/graph-builder/standard-node"
 import { useValueType } from "../../lib/value-types.client"
 
 
@@ -21,6 +21,9 @@ helper.node("getProperty", {
         <StandardNode.Handle type="input" name="property" valueType={useValueType("string")} />
         <StandardNode.Handle type="output" name="value" />
     </StandardNode>,
+    configComponent: () => <>
+        <NodeTiedConfigField handleId="property" label="Property" />
+    </>,
 })
 
 helper.node("getProperties", {
@@ -48,6 +51,9 @@ helper.node("setProperty", {
         <StandardNode.Handle type="input" name="value" />
         <StandardNode.Handle type="output" name="newObject" valueType={useValueType("object")} />
     </StandardNode>,
+    configComponent: () => <>
+        <NodeTiedConfigField handleId="property" label="Property" />
+    </>,
 })
 
 helper.node("setProperties", {

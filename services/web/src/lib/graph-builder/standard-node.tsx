@@ -14,7 +14,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@ui/popover"
 import TI from "@web/components/tabler-icon"
 import { useDialogState } from "@web/lib/hooks"
 import { cn, getOffsetRelativeTo } from "@web/lib/utils"
-import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react"
+import { AnimatePresence, motion, useMotionValueEvent } from "framer-motion"
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import Markdown from "react-markdown"
 import { ClientValueTypes } from "workflow-packages/client"
@@ -24,6 +25,9 @@ import { useValueType, ValueDisplay } from "workflow-packages/lib/value-types.cl
 import { z } from "zod"
 import { MODIFIER_HANDLE_IDS, useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "./core"
 import { getDefinitionPackageName } from "./utils"
+
+
+const ZOOM_THRESHOLD = 0.5
 
 
 // #region StandardNode
@@ -55,6 +59,14 @@ export function StandardNode({
 
     const error = gbx.options.runErrors?.[id]
 
+    const _zoom = gbx.useStore(s => s.zoom)
+    const [isZoomedOut, setZoomedOut] = useState(() => _zoom.get() < ZOOM_THRESHOLD)
+    useMotionValueEvent(_zoom, "change", z => {
+        const lessThanThreshold = z < 0.5
+        if (lessThanThreshold !== isZoomedOut)
+            setZoomedOut(lessThanThreshold)
+    })
+
     return (
         <div className={cn(
             "select-none outline-primary outline-2 outline-offset-2 rounded-xl",
@@ -82,6 +94,7 @@ export function StandardNode({
                         />}
                     </div>
                 </div>
+
                 <Card className={cn("flex flex-col items-stretch gap-4 py-1")}>
                     <div
                         className={cn(
@@ -147,6 +160,21 @@ export function StandardNode({
                                 }}>{error}</Markdown>
                             </div>
                         </div>}
+
+                    <AnimatePresence>
+                        {isZoomedOut && <motion.div
+                            className="absolute top-0 left-0 w-full h-full rounded-xl text-white grid place-items-center text-6xl"
+                            style={{
+                                backgroundColor: def.color,
+                            }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.1 }}
+                        >
+                            <TI><def.icon /></TI>
+                        </motion.div>}
+                    </AnimatePresence>
                 </Card>
             </div>
         </div>

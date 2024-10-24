@@ -1,5 +1,5 @@
 import { IconBrandOpenai } from "@tabler/icons-react"
-import { StandardNode } from "web/src/lib/graph-builder/standard-node"
+import { NodeTiedConfigField, StandardNode } from "web/src/lib/graph-builder/standard-node"
 import ThirdPartyAccountSelector from "../../components/third-party-account-selector"
 import { $id } from "../../lib/utils"
 import { createPackage } from "../../registry/registry.client"
@@ -62,5 +62,6 @@ helper.node("chatgpt", {
                     </SelectContent>
                 </Select>}
         </StandardNode.Config>
+        <NodeTiedConfigField handleId="prompt" label="Prompt" />
     </>
 })

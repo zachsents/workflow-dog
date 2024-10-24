@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form"
 import Markdown from "react-markdown"
 import { ClientValueTypes } from "workflow-packages/client"
 import type { ValueTypeUsage } from "workflow-packages/lib/types"
+import { $id } from "workflow-packages/lib/utils"
 import { useValueType, ValueDisplay } from "workflow-packages/lib/value-types.client"
 import { z } from "zod"
 import { useGraphBuilder, useNode, useNodeId, useRegisterHandle, type HandleState, type HandleType } from "./core"
@@ -760,6 +761,61 @@ function Config<T = any>({
                     </p>}
             </div>
             <MemoizedChild id={id} value={passedValue} onChange={onChange} />
+        </div>
+    )
+}
+
+
+// #region NodeTiedConfigField
+export function NodeTiedConfigField({
+    handleId,
+    label,
+}: {
+    handleId: string
+    label: string
+}) {
+
+    const gbx = useGraphBuilder()
+    const nodeId = useNodeId()
+
+    const connectedNodeId = gbx.useStore(s => Array.from(s.edges.values()).find(e => e.t === nodeId && e.th === handleId)?.s)
+
+    const textValue = gbx.useStore(s => connectedNodeId
+        ? s.nodes.get(connectedNodeId)?.config.value
+        : undefined)
+
+    const onChange = (newValue: string) => {
+        if (connectedNodeId)
+            gbx.mutateNodeState(connectedNodeId, n => {
+                n.config.value = newValue
+            })
+        else {
+            const thisNodesPosition = gbx.state.nodes.get(nodeId)!.position
+            const newNode = gbx.addNode({
+                definitionId: $id.node("primitives/text"),
+                position: {
+                    x: thisNodesPosition.x.get() - 400,
+                    y: thisNodesPosition.y.get(),
+                },
+            })
+            gbx.addEdge({
+                s: newNode.id, sh: "text",
+                t: nodeId, th: handleId,
+            })
+        }
+
+    }
+
+    return (
+        <div className="flex flex-col items-stretch gap-2">
+            <div className="flex items-center gap-2">
+                <Label className="text-xs font-bold">{label}</Label>
+            </div>
+            <Input
+                type="text"
+                value={textValue} onChange={ev => onChange(ev.currentTarget.value)}
+                placeholder="Start typing to add a Text action..."
+            />
         </div>
     )
 }

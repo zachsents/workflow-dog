@@ -587,7 +587,6 @@ function ConfigSidepanel() {
                                 <Separator />
 
                                 <div className="px-4">
-                                    {/* <p className="text-xs font-bold mb-2">Action Settings</p> */}
                                     <div className="flex flex-col items-stretch gap-4">
                                         {(node && ConfigComponent) ? <ConfigComponent /> : null}
                                     </div>

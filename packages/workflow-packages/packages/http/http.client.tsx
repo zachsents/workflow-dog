@@ -1,4 +1,4 @@
-import { IconBraces, IconLink, IconSpeakerphone, IconWebhook } from "@tabler/icons-react"
+import { IconBraces, IconExternalLink, IconLink, IconSpeakerphone, IconWebhook } from "@tabler/icons-react"
 import CopyButton from "web/src/components/copy-button"
 import TI from "web/src/components/tabler-icon"
 import { DropdownMenuItem } from "web/src/components/ui/dropdown-menu"
@@ -6,6 +6,7 @@ import { StandardNode } from "web/src/lib/graph-builder/standard-node"
 import { useValueType } from "../../lib/value-types.client"
 import { createPackage } from "../../registry/registry.client"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "web/src/components/ui/select"
+import { Button } from "web/src/components/ui/button"
 
 
 const helper = createPackage("http")
@@ -27,28 +28,30 @@ helper.node("respond", {
                 <StandardNode.Handle
                     type="input" name="body" valueType={useValueType("string")}
                 />
-                <StandardNode.Config<ContentType> id="contentType" label="Content Type" defaultValue="text/plain">
-                    {({ value, onChange }) =>
-                        <Select value={value!} onValueChange={onChange}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Pick a content type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="text/plain">
-                                    Plain Text
-                                </SelectItem>
-                                <SelectItem value="text/html">
-                                    HTML
-                                </SelectItem>
-                                <SelectItem value="application/json">
-                                    JSON
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>}
-                </StandardNode.Config>
             </StandardNode>
         )
     },
+    configComponent: () => <>
+        <StandardNode.Config<ContentType> id="contentType" label="Content Type" defaultValue="text/plain">
+            {({ value, onChange }) =>
+                <Select value={value!} onValueChange={onChange}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Pick a content type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="text/plain">
+                            Plain Text
+                        </SelectItem>
+                        <SelectItem value="text/html">
+                            HTML
+                        </SelectItem>
+                        <SelectItem value="application/json">
+                            JSON
+                        </SelectItem>
+                    </SelectContent>
+                </Select>}
+        </StandardNode.Config>
+    </>,
     whitelistedTriggers: ["eventType:http/request", "eventType:http/webhook"],
 })
 
@@ -153,7 +156,15 @@ helper.eventType("request", {
                 <pre className="break-all whitespace-normal text-xs p-2 bg-gray-100 rounded-md">
                     {url}
                 </pre>
-                <CopyButton content={url} copyText="Copy URL" />
+                <div className="grid grid-cols-2 gap-4">
+                    <CopyButton content={url} copyText="Copy URL" />
+                    <Button className="gap-2" asChild>
+                        <a href={url} target="_blank">
+                            Go to URL
+                            <TI><IconExternalLink /></TI>
+                        </a>
+                    </Button>
+                </div>
             </div>
         )
     },

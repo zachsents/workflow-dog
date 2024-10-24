@@ -17,6 +17,8 @@ import { useValueType, ValueDisplay } from "../../lib/value-types.client"
 import { createPackage } from "../../registry/registry.client"
 import ScheduleConfig from "./components/schedule-config"
 import ValueDisplayBlock from "./components/value-display-block"
+import { $id } from "../../lib/utils"
+import _mapValues from "lodash/mapValues"
 
 
 const helper = createPackage("primitives")
@@ -75,6 +77,45 @@ helper.node("text", {
                 </StandardNode.Content>
             </StandardNode>
         )
+    },
+    configComponent: () => {
+        const gbx = useGraphBuilder()
+        const nodeId = useNodeId()
+
+        return <>
+            <Button
+                onClick={() => {
+                    const oldPosition = _mapValues(gbx.state.nodes.get(nodeId)!.position, v => v.get())
+                    const connectedEdge = Array.from(gbx.state.edges.values())
+                        .find(e => e.s === nodeId && e.sh === "text")
+
+                    gbx.mutateState(s => {
+                        // delete connected edge if there is one
+                        if (connectedEdge)
+                            s.edges.delete(connectedEdge.id)
+
+                        // move node over
+                        s.nodes.get(nodeId)!.position.x.set(oldPosition.x - 450)
+                    })
+                    // add template node
+                    const newNode = gbx.addNode({
+                        definitionId: $id.node("text/template"),
+                        position: oldPosition,
+                    })
+                    gbx.addEdge({
+                        s: nodeId, sh: "text",
+                        t: newNode.id, th: "template",
+                    })
+                    if (connectedEdge)
+                        gbx.addEdge({
+                            s: newNode.id, sh: "result",
+                            t: connectedEdge.t, th: connectedEdge.th,
+                        })
+                }}
+            >
+                Convert to Template
+            </Button>
+        </>
     },
 })
 

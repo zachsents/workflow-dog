@@ -477,13 +477,12 @@ function ConfigSidepanel() {
         : undefined)
 
     const ConfigComponent = useMemo(() => def?.configComponent, [def])
-    console.log(selectedNodeId, node, ConfigComponent)
 
     return (
         <AnimatePresence>
             {(isSingleNode && node && def) ?
                 <motion.div
-                    className="absolute top-0 right-0 h-full z-[100] pointer-events-none p-4 grid place-items-stretch"
+                    className="absolute top-0 right-0 h-full z-[40] pointer-events-none p-4 grid place-items-stretch"
                     key={selectedNodeId}
                 >
                     <NodeContext.Provider value={selectedNodeId}>

@@ -1,5 +1,5 @@
 import { IconBrandGmail, IconBrandGoogleFilled } from "@tabler/icons-react"
-import { StandardNode } from "web/src/lib/graph-builder/standard-node"
+import { NodeTiedConfigField, StandardNode } from "web/src/lib/graph-builder/standard-node"
 import ThirdPartyAccountSelector from "../../components/third-party-account-selector"
 import { $id } from "../../lib/utils"
 import { createPackage } from "../../registry/registry.client"
@@ -78,5 +78,8 @@ helper.node("gmail_sendEmail", {
                 ]]}
             />}
         </StandardNode.Config>
+        <NodeTiedConfigField handleId="to.0" label="To" />
+        <NodeTiedConfigField handleId="subject" label="Subject" />
+        <NodeTiedConfigField handleId="body" label="Body" />
     </>,
 })

@@ -163,7 +163,7 @@ function WorkflowIndex() {
                                     <TI className="ml-1"><IconChevronDown /></TI>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent side="bottom" className="*:flex *:items-center *:gap-4 w-[300px] z-[200]">
+                            <DropdownMenuContent side="bottom" className="*:flex *:items-center *:gap-4 w-[300px] z-[45]">
                                 {workflow.is_enabled
                                     ? <DropdownMenuItem onSelect={() => setEnabled(false)}>
                                         <TI><IconPlayerPauseFilled /></TI>
@@ -194,7 +194,7 @@ function WorkflowIndex() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                                 side="bottom" align="end" alignOffset={4}
-                                className="*:flex *:items-center *:gap-2 w-[200px] z-[200]"
+                                className="*:flex *:items-center *:gap-2 w-[200px] z-[45]"
                             >
                                 <DropdownMenuItem onSelect={renameDialog.open}>
                                     <TI><IconPencil /></TI>

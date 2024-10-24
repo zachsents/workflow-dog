@@ -779,23 +779,32 @@ export function NodeTiedConfigField({
     const nodeId = useNodeId()
 
     const connectedNodeId = gbx.useStore(s => Array.from(s.edges.values()).find(e => e.t === nodeId && e.th === handleId)?.s)
+    const isTextNode = gbx.useStore(s => connectedNodeId
+        ? s.nodes.get(connectedNodeId)?.definitionId === $id.node("primitives/text")
+        : false)
 
-    const textValue = gbx.useStore(s => connectedNodeId
+    const textValue = gbx.useStore(s => (connectedNodeId && isTextNode)
         ? s.nodes.get(connectedNodeId)?.config.value
         : undefined)
 
     const onChange = (newValue: string) => {
-        if (connectedNodeId)
-            gbx.mutateNodeState(connectedNodeId, n => {
-                n.config.value = newValue
-            })
+        if (connectedNodeId) {
+            if (isTextNode) {
+                gbx.mutateNodeState(connectedNodeId, n => {
+                    n.config.value = newValue
+                })
+            }
+        }
         else {
             const thisNodesPosition = gbx.state.nodes.get(nodeId)!.position
+            const handleY = gbx.state.nodes.get(nodeId)?._handlePositions?.[handleId]?.y.get()
             const newNode = gbx.addNode({
                 definitionId: $id.node("primitives/text"),
                 position: {
-                    x: thisNodesPosition.x.get() - 400,
-                    y: thisNodesPosition.y.get(),
+                    x: thisNodesPosition.x.get() - 450,
+                    y: handleY == null
+                        ? thisNodesPosition.y.get()
+                        : thisNodesPosition.y.get() + handleY - 100,
                 },
             })
             gbx.addEdge({
@@ -803,7 +812,6 @@ export function NodeTiedConfigField({
                 t: nodeId, th: handleId,
             })
         }
-
     }
 
     return (
@@ -813,8 +821,13 @@ export function NodeTiedConfigField({
             </div>
             <Input
                 type="text"
-                value={textValue} onChange={ev => onChange(ev.currentTarget.value)}
-                placeholder="Start typing to add a Text action..."
+                value={textValue || ""} onChange={ev => onChange(ev.currentTarget.value)}
+                placeholder={connectedNodeId
+                    ? isTextNode
+                        ? "Type to edit connected Text action..."
+                        : "Value is determined at runtime"
+                    : "Type to add a Text action..."}
+                disabled={!!connectedNodeId && !isTextNode}
             />
         </div>
     )

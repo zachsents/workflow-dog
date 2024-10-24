@@ -55,7 +55,7 @@ helper.node("chatgpt", {
                     <SelectTrigger>
                         <SelectValue placeholder="Pick a model" />
                     </SelectTrigger>
-                    <SelectContent className="z-[101]">
+                    <SelectContent>
                         <SelectItem value="gpt-4o">GPT-4o</SelectItem>
                         <SelectItem value="gpt-4o-mini">GPT-4o mini</SelectItem>
                         <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>

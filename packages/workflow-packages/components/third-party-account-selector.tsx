@@ -105,7 +105,7 @@ export default function ThirdPartyAccountSelector({
                         <TI><IconChevronDown /></TI>
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="z-[101]">
+                <DropdownMenuContent>
                     <DropdownMenuItem
                         className="font-bold flex items-center gap-2"
                         style={{ color: provider.color }}

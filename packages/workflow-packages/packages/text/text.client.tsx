@@ -1,5 +1,5 @@
 import { IconBraces, IconCode, IconLetterCaseLower, IconLetterCaseUpper, IconRuler } from "@tabler/icons-react"
-import { StandardNode } from "web/src/lib/graph-builder/standard-node"
+import { NodeTiedConfigField, StandardNode } from "web/src/lib/graph-builder/standard-node"
 import { createPackage } from "../../registry/registry.client"
 import { useValueType } from "../../lib/value-types.client"
 
@@ -63,6 +63,9 @@ helper.node("template", {
             type="output" name="result" valueType={useValueType("string")}
         />
     </StandardNode>,
+    configComponent: () => <>
+        <NodeTiedConfigField handleId="template" label="Template" />
+    </>,
 })
 
 helper.node("length", {
